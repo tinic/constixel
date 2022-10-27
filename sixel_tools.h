@@ -13,7 +13,7 @@ namespace sixel {
     class format { 
     public:
          template <typename F> static constexpr void sixel_header(const F &charOut) {
-            charOut(0x27);
+            charOut(0x1b);
             charOut('P');
             charOut('q');
          }
@@ -31,7 +31,7 @@ namespace sixel {
 
          template <typename F> static constexpr void sixel_color(const F &charOut, size_t index, uint32_t col) {
             charOut('#');
-            charOut(static_cast<uint8_t>('0'+index));
+            sixel_number(charOut, index);
             charOut(';');
             charOut('2');
             charOut(';');
@@ -42,7 +42,7 @@ namespace sixel {
          }
 
          template <typename F> static constexpr void sixel_end(const F &charOut) {
-            charOut(0x27);
+            charOut(0x1b);
             charOut('\\');
          }
 
@@ -53,7 +53,19 @@ namespace sixel {
                 sixel_color(charOut, c, palette.data()[c]);
             }
             for (size_t y = 0; y < H; y += 6) {
+                bool empty = true;
                 for (size_t c = 0; c < palette.size(); c++) {
+                    uint8_t test6 = 0;
+                    for (size_t x = 0; x < W; x++) {
+                        test6 |= collect6(data, x, c, y);
+                    }
+                    if (!test6) {
+                       continue;
+                    }
+                    if ( c != 0 ) {
+                        charOut('$');
+                    }
+                    empty = false;
                     charOut('#');
                     sixel_number(charOut, static_cast<uint16_t>(c));
                     for (size_t x = 0; x < W; x++) {
@@ -73,11 +85,20 @@ namespace sixel {
                         }
                         charOut('?' + bits6);
                     }
-                    if ( c == ( palette.size() - 1 ) ) {
-                        charOut('-');
-                    } else {
-                        charOut('$');
+                }
+                if (!empty) {
+                    charOut('-');
+                } else {
+                    for (size_t x = 0; x < W; x++) {
+                        size_t repeatCount = std::min(x + 255, W) - x;
+                        if (repeatCount > 3) {
+                            charOut('!');
+                            sixel_number(charOut, repeatCount);
+                            x += repeatCount;
+                        }
+                        charOut('?');
                     }
+                    charOut('-');
                 }
             }
             sixel_end(charOut);
@@ -131,9 +152,9 @@ namespace sixel {
                 size_t x8 = x % 8; 
                 uint8_t out = 0;
                 for (size_t y6 = 0; y6 < 6; y6++) {
-                    out <<= 1;
+                    out >>= 1;
                     if (( y + y6 ) < H) {
-                        out |= ( ( ( (*ptr) >> (7 - x8)) & 1 ) == col ) ? 1 : 0;
+                        out |= ( ( ( (*ptr) >> (7 - x8)) & 1 ) == col ) ? (1UL<<5) : 0;
                     }
                     ptr += bytes_per_line;
                 }
@@ -192,9 +213,9 @@ namespace sixel {
                 size_t x4 = x % 4; 
                 uint8_t out = 0;
                 for (size_t y6 = 0; y6 < 6; y6++) {
-                    out <<= 1;
+                    out >>= 1;
                     if (( y + y6 ) < H) {
-                        out |= ( ( ( (*ptr) >> (6 - x4*2)) & 3 ) == col ) ? 1 : 0;
+                        out |= ( ( ( (*ptr) >> (6 - x4*2)) & 3 ) == col ) ? (1UL<<5) : 0;
                     }
                     ptr += bytes_per_line;
                 }
@@ -264,9 +285,9 @@ namespace sixel {
                 size_t x2 = x % 2; 
                 uint8_t out = 0;
                 for (size_t y6 = 0; y6 < 6; y6++) {
-                    out <<= 1;
+                    out >>= 1;
                     if (( y + y6 ) < H) {
-                        out |= ( ( ( (*ptr) >> (4 - x2*4)) & 0xF ) == col ) ? 1 : 0;
+                        out |= ( ( ( (*ptr) >> (4 - x2*4)) & 0xF ) == col ) ? (1UL<<5) : 0;
                     }
                     ptr += bytes_per_line;
                 }
@@ -283,26 +304,32 @@ namespace sixel {
         void clear() {
             memset(data.data(),0,data.size());
         } 
-        void plot(int32_t x, int32_t y, uint32_t col) {
-            size_t _x = static_cast<size_t>(x); _x %= W;
-            size_t _y = static_cast<size_t>(y); _y %= H;
-            T<W, H>::plot(data, _x, _y, col);
-        }
-        void span(int32_t xl,  int32_t xr, int32_t y, uint32_t col) {
-            size_t _xl = static_cast<size_t>(xl); _xl %= W;
-            size_t _xr = static_cast<size_t>(xr); _xr %= W;
-            size_t _y  = static_cast<size_t>(y ); _y  %= H;
-            T<W, H>::span(data, _xl, _xr, _y, col);
-        }
         void fillrect(int32_t x, int32_t y, int32_t w, int32_t h, uint32_t col) {
+            h+=y;
             for (;y<h;y++) {
-                span(x,x+w,y,col);
+                span(x,w,y,col);
             }
         }
         template <typename F> void sixel(const F &charOut) {
             T<W, H>::sixel(data, charOut);
         }
     private:
+        void plot(int32_t x, int32_t y, uint32_t col) {
+            size_t _x = static_cast<size_t>(x); _x %= W;
+            size_t _y = static_cast<size_t>(y); _y %= H;
+            T<W, H>::plot(data, _x, _y, col);
+        }
+        void span(int32_t x,  int32_t w, int32_t y, uint32_t col) {
+            size_t _xl = static_cast<size_t>(x  ); _xl %= W;
+            size_t _xr = static_cast<size_t>(x+w); _xr %= W;
+            size_t _y  = static_cast<size_t>(y  ); _y  %= H;
+            if ( _xl + w < W ) {
+                T<W, H>::span(data, _xl, _xr, _y, col);
+            } else { 
+                T<W, H>::span(data, _xl, W-1, _y, col);
+                T<W, H>::span(data,   0, _xr, _y, col);
+            }
+        }
         std::array<uint8_t, T<W, H>::image_size> data;
         T<W, H> format;
     };

@@ -3,11 +3,13 @@
 #include "sixel_tools.h"
 
 int main() {
-
-    sixel::image<sixel::format_1bit, 256, 256> image;
+    static sixel::image<sixel::format_4bit, 256, 256> image;
     image.clear();
-    image.fillrect(64,64,128,128,1);
+    for (int32_t c=0; c<16; c++) {
+        image.fillrect(16+c*16,c*16,64,64,c);
+    }
     image.sixel([](uint8_t ch){
         putc(ch,stdout);
     });
-} 
+}
+
