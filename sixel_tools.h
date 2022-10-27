@@ -15,6 +15,11 @@ namespace sixel {
          template <typename F> static constexpr void sixel_header(const F &charOut) {
             charOut(0x1b);
             charOut('P');
+            charOut('0');
+            charOut(';');
+            charOut('0');
+            charOut(';');
+            charOut('0');
             charOut('q');
          }
 
@@ -53,7 +58,6 @@ namespace sixel {
                 sixel_color(charOut, c, palette.data()[c]);
             }
             for (size_t y = 0; y < H; y += 6) {
-                bool empty = true;
                 for (size_t c = 0; c < palette.size(); c++) {
                     uint8_t test6 = 0;
                     for (size_t x = 0; x < W; x++) {
@@ -65,7 +69,6 @@ namespace sixel {
                     if ( c != 0 ) {
                         charOut('$');
                     }
-                    empty = false;
                     charOut('#');
                     sixel_number(charOut, static_cast<uint16_t>(c));
                     for (size_t x = 0; x < W; x++) {
@@ -86,20 +89,7 @@ namespace sixel {
                         charOut('?' + bits6);
                     }
                 }
-                if (!empty) {
-                    charOut('-');
-                } else {
-                    for (size_t x = 0; x < W; x++) {
-                        size_t repeatCount = std::min(x + 255, W) - x;
-                        if (repeatCount > 3) {
-                            charOut('!');
-                            sixel_number(charOut, repeatCount);
-                            x += repeatCount;
-                        }
-                        charOut('?');
-                    }
-                    charOut('-');
-                }
+                charOut('-');
             }
             sixel_end(charOut);
         }
@@ -326,7 +316,7 @@ namespace sixel {
             if ( _xl + w < W ) {
                 T<W, H>::span(data, _xl, _xr, _y, col);
             } else { 
-                T<W, H>::span(data, _xl, W-1, _y, col);
+                T<W, H>::span(data, _xl,   W, _y, col);
                 T<W, H>::span(data,   0, _xr, _y, col);
             }
         }
