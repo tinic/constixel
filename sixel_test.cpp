@@ -5,8 +5,9 @@
 int main() {
 
     sixel::image<sixel::format_1bit, 256, 256> image;
-    image.plot(128,128,0);
-
-    int a = 0;
-    printf("%p\n", &a);
+    image.clear();
+    image.fillrect(0,0,16,16,1);
+    image.sixel([](uint8_t ch){
+        putc(ch,stdout);
+    });
 } 
