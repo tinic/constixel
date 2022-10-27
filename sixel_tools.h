@@ -9,7 +9,7 @@ namespace sixel {
 
     class format { 
     public:
-         template <typename F> static constexpr void sixel_header(const F &charOut) {
+         template <typename F> static constexpr void sixel_header(F &&charOut) {
             charOut(0x1b);
             charOut('P');
             charOut('0');
@@ -20,21 +20,31 @@ namespace sixel {
             charOut('q');
          }
 
-         template <typename F> static constexpr void sixel_number(const F &charOut, uint16_t n) {
-            auto uint16ToBcd = [](uint16_t u) { 
-                return uint16_t(((((u/1000)%10)<<12)|(((u/100)%10)<<8)|(((u/10)%10)<<4)|(u%10)));
-            };
-            uint16_t i = uint16ToBcd(n);
-            if (((i>>8)&0xFF) != 0) {
-                charOut(static_cast<uint8_t>('0'+((i>>8)&0xF)));
+         template <typename F> static constexpr void sixel_number(F &&charOut, uint16_t u) {
+            if (u < 10) {
+                charOut(static_cast<uint8_t>('0'+u));
+            } else if (u < 100) {
+                charOut(static_cast<uint8_t>('0'+(((u/10)%10))));
+                charOut(static_cast<uint8_t>('0'+(u%10)));
+            } else if (u < 1000) {
+                charOut(static_cast<uint8_t>('0'+((u/100)%10)));
+                charOut(static_cast<uint8_t>('0'+((u/10)%10)));
+                charOut(static_cast<uint8_t>('0'+(u%10)));
+            } else if (u < 10000) {
+                charOut(static_cast<uint8_t>('0'+((u/1000)%10)));
+                charOut(static_cast<uint8_t>('0'+((u/100)%10)));
+                charOut(static_cast<uint8_t>('0'+((u/10)%10)));
+                charOut(static_cast<uint8_t>('0'+(u%10)));
+            } else {
+                charOut(static_cast<uint8_t>('0'+((u/10000)%10)));
+                charOut(static_cast<uint8_t>('0'+((u/1000)%10)));
+                charOut(static_cast<uint8_t>('0'+((u/100)%10)));
+                charOut(static_cast<uint8_t>('0'+((u/10)%10)));
+                charOut(static_cast<uint8_t>('0'+(u%10)));
             }
-            if (((i>>4)&0xFF) != 0) {
-                charOut(static_cast<uint8_t>('0'+((i>>4)&0xF)));
-            }
-            charOut(static_cast<uint8_t>('0'+((i>>0)&0xF)));
          }
 
-         template <typename F> static constexpr void sixel_color(const F &charOut, size_t index, uint32_t col) {
+         template <typename F> static constexpr void sixel_color(F &&charOut, size_t index, uint32_t col) {
             charOut('#');
             sixel_number(charOut, index);
             charOut(';');
@@ -46,13 +56,13 @@ namespace sixel {
             }
          }
 
-         template <typename F> static constexpr void sixel_end(const F &charOut) {
+         template <typename F> static constexpr void sixel_end(F &&charOut) {
             charOut(0x1b);
             charOut('\\');
          }
 
         template <size_t W, size_t H, typename P, typename F, typename C> 
-        static constexpr void sixel_image(const uint8_t *data, const P &palette, const F &charOut, const C &collect6) {
+        static constexpr void sixel_image(const uint8_t *data, const P &palette, F &&charOut, const C &collect6) {
             sixel_header(charOut);
             for (size_t c = 0; c < palette.size(); c++) {
                 sixel_color(charOut, c, palette.data()[c]);
@@ -136,7 +146,7 @@ namespace sixel {
             }
         }
 
-        template <typename F> static constexpr void sixel(std::array<uint8_t, image_size> &data, const F &charOut) {
+        template <typename F> static constexpr void sixel(std::array<uint8_t, image_size> &data, F &&charOut) {
             sixel_image<W, H>(data.data(), palette, charOut, [](const uint8_t *data, size_t x, size_t col, size_t y) {
                 const uint8_t *ptr = &data[y * bytes_per_line + x / 8];
                 size_t x8 = x % 8; 
@@ -197,7 +207,7 @@ namespace sixel {
             }
         }
 
-        template <typename F> static constexpr void sixel(std::array<uint8_t, image_size> &data, const F &charOut) {
+        template <typename F> static constexpr void sixel(std::array<uint8_t, image_size> &data, F &&charOut) {
             sixel_image<W, H>(data.data(), palette, charOut, [](const uint8_t *data, size_t x, size_t col, size_t y) {
                 const uint8_t *ptr = &data[y * bytes_per_line + x / 4];
                 size_t x4 = x % 4; 
@@ -269,7 +279,7 @@ namespace sixel {
             }
         }
 
-        template <typename F> static constexpr void sixel(std::array<uint8_t, image_size> &data, const F &charOut) {
+        template <typename F> static constexpr void sixel(std::array<uint8_t, image_size> &data, F &&charOut) {
             sixel_image<W, H>(data.data(), palette, charOut, [](const uint8_t *data, size_t x, size_t col, size_t y) {
                 const uint8_t *ptr = &data[y * bytes_per_line + x / 2];
                 size_t x2 = x % 2; 
@@ -377,7 +387,7 @@ namespace sixel {
             fillarc(x, y, r, 3, 0, col);
         }
 
-        template <typename F> void sixel(const F &charOut) {
+        template <typename F> constexpr void sixel(F &&charOut) {
             T<W, H>::sixel(data, charOut);
         }
 
