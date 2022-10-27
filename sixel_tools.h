@@ -287,28 +287,41 @@ namespace sixel {
     };
 
     template<template<size_t, size_t> class T, size_t W, size_t H> class image {
+
         static_assert(sizeof(W)>=sizeof(uint32_t));
         static_assert(sizeof(H)>=sizeof(uint32_t));
+
         static_assert(W<=16384 && H<=16384);
+
     public:
+
+        size_t size() const {
+            return T<W, H>::image_size;
+        }
+
         void clear() {
             memset(data.data(),0,data.size());
         } 
+
         void fillrect(int32_t x, int32_t y, int32_t w, int32_t h, uint32_t col) {
             h+=y;
             for (;y<h;y++) {
                 span(x,w,y,col);
             }
         }
+
         template <typename F> void sixel(const F &charOut) {
             T<W, H>::sixel(data, charOut);
         }
+
     private:
+
         void plot(int32_t x, int32_t y, uint32_t col) {
             size_t _x = static_cast<size_t>(x); _x %= W;
             size_t _y = static_cast<size_t>(y); _y %= H;
             T<W, H>::plot(data, _x, _y, col);
         }
+
         void span(int32_t x,  int32_t w, int32_t y, uint32_t col) {
             size_t _xl = static_cast<size_t>(x  ); _xl %= W;
             size_t _xr = static_cast<size_t>(x+w); _xr %= W;
