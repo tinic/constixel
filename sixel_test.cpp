@@ -11,7 +11,7 @@ static size_t bytesCount = 0;
 
 int main() {
 
-#if 1
+#if 0
     static sixel::image<sixel::format_4bit, 1024, 256> image;
     sixel::progressbar<sixel::format_4bit, 1024, 256> bar(image);
     bar.start(16,1);
@@ -22,18 +22,35 @@ int main() {
     bar.end();
 #endif  // #if 0
 
-#if 0
+#if 1
     static sixel::image<sixel::format_4bit, 768, 768> image;
     printf("RAM required: %d bytes\n", int32_t(image.size()));
     image.clear();
+
+    printf("\033[H\0337");
     for (int32_t c=0; c<16; c++) {
         image.fillrect(16+c*37,c*32,128,128,c);
+        printf("\0338");
+        image.sixel([](uint8_t ch){
+            putc(ch,stdout);
+            bytesCount++;
+        });
     }
     for (int32_t c=0; c<16; c++) {
         image.line(16,16,64+c*42,700,c,c);
+        printf("\0338");
+        image.sixel([](uint8_t ch){
+            putc(ch,stdout);
+            bytesCount++;
+        });
     }
     for (int32_t c=0; c<16; c++) {
         image.fillcircle(600,384,256-c*16,c);
+        printf("\0338");
+        image.sixel([](uint8_t ch){
+            putc(ch,stdout);
+            bytesCount++;
+        });
     }
 
 #if 0
@@ -50,14 +67,6 @@ int main() {
     std::chrono::duration<double> d0 = t1 - t0;
     std::cout << "time = " << d0.count() << "\n";
 #endif // #if 0
-
-    image.sixel([](uint8_t ch){
-        putc(ch,stdout);
-        bytesCount++;
-    });
-
-    
-
 
     printf("Transfer bytes: %d bytes\n", int32_t(bytesCount));
 #endif // #if 0
