@@ -2,12 +2,27 @@
 #include <vector>
 #include <chrono>
 #include <iostream>
+#include <unistd.h>
 
+#include "sixel.h"
 #include "sixel_tools.h"
 
 static size_t bytesCount = 0;
 
 int main() {
+
+#if 1
+    static sixel::image<sixel::format_4bit, 1024, 256> image;
+    sixel::progressbar<sixel::format_4bit, 1024, 256> bar(image);
+    bar.start(16,1);
+    for (float value = 0.0f; value < 1.0f; value += 0.001f) {
+        bar.update(value);
+        usleep(1000);
+    }
+    bar.end();
+#endif  // #if 0
+
+#if 0
     static sixel::image<sixel::format_4bit, 768, 768> image;
     printf("RAM required: %d bytes\n", int32_t(image.size()));
     image.clear();
@@ -41,7 +56,10 @@ int main() {
         bytesCount++;
     });
 
+    
+
 
     printf("Transfer bytes: %d bytes\n", int32_t(bytesCount));
+#endif // #if 0
 }
 
