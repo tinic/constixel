@@ -49,6 +49,17 @@ namespace sixel {
             charOut('q');
          }
 
+         template <size_t W, size_t H, typename F> static constexpr void sixel_raster_attributes(F &&charOut) {
+            charOut('\"');
+            sixel_number(charOut, 2);
+            charOut(';');
+            sixel_number(charOut, 2);
+            charOut(';');
+            sixel_number(charOut, W);
+            charOut(';');            
+            sixel_number(charOut, H);
+         }
+
         template <typename F> static constexpr void sixel_number(F &&charOut, uint16_t u) {
             if (u < 10) {
                 charOut(static_cast<uint8_t>('0'+u));
@@ -93,6 +104,7 @@ namespace sixel {
         template <size_t W, size_t H, typename P, typename F, typename C> 
         static constexpr void sixel_image(const uint8_t *data, const P &palette, F &&charOut, const rect<int32_t> &_r, const C &collect6) {
             sixel_header(charOut);
+            sixel_raster_attributes<W,H>(charOut);
             for (size_t c = 0; c < palette.size(); c++) {
                 sixel_color(charOut, c, palette.data()[c]);
             }
@@ -350,6 +362,10 @@ namespace sixel {
         void clear() {
             memset(data.data(),0,data.size());
         } 
+
+        void copy(const std::array<uint8_t, T<W, H>::image_size> &src) {
+            memcpy(data.data(),src.data(), data.size());
+        }
 
         void line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t col, uint32_t width = 1) {
             int32_t steep = abs(y1 - y0) > abs(x1 - x0);
