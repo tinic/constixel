@@ -9,7 +9,135 @@
 
 static size_t bytesCount = 0;
 
+constexpr std::vector<uint8_t> test0() {
+    std::vector<uint8_t> out {};
+    sixel::image<sixel::format_1bit, 320, 240> image;
+    image.clear();
+    for (int32_t c=0; c<16; c++) {
+        image.fillrect(16+c*37,c*32,128,128,c);
+    }
+    image.sixel([&out](uint8_t ch) mutable {
+        out.push_back(ch);
+    });
+    return out;
+}
+
+constexpr std::vector<uint8_t> test1() {
+    std::vector<uint8_t> out {};
+    sixel::image<sixel::format_2bit, 319, 240> image;
+    image.clear();
+    for (int32_t c=0; c<16; c++) {
+        image.fillrect(16+c*37,c*32,128,128,c);
+    }
+    image.sixel([&out](uint8_t ch) mutable {
+        out.push_back(ch);
+    });
+    return out;
+}
+
+constexpr std::vector<uint8_t> test2() {
+    std::vector<uint8_t> out {};
+    sixel::image<sixel::format_4bit, 319, 239> image;
+    image.clear();
+    for (int32_t c=0; c<16; c++) {
+        image.fillrect(16+c*37,c*32,128,128,c);
+    }
+    image.sixel([&out](uint8_t ch) mutable {
+        out.push_back(ch);
+    });
+    return out;
+}
+
+constexpr std::vector<uint8_t> test3() {
+    std::vector<uint8_t> out {};
+    sixel::image<sixel::format_1bit, 127, 101> image;
+    image.clear();
+    for (int32_t c=0; c<16; c++) {
+        image.fillcircle(c,c,256-c*16,c);
+    }
+    image.sixel([&out](uint8_t ch) mutable {
+        out.push_back(ch);
+    });
+    return out;
+}
+
+constexpr std::vector<uint8_t> test4() {
+    std::vector<uint8_t> out {};
+    sixel::image<sixel::format_2bit, 111, 95> image;
+    image.clear();
+    for (int32_t c=0; c<16; c++) {
+        image.fillcircle(c,c,256-c*16,c);
+    }
+    image.sixel([&out](uint8_t ch) mutable {
+        out.push_back(ch);
+    });
+    return out;
+}
+
+constexpr std::vector<uint8_t> test5() {
+    std::vector<uint8_t> out {};
+    sixel::image<sixel::format_4bit, 7, 7> image;
+    image.clear();
+    for (int32_t c=0; c<16; c++) {
+        image.fillcircle(c,c,256-c*16,c);
+    }
+    image.sixel([&out](uint8_t ch) mutable {
+        out.push_back(ch);
+    });
+    return out;
+}
+
+constexpr std::vector<uint8_t> test6() {
+    std::vector<uint8_t> out {};
+    sixel::image<sixel::format_1bit, 127, 101> image;
+    image.clear();
+    for (int32_t c=0; c<16; c++) {
+        image.line(16,16,64+c*42,700,c,c);
+    }
+    image.sixel([&out](uint8_t ch) mutable {
+        out.push_back(ch);
+    });
+    return out;
+}
+
+constexpr std::vector<uint8_t> test7() {
+    std::vector<uint8_t> out {};
+    sixel::image<sixel::format_2bit, 111, 95> image;
+    image.clear();
+    for (int32_t c=0; c<16; c++) {
+        image.line(16,16,64+c*42,700,c,c);
+    }
+    image.sixel([&out](uint8_t ch) mutable {
+        out.push_back(ch);
+    });
+    return out;
+}
+
+constexpr std::vector<uint8_t> test8() {
+    std::vector<uint8_t> out {};
+    sixel::image<sixel::format_4bit, 7, 7> image;
+    image.clear();
+    for (int32_t c=0; c<16; c++) {
+        image.line(16,16,64+c*42,700,c,c);
+    }
+    image.sixel([&out](uint8_t ch) mutable {
+        out.push_back(ch);
+    });
+    return out;
+}
+
+
 int main() {
+
+    static_assert(test0().size() == 1970);
+    static_assert(test1().size() == 2967);
+    static_assert(test2().size() == 4654);
+    static_assert(test3().size() == 1646);
+    static_assert(test4().size() == 1638);
+    static_assert(test5().size() == 271);
+    static_assert(test6().size() == 1164);
+    static_assert(test7().size() == 363);
+    static_assert(test8().size() == 273);
 
 #if 0
     static sixel::image<sixel::format_4bit, 1024, 256> image;
@@ -23,6 +151,7 @@ int main() {
 #endif  // #if 0
 
 #if 1
+
     static sixel::image<sixel::format_4bit, 768, 768> image;
     printf("RAM required: %d bytes\n", int32_t(image.size()));
     image.clear();

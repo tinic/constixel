@@ -14,7 +14,7 @@ namespace sixel {
         T w = 0;
         T h = 0;
 
-        rect operator&(const rect &other) const {
+        constexpr rect operator&(const rect &other) const {
             T nax = std::max(x, other.x);
             T nay = std::max(y, other.y);
             T nix = std::min(x + w, other.x + other.w);
@@ -22,7 +22,7 @@ namespace sixel {
             return {nax, nay, nix - nax, niy - nay};
         }
 
-        rect &operator&=(const rect &other) {
+        constexpr rect &operator&=(const rect &other) {
             T nax = std::max(x, other.x);
             T nay = std::max(y, other.y);
             T nix = std::min(x + w, other.x + other.w);
@@ -198,7 +198,9 @@ namespace sixel {
                     if (( y + y6 ) < H) {
                         out |= ( ( ( (*ptr) >> (7 - x8)) & 1 ) == col ) ? (1UL<<5) : 0;
                     }
-                    ptr += bytes_per_line;
+                    if (y6 != 5) {
+                        ptr += bytes_per_line;
+                    }
                 }
                 return out;
             });
@@ -259,7 +261,9 @@ namespace sixel {
                     if (( y + y6 ) < H) {
                         out |= ( ( ( (*ptr) >> (6 - x4*2)) & 3 ) == col ) ? (1UL<<5) : 0;
                     }
-                    ptr += bytes_per_line;
+                    if (y6 != 5) {
+                        ptr += bytes_per_line;
+                    }
                 }
                 return out;
             });
@@ -331,7 +335,9 @@ namespace sixel {
                     if (( y + y6 ) < H) {
                         out |= ( ( ( (*ptr) >> (4 - x2*4)) & 0xF ) == col ) ? (1UL<<5) : 0;
                     }
-                    ptr += bytes_per_line;
+                    if (y6 != 5) {
+                        ptr += bytes_per_line;
+                    }
                 }
                 return out;
             });
@@ -347,27 +353,31 @@ namespace sixel {
 
     public:
 
-        size_t size() const {
+        constexpr size_t size() const {
             return T<W, H>::image_size;
         }
 
-        size_t width() const { 
+        constexpr size_t width() const { 
             return W; 
         }
 
-        size_t height() const { 
+        constexpr size_t height() const { 
             return H; 
         }
 
-        void clear() {
-            memset(data.data(),0,data.size());
+        constexpr void clear() {
+            data.fill(0);
         } 
+
+        constexpr int32_t abs(int32_t v) const {
+            return v < 0 ? -v : v;
+        }
 
         void copy(const std::array<uint8_t, T<W, H>::image_size> &src) {
             memcpy(data.data(),src.data(), data.size());
         }
 
-        void line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t col, uint32_t width = 1) {
+        constexpr void line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t col, uint32_t width = 1) {
             int32_t steep = abs(y1 - y0) > abs(x1 - x0);
 
             if (steep) {
@@ -429,14 +439,14 @@ namespace sixel {
             }
         }
 
-        void fillrect(int32_t x, int32_t y, int32_t w, int32_t h, uint32_t col) {
+        constexpr void fillrect(int32_t x, int32_t y, int32_t w, int32_t h, uint32_t col) {
             h+=y;
             for (;y<h;y++) {
                 span(x,w,y,col);
             }
         }
 
-        void fillcircle(int32_t x, int32_t y, int32_t r, uint32_t col) {
+        constexpr void fillcircle(int32_t x, int32_t y, int32_t r, uint32_t col) {
             span(x - r, 2 * r + 1, y, col);
             fillarc(x, y, r, 3, 0, col);
         }
@@ -451,13 +461,13 @@ namespace sixel {
 
     private:
 
-        void plot(int32_t x, int32_t y, uint32_t col) {
+        constexpr void plot(int32_t x, int32_t y, uint32_t col) {
             size_t _x = static_cast<size_t>(x); _x %= W;
             size_t _y = static_cast<size_t>(y); _y %= H;
             T<W, H>::plot(data, _x, _y, col);
         }
 
-        void span(int32_t x,  int32_t w, int32_t y, uint32_t col) {
+        constexpr void span(int32_t x,  int32_t w, int32_t y, uint32_t col) {
             while(y<0) { y+=H; }
             while(x<0) { x+=W; }
             size_t _xl = static_cast<size_t>(x  ); _xl %= W;
@@ -466,12 +476,12 @@ namespace sixel {
             if ( _xl + w < W ) {
                 T<W, H>::span(data, _xl, _xr, _y, col);
             } else { 
-                T<W, H>::span(data, _xl,   W, _y, col);
+                T<W, H>::span(data, _xl, W-1, _y, col);
                 T<W, H>::span(data,   0, _xr, _y, col);
             }
         }
 
-        void fillarc(int32_t x0, int32_t y0, int32_t r, uint8_t corners, int32_t delta, uint32_t col) {
+        constexpr void fillarc(int32_t x0, int32_t y0, int32_t r, uint8_t corners, int32_t delta, uint32_t col) {
             int32_t f = 1 - r;
             int32_t ddx = -2 * r;
             int32_t ddy = 1;
@@ -505,7 +515,7 @@ namespace sixel {
             }
         }
 
-        std::array<uint8_t, T<W, H>::image_size> data;
+        std::array<uint8_t, T<W, H>::image_size> data {};
         T<W, H> format;
     };
 
