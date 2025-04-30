@@ -141,7 +141,7 @@ int main() {
     static_assert(test8().size() == 273);
 #endif  // #if 0
 
-#if 1
+#if 0
     printf("\033[H\0337");
 
     static sixel::image<sixel::format_4bit, 1024, 256> image0;

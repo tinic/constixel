@@ -2,9 +2,9 @@
 #define _SIXEL_H_
 
 #include <algorithm>
-#include <string>
 #include <array>
 #include <cstdint>
+#include <string>
 
 namespace sixel {
 
@@ -17,7 +17,7 @@ class map {
     using data_type = std::array<std::pair<K, V>, N>;
     using const_iterator = typename data_type::const_iterator;
 
-   template <typename... E>
+    template <typename... E>
     explicit constexpr map(E &&...elements) noexcept : data{std::forward<E>(elements)...} {
         static_assert(N > 0, "N should be positive");
         static_assert(N == sizeof...(elements), "Elements size doesn't match expected size of a hash-map");
@@ -365,7 +365,7 @@ class format_2bit : public format {
             yptr[xl4] &= ~ml[xl0];
             yptr[xl4] |= ml[xl0] & c4;
             for (size_t x = xl4 + 1; x < xr4; x++) {
-                yptr[+x] = c4;
+                yptr[x] = c4;
             }
             yptr[xr4] &= ~mr[xr0];
             yptr[xr4] |= mr[xr0] & c4;
@@ -429,7 +429,7 @@ class format_4bit : public format {
             yptr[xl2] &= ~ml[xl0];
             yptr[xl2] |= ml[xl0] & c2;
             for (size_t x = xl2 + 1; x < xr2; x++) {
-                yptr[+x] = c2;
+                yptr[x] = c2;
             }
             yptr[xr2] &= ~mr[xr0];
             yptr[xr2] |= mr[xr0] & c2;
@@ -449,6 +449,66 @@ class format_4bit : public format {
                 out >>= 1;
                 if ((y + y6) < H) {
                     out |= ((((*ptr) >> (4 - x2 * 4)) & 0xF) == col) ? (1UL << 5) : 0;
+                }
+                if (y6 != 5) {
+                    ptr += bytes_per_line;
+                }
+            }
+            return out;
+        });
+    }
+};
+
+template <size_t W, size_t H>
+class format_8bit : public format {
+   public:
+    static constexpr size_t bits_per_pixel = 8;
+    static constexpr size_t bytes_per_line = W;
+    static constexpr size_t internal_height = ((H + 5) / 6) * 6;
+    static constexpr size_t image_size = internal_height * bytes_per_line;
+    static constexpr std::array<uint32_t, (1UL << bits_per_pixel)> palette = {
+        // clang-format off
+        0x000000, 0xffffff, 0xff0000, 0x00ff00, 0x0000ff, 0xffff00, 0x00ffff, 0xff00ff, 0x333333, 0x666666, 0x999999, 0xcccccc, 0x7f0000, 0x007f00, 0x00007f, 0x7f7f00,
+        0x000000, 0x111111, 0x222222, 0x333333, 0x444444, 0x555555, 0x666666, 0x777777, 0x888888, 0x999999, 0xaaaaaa, 0xbbbbbb, 0xcccccc, 0xdddddd, 0xeeeeee, 0xffffff,
+        0x000000, 0x111111, 0x222222, 0x333333, 0x444444, 0x555555, 0x666666, 0x777777, 0x888888, 0x999999, 0xaaaaaa, 0xbbbbbb, 0xcccccc, 0xdddddd, 0xeeeeee, 0xffffff,
+        0x000000, 0x111111, 0x222222, 0x333333, 0x444444, 0x555555, 0x666666, 0x777777, 0x888888, 0x999999, 0xaaaaaa, 0xbbbbbb, 0xcccccc, 0xdddddd, 0xeeeeee, 0xffffff,
+
+        0x000000, 0x111111, 0x222222, 0x333333, 0x444444, 0x555555, 0x666666, 0x777777, 0x888888, 0x999999, 0xaaaaaa, 0xbbbbbb, 0xcccccc, 0xdddddd, 0xeeeeee, 0xffffff,
+        0x000000, 0x111111, 0x222222, 0x333333, 0x444444, 0x555555, 0x666666, 0x777777, 0x888888, 0x999999, 0xaaaaaa, 0xbbbbbb, 0xcccccc, 0xdddddd, 0xeeeeee, 0xffffff,
+        0x000000, 0x111111, 0x222222, 0x333333, 0x444444, 0x555555, 0x666666, 0x777777, 0x888888, 0x999999, 0xaaaaaa, 0xbbbbbb, 0xcccccc, 0xdddddd, 0xeeeeee, 0xffffff,
+        0x000000, 0x111111, 0x222222, 0x333333, 0x444444, 0x555555, 0x666666, 0x777777, 0x888888, 0x999999, 0xaaaaaa, 0xbbbbbb, 0xcccccc, 0xdddddd, 0xeeeeee, 0xffffff,
+
+        0x000000, 0x111111, 0x222222, 0x333333, 0x444444, 0x555555, 0x666666, 0x777777, 0x888888, 0x999999, 0xaaaaaa, 0xbbbbbb, 0xcccccc, 0xdddddd, 0xeeeeee, 0xffffff,
+        0x000000, 0x111111, 0x222222, 0x333333, 0x444444, 0x555555, 0x666666, 0x777777, 0x888888, 0x999999, 0xaaaaaa, 0xbbbbbb, 0xcccccc, 0xdddddd, 0xeeeeee, 0xffffff,
+        0x000000, 0x111111, 0x222222, 0x333333, 0x444444, 0x555555, 0x666666, 0x777777, 0x888888, 0x999999, 0xaaaaaa, 0xbbbbbb, 0xcccccc, 0xdddddd, 0xeeeeee, 0xffffff,
+        0x000000, 0x111111, 0x222222, 0x333333, 0x444444, 0x555555, 0x666666, 0x777777, 0x888888, 0x999999, 0xaaaaaa, 0xbbbbbb, 0xcccccc, 0xdddddd, 0xeeeeee, 0xffffff,
+
+        0x000000, 0x111111, 0x222222, 0x333333, 0x444444, 0x555555, 0x666666, 0x777777, 0x888888, 0x999999, 0xaaaaaa, 0xbbbbbb, 0xcccccc, 0xdddddd, 0xeeeeee, 0xffffff,
+        0x000000, 0x111111, 0x222222, 0x333333, 0x444444, 0x555555, 0x666666, 0x777777, 0x888888, 0x999999, 0xaaaaaa, 0xbbbbbb, 0xcccccc, 0xdddddd, 0xeeeeee, 0xffffff,
+        0x000000, 0x111111, 0x222222, 0x333333, 0x444444, 0x555555, 0x666666, 0x777777, 0x888888, 0x999999, 0xaaaaaa, 0xbbbbbb, 0xcccccc, 0xdddddd, 0xeeeeee, 0xffffff,
+        0x000000, 0x111111, 0x222222, 0x333333, 0x444444, 0x555555, 0x666666, 0x777777, 0x888888, 0x999999, 0xaaaaaa, 0xbbbbbb, 0xcccccc, 0xdddddd, 0xeeeeee, 0xffffff};
+    // clang-format on
+
+    static constexpr void plot(std::array<uint8_t, image_size> &data, size_t x0, size_t y, uint32_t col) {
+        data.data()[y * bytes_per_line + x0] = col;
+    }
+
+    static constexpr void span(std::array<uint8_t, image_size> &data, size_t xl0, size_t xr0, size_t y, uint32_t col) {
+        uint8_t *yptr = &data.data()[y * bytes_per_line];
+        for (size_t x = xl0; x < xr0; x++) {
+            yptr[x] = col;
+        }
+    }
+
+    template <typename F>
+    static constexpr void sixel(std::array<uint8_t, image_size> &data, F &&charOut, const rect<int32_t> &r, bool preserveBackground) {
+        sixel_image<W, H>(data.data(), palette, charOut, r, preserveBackground, [](const uint8_t *dataRaw, size_t x, size_t col, size_t y) {
+            const uint8_t *ptr = &dataRaw[y * bytes_per_line + x];
+            uint8_t out = 0;
+            for (size_t y6 = 0; y6 < 6; y6++) {
+                out >>= 1;
+                if ((y + y6) < H) {
+                    out |= (*ptr == col) ? (1UL << 5) : 0;
                 }
                 if (y6 != 5) {
                     ptr += bytes_per_line;
