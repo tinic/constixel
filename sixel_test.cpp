@@ -14,7 +14,7 @@ static size_t bytesCount = 0;
 
 constexpr std::vector<uint8_t> test0() {
     std::vector<uint8_t> out{};
-    sixel::image<sixel::format_1bit, 320, 240> image;
+    sixel::image<sixel::format_1bit, 32, 31> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
         image.fillrect(16 + c * 37, c * 32, 128, 128, c);
@@ -27,7 +27,7 @@ constexpr std::vector<uint8_t> test0() {
 
 constexpr std::vector<uint8_t> test1() {
     std::vector<uint8_t> out{};
-    sixel::image<sixel::format_2bit, 319, 240> image;
+    sixel::image<sixel::format_2bit, 112, 64> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
         image.fillrect(16 + c * 37, c * 32, 128, 128, c);
@@ -40,7 +40,7 @@ constexpr std::vector<uint8_t> test1() {
 
 constexpr std::vector<uint8_t> test2() {
     std::vector<uint8_t> out{};
-    sixel::image<sixel::format_4bit, 319, 239> image;
+    sixel::image<sixel::format_4bit, 128, 127> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
         image.fillrect(16 + c * 37, c * 32, 128, 128, c);
@@ -121,7 +121,20 @@ constexpr std::vector<uint8_t> test8() {
     sixel::image<sixel::format_4bit, 7, 7> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
-        image.line(16, 16, 64 + c * 42, 700, c, c);
+        image.line(0, 0, c * 42, 700, c, c);
+    }
+    image.sixel([&out](uint8_t ch) mutable {
+        out.push_back(ch);
+    });
+    return out;
+}
+
+constexpr std::vector<uint8_t> test9() {
+    std::vector<uint8_t> out{};
+    sixel::image<sixel::format_8bit, 32, 32> image;
+    image.clear();
+    for (int32_t c = 0; c < 16; c++) {
+        image.line(0, 0, c, 700, c, c);
     }
     image.sixel([&out](uint8_t ch) mutable {
         out.push_back(ch);
@@ -131,15 +144,16 @@ constexpr std::vector<uint8_t> test8() {
 
 int main() {
 #if 0
-    static_assert(test0().size() == 1970);
-    static_assert(test1().size() == 2967);
-    static_assert(test2().size() == 4654);
+    static_assert(test0().size() == 144);
+    static_assert(test1().size() == 273);
+    static_assert(test2().size() == 663);
     static_assert(test3().size() == 1646);
     static_assert(test4().size() == 1638);
     static_assert(test5().size() == 271);
     static_assert(test6().size() == 1164);
     static_assert(test7().size() == 363);
     static_assert(test8().size() == 273);
+    static_assert(test9().size() == 4080);
 #endif  // #if 0
 
 #if 0
@@ -158,7 +172,7 @@ int main() {
 #if 1
     printf("\033[H\0337");
 
-    static sixel::image<sixel::format_4bit, 768, 768> image1;
+    static sixel::image<sixel::format_8bit, 768, 768> image1;
     printf("RAM required: %d bytes\n", int32_t(image1.size()));
     image1.clear();
 
