@@ -373,8 +373,8 @@ namespace sixel {
             return v < 0 ? -v : v;
         }
 
-        void copy(const std::array<uint8_t, T<W, H>::image_size> &src) {
-            memcpy(data.data(),src.data(), data.size());
+        constexpr void copy(const std::array<uint8_t, T<W, H>::image_size> &src) {
+            data = src;
         }
 
         constexpr void line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t col, uint32_t width = 1) {
