@@ -189,8 +189,8 @@ namespace sixel {
         }
 
         template <typename F> static constexpr void sixel(std::array<uint8_t, image_size> &data, F &&charOut, const rect<int32_t> &r) {
-            sixel_image<W, H>(data.data(), palette, charOut, r, [](const uint8_t *data, size_t x, size_t col, size_t y) {
-                const uint8_t *ptr = &data[y * bytes_per_line + x / 8];
+            sixel_image<W, H>(data.data(), palette, charOut, r, [](const uint8_t *dataRaw, size_t x, size_t col, size_t y) {
+                const uint8_t *ptr = &dataRaw[y * bytes_per_line + x / 8];
                 size_t x8 = x % 8; 
                 uint8_t out = 0;
                 for (size_t y6 = 0; y6 < 6; y6++) {
@@ -250,8 +250,8 @@ namespace sixel {
         }
 
         template <typename F> static constexpr void sixel(std::array<uint8_t, image_size> &data, F &&charOut, const rect<int32_t> &r) {
-            sixel_image<W, H>(data.data(), palette, charOut, r, [](const uint8_t *data, size_t x, size_t col, size_t y) {
-                const uint8_t *ptr = &data[y * bytes_per_line + x / 4];
+            sixel_image<W, H>(data.data(), palette, charOut, r, [](const uint8_t *dataRaw, size_t x, size_t col, size_t y) {
+                const uint8_t *ptr = &dataRaw[y * bytes_per_line + x / 4];
                 size_t x4 = x % 4; 
                 uint8_t out = 0;
                 for (size_t y6 = 0; y6 < 6; y6++) {
@@ -322,8 +322,8 @@ namespace sixel {
         }
 
         template <typename F> static constexpr void sixel(std::array<uint8_t, image_size> &data, F &&charOut, const rect<int32_t> &r) {
-            sixel_image<W, H>(data.data(), palette, charOut, r, [](const uint8_t *data, size_t x, size_t col, size_t y) {
-                const uint8_t *ptr = &data[y * bytes_per_line + x / 2];
+            sixel_image<W, H>(data.data(), palette, charOut, r, [](const uint8_t *dataRaw, size_t x, size_t col, size_t y) {
+                const uint8_t *ptr = &dataRaw[y * bytes_per_line + x / 2];
                 size_t x2 = x % 2; 
                 uint8_t out = 0;
                 for (size_t y6 = 0; y6 < 6; y6++) {
