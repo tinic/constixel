@@ -459,6 +459,70 @@ class format_4bit : public format {
     }
 };
 
+template <size_t W, size_t H>
+class format_8bit : public format {
+   public:
+    static constexpr size_t bits_per_pixel = 4;
+    static constexpr size_t bytes_per_line = (W * bits_per_pixel + 7) / 8;
+    static constexpr size_t internal_height = ((H + 5) / 6) * 6;
+    static constexpr size_t image_size = internal_height * bytes_per_line;
+    static constexpr std::array<uint32_t, (1UL << bits_per_pixel)> palette = {0x000000, 0xffffff, 0xff0000, 0x00ff00, 0x0000ff, 0xffff00, 0x00ffff, 0xff00ff,
+                                                                              0x333333, 0x666666, 0x999999, 0xcccccc, 0x7f0000, 0x007f00, 0x00007f, 0x7f7f00};
+
+    static constexpr void plot(std::array<uint8_t, image_size> &data, size_t x0, size_t y, uint32_t col) {
+        col %= 1UL << bits_per_pixel;
+        size_t x2 = x0 / 2;
+        x0 %= 2;
+        uint8_t *yptr = &data.data()[y * bytes_per_line];
+        yptr[x2] &= ~static_cast<uint8_t>(0xFUL << (4 - x0 * 4));
+        yptr[x2] |= static_cast<uint8_t>(col << (4 - x0 * 4));
+    }
+
+    static constexpr void span(std::array<uint8_t, image_size> &data, size_t xl0, size_t xr0, size_t y, uint32_t col) {
+        col %= 1UL << bits_per_pixel;
+        size_t xl2 = xl0 / 2;
+        xl0 %= 2;
+        size_t xr2 = xr0 / 2;
+        xr0 %= 2;
+        size_t xs2 = xr2 - xl2;
+        uint8_t c2 = static_cast<uint8_t>(col << 4 | col << 0);
+        constexpr uint8_t ml[] = {0b11111111, 0b00001111};
+        constexpr uint8_t mr[] = {0b00000000, 0b11110000};
+        uint8_t *yptr = &data.data()[y * bytes_per_line];
+        if (xs2 > 0) {
+            yptr[xl2] &= ~ml[xl0];
+            yptr[xl2] |= ml[xl0] & c2;
+            for (size_t x = xl2 + 1; x < xr2; x++) {
+                yptr[+x] = c2;
+            }
+            yptr[xr2] &= ~mr[xr0];
+            yptr[xr2] |= mr[xr0] & c2;
+        } else {
+            yptr[xl2] &= ~(ml[xl0] & mr[xr0]);
+            yptr[xl2] |= (ml[xl0] & mr[xr0] & c2);
+        }
+    }
+
+    template <typename F>
+    static constexpr void sixel(std::array<uint8_t, image_size> &data, F &&charOut, const rect<int32_t> &r, bool preserveBackground) {
+        sixel_image<W, H>(data.data(), palette, charOut, r, preserveBackground, [](const uint8_t *dataRaw, size_t x, size_t col, size_t y) {
+            const uint8_t *ptr = &dataRaw[y * bytes_per_line + x / 2];
+            size_t x2 = x % 2;
+            uint8_t out = 0;
+            for (size_t y6 = 0; y6 < 6; y6++) {
+                out >>= 1;
+                if ((y + y6) < H) {
+                    out |= ((((*ptr) >> (4 - x2 * 4)) & 0xF) == col) ? (1UL << 5) : 0;
+                }
+                if (y6 != 5) {
+                    ptr += bytes_per_line;
+                }
+            }
+            return out;
+        });
+    }
+};
+
 template <template <size_t, size_t> class T, size_t W, size_t H>
 class image {
     static_assert(sizeof(W) >= sizeof(uint32_t));
@@ -485,6 +549,14 @@ class image {
 
     [[nodiscard]] constexpr int32_t abs(int32_t v) const {
         return v < 0 ? -v : v;
+    }
+
+    [[nodiscard]] constexpr std::array<uint8_t, T<W, H>::image_size> &dataRef() const {
+        return data;
+    }
+
+    [[nodiscard]] constexpr std::array<uint8_t, T<W, H>::image_size> clone() const {
+        return data;
     }
 
     constexpr void copy(const std::array<uint8_t, T<W, H>::image_size> &src) {
