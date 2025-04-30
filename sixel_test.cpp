@@ -6,6 +6,7 @@
 #include <cstdio>
 #include <iostream>
 #include <vector>
+#include <string>
 
 #include "sixel_tools.h"
 
@@ -141,7 +142,7 @@ int main() {
     static_assert(test8().size() == 273);
 #endif  // #if 0
 
-#if 1
+#if 0
     printf("\033[H\0337");
 
     static sixel::image<sixel::format_4bit, 1024, 256> image0;
@@ -163,27 +164,30 @@ int main() {
 
     for (int32_t c = 0; c < 16; c++) {
         image1.fillrect(16 + c * 37, c * 32, 128, 128, c);
-        printf("\0338");
-        image1.sixel([](uint8_t ch) {
-            putc(ch, stdout);
+        std::string out("\0338");
+        image1.sixel([&out](uint8_t ch) mutable {
+            out.push_back(ch);
             bytesCount++;
         });
+        puts(out.c_str());
     }
     for (int32_t c = 0; c < 16; c++) {
         image1.line(16, 16, 64 + c * 42, 700, c, c);
-        printf("\0338");
-        image1.sixel([](uint8_t ch) {
-            putc(ch, stdout);
+        std::string out("\0338");
+        image1.sixel([&out](uint8_t ch) mutable {
+            out.push_back(ch);
             bytesCount++;
         });
+        puts(out.c_str());
     }
     for (int32_t c = 0; c < 16; c++) {
         image1.fillcircle(600, 384, 256 - c * 16, c);
-        printf("\0338");
-        image1.sixel([](uint8_t ch) {
-            putc(ch, stdout);
+        std::string out("\0338");
+        image1.sixel([&out](uint8_t ch) mutable {
+            out.push_back(ch);
             bytesCount++;
         });
+        puts(out.c_str());
     }
 
     printf("Transfer bytes: %d bytes\n", int32_t(bytesCount));
