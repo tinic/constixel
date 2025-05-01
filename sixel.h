@@ -3,8 +3,10 @@
 
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <cstdint>
 #include <string>
+#include <vector>
 
 namespace sixel {
 
@@ -459,6 +461,154 @@ class format_4bit : public format {
     }
 };
 
+namespace colortools {
+
+struct node {
+    int16_t child[8]{-1, -1, -1, -1, -1, -1, -1, -1};
+    int16_t palette = -1;
+};
+
+class octree {
+   public:
+    size_t node_idx = 0;
+    static constexpr size_t palette_size = 256;
+    static constexpr size_t node_size = palette_size * 8;
+    std::array<node, node_size> nodes;
+    const std::array<uint32_t, palette_size> &pal;
+
+    static constexpr int child_index(uint8_t r, uint8_t g, uint8_t b, int level) {
+        return ((r >> level) & 1) << 2 | ((g >> level) & 1) << 1 | ((b >> level) & 1);
+    }
+
+    constexpr void insert(uint32_t c, size_t idx) {
+        uint32_t n = 0;
+        for (int32_t lvl = 7; lvl >= 0; --lvl) {
+            int32_t ci = child_index((c >> 16) & 0xFF, (c >> 8) & 0xFF, (c >> 0) & 0xFF, lvl);
+            if (nodes[n].child[ci] == -1) {
+                nodes[n].child[ci] = static_cast<int16_t>(node_idx);
+                node_idx++;
+            }
+            n = nodes[n].child[ci];
+        }
+        nodes[n].palette = static_cast<int16_t>(idx);
+    }
+
+   public:
+    constexpr octree(const std::array<uint32_t, palette_size> &palette) : pal(palette) {
+        for (size_t i = 0; i < palette_size; ++i) {
+            insert(palette[i], i);
+        }
+    }
+
+    constexpr uint8_t nearest(uint8_t r, uint8_t g, uint8_t b) const {
+        int n = 0;
+        for (int lvl = 7; lvl >= 0; --lvl) {
+            int ci = child_index(r, g, b, lvl);
+            int next = nodes[n].child[ci];
+            if (next == -1)
+                break;
+            n = next;
+            if (nodes[n].palette != -1)
+                return static_cast<uint8_t>(nodes[n].palette);
+        }
+        // fallback: brute-force
+        int best = 0, bestd = INT_MAX;
+        for (size_t i = 0; i < pal.size(); ++i) {
+            int dr = int(r) - ((pal[i] >> 16) & 0xFF);
+            int dg = int(g) - ((pal[i] >> 8) & 0xFF);
+            int db = int(b) - ((pal[i] >> 0) & 0xFF);
+            int d = dr * dr + dg * dg + db * db;
+            if (d < bestd) {
+                bestd = d;
+                best = int(i);
+            }
+        }
+        return static_cast<uint8_t>(best);
+    }
+};
+
+static constexpr double cos(double x, int terms = 10) {
+    x = x - 6.283185307179586 * int(x / 6.283185307179586);  // wrap x to [0, 2π)
+    double res = 1.0, term = 1.0;
+    double x2 = x * x;
+    for (int i = 1; i < terms; ++i) {
+        term *= -x2 / ((2 * i - 1) * (2 * i));
+        res += term;
+    }
+    return res;
+}
+
+static constexpr double sin(double x, int terms = 10) {
+    x = x - 6.283185307179586 * int(x / 6.283185307179586);  // wrap x to [0, 2π)
+    double res = x, term = x;
+    double x2 = x * x;
+    for (int i = 1; i < terms; ++i) {
+        term *= -x2 / ((2 * i) * (2 * i + 1));
+        res += term;
+    }
+    return res;
+}
+
+static constexpr double pow(double base, double exp, int terms = 10) {
+    if (base <= 0.0)
+        return (base == 0.0) ? 0.0 : 0.0 / 0.0;  // NaN for negative base
+    double ln = 0.0, y = (base - 1) / (base + 1);
+    double y2 = y * y, num = y;
+    for (int i = 1; i <= terms; ++i) {
+        ln += num / (2 * i - 1);
+        num *= y2;
+    }
+    ln *= 2;
+    double res = 1.0, term = 1.0, x = exp * ln;
+    for (int i = 1; i < terms; ++i) {
+        term *= x / i;
+        res += term;
+    }
+    return res;
+}
+
+struct oklch {
+    double l, c, h;
+};
+
+struct oklab {
+    double l, a, b;
+};
+
+struct srgb {
+    double r, g, b;
+};
+
+static consteval double linear_to_srgb(double c) {
+    if (c <= 0.0031308) {
+        return 12.92 * c;
+    } else {
+        return 1.055 * pow(c, 1.0 / 2.4) - 0.055;
+    }
+}
+
+static consteval srgb oklab_to_srgb(const oklab &oklab) {
+    double l = oklab.l;
+    double a = oklab.a;
+    double b = oklab.b;
+
+    double l_ = l + 0.3963377774 * a + 0.2158037573 * b;
+    double m_ = l - 0.1055613458 * a - 0.0638541728 * b;
+    double s_ = l - 0.0894841775 * a - 1.2914855480 * b;
+
+    double r = 4.0767416621 * l_ - 3.3077115913 * m_ + 0.2309699292 * s_;
+    double g = -1.2684380046 * l_ + 2.6097574011 * m_ - 0.3413193965 * s_;
+    double bl = -0.0041960863 * l_ - 0.7034186168 * m_ + 1.7076147031 * s_;
+
+    return {linear_to_srgb(std::max(0.0, std::min(1.0, r))), linear_to_srgb(std::max(0.0, std::min(1.0, g))), linear_to_srgb(std::max(0.0, std::min(1.0, bl)))};
+}
+
+static consteval oklab oklch_to_oklab(const oklch &oklch) {
+    return {oklch.l, oklch.c * cos(oklch.h * M_PI / 180.0), oklch.c * sin(oklch.h * M_PI / 180.0)};
+}
+
+};  // namespace colortools
+
 template <size_t W, size_t H>
 class format_8bit : public format {
    public:
@@ -466,28 +616,59 @@ class format_8bit : public format {
     static constexpr size_t bytes_per_line = W;
     static constexpr size_t internal_height = ((H + 5) / 6) * 6;
     static constexpr size_t image_size = internal_height * bytes_per_line;
-    static constexpr std::array<uint32_t, (1UL << bits_per_pixel)> palette = {
+
+    static consteval const std::array<uint32_t, (1UL << bits_per_pixel)> gen_palette() {
+        std::array<uint32_t, (1UL << bits_per_pixel)> pal{};
         // clang-format off
-        0x000000, 0xffffff, 0xff0000, 0x00ff00, 0x0000ff, 0xffff00, 0x00ffff, 0xff00ff, 0x333333, 0x666666, 0x999999, 0xcccccc, 0x7f0000, 0x007f00, 0x00007f, 0x7f7f00,
-        0x000000, 0x111111, 0x222222, 0x333333, 0x444444, 0x555555, 0x666666, 0x777777, 0x888888, 0x999999, 0xaaaaaa, 0xbbbbbb, 0xcccccc, 0xdddddd, 0xeeeeee, 0xffffff,
-        0x000000, 0x110000, 0x220000, 0x440000, 0x660000, 0x880000, 0xaa0000, 0xcc0000, 0xff0000, 0xff2222, 0xff4444, 0xff6666, 0xff8888, 0xffaaaa, 0xffcccc, 0xffffff,
-        0x000000, 0x001100, 0x002200, 0x004400, 0x006600, 0x008800, 0x00aa00, 0x00cc00, 0x00ff00, 0x22ff22, 0x44ff44, 0x66ff66, 0x88ff88, 0xaaffaa, 0xccffcc, 0xffffff,
+        pal[ 0] = 0x000000; pal[ 1] = 0xffffff; pal[ 2] = 0xff0000; pal[ 3] = 0x00ff00;
+        pal[ 4] = 0x0000ff; pal[ 5] = 0xffff00; pal[ 6] = 0x00ffff; pal[ 7] = 0xff00ff;
+        pal[ 8] = 0x333333; pal[ 9] = 0x666666; pal[10] = 0x999999; pal[11] = 0xcccccc;
+        pal[12] = 0x7f0000; pal[13] = 0x007f00; pal[14] = 0x00007f; pal[15] = 0x7f7f00;
+        for (size_t c = 0; c < 16; c++) {
+            uint32_t y = (0xff * c) / 15;
+            pal[0x10 + c] = (y << 16) | (y << 8) | (y << 0);
+        }
+        for (size_t c = 0; c < 8; c++) {
+            uint32_t y = (0xff * c) / 7;
+            uint32_t x = (0xff * (c + 1)) / 8;
+            pal[0x20 + c + 0] = ( y  << 16) | ( 0  << 8) | ( 0  << 0); // Rxx
+            pal[0x20 + c + 8] = (255 << 16) | ( x  << 8) | ( x  << 0); 
+            pal[0x30 + c + 0] = ( 0  << 16) | ( y  << 8) | ( 0  << 0); // Gxx
+            pal[0x30 + c + 8] = ( x  << 16) | (255 << 8) | ( x  << 0);
+            pal[0x40 + c + 0] = ( 0  << 16) | ( 0  << 8) | ( y  << 0); // Bxx
+            pal[0x40 + c + 8] = ( x  << 16) | ( x  << 8) | (255 << 0);
+            pal[0x50 + c + 0] = ( y  << 16) | ( y  << 8) | ( 0  << 0); // RGx
+            pal[0x50 + c + 8] = (255 << 16) | (255 << 8) | ( x  << 0);
+            pal[0x60 + c + 0] = ( 0  << 16) | ( y  << 8) | ( y  << 0); // xGB
+            pal[0x60 + c + 8] = ( x  << 16) | (255 << 8) | (255 << 0);
+            pal[0x70 + c + 0] = ( y  << 16) | ( 0  << 8) | ( y  << 0); // RxB
+            pal[0x70 + c + 8] = (255 << 16) | ( x  << 8) | (255 << 0);
+        }
+        // clang-format on
+        for (size_t c = 0; c < 8; c++) {
+            colortools::oklab lft{static_cast<double>(c) / 7.2 - 0.1, 0.2, 0.0};
+            colortools::oklab rgh{static_cast<double>(c) / 7.2 - 0.1, 0.2, 360.0};
+            for (size_t d = 0; d < 16; d++) {
+                auto res = colortools::oklab_to_srgb(colortools::oklch_to_oklab(colortools::oklch{
+                    std::lerp(lft.l, rgh.l, static_cast<double>(d) / 15.0),
+                    std::lerp(lft.a, rgh.a, static_cast<double>(d) / 15.0),
+                    std::lerp(lft.b, rgh.b, static_cast<double>(d) / 15.0),
+                }));
+                pal[0x80 + c * 16 + d] = (static_cast<uint32_t>(std::max(0.0, std::min(1.0, res.r)) * 255.0) << 16) |
+                                         (static_cast<uint32_t>(std::max(0.0, std::min(1.0, res.g)) * 255.0) << 8) |
+                                         (static_cast<uint32_t>(std::max(0.0, std::min(1.0, res.b)) * 255.0) << 0);
+            }
+        }
+        return pal;
+    }
 
-        0x000000, 0x000011, 0x000022, 0x000044, 0x000066, 0x000088, 0x0000aa, 0x0000cc, 0x0000ff, 0x2222ff, 0x4444ff, 0x6666ff, 0x8888ff, 0xaaaaff, 0xccccff, 0xffffff,
-        0x000000, 0x111100, 0x222200, 0x444400, 0x666600, 0x888800, 0xaaaa00, 0xcccc00, 0xffff00, 0xffff22, 0xffff44, 0xffff66, 0xffff88, 0xffffaa, 0xffffcc, 0xffffff,
-        0x000000, 0x110011, 0x220022, 0x440044, 0x660066, 0x880088, 0xaa00aa, 0xcc00cc, 0xff00ff, 0xff22ff, 0xff44ff, 0xff66ff, 0xff88ff, 0xffaaff, 0xffccff, 0xffffff,
-        0x000000, 0x111111, 0x222222, 0x333333, 0x444444, 0x555555, 0x666666, 0x777777, 0x888888, 0x999999, 0xaaaaaa, 0xbbbbbb, 0xcccccc, 0xdddddd, 0xeeeeee, 0xffffff,
+    static constexpr std::array<uint32_t, (1UL << bits_per_pixel)> palette = gen_palette();
 
-        0x000000, 0x111111, 0x222222, 0x333333, 0x444444, 0x555555, 0x666666, 0x777777, 0x888888, 0x999999, 0xaaaaaa, 0xbbbbbb, 0xcccccc, 0xdddddd, 0xeeeeee, 0xffffff,
-        0x000000, 0x111111, 0x222222, 0x333333, 0x444444, 0x555555, 0x666666, 0x777777, 0x888888, 0x999999, 0xaaaaaa, 0xbbbbbb, 0xcccccc, 0xdddddd, 0xeeeeee, 0xffffff,
-        0x000000, 0x111111, 0x222222, 0x333333, 0x444444, 0x555555, 0x666666, 0x777777, 0x888888, 0x999999, 0xaaaaaa, 0xbbbbbb, 0xcccccc, 0xdddddd, 0xeeeeee, 0xffffff,
-        0x000000, 0x111111, 0x222222, 0x333333, 0x444444, 0x555555, 0x666666, 0x777777, 0x888888, 0x999999, 0xaaaaaa, 0xbbbbbb, 0xcccccc, 0xdddddd, 0xeeeeee, 0xffffff,
+    static consteval const colortools::octree gen_octree() {
+        return colortools::octree(palette);
+    }
 
-        0x000000, 0x111111, 0x222222, 0x333333, 0x444444, 0x555555, 0x666666, 0x777777, 0x888888, 0x999999, 0xaaaaaa, 0xbbbbbb, 0xcccccc, 0xdddddd, 0xeeeeee, 0xffffff,
-        0x000000, 0x111111, 0x222222, 0x333333, 0x444444, 0x555555, 0x666666, 0x777777, 0x888888, 0x999999, 0xaaaaaa, 0xbbbbbb, 0xcccccc, 0xdddddd, 0xeeeeee, 0xffffff,
-        0x000000, 0x111111, 0x222222, 0x333333, 0x444444, 0x555555, 0x666666, 0x777777, 0x888888, 0x999999, 0xaaaaaa, 0xbbbbbb, 0xcccccc, 0xdddddd, 0xeeeeee, 0xffffff,
-        0x000000, 0x111111, 0x222222, 0x333333, 0x444444, 0x555555, 0x666666, 0x777777, 0x888888, 0x999999, 0xaaaaaa, 0xbbbbbb, 0xcccccc, 0xdddddd, 0xeeeeee, 0xffffff};
-    // clang-format on
+    static constexpr const colortools::octree octree = gen_octree();
 
     static constexpr void plot(std::array<uint8_t, image_size> &data, size_t x0, size_t y, uint32_t col) {
         data.data()[y * bytes_per_line + x0] = col;
@@ -497,6 +678,24 @@ class format_8bit : public format {
         uint8_t *yptr = &data.data()[y * bytes_per_line];
         for (size_t x = xl0; x < xr0; x++) {
             yptr[x] = col;
+        }
+    }
+
+    static constexpr void blitRGBA(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
+        for (int32_t y = 0; y < r.h; y++) {
+            for (int32_t x = 0; x < r.w; x++) {
+                data.data()[(y + r.y) * bytes_per_line + (x + r.x)] =
+                    octree.nearest(ptr[y * stride + x * 4 + 0], ptr[y * stride + x * 4 + 1], ptr[y * stride + x * 4 + 2]);
+            }
+        }
+    }
+
+    static constexpr void blitRGB(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
+        for (int32_t y = 0; y < r.h; y++) {
+            for (int32_t x = 0; x < r.w; x++) {
+                data.data()[(y + r.y) * bytes_per_line + (x + r.x)] =
+                    octree.nearest(ptr[y * stride + x * 3 + 0], ptr[y * stride + x * 3 + 1], ptr[y * stride + x * 3 + 2]);
+            }
         }
     }
 
@@ -631,6 +830,20 @@ class image {
     constexpr void fillcircle(int32_t x, int32_t y, int32_t r, uint32_t col) {
         span(x - abs(r), 2 * abs(r) + 1, y, col);
         fillarc(x, y, abs(r), 3, 0, col);
+    }
+
+    constexpr void blitRGBA(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
+        rect<int32_t> blitrect{x, y, w, h};
+        blitrect &= {0, 0, W, H};
+        blitrect &= {x, y, iw, ih};
+        T<W, H>::blitRGBA(data, blitrect, ptr, iw, ih, stride);
+    }
+
+    constexpr void blitRGB(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
+        rect<int32_t> blitrect{x, y, w, h};
+        blitrect &= {0, 0, W, H};
+        blitrect &= {x, y, iw, ih};
+        T<W, H>::blitRGB(data, blitrect, ptr, iw, ih, stride);
     }
 
     template <typename F>
