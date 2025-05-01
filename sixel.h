@@ -279,7 +279,7 @@ class format_1bit : public format {
     static constexpr std::array<uint32_t, (1UL << bits_per_pixel)> palette = {0x00000000, 0x00ffffff};
 
     static constexpr void plot(std::array<uint8_t, image_size> &data, size_t x0, size_t y, uint32_t col) {
-        col %= 1UL << bits_per_pixel;
+        col &= (1UL << bits_per_pixel) - 1;
         size_t x8 = x0 / 8;
         x0 %= 8;
         uint8_t *yptr = &data.data()[y * bytes_per_line];
@@ -288,7 +288,7 @@ class format_1bit : public format {
     }
 
     static constexpr void span(std::array<uint8_t, image_size> &data, size_t xl0, size_t xr0, size_t y, uint32_t col) {
-        col %= 1UL << bits_per_pixel;
+        col &= (1UL << bits_per_pixel) - 1;
         size_t xl8 = xl0 / 8;
         xl0 %= 8;
         size_t xr8 = xr0 / 8;
@@ -342,7 +342,7 @@ class format_2bit : public format {
     static constexpr std::array<uint32_t, (1UL << bits_per_pixel)> palette = {0x000000, 0xffffff, 0xff0000, 0x00ff00};
 
     static constexpr void plot(std::array<uint8_t, image_size> &data, size_t x0, size_t y, uint32_t col) {
-        col %= 1UL << bits_per_pixel;
+        col &= (1UL << bits_per_pixel) - 1;
         size_t x4 = x0 / 4;
         x0 %= 4;
         uint8_t *yptr = &data.data()[y * bytes_per_line];
@@ -351,7 +351,7 @@ class format_2bit : public format {
     }
 
     static constexpr void span(std::array<uint8_t, image_size> &data, size_t xl0, size_t xr0, size_t y, uint32_t col) {
-        col %= 1UL << bits_per_pixel;
+        col &= (1UL << bits_per_pixel) - 1;
         size_t xl4 = xl0 / 4;
         xl0 %= 4;
         size_t xr4 = xr0 / 4;
@@ -406,7 +406,7 @@ class format_4bit : public format {
                                                                               0x333333, 0x666666, 0x999999, 0xcccccc, 0x7f0000, 0x007f00, 0x00007f, 0x7f7f00};
 
     static constexpr void plot(std::array<uint8_t, image_size> &data, size_t x0, size_t y, uint32_t col) {
-        col %= 1UL << bits_per_pixel;
+        col &= (1UL << bits_per_pixel) - 1;
         size_t x2 = x0 / 2;
         x0 %= 2;
         uint8_t *yptr = &data.data()[y * bytes_per_line];
@@ -415,7 +415,7 @@ class format_4bit : public format {
     }
 
     static constexpr void span(std::array<uint8_t, image_size> &data, size_t xl0, size_t xr0, size_t y, uint32_t col) {
-        col %= 1UL << bits_per_pixel;
+        col &= (1UL << bits_per_pixel) - 1;
         size_t xl2 = xl0 / 2;
         xl0 %= 2;
         size_t xr2 = xr0 / 2;
@@ -470,12 +470,12 @@ class format_8bit : public format {
         // clang-format off
         0x000000, 0xffffff, 0xff0000, 0x00ff00, 0x0000ff, 0xffff00, 0x00ffff, 0xff00ff, 0x333333, 0x666666, 0x999999, 0xcccccc, 0x7f0000, 0x007f00, 0x00007f, 0x7f7f00,
         0x000000, 0x111111, 0x222222, 0x333333, 0x444444, 0x555555, 0x666666, 0x777777, 0x888888, 0x999999, 0xaaaaaa, 0xbbbbbb, 0xcccccc, 0xdddddd, 0xeeeeee, 0xffffff,
-        0x000000, 0x111111, 0x222222, 0x333333, 0x444444, 0x555555, 0x666666, 0x777777, 0x888888, 0x999999, 0xaaaaaa, 0xbbbbbb, 0xcccccc, 0xdddddd, 0xeeeeee, 0xffffff,
-        0x000000, 0x111111, 0x222222, 0x333333, 0x444444, 0x555555, 0x666666, 0x777777, 0x888888, 0x999999, 0xaaaaaa, 0xbbbbbb, 0xcccccc, 0xdddddd, 0xeeeeee, 0xffffff,
+        0x000000, 0x110000, 0x220000, 0x440000, 0x660000, 0x880000, 0xaa0000, 0xcc0000, 0xff0000, 0xff2222, 0xff4444, 0xff6666, 0xff8888, 0xffaaaa, 0xffcccc, 0xffffff,
+        0x000000, 0x001100, 0x002200, 0x004400, 0x006600, 0x008800, 0x00aa00, 0x00cc00, 0x00ff00, 0x22ff22, 0x44ff44, 0x66ff66, 0x88ff88, 0xaaffaa, 0xccffcc, 0xffffff,
 
-        0x000000, 0x111111, 0x222222, 0x333333, 0x444444, 0x555555, 0x666666, 0x777777, 0x888888, 0x999999, 0xaaaaaa, 0xbbbbbb, 0xcccccc, 0xdddddd, 0xeeeeee, 0xffffff,
-        0x000000, 0x111111, 0x222222, 0x333333, 0x444444, 0x555555, 0x666666, 0x777777, 0x888888, 0x999999, 0xaaaaaa, 0xbbbbbb, 0xcccccc, 0xdddddd, 0xeeeeee, 0xffffff,
-        0x000000, 0x111111, 0x222222, 0x333333, 0x444444, 0x555555, 0x666666, 0x777777, 0x888888, 0x999999, 0xaaaaaa, 0xbbbbbb, 0xcccccc, 0xdddddd, 0xeeeeee, 0xffffff,
+        0x000000, 0x000011, 0x000022, 0x000044, 0x000066, 0x000088, 0x0000aa, 0x0000cc, 0x0000ff, 0x2222ff, 0x4444ff, 0x6666ff, 0x8888ff, 0xaaaaff, 0xccccff, 0xffffff,
+        0x000000, 0x111100, 0x222200, 0x444400, 0x666600, 0x888800, 0xaaaa00, 0xcccc00, 0xffff00, 0xffff22, 0xffff44, 0xffff66, 0xffff88, 0xffffaa, 0xffffcc, 0xffffff,
+        0x000000, 0x110011, 0x220022, 0x440044, 0x660066, 0x880088, 0xaa00aa, 0xcc00cc, 0xff00ff, 0xff22ff, 0xff44ff, 0xff66ff, 0xff88ff, 0xffaaff, 0xffccff, 0xffffff,
         0x000000, 0x111111, 0x222222, 0x333333, 0x444444, 0x555555, 0x666666, 0x777777, 0x888888, 0x999999, 0xaaaaaa, 0xbbbbbb, 0xcccccc, 0xdddddd, 0xeeeeee, 0xffffff,
 
         0x000000, 0x111111, 0x222222, 0x333333, 0x444444, 0x555555, 0x666666, 0x777777, 0x888888, 0x999999, 0xaaaaaa, 0xbbbbbb, 0xcccccc, 0xdddddd, 0xeeeeee, 0xffffff,
@@ -629,8 +629,8 @@ class image {
     }
 
     constexpr void fillcircle(int32_t x, int32_t y, int32_t r, uint32_t col) {
-        span(x - r, 2 * r + 1, y, col);
-        fillarc(x, y, r, 3, 0, col);
+        span(x - abs(r), 2 * abs(r) + 1, y, col);
+        fillarc(x, y, abs(r), 3, 0, col);
     }
 
     template <typename F>
