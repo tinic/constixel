@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.15)
 
 set(CMAKE_CXX_STANDARD 23)
 
+if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 12)
+    message(FATAL_ERROR "Requires at least gcc 12")
+endif()
+
 project(constixel_tests)
 
 string(FIND ${CMAKE_CXX_COMPILER_ID} "Clang" IS_CLANG)

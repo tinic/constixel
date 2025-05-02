@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-#include "../../fontbm/src/external/lodepng/lodepng.h"
+#include "../fontbm/src/external/lodepng/lodepng.h"
 #include "../constixel.h"
 
 static size_t bytesCount = 0;
