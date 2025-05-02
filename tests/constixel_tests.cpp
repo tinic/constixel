@@ -294,7 +294,7 @@ int main() {
     uint32_t h = 0;
     constexpr int32_t ow = 1024;
     constexpr int32_t oh = 1024;
-    if (lodepng::decode(rgbaimage, w, h, "../media/larikeet.png") == 0) {
+    if (lodepng::decode(rgbaimage, w, h, "../../media/larikeet.png") == 0) {
         draw_image_cut<constixel::image<constixel::format_1bit, ow, oh>>(rgbaimage, int32_t(w), int32_t(h));
         draw_image_cut<constixel::image<constixel::format_2bit, ow, oh>>(rgbaimage, int32_t(w), int32_t(h));
         draw_image_cut<constixel::image<constixel::format_4bit, ow, oh>>(rgbaimage, int32_t(w), int32_t(h));
