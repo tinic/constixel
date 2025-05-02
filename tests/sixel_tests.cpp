@@ -12,6 +12,7 @@
 
 static size_t bytesCount = 0;
 
+#if 1
 constexpr std::string test0() {
     std::string out{};
     sixel::image<sixel::format_1bit, 32, 31> image;
@@ -79,7 +80,7 @@ constexpr std::string test4() {
 
 constexpr std::string test5() {
     std::string out{};
-    sixel::image<sixel::format_4bit, 7, 128> image;
+    sixel::image<sixel::format_4bit, 7, 128, 8> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
         image.fillcircle(c, c, 256 - c * 16, c);
@@ -118,7 +119,7 @@ constexpr std::string test7() {
 
 constexpr std::string test8() {
     std::string out{};
-    sixel::image<sixel::format_4bit, 7, 7> image;
+    sixel::image<sixel::format_4bit, 7, 7, 8> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
         image.line(-8, -8, c * 8, 64, c, c);
@@ -178,6 +179,23 @@ void draw_image_linear(const std::vector<uint8_t> &rgbaimage, uint32_t w, uint32
     puts(out.c_str());
 }
 
+template <typename T>
+void draw_palette() {
+    static T image;
+    for (int32_t y = 0; y < 16; y++) {
+        for (int32_t x = 0; x < 16; x++) {
+            image.fillrect(x, y, 1, 1, y * 16 + x);
+        }
+    }
+    std::string out;
+    image.sixel([&out](uint8_t ch) mutable {
+        out.push_back(ch);
+        bytesCount++;
+    });
+    puts(out.c_str());
+}
+#endif  // #if 0
+
 int main() {
 #if 0
     static_assert(test0().size() == 316);
@@ -217,7 +235,6 @@ int main() {
 
 #if 0
     printf("\033[H\0337");
-
     static sixel::image<sixel::format_4bit, 1024, 256> image0;
     sixel::progressbar<sixel::format_4bit, 1024, 256> bar(image0);
     bar.start(16, 1);
@@ -230,7 +247,6 @@ int main() {
 
 #if 0
     printf("\033[H\0337");
-
     static sixel::image<sixel::format_8bit, 768, 768> image1;
     printf("RAM required: %d bytes\n", int32_t(image1.size()));
     image1.clear();
@@ -266,37 +282,27 @@ int main() {
     printf("Transfer bytes: %d bytes\n", int32_t(bytesCount));
 #endif  // #if 0
 
-#if 0
-    static sixel::image<sixel::format_8bit, 1024, 1024> image1;
-    for (int32_t y = 0; y < 16; y++) {
-        for (int32_t x = 0; x < 16; x++) {
-            image1.fillrect(x*64, y*64, 64, 64, y*16+x);
-        }
-    }
-    std::string out("\0338");
-    image1.sixel([&out](uint8_t ch) mutable {
-        out.push_back(ch);
-        bytesCount++;
-    });
-    puts(out.c_str());
+#if 1
+    draw_palette<sixel::image<sixel::format_1bit, 16, 16, 32>>();
+    draw_palette<sixel::image<sixel::format_2bit, 16, 16, 32>>();
+    draw_palette<sixel::image<sixel::format_4bit, 16, 16, 32>>();
+    draw_palette<sixel::image<sixel::format_8bit, 16, 16, 32>>();
 #endif  // #if 1
 
-#if 1
+#if 0
     static_assert(sixel::image<sixel::format_2bit, 1, 1>().octree_memory_length() == sixel::image<sixel::format_2bit, 1, 1>().octree_used_length());
     static_assert(sixel::image<sixel::format_4bit, 1, 1>().octree_memory_length() == sixel::image<sixel::format_4bit, 1, 1>().octree_used_length());
     static_assert(sixel::image<sixel::format_8bit, 1, 1>().octree_memory_length() == sixel::image<sixel::format_8bit, 1, 1>().octree_used_length());
 #endif  // #if 1
 
 #if 1
-
     std::vector<uint8_t> rgbaimage;
     uint32_t w = 0;
     uint32_t h = 0;
     constexpr size_t ow = 1024;
     constexpr size_t oh = 1024;
+    constexpr size_t sc = 1;
     if (lodepng::decode(rgbaimage, w, h, "../media/larikeet.png") == 0) {
-        std::string out("\0338");
-
         draw_image_cut<sixel::image<sixel::format_1bit, ow, oh>>(rgbaimage, w, h);
         draw_image_cut<sixel::image<sixel::format_2bit, ow, oh>>(rgbaimage, w, h);
         draw_image_cut<sixel::image<sixel::format_4bit, ow, oh>>(rgbaimage, w, h);

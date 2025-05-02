@@ -169,16 +169,16 @@ class format {
         charOut('q');
     }
 
-    template <size_t W, size_t H, typename F>
+    template <size_t W, size_t H, size_t S, typename F>
     static constexpr void sixel_raster_attributes(F &&charOut) {
         charOut('\"');
         sixel_number(charOut, 2);
         charOut(';');
         sixel_number(charOut, 2);
         charOut(';');
-        sixel_number(charOut, W);
+        sixel_number(charOut, W * S);
         charOut(';');
-        sixel_number(charOut, H);
+        sixel_number(charOut, H * S);
     }
 
     template <typename F>
@@ -225,20 +225,20 @@ class format {
         charOut('\\');
     }
 
-    template <size_t W, size_t H, typename P, typename F, typename C>
+    template <size_t W, size_t H, int32_t S, typename P, typename F, typename C>
     static constexpr void sixel_image(const uint8_t *data, const P &palette, F &&charOut, const rect<int32_t> &_r, bool preserveBackground, const C &collect6) {
         sixel_header(charOut);
         if (!preserveBackground) {
-            sixel_raster_attributes<W, H>(charOut);
+            sixel_raster_attributes<W, H, S>(charOut);
         }
         for (size_t c = 0; c < palette.size(); c++) {
             sixel_color(charOut, c, palette.data()[c]);
         }
-        const auto r = _r & rect<int32_t>{0, 0, W, H};
-        for (size_t y = r.y; y < r.y + r.h; y += 6) {
+        const auto r = rect<int32_t>{_r.x * S, _r.y * S, _r.w * S, _r.h * S} & rect<int32_t>{0, 0, W * S, H * S};
+        for (size_t y = r.y; y < (r.y + r.h); y += 6) {
             for (size_t c = 0; c < palette.size(); c++) {
                 uint8_t test6 = 0;
-                for (size_t x = r.x; x < r.x + r.w; x++) {
+                for (size_t x = r.x; x < (r.x + r.w); x++) {
                     test6 |= collect6(data, x, c, y);
                 }
                 if (!test6) {
@@ -249,10 +249,10 @@ class format {
                 }
                 charOut('#');
                 sixel_number(charOut, static_cast<uint16_t>(c));
-                for (size_t x = r.x; x < r.x + r.w; x++) {
+                for (size_t x = r.x; x < (r.x + r.w); x++) {
                     uint8_t bits6 = collect6(data, x, c, y);
                     uint16_t repeatCount = 0;
-                    for (size_t xr = x + 1; xr < std::min(x + 255, W); xr++) {
+                    for (size_t xr = (x + 1); xr < (std::min(x + 255, W * S)); xr++) {
                         if (bits6 == collect6(data, xr, c, y)) {
                             repeatCount++;
                             continue;
@@ -273,7 +273,7 @@ class format {
     }
 };
 
-template <size_t W, size_t H>
+template <size_t W, size_t H, int32_t S>
 class format_1bit : public format {
    public:
     static constexpr size_t bits_per_pixel = 1;
@@ -379,17 +379,21 @@ class format_1bit : public format {
 
     template <typename F>
     static constexpr void sixel(std::array<uint8_t, image_size> &data, F &&charOut, const rect<int32_t> &r, bool preserveBackground) {
-        sixel_image<W, H>(data.data(), palette, charOut, r, preserveBackground, [](const uint8_t *dataRaw, size_t x, size_t col, size_t y) {
-            const uint8_t *ptr = &dataRaw[y * bytes_per_line + x / 8];
-            size_t x8 = x % 8;
+        sixel_image<W, H, S>(data.data(), palette, charOut, r, preserveBackground, [](const uint8_t *dataRaw, size_t x, size_t col, size_t y) {
+            const uint8_t *ptr = &dataRaw[(y / S) * bytes_per_line + (x / S) / 8];
+            size_t x8 = (x / S) % 8;
             uint8_t out = 0;
+            int32_t inc = y % S;
             for (size_t y6 = 0; y6 < 6; y6++) {
                 out >>= 1;
-                if ((y + y6) < H) {
+                if ((y + y6) < H * S) {
                     out |= ((((*ptr) >> (7 - x8)) & 1) == col) ? (1UL << 5) : 0;
                 }
                 if (y6 != 5) {
-                    ptr += bytes_per_line;
+                    if (++inc >= S) {
+                        inc = 0;
+                        ptr += bytes_per_line;
+                    }
                 }
             }
             return out;
@@ -397,15 +401,15 @@ class format_1bit : public format {
     }
 };
 
-template <size_t W, size_t H>
+template <size_t W, size_t H, int32_t S>
 class format_2bit : public format {
    public:
-    static constexpr size_t octree_size = 25;
+    static constexpr size_t octree_size = 25;  // strongly depends on palette below.
     static constexpr size_t bits_per_pixel = 2;
     static constexpr size_t bytes_per_line = (W * bits_per_pixel + 7) / 8;
     static constexpr size_t internal_height = ((H + 5) / 6) * 6;
     static constexpr size_t image_size = internal_height * bytes_per_line;
-    static constexpr std::array<uint32_t, (1UL << bits_per_pixel)> palette = {0x000000, 0xffffff, 0xff0000, 0x00ff00};
+    static constexpr std::array<uint32_t, (1UL << bits_per_pixel)> palette = {0x000000, 0xffffff, 0xff0000, 0x0077ff};
 
     static consteval const colortools::octree<1UL << bits_per_pixel, octree_size> gen_octree() {
         return colortools::octree<1UL << bits_per_pixel, octree_size>(palette);
@@ -507,17 +511,21 @@ class format_2bit : public format {
 
     template <typename F>
     static constexpr void sixel(std::array<uint8_t, image_size> &data, F &&charOut, const rect<int32_t> &r, bool preserveBackground) {
-        sixel_image<W, H>(data.data(), palette, charOut, r, preserveBackground, [](const uint8_t *dataRaw, size_t x, size_t col, size_t y) {
-            const uint8_t *ptr = &dataRaw[y * bytes_per_line + x / 4];
-            size_t x4 = x % 4;
+        sixel_image<W, H, S>(data.data(), palette, charOut, r, preserveBackground, [](const uint8_t *dataRaw, size_t x, size_t col, size_t y) {
+            const uint8_t *ptr = &dataRaw[(y / S) * bytes_per_line + (x / S) / 4];
+            size_t x4 = (x / S) % 4;
             uint8_t out = 0;
+            int32_t inc = y % S;
             for (size_t y6 = 0; y6 < 6; y6++) {
                 out >>= 1;
-                if ((y + y6) < H) {
+                if ((y + y6) < H * S) {
                     out |= ((((*ptr) >> (6 - x4 * 2)) & 3) == col) ? (1UL << 5) : 0;
                 }
                 if (y6 != 5) {
-                    ptr += bytes_per_line;
+                    if (++inc >= S) {
+                        inc = 0;
+                        ptr += bytes_per_line;
+                    }
                 }
             }
             return out;
@@ -525,10 +533,10 @@ class format_2bit : public format {
     }
 };
 
-template <size_t W, size_t H>
+template <size_t W, size_t H, int32_t S>
 class format_4bit : public format {
    public:
-    static constexpr size_t octree_size = 70;
+    static constexpr size_t octree_size = 70;  // strongly depends on palette below.
     static constexpr size_t bits_per_pixel = 4;
     static constexpr size_t bytes_per_line = (W * bits_per_pixel + 7) / 8;
     static constexpr size_t internal_height = ((H + 5) / 6) * 6;
@@ -636,17 +644,21 @@ class format_4bit : public format {
 
     template <typename F>
     static constexpr void sixel(std::array<uint8_t, image_size> &data, F &&charOut, const rect<int32_t> &r, bool preserveBackground) {
-        sixel_image<W, H>(data.data(), palette, charOut, r, preserveBackground, [](const uint8_t *dataRaw, size_t x, size_t col, size_t y) {
-            const uint8_t *ptr = &dataRaw[y * bytes_per_line + x / 2];
-            size_t x2 = x % 2;
+        sixel_image<W, H, S>(data.data(), palette, charOut, r, preserveBackground, [](const uint8_t *dataRaw, size_t x, size_t col, size_t y) {
+            const uint8_t *ptr = &dataRaw[(y / S) * bytes_per_line + (x / S) / 2];
+            size_t x2 = (x / S) % 2;
             uint8_t out = 0;
+            int32_t inc = y % S;
             for (size_t y6 = 0; y6 < 6; y6++) {
                 out >>= 1;
-                if ((y + y6) < H) {
+                if ((y + y6) < H * S) {
                     out |= ((((*ptr) >> (4 - x2 * 4)) & 0xF) == col) ? (1UL << 5) : 0;
                 }
                 if (y6 != 5) {
-                    ptr += bytes_per_line;
+                    if (++inc >= S) {
+                        inc = 0;
+                        ptr += bytes_per_line;
+                    }
                 }
             }
             return out;
@@ -654,10 +666,10 @@ class format_4bit : public format {
     }
 };
 
-template <size_t W, size_t H>
+template <size_t W, size_t H, int32_t S>
 class format_8bit : public format {
    public:
-    static constexpr size_t octree_size = 1061;
+    static constexpr size_t octree_size = 1061;  // strongly depends on palette below.
     static constexpr size_t bits_per_pixel = 8;
     static constexpr size_t bytes_per_line = W;
     static constexpr size_t internal_height = ((H + 5) / 6) * 6;
@@ -788,16 +800,20 @@ class format_8bit : public format {
 
     template <typename F>
     static constexpr void sixel(std::array<uint8_t, image_size> &data, F &&charOut, const rect<int32_t> &r, bool preserveBackground) {
-        sixel_image<W, H>(data.data(), palette, charOut, r, preserveBackground, [](const uint8_t *dataRaw, size_t x, size_t col, size_t y) {
-            const uint8_t *ptr = &dataRaw[y * bytes_per_line + x];
+        sixel_image<W, H, S>(data.data(), palette, charOut, r, preserveBackground, [](const uint8_t *dataRaw, size_t x, size_t col, size_t y) {
+            const uint8_t *ptr = &dataRaw[(y / S) * bytes_per_line + (x / S)];
             uint8_t out = 0;
+            int32_t inc = y % S;
             for (size_t y6 = 0; y6 < 6; y6++) {
                 out >>= 1;
-                if ((y + y6) < H) {
+                if ((y + y6) < H * S) {
                     out |= (*ptr == col) ? (1UL << 5) : 0;
                 }
                 if (y6 != 5) {
-                    ptr += bytes_per_line;
+                    if (++inc >= S) {
+                        inc = 0;
+                        ptr += bytes_per_line;
+                    }
                 }
             }
             return out;
@@ -805,7 +821,7 @@ class format_8bit : public format {
     }
 };
 
-template <template <size_t, size_t> class T, size_t W, size_t H>
+template <template <size_t, size_t, size_t> class T, size_t W, size_t H, int32_t S = 1>
 class image {
     static_assert(sizeof(W) >= sizeof(uint32_t));
     static_assert(sizeof(H) >= sizeof(uint32_t));
@@ -813,8 +829,8 @@ class image {
     static_assert(W <= 16384 && H <= 16384);
 
    public:
-    [[nodiscard]] constexpr size_t size() const {
-        return T<W, H>::image_size;
+    [[nodiscard]] constexpr int32_t Size() const {
+        return T<W, H, S>::image_size;
     }
 
     [[nodiscard]] constexpr size_t width() const {
@@ -833,15 +849,15 @@ class image {
         return v < 0 ? -v : v;
     }
 
-    [[nodiscard]] constexpr std::array<uint8_t, T<W, H>::image_size> &dataRef() const {
+    [[nodiscard]] constexpr std::array<uint8_t, T<W, H, S>::image_size> &dataRef() const {
         return data;
     }
 
-    [[nodiscard]] constexpr std::array<uint8_t, T<W, H>::image_size> clone() const {
+    [[nodiscard]] constexpr std::array<uint8_t, T<W, H, S>::image_size> clone() const {
         return data;
     }
 
-    constexpr void copy(const std::array<uint8_t, T<W, H>::image_size> &src) {
+    constexpr void copy(const std::array<uint8_t, T<W, H, S>::image_size> &src) {
         data = src;
     }
 
@@ -923,31 +939,31 @@ class image {
         rect<int32_t> blitrect{x, y, w, h};
         blitrect &= {0, 0, W, H};
         blitrect &= {x, y, iw, ih};
-        T<W, H>::blitRGBA(data, blitrect, ptr, iw, ih, stride);
+        T<W, H, S>::blitRGBA(data, blitrect, ptr, iw, ih, stride);
     }
 
     constexpr void blitRGBADiffused(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
         rect<int32_t> blitrect{x, y, w, h};
         blitrect &= {0, 0, W, H};
         blitrect &= {x, y, iw, ih};
-        T<W, H>::blitRGBADiffused(data, blitrect, ptr, iw, ih, stride);
+        T<W, H, S>::blitRGBADiffused(data, blitrect, ptr, iw, ih, stride);
     }
 
     constexpr void blitRGBADiffusedLinear(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
         rect<int32_t> blitrect{x, y, w, h};
         blitrect &= {0, 0, W, H};
         blitrect &= {x, y, iw, ih};
-        T<W, H>::blitRGBADiffusedLinear(data, blitrect, ptr, iw, ih, stride);
+        T<W, H, S>::blitRGBADiffusedLinear(data, blitrect, ptr, iw, ih, stride);
     }
 
     template <typename F>
     constexpr void sixel(F &&charOut, bool preserveBackground = false) {
-        T<W, H>::sixel(data, charOut, {0, 0, W, H}, preserveBackground);
+        T<W, H, S>::sixel(data, charOut, {0, 0, W, H}, preserveBackground);
     }
 
     template <typename F>
     constexpr void sixel(F &&charOut, const rect<int32_t> &r, bool preserveBackground = true) {
-        T<W, H>::sixel(data, charOut, r, preserveBackground);
+        T<W, H, S>::sixel(data, charOut, r, preserveBackground);
     }
 
     constexpr size_t octree_used_length() const {
@@ -963,7 +979,7 @@ class image {
         _x %= W;
         size_t _y = static_cast<size_t>(y);
         _y %= H;
-        T<W, H>::plot(data, _x, _y, col);
+        T<W, H, S>::plot(data, _x, _y, col);
     }
 
     constexpr void span(int32_t x, int32_t w, int32_t y, uint32_t col) {
@@ -980,10 +996,10 @@ class image {
         size_t _y = static_cast<size_t>(y);
         _y %= H;
         if (_xl + w < W) {
-            T<W, H>::span(data, _xl, _xr, _y, col);
+            T<W, H, S>::span(data, _xl, _xr, _y, col);
         } else {
-            T<W, H>::span(data, _xl, W - 1, _y, col);
-            T<W, H>::span(data, 0, _xr, _y, col);
+            T<W, H, S>::span(data, _xl, W - 1, _y, col);
+            T<W, H, S>::span(data, 0, _xr, _y, col);
         }
     }
 
@@ -1021,8 +1037,8 @@ class image {
         }
     }
 
-    std::array<uint8_t, T<W, H>::image_size> data{};
-    T<W, H> format;
+    std::array<uint8_t, T<W, H, S>::image_size> data{};
+    T<W, H, S> format;
 };
 
 }  // namespace sixel
