@@ -1,5 +1,3 @@
-#include "sixel.h"
-
 #include <unistd.h>
 
 #include <chrono>
@@ -10,6 +8,7 @@
 
 #include "../fontbm/src/external/lodepng/lodepng.h"
 #include "./sixel_tools.h"
+#include "sixel.h"
 
 static size_t bytesCount = 0;
 
@@ -143,6 +142,42 @@ constexpr std::string test9() {
     return out;
 }
 
+template <typename T>
+void draw_image_cut(const std::vector<uint8_t> &rgbaimage, uint32_t w, uint32_t h) {
+    static T image;
+    std::string out{};
+    image.blitRGBA(0, 0, w, h, rgbaimage.data(), w, h, w * 4);
+    image.sixel([&out](uint8_t ch) mutable {
+        out.push_back(ch);
+        bytesCount++;
+    });
+    puts(out.c_str());
+}
+
+template <typename T>
+void draw_image_diffused(const std::vector<uint8_t> &rgbaimage, uint32_t w, uint32_t h) {
+    static T image;
+    std::string out{};
+    image.blitRGBADiffused(0, 0, w, h, rgbaimage.data(), w, h, w * 4);
+    image.sixel([&out](uint8_t ch) mutable {
+        out.push_back(ch);
+        bytesCount++;
+    });
+    puts(out.c_str());
+}
+
+template <typename T>
+void draw_image_linear(const std::vector<uint8_t> &rgbaimage, uint32_t w, uint32_t h) {
+    static T image;
+    std::string out{};
+    image.blitRGBADiffusedLinear(0, 0, w, h, rgbaimage.data(), w, h, w * 4);
+    image.sixel([&out](uint8_t ch) mutable {
+        out.push_back(ch);
+        bytesCount++;
+    });
+    puts(out.c_str());
+}
+
 int main() {
 #if 0
     static_assert(test0().size() == 316);
@@ -244,25 +279,38 @@ int main() {
         bytesCount++;
     });
     puts(out.c_str());
-#endif  // #if 1 
+#endif  // #if 1
 
 #if 1
+    static_assert(sixel::image<sixel::format_2bit, 1, 1>().octree_memory_length() == sixel::image<sixel::format_2bit, 1, 1>().octree_used_length());
+    static_assert(sixel::image<sixel::format_4bit, 1, 1>().octree_memory_length() == sixel::image<sixel::format_4bit, 1, 1>().octree_used_length());
+    static_assert(sixel::image<sixel::format_8bit, 1, 1>().octree_memory_length() == sixel::image<sixel::format_8bit, 1, 1>().octree_used_length());
+#endif  // #if 1
+
+#if 1
+
     std::vector<uint8_t> rgbaimage;
     uint32_t w = 0;
     uint32_t h = 0;
+    constexpr size_t ow = 1024;
+    constexpr size_t oh = 1024;
     if (lodepng::decode(rgbaimage, w, h, "../media/larikeet.png") == 0) {
-        static sixel::image<sixel::format_8bit, 1024, 1024> image1;
-
-        image1.blitRGBA(0,0,1024,1024,rgbaimage.data(),w,h,w*4);
-    
         std::string out("\0338");
-        image1.sixel([&out](uint8_t ch) mutable {
-            out.push_back(ch);
-            bytesCount++;
-        });
-        puts(out.c_str());
+
+        draw_image_cut<sixel::image<sixel::format_1bit, ow, oh>>(rgbaimage, w, h);
+        draw_image_cut<sixel::image<sixel::format_2bit, ow, oh>>(rgbaimage, w, h);
+        draw_image_cut<sixel::image<sixel::format_4bit, ow, oh>>(rgbaimage, w, h);
+        draw_image_cut<sixel::image<sixel::format_8bit, ow, oh>>(rgbaimage, w, h);
+
+        draw_image_diffused<sixel::image<sixel::format_1bit, ow, oh>>(rgbaimage, w, h);
+        draw_image_diffused<sixel::image<sixel::format_2bit, ow, oh>>(rgbaimage, w, h);
+        draw_image_diffused<sixel::image<sixel::format_4bit, ow, oh>>(rgbaimage, w, h);
+        draw_image_diffused<sixel::image<sixel::format_8bit, ow, oh>>(rgbaimage, w, h);
+
+        draw_image_linear<sixel::image<sixel::format_1bit, ow, oh>>(rgbaimage, w, h);
+        draw_image_linear<sixel::image<sixel::format_2bit, ow, oh>>(rgbaimage, w, h);
+        draw_image_linear<sixel::image<sixel::format_4bit, ow, oh>>(rgbaimage, w, h);
+        draw_image_linear<sixel::image<sixel::format_8bit, ow, oh>>(rgbaimage, w, h);
     }
-
-#endif  // #if 1 
-
+#endif  // #if 1
 }
