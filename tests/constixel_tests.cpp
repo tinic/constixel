@@ -1,5 +1,3 @@
-#include <unistd.h>
-
 #include <chrono>
 #include <cstdio>
 #include <iostream>
@@ -250,7 +248,6 @@ int main() {
     draw_functions<constixel::image<constixel::format_4bit, 768, 768>>();
     draw_functions<constixel::image<constixel::format_8bit, 768, 768>>();
     puts("\n");
-    usleep(1000000);
 #endif  // #if 0
 
 #if 1
@@ -275,7 +272,6 @@ int main() {
     puts("\n");
     puts(test9().c_str());
     puts("\n");
-    usleep(1000000);
 #endif  // #if 1
 
 #if 1
@@ -285,7 +281,6 @@ int main() {
     draw_palette<constixel::image<constixel::format_4bit, 16, 16, 32>>();
     draw_palette<constixel::image<constixel::format_8bit, 16, 16, 32>>();
     puts("\n");
-    usleep(1000000);
 #endif  // #if 1
 
 #if 1
@@ -294,7 +289,7 @@ int main() {
     uint32_t h = 0;
     constexpr int32_t ow = 1024;
     constexpr int32_t oh = 1024;
-    if (lodepng::decode(rgbaimage, w, h, "../../media/larikeet.png") == 0) {
+    if (lodepng::decode(rgbaimage, w, h, "../media/larikeet.png") == 0) {
         draw_image_cut<constixel::image<constixel::format_1bit, ow, oh>>(rgbaimage, int32_t(w), int32_t(h));
         draw_image_cut<constixel::image<constixel::format_2bit, ow, oh>>(rgbaimage, int32_t(w), int32_t(h));
         draw_image_cut<constixel::image<constixel::format_4bit, ow, oh>>(rgbaimage, int32_t(w), int32_t(h));
