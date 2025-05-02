@@ -199,15 +199,15 @@ void draw_palette() {
 int main() {
 #if 0
     static_assert(test0().size() == 316);
-    static_assert(test1().size() == 1220);
+    static_assert(test1().size() == 1221);
     static_assert(test2().size() == 2090);
     static_assert(test3().size() == 1646);
-    static_assert(test4().size() == 1638);
-    static_assert(test5().size() == 1025);
+    static_assert(test4().size() == 1639);
+    static_assert(test5().size() == 5828);
     static_assert(test6().size() == 1428);
-    static_assert(test7().size() == 2629);
-    static_assert(test8().size() == 279);
-    static_assert(test9().size() == 5960);
+    static_assert(test7().size() == 2630);
+    static_assert(test8().size() == 471);
+    static_assert(test9().size() == 5916);
 #endif  // #if 0
 
 #if 0
@@ -282,7 +282,7 @@ int main() {
     printf("Transfer bytes: %d bytes\n", int32_t(bytesCount));
 #endif  // #if 0
 
-#if 1
+#if 0
     draw_palette<sixel::image<sixel::format_1bit, 16, 16, 32>>();
     draw_palette<sixel::image<sixel::format_2bit, 16, 16, 32>>();
     draw_palette<sixel::image<sixel::format_4bit, 16, 16, 32>>();
