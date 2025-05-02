@@ -1159,12 +1159,13 @@ class format_8bit : public format {
     }
 };
 
-template <template <size_t, size_t, size_t> class T, size_t W, size_t H, int32_t S = 1>
+template <template <size_t, size_t, int32_t> class T, size_t W, size_t H, int32_t S = 1>
 class image {
     static_assert(sizeof(W) >= sizeof(uint32_t));
     static_assert(sizeof(H) >= sizeof(uint32_t));
 
     static_assert(W <= 16384 && H <= 16384);
+    static_assert(S >= 1 && S <= 256);
 
    public:
     [[nodiscard]] constexpr int32_t Size() const {
