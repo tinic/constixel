@@ -3,11 +3,11 @@
 
 #include <algorithm>
 #include <array>
+#include <bit>
 #include <cmath>
 #include <cstdint>
 #include <string>
 #include <vector>
-#include <bit>
 
 namespace constixel {
 
@@ -55,7 +55,7 @@ class octree_impl {
     size_t node_idx = 0;
     static constexpr size_t palette_size = S;
     static constexpr size_t node_size = N;
-    std::array<node, node_size> nodes {};
+    std::array<node, node_size> nodes{};
     const std::array<uint32_t, palette_size> &pal;
 
     static constexpr size_t child_index(uint8_t r, uint8_t g, uint8_t b, int32_t level) {
@@ -94,7 +94,7 @@ class octree_impl {
                 return static_cast<uint8_t>(nodes[n].palette);
         }
         // fallback: brute-force
-        int32_t best = 0, bestd = 1UL<<30;
+        int32_t best = 0, bestd = 1UL << 30;
         for (size_t i = 0; i < pal.size(); ++i) {
             int32_t dr = static_cast<int32_t>(r) - static_cast<int32_t>((pal[i] >> 16) & 0xFF);
             int32_t dg = static_cast<int32_t>(g) - static_cast<int32_t>((pal[i] >> 8) & 0xFF);
@@ -526,7 +526,7 @@ class format_1bit : public format {
         }
     }
 
-    static constexpr void blitRGBA(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
+    static constexpr void blitRGBA(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
         for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
             for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
                 uint32_t R = ptr[y * static_cast<size_t>(stride) + x * 4 + 0];
@@ -537,8 +537,7 @@ class format_1bit : public format {
         }
     }
 
-    static constexpr void blitRGBADiffused(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih,
-                                           int32_t stride) {
+    static constexpr void blitRGBADiffused(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
         int32_t err_r = 0;
         int32_t err_g = 0;
         int32_t err_b = 0;
@@ -559,8 +558,7 @@ class format_1bit : public format {
         }
     }
 
-    static constexpr void blitRGBADiffusedLinear(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih,
-                                                 int32_t stride) {
+    static constexpr void blitRGBADiffusedLinear(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
         float err_r = 0;
         float err_g = 0;
         float err_b = 0;
@@ -661,16 +659,17 @@ class format_2bit : public format {
         }
     }
 
-    static constexpr void blitRGBA(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
+    static constexpr void blitRGBA(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
         for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
             for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
-                plot(data, (x + static_cast<uint32_t>(r.x)), (y + static_cast<uint32_t>(r.y)), octree.nearest(ptr[y * static_cast<size_t>(stride) + x * 4 + 0], ptr[y * static_cast<size_t>(stride) + x * 4 + 1], ptr[y * static_cast<size_t>(stride) + x * 4 + 2]));
+                plot(data, (x + static_cast<uint32_t>(r.x)), (y + static_cast<uint32_t>(r.y)),
+                     octree.nearest(ptr[y * static_cast<size_t>(stride) + x * 4 + 0], ptr[y * static_cast<size_t>(stride) + x * 4 + 1],
+                                    ptr[y * static_cast<size_t>(stride) + x * 4 + 2]));
             }
         }
     }
 
-    static constexpr void blitRGBADiffused(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih,
-                                           int32_t stride) {
+    static constexpr void blitRGBADiffused(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
         int32_t err_r = 0;
         int32_t err_g = 0;
         int32_t err_b = 0;
@@ -691,8 +690,7 @@ class format_2bit : public format {
         }
     }
 
-    static constexpr void blitRGBADiffusedLinear(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih,
-                                                 int32_t stride) {
+    static constexpr void blitRGBADiffusedLinear(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
         float err_r = 0;
         float err_g = 0;
         float err_b = 0;
@@ -794,16 +792,17 @@ class format_4bit : public format {
         }
     }
 
-    static constexpr void blitRGBA(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
+    static constexpr void blitRGBA(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
         for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
             for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
-                plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), octree.nearest(ptr[y * static_cast<size_t>(stride) + x * 4 + 0], ptr[y * static_cast<size_t>(stride) + x * 4 + 1], ptr[y * static_cast<size_t>(stride) + x * 4 + 2]));
+                plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)),
+                     octree.nearest(ptr[y * static_cast<size_t>(stride) + x * 4 + 0], ptr[y * static_cast<size_t>(stride) + x * 4 + 1],
+                                    ptr[y * static_cast<size_t>(stride) + x * 4 + 2]));
             }
         }
     }
 
-    static constexpr void blitRGBADiffused(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih,
-                                           int32_t stride) {
+    static constexpr void blitRGBADiffused(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
         int32_t err_r = 0;
         int32_t err_g = 0;
         int32_t err_b = 0;
@@ -818,14 +817,13 @@ class format_4bit : public format {
                 uint8_t n = octree.nearest(static_cast<uint8_t>(R), static_cast<uint8_t>(G), static_cast<uint8_t>(B));
                 plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
                 err_r = R - static_cast<int32_t>((palette[n] >> 16) & 0xFF);
-                err_g = G - static_cast<int32_t>((palette[n] >>  8) & 0xFF);
-                err_b = B - static_cast<int32_t>((palette[n] >>  0) & 0xFF);
+                err_g = G - static_cast<int32_t>((palette[n] >> 8) & 0xFF);
+                err_b = B - static_cast<int32_t>((palette[n] >> 0) & 0xFF);
             }
         }
     }
 
-    static constexpr void blitRGBADiffusedLinear(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih,
-                                                 int32_t stride) {
+    static constexpr void blitRGBADiffusedLinear(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
         float err_r = 0;
         float err_g = 0;
         float err_b = 0;
@@ -949,17 +947,17 @@ class format_8bit : public format {
         }
     }
 
-    static constexpr void blitRGBA(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
+    static constexpr void blitRGBA(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
         for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
             for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
                 data.data()[(y + static_cast<size_t>(r.y)) * bytes_per_line + (x + static_cast<size_t>(r.x))] =
-                    octree.nearest(ptr[y * static_cast<size_t>(stride) + x * 4 + 0], ptr[y * static_cast<size_t>(stride) + x * 4 + 1], ptr[y * static_cast<size_t>(stride) + x * 4 + 2]);
+                    octree.nearest(ptr[y * static_cast<size_t>(stride) + x * 4 + 0], ptr[y * static_cast<size_t>(stride) + x * 4 + 1],
+                                   ptr[y * static_cast<size_t>(stride) + x * 4 + 2]);
             }
         }
     }
 
-    static constexpr void blitRGBADiffused(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih,
-                                           int32_t stride) {
+    static constexpr void blitRGBADiffused(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
         int32_t err_r = 0;
         int32_t err_g = 0;
         int32_t err_b = 0;
@@ -980,8 +978,7 @@ class format_8bit : public format {
         }
     }
 
-    static constexpr void blitRGBADiffusedLinear(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih,
-                                                 int32_t stride) {
+    static constexpr void blitRGBADiffusedLinear(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
         float err_r = 0;
         float err_g = 0;
         float err_b = 0;
@@ -1150,21 +1147,21 @@ class image {
         rect<int32_t> blitrect{x, y, w, h};
         blitrect &= {0, 0, W, H};
         blitrect &= {x, y, iw, ih};
-        T<W, H, S>::blitRGBA(data, blitrect, ptr, iw, ih, stride);
+        T<W, H, S>::blitRGBA(data, blitrect, ptr, stride);
     }
 
     constexpr void blitRGBADiffused(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
         rect<int32_t> blitrect{x, y, w, h};
         blitrect &= {0, 0, W, H};
         blitrect &= {x, y, iw, ih};
-        T<W, H, S>::blitRGBADiffused(data, blitrect, ptr, iw, ih, stride);
+        T<W, H, S>::blitRGBADiffused(data, blitrect, ptr, stride);
     }
 
     constexpr void blitRGBADiffusedLinear(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
         rect<int32_t> blitrect{x, y, w, h};
         blitrect &= {0, 0, W, H};
         blitrect &= {x, y, iw, ih};
-        T<W, H, S>::blitRGBADiffusedLinear(data, blitrect, ptr, iw, ih, stride);
+        T<W, H, S>::blitRGBADiffusedLinear(data, blitrect, ptr, stride);
     }
 
     template <typename F>
@@ -1252,9 +1249,12 @@ class image {
     T<W, H, S> format{};
 };
 
-static_assert(constixel::image<constixel::format_2bit, 1, 1>().octree_memory_length() == constixel::image<constixel::format_2bit, 1, 1>().octree_used_length(), "Octree memory size does not match 2bit palette contents.");
-static_assert(constixel::image<constixel::format_4bit, 1, 1>().octree_memory_length() == constixel::image<constixel::format_4bit, 1, 1>().octree_used_length(), "Octree memory size does not match 4bit palette contents.");
-static_assert(constixel::image<constixel::format_8bit, 1, 1>().octree_memory_length() == constixel::image<constixel::format_8bit, 1, 1>().octree_used_length(), "Octree memory size does not match 8bit palette contents.");
+static_assert(constixel::image<constixel::format_2bit, 1, 1>().octree_memory_length() == constixel::image<constixel::format_2bit, 1, 1>().octree_used_length(),
+              "Octree memory size does not match 2bit palette contents.");
+static_assert(constixel::image<constixel::format_4bit, 1, 1>().octree_memory_length() == constixel::image<constixel::format_4bit, 1, 1>().octree_used_length(),
+              "Octree memory size does not match 4bit palette contents.");
+static_assert(constixel::image<constixel::format_8bit, 1, 1>().octree_memory_length() == constixel::image<constixel::format_8bit, 1, 1>().octree_used_length(),
+              "Octree memory size does not match 8bit palette contents.");
 
 }  // namespace constixel
 #endif  // #ifndef _SIXEL_H_
