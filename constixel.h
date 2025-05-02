@@ -11,6 +11,8 @@
 
 namespace constixel {
 
+#define GCC_BROKEN_BITCAST
+
 static constexpr float fast_rcp(const float x) {  // 23.8bits of accuracy
 #ifdef GCC_BROKEN_BITCAST
     return 1.0f / x;
@@ -82,7 +84,7 @@ static constexpr float fast_sqrtf(const float x) {  // 23.62bits of accuracy
 #else   // #if (__FPU_PRESENT == 1) && (__FPU_USED == 1)
     // https://www.mdpi.com/2079-3197/9/2/21
     int32_t i = std::bit_cast<int>(x);
-    int k = i & 0x00800000;
+    int32_t k = i & 0x00800000;
     float y;
     if (k != 0) {
         i = 0x5ed9d098 - (i >> 1);
@@ -107,7 +109,7 @@ static constexpr float fast_rsqrtf(const float x) {  // 23.40bits of accuracy
 #else   // #ifdef GCC_BROKEN_BITCAST
     // https://www.mdpi.com/2079-3197/9/2/21
     int32_t i = std::bit_cast<int>(x);
-    int k = i & 0x00800000;
+    int32_t k = i & 0x00800000;
     float y;
     if (k != 0) {
         i = 0x5ed9dbc6 - (i >> 1);
@@ -188,19 +190,19 @@ class octree_impl {
     std::array<node, node_size> nodes;
     const std::array<uint32_t, palette_size> &pal;
 
-    static constexpr int child_index(uint8_t r, uint8_t g, uint8_t b, int level) {
-        return ((r >> level) & 1) << 2 | ((g >> level) & 1) << 1 | ((b >> level) & 1);
+    static constexpr size_t child_index(uint8_t r, uint8_t g, uint8_t b, int32_t level) {
+        return static_cast<size_t>(((r >> level) & 1) << 2 | ((g >> level) & 1) << 1 | ((b >> level) & 1));
     }
 
     constexpr void insert(uint32_t c, size_t idx) {
-        uint32_t n = 0;
+        size_t n = 0;
         for (int32_t lvl = 7; lvl >= 0; --lvl) {
-            int32_t ci = child_index((c >> 16) & 0xFF, (c >> 8) & 0xFF, (c >> 0) & 0xFF, lvl);
+            size_t ci = child_index((c >> 16) & 0xFF, (c >> 8) & 0xFF, (c >> 0) & 0xFF, lvl);
             if (nodes[n].child[ci] == -1) {
                 nodes[n].child[ci] = static_cast<int16_t>(node_idx);
                 node_idx++;
             }
-            n = nodes[n].child[ci];
+            n = static_cast<size_t>(nodes[n].child[ci]);
         }
         nodes[n].palette = static_cast<int16_t>(idx);
     }
@@ -213,10 +215,10 @@ class octree_impl {
     }
 
     constexpr uint8_t nearest(uint8_t r, uint8_t g, uint8_t b) const {
-        int n = 0;
-        for (int lvl = 7; lvl >= 0; --lvl) {
-            int ci = child_index(r, g, b, lvl);
-            int next = nodes[n].child[ci];
+        size_t n = 0;
+        for (int32_t lvl = 7; lvl >= 0; --lvl) {
+            size_t ci = child_index(r, g, b, lvl);
+            size_t next = static_cast<size_t>(nodes[n].child[ci]);
             if (next == -1)
                 break;
             n = next;
@@ -224,15 +226,15 @@ class octree_impl {
                 return static_cast<uint8_t>(nodes[n].palette);
         }
         // fallback: brute-force
-        int best = 0, bestd = INT_MAX;
+        int32_t best = 0, bestd = 1UL<<30;
         for (size_t i = 0; i < pal.size(); ++i) {
-            int dr = int(r) - ((pal[i] >> 16) & 0xFF);
-            int dg = int(g) - ((pal[i] >> 8) & 0xFF);
-            int db = int(b) - ((pal[i] >> 0) & 0xFF);
-            int d = dr * dr + dg * dg + db * db;
+            int32_t dr = static_cast<int32_t>(r) - static_cast<int32_t>((pal[i] >> 16) & 0xFF);
+            int32_t dg = static_cast<int32_t>(g) - static_cast<int32_t>((pal[i] >> 8) & 0xFF);
+            int32_t db = static_cast<int32_t>(b) - static_cast<int32_t>((pal[i] >> 0) & 0xFF);
+            int32_t d = dr * dr + dg * dg + db * db;
             if (d < bestd) {
                 bestd = d;
-                best = int(i);
+                best = static_cast<int32_t>(i);
             }
         }
         return static_cast<uint8_t>(best);
@@ -246,40 +248,40 @@ class octree_impl {
     }
 };
 
-static consteval double cos(double x, int terms = 10) {
+static consteval double cos(double x, int32_t terms = 10) {
     x = x - 6.283185307179586 * int(x / 6.283185307179586);  // wrap x to [0, 2π)
     double res = 1.0, term = 1.0;
     double x2 = x * x;
-    for (int i = 1; i < terms; ++i) {
+    for (int32_t i = 1; i < terms; ++i) {
         term *= -x2 / ((2 * i - 1) * (2 * i));
         res += term;
     }
     return res;
 }
 
-static consteval double sin(double x, int terms = 10) {
+static consteval double sin(double x, int32_t terms = 10) {
     x = x - 6.283185307179586 * int(x / 6.283185307179586);  // wrap x to [0, 2π)
     double res = x, term = x;
     double x2 = x * x;
-    for (int i = 1; i < terms; ++i) {
+    for (int32_t i = 1; i < terms; ++i) {
         term *= -x2 / ((2 * i) * (2 * i + 1));
         res += term;
     }
     return res;
 }
 
-static consteval double pow(double base, double exp, int terms = 10) {
+static consteval double pow(double base, double exp, int32_t terms = 10) {
     if (base <= 0.0)
         return (base == 0.0) ? 0.0 : 0.0 / 0.0;  // NaN for negative base
     double ln = 0.0, y = (base - 1) / (base + 1);
     double y2 = y * y, num = y;
-    for (int i = 1; i <= terms; ++i) {
+    for (int32_t i = 1; i <= terms; ++i) {
         ln += num / (2 * i - 1);
         num *= y2;
     }
     ln *= 2;
     double res = 1.0, term = 1.0, x = exp * ln;
-    for (int i = 1; i < terms; ++i) {
+    for (int32_t i = 1; i < terms; ++i) {
         term *= x / i;
         res += term;
     }
@@ -522,30 +524,30 @@ class format {
     template <typename F>
     static constexpr void sixel_number(F &&charOut, uint16_t u) {
         if (u < 10) {
-            charOut(static_cast<uint8_t>('0' + u));
+            charOut(static_cast<char>('0' + u));
         } else if (u < 100) {
-            charOut(static_cast<uint8_t>('0' + (((u / 10) % 10))));
-            charOut(static_cast<uint8_t>('0' + (u % 10)));
+            charOut(static_cast<char>('0' + (((u / 10) % 10))));
+            charOut(static_cast<char>('0' + (u % 10)));
         } else if (u < 1000) {
-            charOut(static_cast<uint8_t>('0' + ((u / 100) % 10)));
-            charOut(static_cast<uint8_t>('0' + ((u / 10) % 10)));
-            charOut(static_cast<uint8_t>('0' + (u % 10)));
+            charOut(static_cast<char>('0' + ((u / 100) % 10)));
+            charOut(static_cast<char>('0' + ((u / 10) % 10)));
+            charOut(static_cast<char>('0' + (u % 10)));
         } else if (u < 10000) {
-            charOut(static_cast<uint8_t>('0' + ((u / 1000) % 10)));
-            charOut(static_cast<uint8_t>('0' + ((u / 100) % 10)));
-            charOut(static_cast<uint8_t>('0' + ((u / 10) % 10)));
-            charOut(static_cast<uint8_t>('0' + (u % 10)));
+            charOut(static_cast<char>('0' + ((u / 1000) % 10)));
+            charOut(static_cast<char>('0' + ((u / 100) % 10)));
+            charOut(static_cast<char>('0' + ((u / 10) % 10)));
+            charOut(static_cast<char>('0' + (u % 10)));
         } else {
-            charOut(static_cast<uint8_t>('0' + ((u / 10000) % 10)));
-            charOut(static_cast<uint8_t>('0' + ((u / 1000) % 10)));
-            charOut(static_cast<uint8_t>('0' + ((u / 100) % 10)));
-            charOut(static_cast<uint8_t>('0' + ((u / 10) % 10)));
-            charOut(static_cast<uint8_t>('0' + (u % 10)));
+            charOut(static_cast<char>('0' + ((u / 10000) % 10)));
+            charOut(static_cast<char>('0' + ((u / 1000) % 10)));
+            charOut(static_cast<char>('0' + ((u / 100) % 10)));
+            charOut(static_cast<char>('0' + ((u / 10) % 10)));
+            charOut(static_cast<char>('0' + (u % 10)));
         }
     }
 
     template <typename F>
-    static constexpr void sixel_color(F &&charOut, size_t index, uint32_t col) {
+    static constexpr void sixel_color(F &&charOut, uint16_t index, uint32_t col) {
         charOut('#');
         sixel_number(charOut, index);
         charOut(';');
@@ -570,13 +572,13 @@ class format {
             sixel_raster_attributes<W, H, S>(charOut);
         }
         for (size_t c = 0; c < palette.size(); c++) {
-            sixel_color(charOut, c, palette.data()[c]);
+            sixel_color(charOut, static_cast<uint16_t>(c), palette.data()[c]);
         }
         const auto r = rect<int32_t>{_r.x * S, _r.y * S, _r.w * S, _r.h * S} & rect<int32_t>{0, 0, W * S, H * S};
-        for (size_t y = r.y; y < (r.y + r.h); y += 6) {
+        for (size_t y = static_cast<size_t>(r.y); y < static_cast<size_t>(r.y + r.h); y += 6) {
             for (size_t c = 0; c < palette.size(); c++) {
                 uint8_t test6 = 0;
-                for (size_t x = r.x; x < (r.x + r.w); x++) {
+                for (size_t x = static_cast<size_t>(r.x); x < static_cast<size_t>(r.x + r.w); x++) {
                     test6 |= collect6(data, x, c, y);
                 }
                 if (!test6) {
@@ -587,7 +589,7 @@ class format {
                 }
                 charOut('#');
                 sixel_number(charOut, static_cast<uint16_t>(c));
-                for (size_t x = r.x; x < (r.x + r.w); x++) {
+                for (size_t x = static_cast<size_t>(r.x); x < static_cast<size_t>(r.x + r.w); x++) {
                     uint8_t bits6 = collect6(data, x, c, y);
                     uint16_t repeatCount = 0;
                     for (size_t xr = (x + 1); xr < (std::min(x + 255, W * S)); xr++) {
@@ -602,7 +604,7 @@ class format {
                         sixel_number(charOut, repeatCount + 1);
                         x += repeatCount;
                     }
-                    charOut('?' + bits6);
+                    charOut(static_cast<char>('?' + bits6));
                 }
             }
             charOut('-');
@@ -620,7 +622,7 @@ class format_1bit : public format {
     static constexpr size_t image_size = internal_height * bytes_per_line;
     static constexpr std::array<uint32_t, (1UL << bits_per_pixel)> palette = {0x00000000, 0x00ffffff};
 
-    static constexpr void plot(std::array<uint8_t, image_size> &data, size_t x0, size_t y, uint32_t col) {
+    static constexpr void plot(std::array<uint8_t, image_size> &data, size_t x0, size_t y, uint8_t col) {
         col &= (1UL << bits_per_pixel) - 1;
         size_t x8 = x0 / 8;
         x0 %= 8;
@@ -629,7 +631,7 @@ class format_1bit : public format {
         yptr[x8] |= static_cast<uint8_t>(col << (7 - x0));
     }
 
-    static constexpr void span(std::array<uint8_t, image_size> &data, size_t xl0, size_t xr0, size_t y, uint32_t col) {
+    static constexpr void span(std::array<uint8_t, image_size> &data, size_t xl0, size_t xr0, size_t y, uint8_t col) {
         col &= (1UL << bits_per_pixel) - 1;
         size_t xl8 = xl0 / 8;
         xl0 %= 8;
@@ -655,12 +657,12 @@ class format_1bit : public format {
     }
 
     static constexpr void blitRGBA(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
-        for (int32_t y = 0; y < r.h; y++) {
-            for (int32_t x = 0; x < r.w; x++) {
-                uint32_t R = ptr[y * stride + x * 4 + 0];
-                uint32_t G = ptr[y * stride + x * 4 + 1];
-                uint32_t B = ptr[y * stride + x * 4 + 2];
-                plot(data, (x + r.x), (y + r.y), (R * 2 + G * 3 + B * 1) > 768 ? 1 : 0);
+        for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
+            for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
+                uint32_t R = ptr[y * static_cast<size_t>(stride) + x * 4 + 0];
+                uint32_t G = ptr[y * static_cast<size_t>(stride) + x * 4 + 1];
+                uint32_t B = ptr[y * static_cast<size_t>(stride) + x * 4 + 2];
+                plot(data, x + static_cast<size_t>(r.x), y + static_cast<size_t>(r.y), (R * 2 + G * 3 + B * 1) > 768 ? 1 : 0);
             }
         }
     }
@@ -670,16 +672,16 @@ class format_1bit : public format {
         int32_t err_r = 0;
         int32_t err_g = 0;
         int32_t err_b = 0;
-        for (int32_t y = 0; y < r.h; y++) {
-            for (int32_t x = 0; x < r.w; x++) {
-                int32_t R = ptr[y * stride + x * 4 + 0];
-                int32_t G = ptr[y * stride + x * 4 + 1];
-                int32_t B = ptr[y * stride + x * 4 + 2];
+        for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
+            for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
+                int32_t R = ptr[y * static_cast<size_t>(stride) + x * 4 + 0];
+                int32_t G = ptr[y * static_cast<size_t>(stride) + x * 4 + 1];
+                int32_t B = ptr[y * static_cast<size_t>(stride) + x * 4 + 2];
                 R = std::clamp(R + err_r, 0, 255);
                 G = std::clamp(G + err_g, 0, 255);
                 B = std::clamp(B + err_b, 0, 255);
-                uint32_t n = (R * 2 + G * 3 + B * 1) > 768 ? 1 : 0;
-                plot(data, (x + r.x), (y + r.y), n);
+                uint8_t n = (R * 2 + G * 3 + B * 1) > 768 ? 1 : 0;
+                plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
                 err_r = R - (n ? 0xFF : 0x00);
                 err_g = G - (n ? 0xFF : 0x00);
                 err_b = B - (n ? 0xFF : 0x00);
@@ -692,11 +694,11 @@ class format_1bit : public format {
         float err_r = 0;
         float err_g = 0;
         float err_b = 0;
-        for (int32_t y = 0; y < r.h; y++) {
-            for (int32_t x = 0; x < r.w; x++) {
-                float R = static_cast<float>(ptr[y * stride + x * 4 + 0]) * (1.0f / 255.0f);
-                float G = static_cast<float>(ptr[y * stride + x * 4 + 1]) * (1.0f / 255.0f);
-                float B = static_cast<float>(ptr[y * stride + x * 4 + 2]) * (1.0f / 255.0f);
+        for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
+            for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
+                float R = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 0]) * (1.0f / 255.0f);
+                float G = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 1]) * (1.0f / 255.0f);
+                float B = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 2]) * (1.0f / 255.0f);
                 float Rl = constixel::srgb_to_linear(R);
                 float Gl = constixel::srgb_to_linear(G);
                 float Bl = constixel::srgb_to_linear(B);
@@ -706,8 +708,8 @@ class format_1bit : public format {
                 R = constixel::linear_to_srgb(Rl);
                 G = constixel::linear_to_srgb(Gl);
                 B = constixel::linear_to_srgb(Bl);
-                uint32_t n = (R * 2 * +G * 3 + B * 1) > 3 ? 1 : 0;
-                plot(data, (x + r.x), (y + r.y), n);
+                uint8_t n = (R * 2 * +G * 3 + B * 1) > 3 ? 1 : 0;
+                plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
                 err_r = Rl - constixel::srgb_to_linear(static_cast<float>(n ? 1.0f : 0.0f));
                 err_g = Gl - constixel::srgb_to_linear(static_cast<float>(n ? 1.0f : 0.0f));
                 err_b = Bl - constixel::srgb_to_linear(static_cast<float>(n ? 1.0f : 0.0f));
@@ -755,7 +757,7 @@ class format_2bit : public format {
 
     static constexpr const constixel::octree_impl<1UL << bits_per_pixel, octree_size> octree = gen_octree();
 
-    static constexpr void plot(std::array<uint8_t, image_size> &data, size_t x0, size_t y, uint32_t col) {
+    static constexpr void plot(std::array<uint8_t, image_size> &data, size_t x0, size_t y, uint8_t col) {
         col &= (1UL << bits_per_pixel) - 1;
         size_t x4 = x0 / 4;
         x0 %= 4;
@@ -764,7 +766,7 @@ class format_2bit : public format {
         yptr[x4] |= static_cast<uint8_t>(col << (6 - x0 * 2));
     }
 
-    static constexpr void span(std::array<uint8_t, image_size> &data, size_t xl0, size_t xr0, size_t y, uint32_t col) {
+    static constexpr void span(std::array<uint8_t, image_size> &data, size_t xl0, size_t xr0, size_t y, uint8_t col) {
         col &= (1UL << bits_per_pixel) - 1;
         size_t xl4 = xl0 / 4;
         xl0 %= 4;
@@ -790,9 +792,9 @@ class format_2bit : public format {
     }
 
     static constexpr void blitRGBA(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
-        for (int32_t y = 0; y < r.h; y++) {
-            for (int32_t x = 0; x < r.w; x++) {
-                plot(data, (x + r.x), (y + r.y), octree.nearest(ptr[y * stride + x * 4 + 0], ptr[y * stride + x * 4 + 1], ptr[y * stride + x * 4 + 2]));
+        for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
+            for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
+                plot(data, (x + static_cast<uint32_t>(r.x)), (y + static_cast<uint32_t>(r.y)), octree.nearest(ptr[y * static_cast<size_t>(stride) + x * 4 + 0], ptr[y * static_cast<size_t>(stride) + x * 4 + 1], ptr[y * static_cast<size_t>(stride) + x * 4 + 2]));
             }
         }
     }
@@ -802,19 +804,19 @@ class format_2bit : public format {
         int32_t err_r = 0;
         int32_t err_g = 0;
         int32_t err_b = 0;
-        for (int32_t y = 0; y < r.h; y++) {
-            for (int32_t x = 0; x < r.w; x++) {
-                int32_t R = ptr[y * stride + x * 4 + 0];
-                int32_t G = ptr[y * stride + x * 4 + 1];
-                int32_t B = ptr[y * stride + x * 4 + 2];
+        for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
+            for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
+                int32_t R = ptr[y * static_cast<size_t>(stride) + x * 4 + 0];
+                int32_t G = ptr[y * static_cast<size_t>(stride) + x * 4 + 1];
+                int32_t B = ptr[y * static_cast<size_t>(stride) + x * 4 + 2];
                 R = std::clamp(R + err_r, 0, 255);
                 G = std::clamp(G + err_g, 0, 255);
                 B = std::clamp(B + err_b, 0, 255);
-                uint32_t n = octree.nearest(R, G, B);
-                plot(data, (x + r.x), (y + r.y), n);
-                err_r = R - ((palette[n] >> 16) & 0xFF);
-                err_g = G - ((palette[n] >> 8) & 0xFF);
-                err_b = B - ((palette[n] >> 0) & 0xFF);
+                uint8_t n = octree.nearest(static_cast<uint8_t>(R), static_cast<uint8_t>(G), static_cast<uint8_t>(B));
+                plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
+                err_r = R - static_cast<int32_t>((palette[n] >> 16) & 0xFF);
+                err_g = G - static_cast<int32_t>((palette[n] >> 8) & 0xFF);
+                err_b = B - static_cast<int32_t>((palette[n] >> 0) & 0xFF);
             }
         }
     }
@@ -824,11 +826,11 @@ class format_2bit : public format {
         float err_r = 0;
         float err_g = 0;
         float err_b = 0;
-        for (int32_t y = 0; y < r.h; y++) {
-            for (int32_t x = 0; x < r.w; x++) {
-                float R = static_cast<float>(ptr[y * stride + x * 4 + 0]) * (1.0f / 255.0f);
-                float G = static_cast<float>(ptr[y * stride + x * 4 + 1]) * (1.0f / 255.0f);
-                float B = static_cast<float>(ptr[y * stride + x * 4 + 2]) * (1.0f / 255.0f);
+        for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
+            for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
+                float R = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 0]) * (1.0f / 255.0f);
+                float G = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 1]) * (1.0f / 255.0f);
+                float B = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 2]) * (1.0f / 255.0f);
                 float Rl = constixel::srgb_to_linear(R);
                 float Gl = constixel::srgb_to_linear(G);
                 float Bl = constixel::srgb_to_linear(B);
@@ -838,8 +840,8 @@ class format_2bit : public format {
                 R = constixel::linear_to_srgb(Rl);
                 G = constixel::linear_to_srgb(Gl);
                 B = constixel::linear_to_srgb(Bl);
-                uint32_t n = octree.nearest(static_cast<int32_t>(R * 255.0f), static_cast<int32_t>(G * 255.0f), static_cast<int32_t>(B * 255.0f));
-                plot(data, (x + r.x), (y + r.y), n);
+                uint8_t n = octree.nearest(static_cast<uint8_t>(R * 255.0f), static_cast<uint8_t>(G * 255.0f), static_cast<uint8_t>(B * 255.0f));
+                plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
                 err_r = Rl - constixel::srgb_to_linear(static_cast<float>((palette[n] >> 16) & 0xFF) * (1.0f / 255.0f));
                 err_g = Gl - constixel::srgb_to_linear(static_cast<float>((palette[n] >> 8) & 0xFF) * (1.0f / 255.0f));
                 err_b = Bl - constixel::srgb_to_linear(static_cast<float>((palette[n] >> 0) & 0xFF) * (1.0f / 255.0f));
@@ -888,7 +890,7 @@ class format_4bit : public format {
 
     static constexpr const constixel::octree_impl<1UL << bits_per_pixel, octree_size> octree = gen_octree();
 
-    static constexpr void plot(std::array<uint8_t, image_size> &data, size_t x0, size_t y, uint32_t col) {
+    static constexpr void plot(std::array<uint8_t, image_size> &data, size_t x0, size_t y, uint8_t col) {
         col &= (1UL << bits_per_pixel) - 1;
         size_t x2 = x0 / 2;
         x0 %= 2;
@@ -897,7 +899,7 @@ class format_4bit : public format {
         yptr[x2] |= static_cast<uint8_t>(col << (4 - x0 * 4));
     }
 
-    static constexpr void span(std::array<uint8_t, image_size> &data, size_t xl0, size_t xr0, size_t y, uint32_t col) {
+    static constexpr void span(std::array<uint8_t, image_size> &data, size_t xl0, size_t xr0, size_t y, uint8_t col) {
         col &= (1UL << bits_per_pixel) - 1;
         size_t xl2 = xl0 / 2;
         xl0 %= 2;
@@ -923,9 +925,9 @@ class format_4bit : public format {
     }
 
     static constexpr void blitRGBA(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
-        for (int32_t y = 0; y < r.h; y++) {
-            for (int32_t x = 0; x < r.w; x++) {
-                plot(data, (x + r.x), (y + r.y), octree.nearest(ptr[y * stride + x * 4 + 0], ptr[y * stride + x * 4 + 1], ptr[y * stride + x * 4 + 2]));
+        for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
+            for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
+                plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), octree.nearest(ptr[y * static_cast<size_t>(stride) + x * 4 + 0], ptr[y * static_cast<size_t>(stride) + x * 4 + 1], ptr[y * static_cast<size_t>(stride) + x * 4 + 2]));
             }
         }
     }
@@ -935,19 +937,19 @@ class format_4bit : public format {
         int32_t err_r = 0;
         int32_t err_g = 0;
         int32_t err_b = 0;
-        for (int32_t y = 0; y < r.h; y++) {
-            for (int32_t x = 0; x < r.w; x++) {
-                int32_t R = ptr[y * stride + x * 4 + 0];
-                int32_t G = ptr[y * stride + x * 4 + 1];
-                int32_t B = ptr[y * stride + x * 4 + 2];
+        for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
+            for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
+                int32_t R = ptr[y * static_cast<size_t>(stride) + x * 4 + 0];
+                int32_t G = ptr[y * static_cast<size_t>(stride) + x * 4 + 1];
+                int32_t B = ptr[y * static_cast<size_t>(stride) + x * 4 + 2];
                 R = std::clamp(R + err_r, 0, 255);
                 G = std::clamp(G + err_g, 0, 255);
                 B = std::clamp(B + err_b, 0, 255);
-                uint32_t n = octree.nearest(R, G, B);
-                plot(data, (x + r.x), (y + r.y), n);
-                err_r = R - ((palette[n] >> 16) & 0xFF);
-                err_g = G - ((palette[n] >> 8) & 0xFF);
-                err_b = B - ((palette[n] >> 0) & 0xFF);
+                uint8_t n = octree.nearest(static_cast<uint8_t>(R), static_cast<uint8_t>(G), static_cast<uint8_t>(B));
+                plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
+                err_r = R - static_cast<int32_t>((palette[n] >> 16) & 0xFF);
+                err_g = G - static_cast<int32_t>((palette[n] >>  8) & 0xFF);
+                err_b = B - static_cast<int32_t>((palette[n] >>  0) & 0xFF);
             }
         }
     }
@@ -957,11 +959,11 @@ class format_4bit : public format {
         float err_r = 0;
         float err_g = 0;
         float err_b = 0;
-        for (int32_t y = 0; y < r.h; y++) {
-            for (int32_t x = 0; x < r.w; x++) {
-                float R = static_cast<float>(ptr[y * stride + x * 4 + 0]) * (1.0f / 255.0f);
-                float G = static_cast<float>(ptr[y * stride + x * 4 + 1]) * (1.0f / 255.0f);
-                float B = static_cast<float>(ptr[y * stride + x * 4 + 2]) * (1.0f / 255.0f);
+        for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
+            for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
+                float R = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 0]) * (1.0f / 255.0f);
+                float G = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 1]) * (1.0f / 255.0f);
+                float B = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 2]) * (1.0f / 255.0f);
                 float Rl = constixel::srgb_to_linear(R);
                 float Gl = constixel::srgb_to_linear(G);
                 float Bl = constixel::srgb_to_linear(B);
@@ -971,8 +973,8 @@ class format_4bit : public format {
                 R = constixel::linear_to_srgb(Rl);
                 G = constixel::linear_to_srgb(Gl);
                 B = constixel::linear_to_srgb(Bl);
-                uint32_t n = octree.nearest(static_cast<int32_t>(R * 255.0f), static_cast<int32_t>(G * 255.0f), static_cast<int32_t>(B * 255.0f));
-                plot(data, (x + r.x), (y + r.y), n);
+                uint8_t n = octree.nearest(static_cast<uint8_t>(R * 255.0f), static_cast<uint8_t>(G * 255.0f), static_cast<uint8_t>(B * 255.0f));
+                plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
                 err_r = Rl - constixel::srgb_to_linear(static_cast<float>((palette[n] >> 16) & 0xFF) * (1.0f / 255.0f));
                 err_g = Gl - constixel::srgb_to_linear(static_cast<float>((palette[n] >> 8) & 0xFF) * (1.0f / 255.0f));
                 err_b = Bl - constixel::srgb_to_linear(static_cast<float>((palette[n] >> 0) & 0xFF) * (1.0f / 255.0f));
@@ -1021,12 +1023,12 @@ class format_8bit : public format {
         pal[ 8] = 0x333333; pal[ 9] = 0x666666; pal[10] = 0x999999; pal[11] = 0xcccccc;
         pal[12] = 0x7f0000; pal[13] = 0x007f00; pal[14] = 0x00007f; pal[15] = 0x7f7f00;
         for (size_t c = 0; c < 16; c++) {
-            uint32_t y = (0xff * c) / 15;
+            uint32_t y = (0xff * static_cast<uint32_t>(c)) / 15;
             pal[0x10 + c] = (y << 16) | (y << 8) | (y << 0);
         }
         for (size_t c = 0; c < 8; c++) {
-            uint32_t y = (0xff * c) / 7;
-            uint32_t x = (0xff * (c + 1)) / 8;
+            uint32_t y = (0xff * static_cast<uint32_t>(c)) / 7;
+            uint32_t x = (0xff * (static_cast<uint32_t>(c) + 1)) / 8;
             pal[0x20 + c + 0] = ( y  << 16) | ( 0  << 8) | ( 0  << 0); // Rxx
             pal[0x20 + c + 8] = (255 << 16) | ( x  << 8) | ( x  << 0); 
             pal[0x30 + c + 0] = ( 0  << 16) | ( y  << 8) | ( 0  << 0); // Gxx
@@ -1066,11 +1068,11 @@ class format_8bit : public format {
 
     static constexpr const constixel::octree_impl<1UL << bits_per_pixel, octree_size> octree = gen_octree();
 
-    static constexpr void plot(std::array<uint8_t, image_size> &data, size_t x0, size_t y, uint32_t col) {
+    static constexpr void plot(std::array<uint8_t, image_size> &data, size_t x0, size_t y, uint8_t col) {
         data.data()[y * bytes_per_line + x0] = col;
     }
 
-    static constexpr void span(std::array<uint8_t, image_size> &data, size_t xl0, size_t xr0, size_t y, uint32_t col) {
+    static constexpr void span(std::array<uint8_t, image_size> &data, size_t xl0, size_t xr0, size_t y, uint8_t col) {
         uint8_t *yptr = &data.data()[y * bytes_per_line];
         for (size_t x = xl0; x < xr0; x++) {
             yptr[x] = col;
@@ -1078,10 +1080,10 @@ class format_8bit : public format {
     }
 
     static constexpr void blitRGBA(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
-        for (int32_t y = 0; y < r.h; y++) {
-            for (int32_t x = 0; x < r.w; x++) {
-                data.data()[(y + r.y) * bytes_per_line + (x + r.x)] =
-                    octree.nearest(ptr[y * stride + x * 4 + 0], ptr[y * stride + x * 4 + 1], ptr[y * stride + x * 4 + 2]);
+        for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
+            for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
+                data.data()[(y + static_cast<size_t>(r.y)) * bytes_per_line + (x + static_cast<size_t>(r.x))] =
+                    octree.nearest(ptr[y * static_cast<size_t>(stride) + x * 4 + 0], ptr[y * static_cast<size_t>(stride) + x * 4 + 1], ptr[y * static_cast<size_t>(stride) + x * 4 + 2]);
             }
         }
     }
@@ -1091,19 +1093,19 @@ class format_8bit : public format {
         int32_t err_r = 0;
         int32_t err_g = 0;
         int32_t err_b = 0;
-        for (int32_t y = 0; y < r.h; y++) {
-            for (int32_t x = 0; x < r.w; x++) {
-                int32_t R = ptr[y * stride + x * 4 + 0];
-                int32_t G = ptr[y * stride + x * 4 + 1];
-                int32_t B = ptr[y * stride + x * 4 + 2];
+        for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
+            for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
+                int32_t R = ptr[y * static_cast<size_t>(stride) + x * 4 + 0];
+                int32_t G = ptr[y * static_cast<size_t>(stride) + x * 4 + 1];
+                int32_t B = ptr[y * static_cast<size_t>(stride) + x * 4 + 2];
                 R = std::clamp(R + err_r, 0, 255);
                 G = std::clamp(G + err_g, 0, 255);
                 B = std::clamp(B + err_b, 0, 255);
-                uint32_t n = octree.nearest(R, G, B);
-                data.data()[(y + r.y) * bytes_per_line + (x + r.x)] = n;
-                err_r = R - ((palette[n] >> 16) & 0xFF);
-                err_g = G - ((palette[n] >> 8) & 0xFF);
-                err_b = B - ((palette[n] >> 0) & 0xFF);
+                uint8_t n = octree.nearest(static_cast<uint8_t>(R), static_cast<uint8_t>(G), static_cast<uint8_t>(B));
+                data.data()[(y + static_cast<size_t>(r.y)) * bytes_per_line + (x + static_cast<size_t>(r.x))] = n;
+                err_r = R - static_cast<int32_t>((palette[n] >> 16) & 0xFF);
+                err_g = G - static_cast<int32_t>((palette[n] >> 8) & 0xFF);
+                err_b = B - static_cast<int32_t>((palette[n] >> 0) & 0xFF);
             }
         }
     }
@@ -1113,11 +1115,11 @@ class format_8bit : public format {
         float err_r = 0;
         float err_g = 0;
         float err_b = 0;
-        for (int32_t y = 0; y < r.h; y++) {
-            for (int32_t x = 0; x < r.w; x++) {
-                float R = static_cast<float>(ptr[y * stride + x * 4 + 0]) * (1.0f / 255.0f);
-                float G = static_cast<float>(ptr[y * stride + x * 4 + 1]) * (1.0f / 255.0f);
-                float B = static_cast<float>(ptr[y * stride + x * 4 + 2]) * (1.0f / 255.0f);
+        for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
+            for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
+                float R = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 0]) * (1.0f / 255.0f);
+                float G = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 1]) * (1.0f / 255.0f);
+                float B = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 2]) * (1.0f / 255.0f);
                 float Rl = constixel::srgb_to_linear(R);
                 float Gl = constixel::srgb_to_linear(G);
                 float Bl = constixel::srgb_to_linear(B);
@@ -1127,8 +1129,8 @@ class format_8bit : public format {
                 R = constixel::linear_to_srgb(Rl);
                 G = constixel::linear_to_srgb(Gl);
                 B = constixel::linear_to_srgb(Bl);
-                uint32_t n = octree.nearest(static_cast<int32_t>(R * 255.0f), static_cast<int32_t>(G * 255.0f), static_cast<int32_t>(B * 255.0f));
-                data.data()[(y + r.y) * bytes_per_line + (x + r.x)] = n;
+                uint8_t n = octree.nearest(static_cast<uint8_t>(R * 255.0f), static_cast<uint8_t>(G * 255.0f), static_cast<uint8_t>(B * 255.0f));
+                data.data()[(y + static_cast<size_t>(r.y)) * bytes_per_line + (x + static_cast<size_t>(r.x))] = n;
                 err_r = Rl - constixel::srgb_to_linear(static_cast<float>((palette[n] >> 16) & 0xFF) * (1.0f / 255.0f));
                 err_g = Gl - constixel::srgb_to_linear(static_cast<float>((palette[n] >> 8) & 0xFF) * (1.0f / 255.0f));
                 err_b = Bl - constixel::srgb_to_linear(static_cast<float>((palette[n] >> 0) & 0xFF) * (1.0f / 255.0f));
@@ -1199,7 +1201,7 @@ class image {
         data = src;
     }
 
-    constexpr void line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t col, uint32_t width = 1) {
+    constexpr void line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, uint32_t width = 1) {
         int32_t steep = abs(y1 - y0) > abs(x1 - x0);
 
         if (steep) {
@@ -1261,14 +1263,14 @@ class image {
         }
     }
 
-    constexpr void fillrect(int32_t x, int32_t y, int32_t w, int32_t h, uint32_t col) {
+    constexpr void fillrect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col) {
         h += y;
         for (; y < h; y++) {
             span(x, w, y, col);
         }
     }
 
-    constexpr void fillcircle(int32_t x, int32_t y, int32_t r, uint32_t col) {
+    constexpr void fillcircle(int32_t x, int32_t y, int32_t r, uint8_t col) {
         span(x - abs(r), 2 * abs(r) + 1, y, col);
         fillarc(x, y, abs(r), 3, 0, col);
     }
@@ -1312,7 +1314,7 @@ class image {
     }
 
    private:
-    constexpr void plot(int32_t x, int32_t y, uint32_t col) {
+    constexpr void plot(int32_t x, int32_t y, uint8_t col) {
         size_t _x = static_cast<size_t>(x);
         _x %= W;
         size_t _y = static_cast<size_t>(y);
@@ -1320,7 +1322,7 @@ class image {
         T<W, H, S>::plot(data, _x, _y, col);
     }
 
-    constexpr void span(int32_t x, int32_t w, int32_t y, uint32_t col) {
+    constexpr void span(int32_t x, int32_t w, int32_t y, uint8_t col) {
         while (y < 0) {
             y += H;
         }
@@ -1333,7 +1335,7 @@ class image {
         _xr %= W;
         size_t _y = static_cast<size_t>(y);
         _y %= H;
-        if (_xl + w < W) {
+        if (_xl + static_cast<size_t>(w) < W) {
             T<W, H, S>::span(data, _xl, _xr, _y, col);
         } else {
             T<W, H, S>::span(data, _xl, W - 1, _y, col);
@@ -1341,7 +1343,7 @@ class image {
         }
     }
 
-    constexpr void fillarc(int32_t x0, int32_t y0, int32_t r, uint8_t corners, int32_t delta, uint32_t col) {
+    constexpr void fillarc(int32_t x0, int32_t y0, int32_t r, uint8_t corners, int32_t delta, uint8_t col) {
         int32_t f = 1 - r;
         int32_t ddx = -2 * r;
         int32_t ddy = 1;
@@ -1376,7 +1378,7 @@ class image {
     }
 
     std::array<uint8_t, T<W, H, S>::image_size> data{};
-    T<W, H, S> format;
+    T<W, H, S> format{};
 };
 
 static_assert(constixel::image<constixel::format_2bit, 1, 1>().octree_memory_length() == constixel::image<constixel::format_2bit, 1, 1>().octree_used_length(), "Octree memory size does not match 2bit palette contents.");
