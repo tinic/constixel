@@ -59,5 +59,6 @@
         "regex": "cpp",
         "set": "cpp",
         "unordered_set": "cpp"
-    }
+    },
+    "cmake.sourceDirectory": "/Users/turo/sixel-tools/tests"
 }
