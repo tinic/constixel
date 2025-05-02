@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+#include "./colortools.h"
+
 namespace sixel {
 
 template <std::size_t N, typename K, typename V>
@@ -314,6 +316,67 @@ class format_1bit : public format {
         }
     }
 
+    static constexpr void blitRGBA(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
+        for (int32_t y = 0; y < r.h; y++) {
+            for (int32_t x = 0; x < r.w; x++) {
+                uint32_t R = ptr[y * stride + x * 4 + 0];
+                uint32_t G = ptr[y * stride + x * 4 + 1];
+                uint32_t B = ptr[y * stride + x * 4 + 2];
+                plot(data, (x + r.x), (y + r.y), (R * 2 + G * 3 + B * 1) > 768 ? 1 : 0);
+            }
+        }
+    }
+
+    static constexpr void blitRGBADiffused(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih,
+                                           int32_t stride) {
+        int32_t err_r = 0;
+        int32_t err_g = 0;
+        int32_t err_b = 0;
+        for (int32_t y = 0; y < r.h; y++) {
+            for (int32_t x = 0; x < r.w; x++) {
+                int32_t R = ptr[y * stride + x * 4 + 0];
+                int32_t G = ptr[y * stride + x * 4 + 1];
+                int32_t B = ptr[y * stride + x * 4 + 2];
+                R = std::clamp(R + err_r, 0, 255);
+                G = std::clamp(G + err_g, 0, 255);
+                B = std::clamp(B + err_b, 0, 255);
+                uint32_t n = (R * 2 + G * 3 + B * 1) > 768 ? 1 : 0;
+                plot(data, (x + r.x), (y + r.y), n);
+                err_r = R - (n ? 0xFF : 0x00);
+                err_g = G - (n ? 0xFF : 0x00);
+                err_b = B - (n ? 0xFF : 0x00);
+            }
+        }
+    }
+
+    static constexpr void blitRGBADiffusedLinear(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih,
+                                                 int32_t stride) {
+        float err_r = 0;
+        float err_g = 0;
+        float err_b = 0;
+        for (int32_t y = 0; y < r.h; y++) {
+            for (int32_t x = 0; x < r.w; x++) {
+                float R = static_cast<float>(ptr[y * stride + x * 4 + 0]) * (1.0f / 255.0f);
+                float G = static_cast<float>(ptr[y * stride + x * 4 + 1]) * (1.0f / 255.0f);
+                float B = static_cast<float>(ptr[y * stride + x * 4 + 2]) * (1.0f / 255.0f);
+                float Rl = colortools::srgb_to_linear(R);
+                float Gl = colortools::srgb_to_linear(G);
+                float Bl = colortools::srgb_to_linear(B);
+                Rl = std::clamp(Rl + err_r, 0.0f, 1.0f);
+                Gl = std::clamp(Gl + err_g, 0.0f, 1.0f);
+                Bl = std::clamp(Bl + err_b, 0.0f, 1.0f);
+                R = colortools::linear_to_srgb(Rl);
+                G = colortools::linear_to_srgb(Gl);
+                B = colortools::linear_to_srgb(Bl);
+                uint32_t n = (R * 2 * +G * 3 + B * 1) > 3 ? 1 : 0;
+                plot(data, (x + r.x), (y + r.y), n);
+                err_r = Rl - colortools::srgb_to_linear(static_cast<float>(n ? 1.0f : 0.0f));
+                err_g = Gl - colortools::srgb_to_linear(static_cast<float>(n ? 1.0f : 0.0f));
+                err_b = Bl - colortools::srgb_to_linear(static_cast<float>(n ? 1.0f : 0.0f));
+            }
+        }
+    }
+
     template <typename F>
     static constexpr void sixel(std::array<uint8_t, image_size> &data, F &&charOut, const rect<int32_t> &r, bool preserveBackground) {
         sixel_image<W, H>(data.data(), palette, charOut, r, preserveBackground, [](const uint8_t *dataRaw, size_t x, size_t col, size_t y) {
@@ -337,11 +400,18 @@ class format_1bit : public format {
 template <size_t W, size_t H>
 class format_2bit : public format {
    public:
+    static constexpr size_t octree_size = 25;
     static constexpr size_t bits_per_pixel = 2;
     static constexpr size_t bytes_per_line = (W * bits_per_pixel + 7) / 8;
     static constexpr size_t internal_height = ((H + 5) / 6) * 6;
     static constexpr size_t image_size = internal_height * bytes_per_line;
     static constexpr std::array<uint32_t, (1UL << bits_per_pixel)> palette = {0x000000, 0xffffff, 0xff0000, 0x00ff00};
+
+    static consteval const colortools::octree<1UL << bits_per_pixel, octree_size> gen_octree() {
+        return colortools::octree<1UL << bits_per_pixel, octree_size>(palette);
+    }
+
+    static constexpr const colortools::octree<1UL << bits_per_pixel, octree_size> octree = gen_octree();
 
     static constexpr void plot(std::array<uint8_t, image_size> &data, size_t x0, size_t y, uint32_t col) {
         col &= (1UL << bits_per_pixel) - 1;
@@ -377,6 +447,64 @@ class format_2bit : public format {
         }
     }
 
+    static constexpr void blitRGBA(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
+        for (int32_t y = 0; y < r.h; y++) {
+            for (int32_t x = 0; x < r.w; x++) {
+                plot(data, (x + r.x), (y + r.y), octree.nearest(ptr[y * stride + x * 4 + 0], ptr[y * stride + x * 4 + 1], ptr[y * stride + x * 4 + 2]));
+            }
+        }
+    }
+
+    static constexpr void blitRGBADiffused(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih,
+                                           int32_t stride) {
+        int32_t err_r = 0;
+        int32_t err_g = 0;
+        int32_t err_b = 0;
+        for (int32_t y = 0; y < r.h; y++) {
+            for (int32_t x = 0; x < r.w; x++) {
+                int32_t R = ptr[y * stride + x * 4 + 0];
+                int32_t G = ptr[y * stride + x * 4 + 1];
+                int32_t B = ptr[y * stride + x * 4 + 2];
+                R = std::clamp(R + err_r, 0, 255);
+                G = std::clamp(G + err_g, 0, 255);
+                B = std::clamp(B + err_b, 0, 255);
+                uint32_t n = octree.nearest(R, G, B);
+                plot(data, (x + r.x), (y + r.y), n);
+                err_r = R - ((palette[n] >> 16) & 0xFF);
+                err_g = G - ((palette[n] >> 8) & 0xFF);
+                err_b = B - ((palette[n] >> 0) & 0xFF);
+            }
+        }
+    }
+
+    static constexpr void blitRGBADiffusedLinear(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih,
+                                                 int32_t stride) {
+        float err_r = 0;
+        float err_g = 0;
+        float err_b = 0;
+        for (int32_t y = 0; y < r.h; y++) {
+            for (int32_t x = 0; x < r.w; x++) {
+                float R = static_cast<float>(ptr[y * stride + x * 4 + 0]) * (1.0f / 255.0f);
+                float G = static_cast<float>(ptr[y * stride + x * 4 + 1]) * (1.0f / 255.0f);
+                float B = static_cast<float>(ptr[y * stride + x * 4 + 2]) * (1.0f / 255.0f);
+                float Rl = colortools::srgb_to_linear(R);
+                float Gl = colortools::srgb_to_linear(G);
+                float Bl = colortools::srgb_to_linear(B);
+                Rl = std::clamp(Rl + err_r, 0.0f, 1.0f);
+                Gl = std::clamp(Gl + err_g, 0.0f, 1.0f);
+                Bl = std::clamp(Bl + err_b, 0.0f, 1.0f);
+                R = colortools::linear_to_srgb(Rl);
+                G = colortools::linear_to_srgb(Gl);
+                B = colortools::linear_to_srgb(Bl);
+                uint32_t n = octree.nearest(static_cast<int32_t>(R * 255.0f), static_cast<int32_t>(G * 255.0f), static_cast<int32_t>(B * 255.0f));
+                plot(data, (x + r.x), (y + r.y), n);
+                err_r = Rl - colortools::srgb_to_linear(static_cast<float>((palette[n] >> 16) & 0xFF) * (1.0f / 255.0f));
+                err_g = Gl - colortools::srgb_to_linear(static_cast<float>((palette[n] >> 8) & 0xFF) * (1.0f / 255.0f));
+                err_b = Bl - colortools::srgb_to_linear(static_cast<float>((palette[n] >> 0) & 0xFF) * (1.0f / 255.0f));
+            }
+        }
+    }
+
     template <typename F>
     static constexpr void sixel(std::array<uint8_t, image_size> &data, F &&charOut, const rect<int32_t> &r, bool preserveBackground) {
         sixel_image<W, H>(data.data(), palette, charOut, r, preserveBackground, [](const uint8_t *dataRaw, size_t x, size_t col, size_t y) {
@@ -400,12 +528,19 @@ class format_2bit : public format {
 template <size_t W, size_t H>
 class format_4bit : public format {
    public:
+    static constexpr size_t octree_size = 70;
     static constexpr size_t bits_per_pixel = 4;
     static constexpr size_t bytes_per_line = (W * bits_per_pixel + 7) / 8;
     static constexpr size_t internal_height = ((H + 5) / 6) * 6;
     static constexpr size_t image_size = internal_height * bytes_per_line;
     static constexpr std::array<uint32_t, (1UL << bits_per_pixel)> palette = {0x000000, 0xffffff, 0xff0000, 0x00ff00, 0x0000ff, 0xffff00, 0x00ffff, 0xff00ff,
                                                                               0x333333, 0x666666, 0x999999, 0xcccccc, 0x7f0000, 0x007f00, 0x00007f, 0x7f7f00};
+
+    static consteval const colortools::octree<1UL << bits_per_pixel, octree_size> gen_octree() {
+        return colortools::octree<1UL << bits_per_pixel, octree_size>(palette);
+    }
+
+    static constexpr const colortools::octree<1UL << bits_per_pixel, octree_size> octree = gen_octree();
 
     static constexpr void plot(std::array<uint8_t, image_size> &data, size_t x0, size_t y, uint32_t col) {
         col &= (1UL << bits_per_pixel) - 1;
@@ -441,6 +576,64 @@ class format_4bit : public format {
         }
     }
 
+    static constexpr void blitRGBA(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
+        for (int32_t y = 0; y < r.h; y++) {
+            for (int32_t x = 0; x < r.w; x++) {
+                plot(data, (x + r.x), (y + r.y), octree.nearest(ptr[y * stride + x * 4 + 0], ptr[y * stride + x * 4 + 1], ptr[y * stride + x * 4 + 2]));
+            }
+        }
+    }
+
+    static constexpr void blitRGBADiffused(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih,
+                                           int32_t stride) {
+        int32_t err_r = 0;
+        int32_t err_g = 0;
+        int32_t err_b = 0;
+        for (int32_t y = 0; y < r.h; y++) {
+            for (int32_t x = 0; x < r.w; x++) {
+                int32_t R = ptr[y * stride + x * 4 + 0];
+                int32_t G = ptr[y * stride + x * 4 + 1];
+                int32_t B = ptr[y * stride + x * 4 + 2];
+                R = std::clamp(R + err_r, 0, 255);
+                G = std::clamp(G + err_g, 0, 255);
+                B = std::clamp(B + err_b, 0, 255);
+                uint32_t n = octree.nearest(R, G, B);
+                plot(data, (x + r.x), (y + r.y), n);
+                err_r = R - ((palette[n] >> 16) & 0xFF);
+                err_g = G - ((palette[n] >> 8) & 0xFF);
+                err_b = B - ((palette[n] >> 0) & 0xFF);
+            }
+        }
+    }
+
+    static constexpr void blitRGBADiffusedLinear(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih,
+                                                 int32_t stride) {
+        float err_r = 0;
+        float err_g = 0;
+        float err_b = 0;
+        for (int32_t y = 0; y < r.h; y++) {
+            for (int32_t x = 0; x < r.w; x++) {
+                float R = static_cast<float>(ptr[y * stride + x * 4 + 0]) * (1.0f / 255.0f);
+                float G = static_cast<float>(ptr[y * stride + x * 4 + 1]) * (1.0f / 255.0f);
+                float B = static_cast<float>(ptr[y * stride + x * 4 + 2]) * (1.0f / 255.0f);
+                float Rl = colortools::srgb_to_linear(R);
+                float Gl = colortools::srgb_to_linear(G);
+                float Bl = colortools::srgb_to_linear(B);
+                Rl = std::clamp(Rl + err_r, 0.0f, 1.0f);
+                Gl = std::clamp(Gl + err_g, 0.0f, 1.0f);
+                Bl = std::clamp(Bl + err_b, 0.0f, 1.0f);
+                R = colortools::linear_to_srgb(Rl);
+                G = colortools::linear_to_srgb(Gl);
+                B = colortools::linear_to_srgb(Bl);
+                uint32_t n = octree.nearest(static_cast<int32_t>(R * 255.0f), static_cast<int32_t>(G * 255.0f), static_cast<int32_t>(B * 255.0f));
+                plot(data, (x + r.x), (y + r.y), n);
+                err_r = Rl - colortools::srgb_to_linear(static_cast<float>((palette[n] >> 16) & 0xFF) * (1.0f / 255.0f));
+                err_g = Gl - colortools::srgb_to_linear(static_cast<float>((palette[n] >> 8) & 0xFF) * (1.0f / 255.0f));
+                err_b = Bl - colortools::srgb_to_linear(static_cast<float>((palette[n] >> 0) & 0xFF) * (1.0f / 255.0f));
+            }
+        }
+    }
+
     template <typename F>
     static constexpr void sixel(std::array<uint8_t, image_size> &data, F &&charOut, const rect<int32_t> &r, bool preserveBackground) {
         sixel_image<W, H>(data.data(), palette, charOut, r, preserveBackground, [](const uint8_t *dataRaw, size_t x, size_t col, size_t y) {
@@ -461,157 +654,10 @@ class format_4bit : public format {
     }
 };
 
-namespace colortools {
-
-struct node {
-    int16_t child[8]{-1, -1, -1, -1, -1, -1, -1, -1};
-    int16_t palette = -1;
-};
-
-class octree {
-   public:
-    size_t node_idx = 0;
-    static constexpr size_t palette_size = 256;
-    static constexpr size_t node_size = palette_size * 8;
-    std::array<node, node_size> nodes;
-    const std::array<uint32_t, palette_size> &pal;
-
-    static constexpr int child_index(uint8_t r, uint8_t g, uint8_t b, int level) {
-        return ((r >> level) & 1) << 2 | ((g >> level) & 1) << 1 | ((b >> level) & 1);
-    }
-
-    constexpr void insert(uint32_t c, size_t idx) {
-        uint32_t n = 0;
-        for (int32_t lvl = 7; lvl >= 0; --lvl) {
-            int32_t ci = child_index((c >> 16) & 0xFF, (c >> 8) & 0xFF, (c >> 0) & 0xFF, lvl);
-            if (nodes[n].child[ci] == -1) {
-                nodes[n].child[ci] = static_cast<int16_t>(node_idx);
-                node_idx++;
-            }
-            n = nodes[n].child[ci];
-        }
-        nodes[n].palette = static_cast<int16_t>(idx);
-    }
-
-   public:
-    constexpr octree(const std::array<uint32_t, palette_size> &palette) : pal(palette) {
-        for (size_t i = 0; i < palette_size; ++i) {
-            insert(palette[i], i);
-        }
-    }
-
-    constexpr uint8_t nearest(uint8_t r, uint8_t g, uint8_t b) const {
-        int n = 0;
-        for (int lvl = 7; lvl >= 0; --lvl) {
-            int ci = child_index(r, g, b, lvl);
-            int next = nodes[n].child[ci];
-            if (next == -1)
-                break;
-            n = next;
-            if (nodes[n].palette != -1)
-                return static_cast<uint8_t>(nodes[n].palette);
-        }
-        // fallback: brute-force
-        int best = 0, bestd = INT_MAX;
-        for (size_t i = 0; i < pal.size(); ++i) {
-            int dr = int(r) - ((pal[i] >> 16) & 0xFF);
-            int dg = int(g) - ((pal[i] >> 8) & 0xFF);
-            int db = int(b) - ((pal[i] >> 0) & 0xFF);
-            int d = dr * dr + dg * dg + db * db;
-            if (d < bestd) {
-                bestd = d;
-                best = int(i);
-            }
-        }
-        return static_cast<uint8_t>(best);
-    }
-};
-
-static constexpr double cos(double x, int terms = 10) {
-    x = x - 6.283185307179586 * int(x / 6.283185307179586);  // wrap x to [0, 2π)
-    double res = 1.0, term = 1.0;
-    double x2 = x * x;
-    for (int i = 1; i < terms; ++i) {
-        term *= -x2 / ((2 * i - 1) * (2 * i));
-        res += term;
-    }
-    return res;
-}
-
-static constexpr double sin(double x, int terms = 10) {
-    x = x - 6.283185307179586 * int(x / 6.283185307179586);  // wrap x to [0, 2π)
-    double res = x, term = x;
-    double x2 = x * x;
-    for (int i = 1; i < terms; ++i) {
-        term *= -x2 / ((2 * i) * (2 * i + 1));
-        res += term;
-    }
-    return res;
-}
-
-static constexpr double pow(double base, double exp, int terms = 10) {
-    if (base <= 0.0)
-        return (base == 0.0) ? 0.0 : 0.0 / 0.0;  // NaN for negative base
-    double ln = 0.0, y = (base - 1) / (base + 1);
-    double y2 = y * y, num = y;
-    for (int i = 1; i <= terms; ++i) {
-        ln += num / (2 * i - 1);
-        num *= y2;
-    }
-    ln *= 2;
-    double res = 1.0, term = 1.0, x = exp * ln;
-    for (int i = 1; i < terms; ++i) {
-        term *= x / i;
-        res += term;
-    }
-    return res;
-}
-
-struct oklch {
-    double l, c, h;
-};
-
-struct oklab {
-    double l, a, b;
-};
-
-struct srgb {
-    double r, g, b;
-};
-
-static consteval double linear_to_srgb(double c) {
-    if (c <= 0.0031308) {
-        return 12.92 * c;
-    } else {
-        return 1.055 * pow(c, 1.0 / 2.4) - 0.055;
-    }
-}
-
-static consteval srgb oklab_to_srgb(const oklab &oklab) {
-    double l = oklab.l;
-    double a = oklab.a;
-    double b = oklab.b;
-
-    double l_ = l + 0.3963377774 * a + 0.2158037573 * b;
-    double m_ = l - 0.1055613458 * a - 0.0638541728 * b;
-    double s_ = l - 0.0894841775 * a - 1.2914855480 * b;
-
-    double r = 4.0767416621 * l_ - 3.3077115913 * m_ + 0.2309699292 * s_;
-    double g = -1.2684380046 * l_ + 2.6097574011 * m_ - 0.3413193965 * s_;
-    double bl = -0.0041960863 * l_ - 0.7034186168 * m_ + 1.7076147031 * s_;
-
-    return {linear_to_srgb(std::max(0.0, std::min(1.0, r))), linear_to_srgb(std::max(0.0, std::min(1.0, g))), linear_to_srgb(std::max(0.0, std::min(1.0, bl)))};
-}
-
-static consteval oklab oklch_to_oklab(const oklch &oklch) {
-    return {oklch.l, oklch.c * cos(oklch.h * M_PI / 180.0), oklch.c * sin(oklch.h * M_PI / 180.0)};
-}
-
-};  // namespace colortools
-
 template <size_t W, size_t H>
 class format_8bit : public format {
    public:
+    static constexpr size_t octree_size = 1061;
     static constexpr size_t bits_per_pixel = 8;
     static constexpr size_t bytes_per_line = W;
     static constexpr size_t internal_height = ((H + 5) / 6) * 6;
@@ -646,8 +692,8 @@ class format_8bit : public format {
         }
         // clang-format on
         for (size_t c = 0; c < 8; c++) {
-            colortools::oklab lft{static_cast<double>(c) / 7.2 - 0.1, 0.2, 0.0};
-            colortools::oklab rgh{static_cast<double>(c) / 7.2 - 0.1, 0.2, 360.0};
+            colortools::oklab lft{static_cast<double>(c) / 7 - 0.2, 0.2, 0.0};
+            colortools::oklab rgh{static_cast<double>(c) / 7 - 0.2, 0.2, 360.0};
             for (size_t d = 0; d < 16; d++) {
                 auto res = colortools::oklab_to_srgb(colortools::oklch_to_oklab(colortools::oklch{
                     std::lerp(lft.l, rgh.l, static_cast<double>(d) / 15.0),
@@ -662,13 +708,13 @@ class format_8bit : public format {
         return pal;
     }
 
-    static constexpr std::array<uint32_t, (1UL << bits_per_pixel)> palette = gen_palette();
+    static constexpr std::array<uint32_t, 1UL << bits_per_pixel> palette = gen_palette();
 
-    static consteval const colortools::octree gen_octree() {
-        return colortools::octree(palette);
+    static consteval const colortools::octree<1UL << bits_per_pixel, octree_size> gen_octree() {
+        return colortools::octree<1UL << bits_per_pixel, octree_size>(palette);
     }
 
-    static constexpr const colortools::octree octree = gen_octree();
+    static constexpr const colortools::octree<1UL << bits_per_pixel, octree_size> octree = gen_octree();
 
     static constexpr void plot(std::array<uint8_t, image_size> &data, size_t x0, size_t y, uint32_t col) {
         data.data()[y * bytes_per_line + x0] = col;
@@ -690,11 +736,52 @@ class format_8bit : public format {
         }
     }
 
-    static constexpr void blitRGB(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
+    static constexpr void blitRGBADiffused(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih,
+                                           int32_t stride) {
+        int32_t err_r = 0;
+        int32_t err_g = 0;
+        int32_t err_b = 0;
         for (int32_t y = 0; y < r.h; y++) {
             for (int32_t x = 0; x < r.w; x++) {
-                data.data()[(y + r.y) * bytes_per_line + (x + r.x)] =
-                    octree.nearest(ptr[y * stride + x * 3 + 0], ptr[y * stride + x * 3 + 1], ptr[y * stride + x * 3 + 2]);
+                int32_t R = ptr[y * stride + x * 4 + 0];
+                int32_t G = ptr[y * stride + x * 4 + 1];
+                int32_t B = ptr[y * stride + x * 4 + 2];
+                R = std::clamp(R + err_r, 0, 255);
+                G = std::clamp(G + err_g, 0, 255);
+                B = std::clamp(B + err_b, 0, 255);
+                uint32_t n = octree.nearest(R, G, B);
+                data.data()[(y + r.y) * bytes_per_line + (x + r.x)] = n;
+                err_r = R - ((palette[n] >> 16) & 0xFF);
+                err_g = G - ((palette[n] >> 8) & 0xFF);
+                err_b = B - ((palette[n] >> 0) & 0xFF);
+            }
+        }
+    }
+
+    static constexpr void blitRGBADiffusedLinear(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih,
+                                                 int32_t stride) {
+        float err_r = 0;
+        float err_g = 0;
+        float err_b = 0;
+        for (int32_t y = 0; y < r.h; y++) {
+            for (int32_t x = 0; x < r.w; x++) {
+                float R = static_cast<float>(ptr[y * stride + x * 4 + 0]) * (1.0f / 255.0f);
+                float G = static_cast<float>(ptr[y * stride + x * 4 + 1]) * (1.0f / 255.0f);
+                float B = static_cast<float>(ptr[y * stride + x * 4 + 2]) * (1.0f / 255.0f);
+                float Rl = colortools::srgb_to_linear(R);
+                float Gl = colortools::srgb_to_linear(G);
+                float Bl = colortools::srgb_to_linear(B);
+                Rl = std::clamp(Rl + err_r, 0.0f, 1.0f);
+                Gl = std::clamp(Gl + err_g, 0.0f, 1.0f);
+                Bl = std::clamp(Bl + err_b, 0.0f, 1.0f);
+                R = colortools::linear_to_srgb(Rl);
+                G = colortools::linear_to_srgb(Gl);
+                B = colortools::linear_to_srgb(Bl);
+                uint32_t n = octree.nearest(static_cast<int32_t>(R * 255.0f), static_cast<int32_t>(G * 255.0f), static_cast<int32_t>(B * 255.0f));
+                data.data()[(y + r.y) * bytes_per_line + (x + r.x)] = n;
+                err_r = Rl - colortools::srgb_to_linear(static_cast<float>((palette[n] >> 16) & 0xFF) * (1.0f / 255.0f));
+                err_g = Gl - colortools::srgb_to_linear(static_cast<float>((palette[n] >> 8) & 0xFF) * (1.0f / 255.0f));
+                err_b = Bl - colortools::srgb_to_linear(static_cast<float>((palette[n] >> 0) & 0xFF) * (1.0f / 255.0f));
             }
         }
     }
@@ -839,11 +926,18 @@ class image {
         T<W, H>::blitRGBA(data, blitrect, ptr, iw, ih, stride);
     }
 
-    constexpr void blitRGB(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
+    constexpr void blitRGBADiffused(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
         rect<int32_t> blitrect{x, y, w, h};
         blitrect &= {0, 0, W, H};
         blitrect &= {x, y, iw, ih};
-        T<W, H>::blitRGB(data, blitrect, ptr, iw, ih, stride);
+        T<W, H>::blitRGBADiffused(data, blitrect, ptr, iw, ih, stride);
+    }
+
+    constexpr void blitRGBADiffusedLinear(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
+        rect<int32_t> blitrect{x, y, w, h};
+        blitrect &= {0, 0, W, H};
+        blitrect &= {x, y, iw, ih};
+        T<W, H>::blitRGBADiffusedLinear(data, blitrect, ptr, iw, ih, stride);
     }
 
     template <typename F>
@@ -854,6 +948,13 @@ class image {
     template <typename F>
     constexpr void sixel(F &&charOut, const rect<int32_t> &r, bool preserveBackground = true) {
         T<W, H>::sixel(data, charOut, r, preserveBackground);
+    }
+
+    constexpr size_t octree_used_length() const {
+        return format.octree.nodes_used_length();
+    }
+    constexpr size_t octree_memory_length() const {
+        return format.octree.nodes_memory_length();
     }
 
    private:

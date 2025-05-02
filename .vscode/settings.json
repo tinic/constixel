@@ -49,6 +49,15 @@
         "variant": "cpp",
         "vector": "cpp",
         "algorithm": "cpp",
-        "valarray": "cpp"
+        "valarray": "cpp",
+        "__tree": "cpp",
+        "fstream": "cpp",
+        "future": "cpp",
+        "iomanip": "cpp",
+        "list": "cpp",
+        "map": "cpp",
+        "regex": "cpp",
+        "set": "cpp",
+        "unordered_set": "cpp"
     }
 }
