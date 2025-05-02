@@ -7,15 +7,14 @@
 #include <vector>
 
 #include "../fontbm/src/external/lodepng/lodepng.h"
-#include "./sixel_tools.h"
-#include "sixel.h"
+#include "constixel.h"
 
 static size_t bytesCount = 0;
 
 #if 1
 constexpr std::string test0() {
     std::string out{};
-    sixel::image<sixel::format_1bit, 32, 31> image;
+    constixel::image<constixel::format_1bit, 32, 31> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
         image.fillrect(c * 2, c * 2, 8, 8, c & 1);
@@ -28,7 +27,7 @@ constexpr std::string test0() {
 
 constexpr std::string test1() {
     std::string out{};
-    sixel::image<sixel::format_2bit, 112, 64> image;
+    constixel::image<constixel::format_2bit, 112, 64> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
         image.fillrect(c * 4 - 16, c * 4 - 16, 44, 31, c);
@@ -41,7 +40,7 @@ constexpr std::string test1() {
 
 constexpr std::string test2() {
     std::string out{};
-    sixel::image<sixel::format_4bit, 128, 127> image;
+    constixel::image<constixel::format_4bit, 128, 127> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
         image.fillrect(c * 4 - 16, c * 4 - 16, 44, 31, c);
@@ -54,7 +53,7 @@ constexpr std::string test2() {
 
 constexpr std::string test3() {
     std::string out{};
-    sixel::image<sixel::format_1bit, 127, 101> image;
+    constixel::image<constixel::format_1bit, 127, 101> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
         image.fillcircle(c, c, 256 - c * 16, c);
@@ -67,7 +66,7 @@ constexpr std::string test3() {
 
 constexpr std::string test4() {
     std::string out{};
-    sixel::image<sixel::format_2bit, 111, 95> image;
+    constixel::image<constixel::format_2bit, 111, 95> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
         image.fillcircle(c, c, 256 - c * 16, c);
@@ -80,7 +79,7 @@ constexpr std::string test4() {
 
 constexpr std::string test5() {
     std::string out{};
-    sixel::image<sixel::format_4bit, 7, 128, 8> image;
+    constixel::image<constixel::format_4bit, 7, 128, 8> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
         image.fillcircle(c, c, 256 - c * 16, c);
@@ -93,7 +92,7 @@ constexpr std::string test5() {
 
 constexpr std::string test6() {
     std::string out{};
-    sixel::image<sixel::format_1bit, 127, 101> image;
+    constixel::image<constixel::format_1bit, 127, 101> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
         image.line(16, 16, c * 8, 64, c, c);
@@ -106,7 +105,7 @@ constexpr std::string test6() {
 
 constexpr std::string test7() {
     std::string out{};
-    sixel::image<sixel::format_2bit, 111, 95> image;
+    constixel::image<constixel::format_2bit, 111, 95> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
         image.line(-8, -8, c * 8, 64, c, c);
@@ -119,7 +118,7 @@ constexpr std::string test7() {
 
 constexpr std::string test8() {
     std::string out{};
-    sixel::image<sixel::format_4bit, 7, 7, 8> image;
+    constixel::image<constixel::format_4bit, 7, 7, 8> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
         image.line(-8, -8, c * 8, 64, c, c);
@@ -132,7 +131,7 @@ constexpr std::string test8() {
 
 constexpr std::string test9() {
     std::string out{};
-    sixel::image<sixel::format_8bit, 64, 64> image;
+    constixel::image<constixel::format_8bit, 64, 64> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
         image.line(-8, -8, c * 8, 48, c, c);
@@ -194,6 +193,42 @@ void draw_palette() {
     });
     puts(out.c_str());
 }
+
+template <typename T>
+void draw_functions() {
+    printf("\033[2J\033[H\0337");
+    static T image;
+    image.clear();
+
+    for (int32_t c = 0; c < 32; c++) {
+        image.fillrect(16 + c * 37, c * 32, 128, 128, c);
+        std::string out("\0338");
+        image.sixel([&out](uint8_t ch) mutable {
+            out.push_back(ch);
+            bytesCount++;
+        });
+        puts(out.c_str());
+    }
+    for (int32_t c = 0; c < 32; c++) {
+        image.line(16, 16, 64 + c * 42, 700, c, c);
+        std::string out("\0338");
+        image.sixel([&out](uint8_t ch) mutable {
+            out.push_back(ch);
+            bytesCount++;
+        });
+        puts(out.c_str());
+    }
+    for (int32_t c = 0; c < 32; c++) {
+        image.fillcircle(600, 384, 256 - c * 16, c);
+        std::string out("\0338");
+        image.sixel([&out](uint8_t ch) mutable {
+            out.push_back(ch);
+            bytesCount++;
+        });
+        puts(out.c_str());
+    }
+}
+
 #endif  // #if 0
 
 int main() {
@@ -210,7 +245,18 @@ int main() {
     static_assert(test9().size() == 5916);
 #endif  // #if 0
 
-#if 0
+#if 1
+    draw_functions<constixel::image<constixel::format_1bit, 768, 768>>();
+    draw_functions<constixel::image<constixel::format_2bit, 768, 768>>();
+    draw_functions<constixel::image<constixel::format_4bit, 768, 768>>();
+    draw_functions<constixel::image<constixel::format_8bit, 768, 768>>();
+
+    usleep(1000000);
+#endif  // #if 0
+
+#if 1
+    printf("\033[2J\033[H\0337");
+
     puts(test0().c_str());
     puts("\n");
     puts(test1().c_str());
@@ -231,68 +277,19 @@ int main() {
     puts("\n");
     puts(test9().c_str());
     puts("\n");
+
+    usleep(1000000);
 #endif  // #if 1
 
-#if 0
+#if 1
     printf("\033[H\0337");
-    static sixel::image<sixel::format_4bit, 1024, 256> image0;
-    sixel::progressbar<sixel::format_4bit, 1024, 256> bar(image0);
-    bar.start(16, 1);
-    for (float value = 0.0f; value < 1.0f; value += 0.001f) {
-        bar.update(value);
-        usleep(1000);
-    }
-    bar.end();
-#endif  // #if 0
 
-#if 0
-    printf("\033[H\0337");
-    static sixel::image<sixel::format_8bit, 768, 768> image1;
-    printf("RAM required: %d bytes\n", int32_t(image1.size()));
-    image1.clear();
+    draw_palette<constixel::image<constixel::format_1bit, 16, 16, 32>>();
+    draw_palette<constixel::image<constixel::format_2bit, 16, 16, 32>>();
+    draw_palette<constixel::image<constixel::format_4bit, 16, 16, 32>>();
+    draw_palette<constixel::image<constixel::format_8bit, 16, 16, 32>>();
 
-    for (int32_t c = 0; c < 128; c++) {
-        image1.fillrect(16 + c * 37, c * 32, 128, 128, c);
-        std::string out("\0338");
-        image1.sixel([&out](uint8_t ch) mutable {
-            out.push_back(ch);
-            bytesCount++;
-        });
-        puts(out.c_str());
-    }
-    for (int32_t c = 0; c < 128; c++) {
-        image1.line(16, 16, 64 + c * 42, 700, c, c);
-        std::string out("\0338");
-        image1.sixel([&out](uint8_t ch) mutable {
-            out.push_back(ch);
-            bytesCount++;
-        });
-        puts(out.c_str());
-    }
-    for (int32_t c = 0; c < 128; c++) {
-        image1.fillcircle(600, 384, 256 - c * 16, c);
-        std::string out("\0338");
-        image1.sixel([&out](uint8_t ch) mutable {
-            out.push_back(ch);
-            bytesCount++;
-        });
-        puts(out.c_str());
-    }
-
-    printf("Transfer bytes: %d bytes\n", int32_t(bytesCount));
-#endif  // #if 0
-
-#if 0
-    draw_palette<sixel::image<sixel::format_1bit, 16, 16, 32>>();
-    draw_palette<sixel::image<sixel::format_2bit, 16, 16, 32>>();
-    draw_palette<sixel::image<sixel::format_4bit, 16, 16, 32>>();
-    draw_palette<sixel::image<sixel::format_8bit, 16, 16, 32>>();
-#endif  // #if 1
-
-#if 0
-    static_assert(sixel::image<sixel::format_2bit, 1, 1>().octree_memory_length() == sixel::image<sixel::format_2bit, 1, 1>().octree_used_length());
-    static_assert(sixel::image<sixel::format_4bit, 1, 1>().octree_memory_length() == sixel::image<sixel::format_4bit, 1, 1>().octree_used_length());
-    static_assert(sixel::image<sixel::format_8bit, 1, 1>().octree_memory_length() == sixel::image<sixel::format_8bit, 1, 1>().octree_used_length());
+    usleep(1000000);
 #endif  // #if 1
 
 #if 1
@@ -303,20 +300,20 @@ int main() {
     constexpr size_t oh = 1024;
     constexpr size_t sc = 1;
     if (lodepng::decode(rgbaimage, w, h, "../media/larikeet.png") == 0) {
-        draw_image_cut<sixel::image<sixel::format_1bit, ow, oh>>(rgbaimage, w, h);
-        draw_image_cut<sixel::image<sixel::format_2bit, ow, oh>>(rgbaimage, w, h);
-        draw_image_cut<sixel::image<sixel::format_4bit, ow, oh>>(rgbaimage, w, h);
-        draw_image_cut<sixel::image<sixel::format_8bit, ow, oh>>(rgbaimage, w, h);
+        draw_image_cut<constixel::image<constixel::format_1bit, ow, oh>>(rgbaimage, w, h);
+        draw_image_cut<constixel::image<constixel::format_2bit, ow, oh>>(rgbaimage, w, h);
+        draw_image_cut<constixel::image<constixel::format_4bit, ow, oh>>(rgbaimage, w, h);
+        draw_image_cut<constixel::image<constixel::format_8bit, ow, oh>>(rgbaimage, w, h);
 
-        draw_image_diffused<sixel::image<sixel::format_1bit, ow, oh>>(rgbaimage, w, h);
-        draw_image_diffused<sixel::image<sixel::format_2bit, ow, oh>>(rgbaimage, w, h);
-        draw_image_diffused<sixel::image<sixel::format_4bit, ow, oh>>(rgbaimage, w, h);
-        draw_image_diffused<sixel::image<sixel::format_8bit, ow, oh>>(rgbaimage, w, h);
+        draw_image_diffused<constixel::image<constixel::format_1bit, ow, oh>>(rgbaimage, w, h);
+        draw_image_diffused<constixel::image<constixel::format_2bit, ow, oh>>(rgbaimage, w, h);
+        draw_image_diffused<constixel::image<constixel::format_4bit, ow, oh>>(rgbaimage, w, h);
+        draw_image_diffused<constixel::image<constixel::format_8bit, ow, oh>>(rgbaimage, w, h);
 
-        draw_image_linear<sixel::image<sixel::format_1bit, ow, oh>>(rgbaimage, w, h);
-        draw_image_linear<sixel::image<sixel::format_2bit, ow, oh>>(rgbaimage, w, h);
-        draw_image_linear<sixel::image<sixel::format_4bit, ow, oh>>(rgbaimage, w, h);
-        draw_image_linear<sixel::image<sixel::format_8bit, ow, oh>>(rgbaimage, w, h);
+        draw_image_linear<constixel::image<constixel::format_1bit, ow, oh>>(rgbaimage, w, h);
+        draw_image_linear<constixel::image<constixel::format_2bit, ow, oh>>(rgbaimage, w, h);
+        draw_image_linear<constixel::image<constixel::format_4bit, ow, oh>>(rgbaimage, w, h);
+        draw_image_linear<constixel::image<constixel::format_8bit, ow, oh>>(rgbaimage, w, h);
     }
 #endif  // #if 1
 }
