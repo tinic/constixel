@@ -708,9 +708,9 @@ class format_1bit : public format {
                 B = constixel::linear_to_srgb(Bl);
                 uint8_t n = (R * 2 * +G * 3 + B * 1) > 3 ? 1 : 0;
                 plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
-                err_r = Rl - constixel::srgb_to_linear(static_cast<float>(n ? 1.0f : 0.0f));
-                err_g = Gl - constixel::srgb_to_linear(static_cast<float>(n ? 1.0f : 0.0f));
-                err_b = Bl - constixel::srgb_to_linear(static_cast<float>(n ? 1.0f : 0.0f));
+                err_r = Rl - constixel::srgb_to_linear(n ? 1.0f : 0.0f);
+                err_g = Gl - constixel::srgb_to_linear(n ? 1.0f : 0.0f);
+                err_b = Bl - constixel::srgb_to_linear(n ? 1.0f : 0.0f);
             }
         }
     }
