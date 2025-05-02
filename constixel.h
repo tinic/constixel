@@ -116,6 +116,8 @@ class octree_impl {
     }
 };
 
+static constexpr double m_pi_d = 3.14159265358979323846;
+
 static consteval double cos(double x, int32_t terms = 10) {
     x = x - 6.283185307179586 * int(x / 6.283185307179586);  // wrap x to [0, 2π)
     double res = 1.0, term = 1.0;
@@ -217,7 +219,7 @@ static consteval srgb oklab_to_srgb(const oklab &oklab) {
 }
 
 static consteval oklab oklch_to_oklab(const oklch &oklch) {
-    return {oklch.l, oklch.c * cos(oklch.h * M_PI / 180.0), oklch.c * sin(oklch.h * M_PI / 180.0)};
+    return {oklch.l, oklch.c * cos(oklch.h * m_pi_d / 180.0), oklch.c * sin(oklch.h * m_pi_d / 180.0)};
 }
 
 template <std::size_t N, typename K, typename V>
