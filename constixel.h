@@ -11,8 +11,6 @@
 
 namespace constixel {
 
-#define GCC_BROKEN_BITCAST
-
 static constexpr float fast_rcp(const float x) {  // 23.8bits of accuracy
 #ifdef GCC_BROKEN_BITCAST
     return 1.0f / x;
