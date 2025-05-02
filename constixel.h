@@ -187,7 +187,7 @@ class octree_impl {
     size_t node_idx = 0;
     static constexpr size_t palette_size = S;
     static constexpr size_t node_size = N;
-    std::array<node, node_size> nodes;
+    std::array<node, node_size> nodes {};
     const std::array<uint32_t, palette_size> &pal;
 
     static constexpr size_t child_index(uint8_t r, uint8_t g, uint8_t b, int32_t level) {
