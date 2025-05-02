@@ -45,22 +45,6 @@ static constexpr float fast_pow(const float x, const float p) {
 #endif  // GCC_BROKEN_BITCAST
 }
 
-static constexpr double frac(double v) {  // same as fmod(v, 1.0)
-    return v - std::trunc(v);
-}
-
-static constexpr float fracf(float v) {  // same as fmodf(v, 1.0f)
-    return v - std::truncf(v);
-}
-
-static constexpr float constexpr_pow(const float x, const float p) {
-    return ::exp2f(p * ::log2f(x));
-}
-
-static constexpr float signf(float x) {
-    return (x > 0.0f) ? 1.0f : ((x < 0.0f) ? -1.0f : 1.0f);
-}
-
 struct node {
     int16_t child[8]{-1, -1, -1, -1, -1, -1, -1, -1};
     int16_t palette = -1;
