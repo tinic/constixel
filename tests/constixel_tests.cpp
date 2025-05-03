@@ -3,11 +3,10 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <unistd.h>
 
 #include "../fontbm/src/external/lodepng/lodepng.h"
 #include "../constixel.h"
-
-static size_t bytesCount = 0;
 
 #if 1
 constexpr std::string test0() {
@@ -147,7 +146,6 @@ void draw_image_cut(const std::vector<uint8_t> &rgbaimage, int32_t w, int32_t h)
     image.blitRGBA(0, 0, w, h, rgbaimage.data(), w, h, w * 4);
     image.sixel([&out](char ch) mutable {
         out.push_back(ch);
-        bytesCount++;
     });
     puts(out.c_str());
 }
@@ -159,7 +157,6 @@ void draw_image_diffused(const std::vector<uint8_t> &rgbaimage, int32_t w, int32
     image.blitRGBADiffused(0, 0, w, h, rgbaimage.data(), w, h, w * 4);
     image.sixel([&out](char ch) mutable {
         out.push_back(ch);
-        bytesCount++;
     });
     puts(out.c_str());
 }
@@ -171,7 +168,6 @@ void draw_image_linear(const std::vector<uint8_t> &rgbaimage, int32_t w, int32_t
     image.blitRGBADiffusedLinear(0, 0, w, h, rgbaimage.data(), w, h, w * 4);
     image.sixel([&out](char ch) mutable {
         out.push_back(ch);
-        bytesCount++;
     });
     puts(out.c_str());
 }
@@ -187,40 +183,36 @@ void draw_palette() {
     std::string out;
     image.sixel([&out](char ch) mutable {
         out.push_back(ch);
-        bytesCount++;
     });
     puts(out.c_str());
 }
 
-template <typename T>
+template <typename T, size_t I>
 void draw_functions() {
     puts("\033[2J\033[H\0337");
     static T image;
     image.clear();
-    for (int32_t c = 0; c < 32; c++) {
+    for (int32_t c = 0; c < I; c++) {
         image.fillrect(16 + c * 37, c * 32, 128, 128, static_cast<uint8_t>(c));
         std::string out("\0338");
         image.sixel([&out](char ch) mutable {
             out.push_back(ch);
-            bytesCount++;
         });
         puts(out.c_str());
     }
-    for (int32_t c = 0; c < 32; c++) {
+    for (int32_t c = 0; c < I; c++) {
         image.line(16, 16, 64 + c * 42, 700, static_cast<uint8_t>(c), static_cast<uint8_t>(c));
         std::string out("\0338");
         image.sixel([&out](char ch) mutable {
             out.push_back(ch);
-            bytesCount++;
         });
         puts(out.c_str());
     }
-    for (int32_t c = 0; c < 32; c++) {
+    for (int32_t c = 0; c < I; c++) {
         image.fillcircle(600, 384, 256 - c * 16, static_cast<uint8_t>(c));
         std::string out("\0338");
         image.sixel([&out](char ch) mutable {
             out.push_back(ch);
-            bytesCount++;
         });
         puts(out.c_str());
     }
@@ -229,28 +221,20 @@ void draw_functions() {
 #endif  // #if 0
 
 int main() {
+#if 1
+    static_assert(test0().size() == 276);
+    static_assert(test1().size() == 952);
+    static_assert(test2().size() == 1591);
+    static_assert(test3().size() == 1738);
+    static_assert(test4().size() == 1716);
+    static_assert(test5().size() == 2200);
+    static_assert(test6().size() == 1393);
+    static_assert(test7().size() == 2419);
+    static_assert(test8().size() == 333);
+    static_assert(test9().size() == 6121);
+#endif  // #if 0
+
 #if 0
-    static_assert(test0().size() == 316);
-    static_assert(test1().size() == 1221);
-    static_assert(test2().size() == 2090);
-    static_assert(test3().size() == 1646);
-    static_assert(test4().size() == 1639);
-    static_assert(test5().size() == 5828);
-    static_assert(test6().size() == 1428);
-    static_assert(test7().size() == 2630);
-    static_assert(test8().size() == 471);
-    static_assert(test9().size() == 5916);
-#endif  // #if 0
-
-#if 1
-    draw_functions<constixel::image<constixel::format_1bit, 768, 768>>();
-    draw_functions<constixel::image<constixel::format_2bit, 768, 768>>();
-    draw_functions<constixel::image<constixel::format_4bit, 768, 768>>();
-    draw_functions<constixel::image<constixel::format_8bit, 768, 768>>();
-    puts("\n");
-#endif  // #if 0
-
-#if 1
     puts("\033[2J\033[H\0337");
     puts(test0().c_str());
     puts("\n");
@@ -275,6 +259,14 @@ int main() {
 #endif  // #if 1
 
 #if 1
+    draw_functions<constixel::image<constixel::format_1bit, 768, 768>, 32>();
+    draw_functions<constixel::image<constixel::format_2bit, 768, 768>, 32>();
+    draw_functions<constixel::image<constixel::format_4bit, 768, 768>, 32>();
+    draw_functions<constixel::image<constixel::format_8bit, 768, 768>, 32>();
+    puts("\n");
+#endif  // #if 0
+
+#if 1
     puts("\033[H\0337");
     draw_palette<constixel::image<constixel::format_1bit, 16, 16, 32>>();
     draw_palette<constixel::image<constixel::format_2bit, 16, 16, 32>>();
@@ -289,7 +281,7 @@ int main() {
     uint32_t h = 0;
     constexpr int32_t ow = 1024;
     constexpr int32_t oh = 1024;
-    if (lodepng::decode(rgbaimage, w, h, "../media/larikeet.png") == 0) {
+    if (lodepng::decode(rgbaimage, w, h, "../../media/larikeet.png") == 0) {
         draw_image_cut<constixel::image<constixel::format_1bit, ow, oh>>(rgbaimage, int32_t(w), int32_t(h));
         draw_image_cut<constixel::image<constixel::format_2bit, ow, oh>>(rgbaimage, int32_t(w), int32_t(h));
         draw_image_cut<constixel::image<constixel::format_4bit, ow, oh>>(rgbaimage, int32_t(w), int32_t(h));
@@ -306,4 +298,5 @@ int main() {
         draw_image_linear<constixel::image<constixel::format_8bit, ow, oh>>(rgbaimage, int32_t(w), int32_t(h));
     }
 #endif  // #if 1
+
 }
