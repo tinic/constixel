@@ -20,7 +20,8 @@ Applications:
 
 Requirements:
 
-- gcc 13 or newer
+- C++20
+- gcc 13 or newer (requires bitcast)
 - clang 16 or newer
 - MSVC 17 or newer
 
@@ -47,3 +48,5 @@ int main() {
     puts(out.c_str());
 }
 ```
+
+
