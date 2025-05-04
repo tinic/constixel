@@ -162,7 +162,6 @@ class quantize {
     const std::array<uint32_t, palette_size> &pal;
 
    public:
-
     constexpr quantize(const std::array<uint32_t, palette_size> &palette) : pal(palette) {
         for (size_t i = 0; i < pal.size(); ++i) {
             linearpal[i * 3 + 0] = srgb_to_linear(static_cast<float>((pal[i] >> 16) & 0xFF) * (1.0f / 255.0f));
@@ -557,10 +556,10 @@ class format_1bit : public format {
     }
 
     static constexpr void blitRGBADiffusedLinear(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
-        float err_r = 0;
-        float err_g = 0;
-        float err_b = 0;
         for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
+            float err_r = 0;
+            float err_g = 0;
+            float err_b = 0;
             for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
                 float R = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 0]) * (1.0f / 255.0f);
                 float G = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 1]) * (1.0f / 255.0f);
@@ -571,9 +570,9 @@ class format_1bit : public format {
                 Rl = Rl + err_r;
                 Gl = Gl + err_g;
                 Bl = Bl + err_b;
-                uint8_t n = (Rl * 2 * + Gl * 3 + Bl * 1) > 3.0f ? 1 : 0;
+                uint8_t n = (Rl * 2 * +Gl * 3 + Bl * 1) > 3.0f ? 1 : 0;
                 plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
-                const float c = 0.75f;
+                const float c = 0.75;
                 err_r = std::clamp(Rl - (n ? 1.0f : 0.0f), -c, c);
                 err_g = std::clamp(Gl - (n ? 1.0f : 0.0f), -c, c);
                 err_b = std::clamp(Bl - (n ? 1.0f : 0.0f), -c, c);
