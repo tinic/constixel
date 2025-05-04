@@ -196,7 +196,7 @@ void draw_rgb() {
     auto m = std::mdspan(rgb.data(), 256, 256);
     for (uint32_t y = 0; y < 256; y++) {
         for (uint32_t x = 0; x < 256; x++) {
-            m[x, y] = (x << 0) | (y << 8);
+            m[x, y] = ((256-y)<<16) | (x << 0) | (y << 8);
         }
     }
     {
@@ -313,7 +313,7 @@ int main() {
     puts("\n");
 #endif  // #if 1
 
-#if 0
+#if 1
     std::vector<uint8_t> rgbaimage;
     uint32_t w = 0;
     uint32_t h = 0;
