@@ -17,3 +17,36 @@ Applications:
 - Help debug dynamic memory handling issues in any complex C++ projects.
 - Add graphical output to unit tests.
 - Programmatically render static assets.
+
+Requirements:
+
+- C++20
+- gcc 13 or newer (requires bitcast)
+- clang 16 or newer
+- MSVC 17 or newer
+
+Minimal example:
+
+```c++
+#include "constixel.h"
+
+#include <cstdio>
+
+int main() {
+    static constixel::image<constixel::format_8bit, 256, 256> image;
+
+    for (int32_t y = 0; y < 16; y++) {
+        for (int32_t x = 0; x < 16; x++) {
+            image.fillrect(x * 16, y * 16, 16, 16, static_cast<uint8_t>(y * 16 + x));
+        }
+    }
+
+    std::string out;
+    image.sixel([&out](char ch) mutable {
+        out.push_back(ch);
+    });
+    puts(out.c_str());
+}
+```
+
+
