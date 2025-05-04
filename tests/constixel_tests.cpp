@@ -196,7 +196,7 @@ void draw_rgb() {
     auto m = std::mdspan(rgb.data(), 256, 256);
     for (uint32_t y = 0; y < 256; y++) {
         for (uint32_t x = 0; x < 256; x++) {
-            m[x, y] = ((256-y)<<16) | (x << 0) | (y << 8);
+            m[x, y] = ((256 - y) << 16) | (x << 0) | (y << 8);
         }
     }
     {
@@ -338,6 +338,7 @@ int main() {
 #endif  // #if 1
 
 #if 1
+    draw_rgb<constixel::image<constixel::format_1bit, 256, 256, 1>>();
     draw_rgb<constixel::image<constixel::format_2bit, 256, 256, 1>>();
     draw_rgb<constixel::image<constixel::format_4bit, 256, 256, 1>>();
     draw_rgb<constixel::image<constixel::format_8bit, 256, 256, 1>>();
