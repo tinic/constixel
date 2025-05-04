@@ -710,18 +710,19 @@ class format_2bit : public format {
     }
 
     static constexpr void blitRGBADiffused(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
-        int32_t err_r = 0;
-        int32_t err_g = 0;
-        int32_t err_b = 0;
         for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
+            int32_t err_r = 0;
+            int32_t err_g = 0;
+            int32_t err_b = 0;
             for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
                 int32_t R = ptr[y * static_cast<size_t>(stride) + x * 4 + 0];
                 int32_t G = ptr[y * static_cast<size_t>(stride) + x * 4 + 1];
                 int32_t B = ptr[y * static_cast<size_t>(stride) + x * 4 + 2];
-                R = std::clamp(R + err_r, 0, 255);
-                G = std::clamp(G + err_g, 0, 255);
-                B = std::clamp(B + err_b, 0, 255);
-                uint8_t n = octree.nearest(static_cast<uint8_t>(R), static_cast<uint8_t>(G), static_cast<uint8_t>(B));
+                R = R + err_r;
+                G = G + err_g;
+                B = B + err_b;
+                uint8_t n = octree.nearest(static_cast<uint8_t>(std::clamp(R, 0, 255)), static_cast<uint8_t>(std::clamp(G, 0, 255)),
+                                           static_cast<uint8_t>(std::clamp(B, 0, 255)));
                 plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
                 err_r = R - static_cast<int32_t>((palette[n] >> 16) & 0xFF);
                 err_g = G - static_cast<int32_t>((palette[n] >> 8) & 0xFF);
@@ -731,10 +732,10 @@ class format_2bit : public format {
     }
 
     static constexpr void blitRGBADiffusedLinear(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
-        float err_r = 0;
-        float err_g = 0;
-        float err_b = 0;
         for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
+            float err_r = 0;
+            float err_g = 0;
+            float err_b = 0;
             for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
                 float R = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 0]) * (1.0f / 255.0f);
                 float G = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 1]) * (1.0f / 255.0f);
@@ -742,9 +743,9 @@ class format_2bit : public format {
                 float Rl = constixel::srgb_to_linear(R);
                 float Gl = constixel::srgb_to_linear(G);
                 float Bl = constixel::srgb_to_linear(B);
-                Rl = std::clamp(Rl + err_r, 0.0f, 1.0f);
-                Gl = std::clamp(Gl + err_g, 0.0f, 1.0f);
-                Bl = std::clamp(Bl + err_b, 0.0f, 1.0f);
+                Rl = Rl + err_r;
+                Gl = Gl + err_g;
+                Bl = Bl + err_b;
                 R = constixel::linear_to_srgb(Rl);
                 G = constixel::linear_to_srgb(Gl);
                 B = constixel::linear_to_srgb(Bl);
@@ -862,18 +863,19 @@ class format_4bit : public format {
     }
 
     static constexpr void blitRGBADiffused(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
-        int32_t err_r = 0;
-        int32_t err_g = 0;
-        int32_t err_b = 0;
         for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
+            int32_t err_r = 0;
+            int32_t err_g = 0;
+            int32_t err_b = 0;
             for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
                 int32_t R = ptr[y * static_cast<size_t>(stride) + x * 4 + 0];
                 int32_t G = ptr[y * static_cast<size_t>(stride) + x * 4 + 1];
                 int32_t B = ptr[y * static_cast<size_t>(stride) + x * 4 + 2];
-                R = std::clamp(R + err_r, 0, 255);
-                G = std::clamp(G + err_g, 0, 255);
-                B = std::clamp(B + err_b, 0, 255);
-                uint8_t n = octree.nearest(static_cast<uint8_t>(R), static_cast<uint8_t>(G), static_cast<uint8_t>(B));
+                R = R + err_r;
+                G = G + err_g;
+                B = B + err_b;
+                uint8_t n = octree.nearest(static_cast<uint8_t>(std::clamp(R, 0, 255)), static_cast<uint8_t>(std::clamp(G, 0, 255)),
+                                           static_cast<uint8_t>(std::clamp(B, 0, 255)));
                 plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
                 err_r = R - static_cast<int32_t>((palette[n] >> 16) & 0xFF);
                 err_g = G - static_cast<int32_t>((palette[n] >> 8) & 0xFF);
@@ -883,10 +885,10 @@ class format_4bit : public format {
     }
 
     static constexpr void blitRGBADiffusedLinear(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
-        float err_r = 0;
-        float err_g = 0;
-        float err_b = 0;
         for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
+            float err_r = 0;
+            float err_g = 0;
+            float err_b = 0;
             for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
                 float R = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 0]) * (1.0f / 255.0f);
                 float G = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 1]) * (1.0f / 255.0f);
@@ -894,9 +896,9 @@ class format_4bit : public format {
                 float Rl = constixel::srgb_to_linear(R);
                 float Gl = constixel::srgb_to_linear(G);
                 float Bl = constixel::srgb_to_linear(B);
-                Rl = std::clamp(Rl + err_r, 0.0f, 1.0f);
-                Gl = std::clamp(Gl + err_g, 0.0f, 1.0f);
-                Bl = std::clamp(Bl + err_b, 0.0f, 1.0f);
+                Rl = Rl + err_r;
+                Gl = Gl + err_g;
+                Bl = Bl + err_b;
                 R = constixel::linear_to_srgb(Rl);
                 G = constixel::linear_to_srgb(Gl);
                 B = constixel::linear_to_srgb(Bl);
@@ -1036,18 +1038,19 @@ class format_8bit : public format {
     }
 
     static constexpr void blitRGBADiffused(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
-        int32_t err_r = 0;
-        int32_t err_g = 0;
-        int32_t err_b = 0;
         for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
+            int32_t err_r = 0;
+            int32_t err_g = 0;
+            int32_t err_b = 0;
             for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
                 int32_t R = ptr[y * static_cast<size_t>(stride) + x * 4 + 0];
                 int32_t G = ptr[y * static_cast<size_t>(stride) + x * 4 + 1];
                 int32_t B = ptr[y * static_cast<size_t>(stride) + x * 4 + 2];
-                R = std::clamp(R + err_r, 0, 255);
-                G = std::clamp(G + err_g, 0, 255);
-                B = std::clamp(B + err_b, 0, 255);
-                uint8_t n = octree.nearest(static_cast<uint8_t>(R), static_cast<uint8_t>(G), static_cast<uint8_t>(B));
+                R = R + err_r;
+                G = G + err_g;
+                B = B + err_b;
+                uint8_t n = octree.nearest(static_cast<uint8_t>(std::clamp(R, 0, 255)), static_cast<uint8_t>(std::clamp(G, 0, 255)),
+                                           static_cast<uint8_t>(std::clamp(B, 0, 255)));
                 data.data()[(y + static_cast<size_t>(r.y)) * bytes_per_line + (x + static_cast<size_t>(r.x))] = n;
                 err_r = R - static_cast<int32_t>((palette[n] >> 16) & 0xFF);
                 err_g = G - static_cast<int32_t>((palette[n] >> 8) & 0xFF);
@@ -1057,10 +1060,10 @@ class format_8bit : public format {
     }
 
     static constexpr void blitRGBADiffusedLinear(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
-        float err_r = 0;
-        float err_g = 0;
-        float err_b = 0;
         for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
+            float err_r = 0;
+            float err_g = 0;
+            float err_b = 0;
             for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
                 float R = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 0]) * (1.0f / 255.0f);
                 float G = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 1]) * (1.0f / 255.0f);
@@ -1068,9 +1071,9 @@ class format_8bit : public format {
                 float Rl = constixel::srgb_to_linear(R);
                 float Gl = constixel::srgb_to_linear(G);
                 float Bl = constixel::srgb_to_linear(B);
-                Rl = std::clamp(Rl + err_r, 0.0f, 1.0f);
-                Gl = std::clamp(Gl + err_g, 0.0f, 1.0f);
-                Bl = std::clamp(Bl + err_b, 0.0f, 1.0f);
+                Rl = Rl + err_r;
+                Gl = Gl + err_g;
+                Bl = Bl + err_b;
                 R = constixel::linear_to_srgb(Rl);
                 G = constixel::linear_to_srgb(Gl);
                 B = constixel::linear_to_srgb(Bl);
