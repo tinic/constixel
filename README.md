@@ -20,7 +20,7 @@ Applications:
 
 Minimal example:
 
-```
+```c++
 #include "constixel.h"
 
 #include <cstdio>
