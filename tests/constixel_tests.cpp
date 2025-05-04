@@ -1,12 +1,14 @@
+#include <unistd.h>
+
 #include <chrono>
 #include <cstdio>
 #include <iostream>
+#include <mdspan>
 #include <string>
 #include <vector>
-#include <unistd.h>
 
-#include "../fontbm/src/external/lodepng/lodepng.h"
 #include "../constixel.h"
+#include "../fontbm/src/external/lodepng/lodepng.h"
 
 #if 1
 constexpr std::string test0() {
@@ -179,7 +181,25 @@ void draw_palette() {
         for (int32_t x = 0; x < 16; x++) {
             image.fillrect(x, y, 1, 1, static_cast<uint8_t>(y * 16 + x));
         }
+        std::string out;
+        image.sixel([&out](char ch) mutable {
+            out.push_back(ch);
+        });
+        puts(out.c_str());
     }
+}
+
+template <typename T>
+void draw_rgb() {
+    static T image;
+    std::array<uint32_t, 65536> rgb{};
+    auto m = std::mdspan(rgb.data(), 256, 256);
+    for (uint32_t y = 0; y < 256; y++) {
+        for (uint32_t x = 0; x < 256; x++) {
+            m[x, y] = (x << 0) | (y << 8);
+        }
+    }
+    image.blitRGBADiffused(0, 0, 256, 256, reinterpret_cast<const uint8_t *>(rgb.data()), 256, 256, 256 * 4);
     std::string out;
     image.sixel([&out](char ch) mutable {
         out.push_back(ch);
@@ -221,7 +241,7 @@ void draw_functions() {
 #endif  // #if 0
 
 int main() {
-#if 1
+#if 0
     static_assert(test0().size() == 276);
     static_assert(test1().size() == 952);
     static_assert(test2().size() == 1591);
@@ -258,7 +278,7 @@ int main() {
     puts("\n");
 #endif  // #if 1
 
-#if 1
+#if 0
     draw_functions<constixel::image<constixel::format_1bit, 768, 768>, 32>();
     draw_functions<constixel::image<constixel::format_2bit, 768, 768>, 32>();
     draw_functions<constixel::image<constixel::format_4bit, 768, 768>, 32>();
@@ -266,7 +286,7 @@ int main() {
     puts("\n");
 #endif  // #if 0
 
-#if 1
+#if 0
     puts("\033[H\0337");
     draw_palette<constixel::image<constixel::format_1bit, 16, 16, 32>>();
     draw_palette<constixel::image<constixel::format_2bit, 16, 16, 32>>();
@@ -275,7 +295,7 @@ int main() {
     puts("\n");
 #endif  // #if 1
 
-#if 1
+#if 0
     std::vector<uint8_t> rgbaimage;
     uint32_t w = 0;
     uint32_t h = 0;
@@ -299,4 +319,7 @@ int main() {
     }
 #endif  // #if 1
 
+    draw_rgb<constixel::image<constixel::format_2bit, 256, 256, 1>>();
+    draw_rgb<constixel::image<constixel::format_4bit, 256, 256, 1>>();
+    draw_rgb<constixel::image<constixel::format_8bit, 256, 256, 1>>();
 }
