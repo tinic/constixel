@@ -21,7 +21,7 @@ Applications:
 Requirements:
 
 - C++20
-- gcc 13 or newer (requires bitcast)
+- gcc 13 or newer
 - clang 16 or newer
 - MSVC 17 or newer
 
