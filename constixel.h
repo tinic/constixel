@@ -47,73 +47,7 @@ static constexpr float fast_pow(const float x, const float p) {
 
 struct node {
     int16_t child[8]{-1, -1, -1, -1, -1, -1, -1, -1};
-    int16_t palette = -1;
-};
-
-template <size_t S, size_t N>
-class octree_impl {
-    size_t node_idx = 0;
-    static constexpr size_t palette_size = S;
-    static constexpr size_t node_size = N;
-    std::array<node, node_size> nodes{};
-    const std::array<uint32_t, palette_size> &pal;
-
-    static constexpr size_t child_index(uint8_t r, uint8_t g, uint8_t b, int32_t level) {
-        return static_cast<size_t>(((r >> level) & 1) << 2 | ((g >> level) & 1) << 1 | ((b >> level) & 1));
-    }
-
-    constexpr void insert(uint32_t c, size_t idx) {
-        size_t n = 0;
-        for (int32_t lvl = 7; lvl >= 0; --lvl) {
-            size_t ci = child_index((c >> 16) & 0xFF, (c >> 8) & 0xFF, (c >> 0) & 0xFF, lvl);
-            if (nodes[n].child[ci] == -1) {
-                nodes[n].child[ci] = static_cast<int16_t>(node_idx);
-                node_idx++;
-            }
-            n = static_cast<size_t>(nodes[n].child[ci]);
-        }
-        nodes[n].palette = static_cast<int16_t>(idx);
-    }
-
-   public:
-    constexpr octree_impl(const std::array<uint32_t, palette_size> &palette) : pal(palette) {
-        for (size_t i = 0; i < palette_size; ++i) {
-            insert(palette[i], i);
-        }
-    }
-
-    constexpr uint8_t nearest(uint8_t r, uint8_t g, uint8_t b) const {
-/*        size_t n = 0;
-        for (int32_t lvl = 7; lvl >= 0; --lvl) {
-            size_t ci = child_index(r, g, b, lvl);
-            size_t next = static_cast<size_t>(nodes[n].child[ci]);
-            if (next == -1)
-                break;
-            n = next;
-            if (nodes[n].palette != -1)
-                return static_cast<uint8_t>(nodes[n].palette);
-        }*/
-        // fallback: brute-force
-        int32_t best = 0, bestd = 1UL << 30;
-        for (size_t i = 0; i < pal.size(); ++i) {
-            int32_t dr = static_cast<int32_t>(r) - static_cast<int32_t>((pal[i] >> 16) & 0xFF);
-            int32_t dg = static_cast<int32_t>(g) - static_cast<int32_t>((pal[i] >> 8) & 0xFF);
-            int32_t db = static_cast<int32_t>(b) - static_cast<int32_t>((pal[i] >> 0) & 0xFF);
-            int32_t d = dr * dr + dg * dg + db * db;
-            if (d < bestd) {
-                bestd = d;
-                best = static_cast<int32_t>(i);
-            }
-        }
-        return static_cast<uint8_t>(best);
-    }
-
-    constexpr size_t nodes_used_length() const {
-        return node_idx;
-    }
-    constexpr size_t nodes_memory_length() const {
-        return node_size;
-    }
+    int16_t color = -1;
 };
 
 static constexpr double m_pi_d = 3.14159265358979323846;
@@ -221,6 +155,54 @@ static consteval srgb oklab_to_srgb(const oklab &oklab) {
 static consteval oklab oklch_to_oklab(const oklch &oklch) {
     return {oklch.l, oklch.c * cos(oklch.h * m_pi_d / 180.0), oklch.c * sin(oklch.h * m_pi_d / 180.0)};
 }
+
+template <size_t S>
+class quantize {
+    static constexpr size_t palette_size = S;
+    const std::array<uint32_t, palette_size> &pal;
+
+   public:
+    std::array<float, palette_size * 3> linearpal{};
+
+    constexpr quantize(const std::array<uint32_t, palette_size> &palette) : pal(palette) {
+        for (size_t i = 0; i < pal.size(); ++i) {
+            linearpal[i * 3 + 0] = srgb_to_linear(static_cast<float>((pal[i] >> 16) & 0xFF) * (1.0f / 255.0f));
+            linearpal[i * 3 + 1] = srgb_to_linear(static_cast<float>((pal[i] >> 8) & 0xFF) * (1.0f / 255.0f));
+            linearpal[i * 3 + 2] = srgb_to_linear(static_cast<float>((pal[i] >> 0) & 0xFF) * (1.0f / 255.0f));
+        }
+    }
+
+    constexpr uint8_t nearest(int32_t r, int32_t g, int32_t b) const {
+        int32_t best = 0, bestd = 1UL << 30;
+        for (size_t i = 0; i < pal.size(); ++i) {
+            int32_t dr = r - static_cast<int32_t>((pal[i] >> 16) & 0xFF);
+            int32_t dg = g - static_cast<int32_t>((pal[i] >> 8) & 0xFF);
+            int32_t db = b - static_cast<int32_t>((pal[i] >> 0) & 0xFF);
+            int32_t d = dr * dr + dg * dg + db * db;
+            if (d < bestd) {
+                bestd = d;
+                best = static_cast<int32_t>(i);
+            }
+        }
+        return static_cast<uint8_t>(best);
+    }
+
+    constexpr uint8_t nearest_linear(float r, float g, float b) const {
+        size_t best = 0;
+        float bestd = 100.0f;
+        for (size_t i = 0; i < pal.size(); ++i) {
+            float dr = r - linearpal[i * 3 + 0];
+            float dg = g - linearpal[i * 3 + 1];
+            float db = b - linearpal[i * 3 + 2];
+            float d = dr * dr + dg * dg + db * db;
+            if (d < bestd) {
+                bestd = d;
+                best = i;
+            }
+        }
+        return static_cast<uint8_t>(best);
+    }
+};
 
 template <std::size_t N, typename K, typename V>
 class map {
@@ -652,18 +634,17 @@ class format_1bit : public format {
 template <size_t W, size_t H, int32_t S>
 class format_2bit : public format {
    public:
-    static constexpr size_t octree_size = 25;  // strongly depends on fixed palette below.
     static constexpr size_t bits_per_pixel = 2;
     static constexpr size_t bytes_per_line = (W * bits_per_pixel + 7) / 8;
     static constexpr size_t internal_height = ((H + 5) / 6) * 6;
     static constexpr size_t image_size = internal_height * bytes_per_line;
     static constexpr std::array<uint32_t, (1UL << bits_per_pixel)> palette = {0x000000, 0xffffff, 0xff0000, 0x0077ff};
 
-    static consteval const constixel::octree_impl<1UL << bits_per_pixel, octree_size> gen_octree() {
-        return constixel::octree_impl<1UL << bits_per_pixel, octree_size>(palette);
-    }
+    static constexpr const constixel::quantize<1UL << bits_per_pixel> gen_quant() {
+        return constixel::quantize<1UL << bits_per_pixel>(palette);
+    };
 
-    static constexpr const constixel::octree_impl<1UL << bits_per_pixel, octree_size> octree = gen_octree();
+    static constexpr const constixel::quantize<1UL << bits_per_pixel> quant = gen_quant();
 
     static constexpr void plot(std::array<uint8_t, image_size> &data, size_t x0, size_t y, uint32_t col) {
         col &= (1UL << bits_per_pixel) - 1;
@@ -703,8 +684,8 @@ class format_2bit : public format {
         for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
             for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
                 plot(data, (x + static_cast<uint32_t>(r.x)), (y + static_cast<uint32_t>(r.y)),
-                     octree.nearest(ptr[y * static_cast<size_t>(stride) + x * 4 + 0], ptr[y * static_cast<size_t>(stride) + x * 4 + 1],
-                                    ptr[y * static_cast<size_t>(stride) + x * 4 + 2]));
+                     quant.nearest(ptr[y * static_cast<size_t>(stride) + x * 4 + 0], ptr[y * static_cast<size_t>(stride) + x * 4 + 1],
+                                   ptr[y * static_cast<size_t>(stride) + x * 4 + 2]));
             }
         }
     }
@@ -721,12 +702,11 @@ class format_2bit : public format {
                 R = R + err_r;
                 G = G + err_g;
                 B = B + err_b;
-                uint8_t n = octree.nearest(static_cast<uint8_t>(std::clamp(R, 0, 255)), static_cast<uint8_t>(std::clamp(G, 0, 255)),
-                                           static_cast<uint8_t>(std::clamp(B, 0, 255)));
+                uint8_t n = quant.nearest(R,G,B);
                 plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
-                err_r = R - static_cast<int32_t>((palette[n] >> 16) & 0xFF);
-                err_g = G - static_cast<int32_t>((palette[n] >> 8) & 0xFF);
-                err_b = B - static_cast<int32_t>((palette[n] >> 0) & 0xFF);
+                err_r = std::clamp(R - static_cast<int32_t>((palette[n] >> 16) & 0xFF), -255, 255);
+                err_g = std::clamp(G - static_cast<int32_t>((palette[n] >> 8) & 0xFF), -255, 255);
+                err_b = std::clamp(B - static_cast<int32_t>((palette[n] >> 0) & 0xFF), -255, 255);
             }
         }
     }
@@ -746,14 +726,11 @@ class format_2bit : public format {
                 Rl = Rl + err_r;
                 Gl = Gl + err_g;
                 Bl = Bl + err_b;
-                R = constixel::linear_to_srgb(Rl);
-                G = constixel::linear_to_srgb(Gl);
-                B = constixel::linear_to_srgb(Bl);
-                uint8_t n = octree.nearest(static_cast<uint8_t>(R * 255.0f), static_cast<uint8_t>(G * 255.0f), static_cast<uint8_t>(B * 255.0f));
+                uint8_t n = quant.nearest_linear(Rl, Gl, Bl);
                 plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
-                err_r = Rl - constixel::srgb_to_linear(static_cast<float>((palette[n] >> 16) & 0xFF) * (1.0f / 255.0f));
-                err_g = Gl - constixel::srgb_to_linear(static_cast<float>((palette[n] >> 8) & 0xFF) * (1.0f / 255.0f));
-                err_b = Bl - constixel::srgb_to_linear(static_cast<float>((palette[n] >> 0) & 0xFF) * (1.0f / 255.0f));
+                err_r = std::clamp(Rl - quant.linearpal[n * 3 + 0], -1.0f, 1.0f);
+                err_g = std::clamp(Gl - quant.linearpal[n * 3 + 1], -1.0f, 1.0f);
+                err_b = std::clamp(Bl - quant.linearpal[n * 3 + 2], -1.0f, 1.0f);
             }
         }
     }
@@ -804,7 +781,6 @@ class format_2bit : public format {
 template <size_t W, size_t H, int32_t S>
 class format_4bit : public format {
    public:
-    static constexpr size_t octree_size = 70;  // strongly depends on fixed palette below.
     static constexpr size_t bits_per_pixel = 4;
     static constexpr size_t bytes_per_line = (W * bits_per_pixel + 7) / 8;
     static constexpr size_t internal_height = ((H + 5) / 6) * 6;
@@ -812,11 +788,11 @@ class format_4bit : public format {
     static constexpr std::array<uint32_t, (1UL << bits_per_pixel)> palette = {0x000000, 0xffffff, 0xff0000, 0x00ff00, 0x0000ff, 0xffff00, 0x00ffff, 0xff00ff,
                                                                               0x333333, 0x666666, 0x999999, 0xcccccc, 0x7f0000, 0x007f00, 0x00007f, 0x7f7f00};
 
-    static consteval const constixel::octree_impl<1UL << bits_per_pixel, octree_size> gen_octree() {
-        return constixel::octree_impl<1UL << bits_per_pixel, octree_size>(palette);
-    }
+    static constexpr const constixel::quantize<1UL << bits_per_pixel> gen_quant() {
+        return constixel::quantize<1UL << bits_per_pixel>(palette);
+    };
 
-    static constexpr const constixel::octree_impl<1UL << bits_per_pixel, octree_size> octree = gen_octree();
+    static constexpr const constixel::quantize<1UL << bits_per_pixel> quant = gen_quant();
 
     static constexpr void plot(std::array<uint8_t, image_size> &data, size_t x0, size_t y, uint32_t col) {
         col &= (1UL << bits_per_pixel) - 1;
@@ -856,8 +832,8 @@ class format_4bit : public format {
         for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
             for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
                 plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)),
-                     octree.nearest(ptr[y * static_cast<size_t>(stride) + x * 4 + 0], ptr[y * static_cast<size_t>(stride) + x * 4 + 1],
-                                    ptr[y * static_cast<size_t>(stride) + x * 4 + 2]));
+                     quant.nearest(ptr[y * static_cast<size_t>(stride) + x * 4 + 0], ptr[y * static_cast<size_t>(stride) + x * 4 + 1],
+                                   ptr[y * static_cast<size_t>(stride) + x * 4 + 2]));
             }
         }
     }
@@ -874,12 +850,11 @@ class format_4bit : public format {
                 R = R + err_r;
                 G = G + err_g;
                 B = B + err_b;
-                uint8_t n = octree.nearest(static_cast<uint8_t>(std::clamp(R, 0, 255)), static_cast<uint8_t>(std::clamp(G, 0, 255)),
-                                           static_cast<uint8_t>(std::clamp(B, 0, 255)));
+                uint8_t n = quant.nearest(R,G,B);
                 plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
-                err_r = R - static_cast<int32_t>((palette[n] >> 16) & 0xFF);
-                err_g = G - static_cast<int32_t>((palette[n] >> 8) & 0xFF);
-                err_b = B - static_cast<int32_t>((palette[n] >> 0) & 0xFF);
+                err_r = std::clamp(R - static_cast<int32_t>((palette[n] >> 16) & 0xFF), -255, 255);
+                err_g = std::clamp(G - static_cast<int32_t>((palette[n] >> 8) & 0xFF), -255, 255);
+                err_b = std::clamp(B - static_cast<int32_t>((palette[n] >> 0) & 0xFF), -255, 255);
             }
         }
     }
@@ -899,14 +874,11 @@ class format_4bit : public format {
                 Rl = Rl + err_r;
                 Gl = Gl + err_g;
                 Bl = Bl + err_b;
-                R = constixel::linear_to_srgb(Rl);
-                G = constixel::linear_to_srgb(Gl);
-                B = constixel::linear_to_srgb(Bl);
-                uint8_t n = octree.nearest(static_cast<uint8_t>(R * 255.0f), static_cast<uint8_t>(G * 255.0f), static_cast<uint8_t>(B * 255.0f));
+                uint8_t n = quant.nearest_linear(Rl, Gl, Bl);
                 plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
-                err_r = Rl - constixel::srgb_to_linear(static_cast<float>((palette[n] >> 16) & 0xFF) * (1.0f / 255.0f));
-                err_g = Gl - constixel::srgb_to_linear(static_cast<float>((palette[n] >> 8) & 0xFF) * (1.0f / 255.0f));
-                err_b = Bl - constixel::srgb_to_linear(static_cast<float>((palette[n] >> 0) & 0xFF) * (1.0f / 255.0f));
+                err_r = std::clamp(Rl - quant.linearpal[n * 3 + 0], -1.0f, 1.0f);
+                err_g = std::clamp(Gl - quant.linearpal[n * 3 + 1], -1.0f, 1.0f);
+                err_b = std::clamp(Bl - quant.linearpal[n * 3 + 2], -1.0f, 1.0f);
             }
         }
     }
@@ -957,7 +929,6 @@ class format_4bit : public format {
 template <size_t W, size_t H, int32_t S>
 class format_8bit : public format {
    public:
-    static constexpr size_t octree_size = 1061;  // strongly depends on calculated palette below.
     static constexpr size_t bits_per_pixel = 8;
     static constexpr size_t bytes_per_line = W;
     static constexpr size_t internal_height = ((H + 5) / 6) * 6;
@@ -1010,11 +981,11 @@ class format_8bit : public format {
 
     static constexpr std::array<uint32_t, 1UL << bits_per_pixel> palette = gen_palette();
 
-    static consteval const constixel::octree_impl<1UL << bits_per_pixel, octree_size> gen_octree() {
-        return constixel::octree_impl<1UL << bits_per_pixel, octree_size>(palette);
-    }
+    static constexpr const constixel::quantize<1UL << bits_per_pixel> gen_quant() {
+        return constixel::quantize<1UL << bits_per_pixel>(palette);
+    };
 
-    static constexpr const constixel::octree_impl<1UL << bits_per_pixel, octree_size> octree = gen_octree();
+    static constexpr const constixel::quantize<1UL << bits_per_pixel> quant = gen_quant();
 
     static constexpr void plot(std::array<uint8_t, image_size> &data, size_t x0, size_t y, uint32_t col) {
         data.data()[y * bytes_per_line + x0] = static_cast<uint8_t>(col);
@@ -1031,8 +1002,8 @@ class format_8bit : public format {
         for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
             for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
                 data.data()[(y + static_cast<size_t>(r.y)) * bytes_per_line + (x + static_cast<size_t>(r.x))] =
-                    octree.nearest(ptr[y * static_cast<size_t>(stride) + x * 4 + 0], ptr[y * static_cast<size_t>(stride) + x * 4 + 1],
-                                   ptr[y * static_cast<size_t>(stride) + x * 4 + 2]);
+                    quant.nearest(ptr[y * static_cast<size_t>(stride) + x * 4 + 0], ptr[y * static_cast<size_t>(stride) + x * 4 + 1],
+                                  ptr[y * static_cast<size_t>(stride) + x * 4 + 2]);
             }
         }
     }
@@ -1049,12 +1020,11 @@ class format_8bit : public format {
                 R = R + err_r;
                 G = G + err_g;
                 B = B + err_b;
-                uint8_t n = octree.nearest(static_cast<uint8_t>(std::clamp(R, 0, 255)), static_cast<uint8_t>(std::clamp(G, 0, 255)),
-                                           static_cast<uint8_t>(std::clamp(B, 0, 255)));
+                uint8_t n = quant.nearest(R,G,B);
                 data.data()[(y + static_cast<size_t>(r.y)) * bytes_per_line + (x + static_cast<size_t>(r.x))] = n;
-                err_r = R - static_cast<int32_t>((palette[n] >> 16) & 0xFF);
-                err_g = G - static_cast<int32_t>((palette[n] >> 8) & 0xFF);
-                err_b = B - static_cast<int32_t>((palette[n] >> 0) & 0xFF);
+                err_r = std::clamp(R - static_cast<int32_t>((palette[n] >> 16) & 0xFF), -255, 255);
+                err_g = std::clamp(G - static_cast<int32_t>((palette[n] >> 8) & 0xFF), -255, 255);
+                err_b = std::clamp(B - static_cast<int32_t>((palette[n] >> 0) & 0xFF), -255, 255);
             }
         }
     }
@@ -1074,14 +1044,11 @@ class format_8bit : public format {
                 Rl = Rl + err_r;
                 Gl = Gl + err_g;
                 Bl = Bl + err_b;
-                R = constixel::linear_to_srgb(Rl);
-                G = constixel::linear_to_srgb(Gl);
-                B = constixel::linear_to_srgb(Bl);
-                uint8_t n = octree.nearest(static_cast<uint8_t>(R * 255.0f), static_cast<uint8_t>(G * 255.0f), static_cast<uint8_t>(B * 255.0f));
+                uint8_t n = quant.nearest_linear(Rl, Gl, Bl);
                 data.data()[(y + static_cast<size_t>(r.y)) * bytes_per_line + (x + static_cast<size_t>(r.x))] = n;
-                err_r = Rl - constixel::srgb_to_linear(static_cast<float>((palette[n] >> 16) & 0xFF) * (1.0f / 255.0f));
-                err_g = Gl - constixel::srgb_to_linear(static_cast<float>((palette[n] >> 8) & 0xFF) * (1.0f / 255.0f));
-                err_b = Bl - constixel::srgb_to_linear(static_cast<float>((palette[n] >> 0) & 0xFF) * (1.0f / 255.0f));
+                err_r = std::clamp(Rl - quant.linearpal[n * 3 + 0], -1.0f, 1.0f);
+                err_g = std::clamp(Gl - quant.linearpal[n * 3 + 1], -1.0f, 1.0f);
+                err_b = std::clamp(Bl - quant.linearpal[n * 3 + 2], -1.0f, 1.0f);
             }
         }
     }
@@ -1283,13 +1250,6 @@ class image {
         T<W, H, S>::sixel(data, charOut, r, preserveBackground);
     }
 
-    constexpr size_t octree_used_length() const {
-        return format.octree.nodes_used_length();
-    }
-    constexpr size_t octree_memory_length() const {
-        return format.octree.nodes_memory_length();
-    }
-
    private:
     constexpr void plot(int32_t x, int32_t y, uint32_t col) {
         size_t _x = static_cast<size_t>(x);
@@ -1374,13 +1334,6 @@ class image {
     std::array<uint8_t, T<W, H, S>::image_size> data{};
     T<W, H, S> format{};
 };
-
-static_assert(constixel::image<constixel::format_2bit, 1, 1>().octree_memory_length() == constixel::image<constixel::format_2bit, 1, 1>().octree_used_length(),
-              "Octree memory size does not match 2bit palette contents.");
-static_assert(constixel::image<constixel::format_4bit, 1, 1>().octree_memory_length() == constixel::image<constixel::format_4bit, 1, 1>().octree_used_length(),
-              "Octree memory size does not match 4bit palette contents.");
-static_assert(constixel::image<constixel::format_8bit, 1, 1>().octree_memory_length() == constixel::image<constixel::format_8bit, 1, 1>().octree_used_length(),
-              "Octree memory size does not match 8bit palette contents.");
 
 }  // namespace constixel
 #endif  // #ifndef _SIXEL_H_
