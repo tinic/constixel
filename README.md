@@ -9,6 +9,7 @@ Primary features and goals:
 - Minimalistic interface and single header implementation so it can be used without fuzz in any modern C++ project.
 - Ability to render text from fontbm generated font files. All constexpr safe.
 - 1, 2, 4 and 8bit palette based back buffers for minimal memory usage.
+- Blit raw 32-bit RGBA image buffers into the palette backed back buffer (with or without dithering). 
 
 Applications:
 
@@ -21,9 +22,7 @@ Applications:
 Requirements:
 
 - C++20
-- gcc 13 or newer
-- clang 16 or newer
-- MSVC 17 or newer
+- gcc 13 or newer, clang 16 or newer, MSVC 17 or newer
 - For sixel display you will need a capabable terminal. Windows Terminal, iTerm on MacOS and any Linux terminal will work. The Terminal app on MacOS does not support sixel.
 
 Minimal example:
