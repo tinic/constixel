@@ -162,7 +162,6 @@ class quantize {
     const std::array<uint32_t, palette_size> &pal;
 
    public:
-    std::array<float, palette_size * 3> linearpal{};
 
     constexpr quantize(const std::array<uint32_t, palette_size> &palette) : pal(palette) {
         for (size_t i = 0; i < pal.size(); ++i) {
@@ -186,6 +185,8 @@ class quantize {
         }
         return static_cast<uint8_t>(best);
     }
+
+    std::array<float, palette_size * 3> linearpal{};
 
     constexpr uint8_t nearest_linear(float r, float g, float b) const {
         size_t best = 0;
@@ -541,22 +542,16 @@ class format_1bit : public format {
     }
 
     static constexpr void blitRGBADiffused(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
-        int32_t err_r = 0;
-        int32_t err_g = 0;
-        int32_t err_b = 0;
+        int32_t err = 0;
         for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
             for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
                 int32_t R = ptr[y * static_cast<size_t>(stride) + x * 4 + 0];
                 int32_t G = ptr[y * static_cast<size_t>(stride) + x * 4 + 1];
                 int32_t B = ptr[y * static_cast<size_t>(stride) + x * 4 + 2];
-                R = std::clamp(R + err_r, 0, 255);
-                G = std::clamp(G + err_g, 0, 255);
-                B = std::clamp(B + err_b, 0, 255);
-                uint8_t n = (R * 2 + G * 3 + B * 1) > 768 ? 1 : 0;
+                int32_t V = (R * 2 + G * 3 + B * 1) + err;
+                uint8_t n = V > 768 ? 1 : 0;
                 plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
-                err_r = R - (n ? 0xFF : 0x00);
-                err_g = G - (n ? 0xFF : 0x00);
-                err_b = B - (n ? 0xFF : 0x00);
+                err = std::clamp(V - (n ? 0xFF * 6 : 0x00), -0xFF * 6, 0xFF * 6);
             }
         }
     }
@@ -573,17 +568,15 @@ class format_1bit : public format {
                 float Rl = constixel::srgb_to_linear(R);
                 float Gl = constixel::srgb_to_linear(G);
                 float Bl = constixel::srgb_to_linear(B);
-                Rl = std::clamp(Rl + err_r, 0.0f, 1.0f);
-                Gl = std::clamp(Gl + err_g, 0.0f, 1.0f);
-                Bl = std::clamp(Bl + err_b, 0.0f, 1.0f);
-                R = constixel::linear_to_srgb(Rl);
-                G = constixel::linear_to_srgb(Gl);
-                B = constixel::linear_to_srgb(Bl);
-                uint8_t n = (R * 2 * +G * 3 + B * 1) > 3 ? 1 : 0;
+                Rl = Rl + err_r;
+                Gl = Gl + err_g;
+                Bl = Bl + err_b;
+                uint8_t n = (Rl * 2 * + Gl * 3 + Bl * 1) > 3.0f ? 1 : 0;
                 plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
-                err_r = Rl - constixel::srgb_to_linear(n ? 1.0f : 0.0f);
-                err_g = Gl - constixel::srgb_to_linear(n ? 1.0f : 0.0f);
-                err_b = Bl - constixel::srgb_to_linear(n ? 1.0f : 0.0f);
+                const float c = 0.75f;
+                err_r = std::clamp(Rl - (n ? 1.0f : 0.0f), -c, c);
+                err_g = std::clamp(Gl - (n ? 1.0f : 0.0f), -c, c);
+                err_b = std::clamp(Bl - (n ? 1.0f : 0.0f), -c, c);
             }
         }
     }
@@ -702,7 +695,7 @@ class format_2bit : public format {
                 R = R + err_r;
                 G = G + err_g;
                 B = B + err_b;
-                uint8_t n = quant.nearest(R,G,B);
+                uint8_t n = quant.nearest(R, G, B);
                 plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
                 err_r = std::clamp(R - static_cast<int32_t>((palette[n] >> 16) & 0xFF), -255, 255);
                 err_g = std::clamp(G - static_cast<int32_t>((palette[n] >> 8) & 0xFF), -255, 255);
@@ -850,7 +843,7 @@ class format_4bit : public format {
                 R = R + err_r;
                 G = G + err_g;
                 B = B + err_b;
-                uint8_t n = quant.nearest(R,G,B);
+                uint8_t n = quant.nearest(R, G, B);
                 plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
                 err_r = std::clamp(R - static_cast<int32_t>((palette[n] >> 16) & 0xFF), -255, 255);
                 err_g = std::clamp(G - static_cast<int32_t>((palette[n] >> 8) & 0xFF), -255, 255);
@@ -1020,7 +1013,7 @@ class format_8bit : public format {
                 R = R + err_r;
                 G = G + err_g;
                 B = B + err_b;
-                uint8_t n = quant.nearest(R,G,B);
+                uint8_t n = quant.nearest(R, G, B);
                 data.data()[(y + static_cast<size_t>(r.y)) * bytes_per_line + (x + static_cast<size_t>(r.x))] = n;
                 err_r = std::clamp(R - static_cast<int32_t>((palette[n] >> 16) & 0xFF), -255, 255);
                 err_g = std::clamp(G - static_cast<int32_t>((palette[n] >> 8) & 0xFF), -255, 255);
