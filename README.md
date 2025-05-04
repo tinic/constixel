@@ -18,6 +18,12 @@ Applications:
 - Add graphical output to unit tests.
 - Programmatically render static assets.
 
+Requirements:
+
+- gcc 13 or newer
+- clang 16 or newer
+- MSVC 17 or newer
+
 Minimal example:
 
 ```c++
