@@ -1,6 +1,6 @@
 # constixel
 
-constixel is a constexpr minimal C++20+ graphics library with the ability to output to a terminal using the sixel protocol.
+constixel is a minimalistic constexpr C++20+ graphics rendering library with the ability to output to a terminal using the sixel protocol.
 
 ## Primary features and goals
 
