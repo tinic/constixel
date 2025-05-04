@@ -49,4 +49,5 @@ int main() {
 }
 ```
 
+![constixel](./media/constixel.jpg "Example in iTerm")
 
