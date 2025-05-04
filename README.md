@@ -1,8 +1,8 @@
 # constixel
 
-constixel is a constexpr minimal C++20+ graphics library with the ability to output to a terminal using the sixel protocol. 
+constixel is a constexpr minimal C++20+ graphics library with the ability to output to a terminal using the sixel protocol.
 
-Primary features and goals:
+## Primary features and goals
 
 - Completely constexpr. All operations, including the sixel output stream can be generated during compilation.
 - No dynamic allocations. The backbuffer and interal data structures can live as global static variables.
@@ -11,7 +11,7 @@ Primary features and goals:
 - 1, 2, 4 and 8bit palette based back buffers for minimal memory usage. Reasonable standard palettes are provided.
 - Blit raw 32-bit RGBA image buffers into the palette backed back buffer (with or without dithering). 
 
-Applications:
+## Applications
 
 - Interface rendering on embedded devices.
 - Send graphical data to your terminal through a serial connection from any embedded device.
@@ -20,7 +20,7 @@ Applications:
 - Help debug dynamic memory handling issues in any complex C++ projects.
 - ...
   
-Requirements:
+## Requirements
 
 - C++20
 - gcc 13 or newer, clang 16 or newer, MSVC 17 or newer
@@ -29,7 +29,7 @@ Requirements:
 > [!NOTE]
 > The Terminal app on MacOS does not support sixel, please use iTerm2.
 
-Minimal example:
+## Minimal example
 
 ```c++
 #include "constixel.h"
