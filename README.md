@@ -15,10 +15,11 @@ Applications:
 
 - Interface rendering on embedded devices.
 - Send graphical data to your terminal through a serial connection from any embedded device.
-- Help debug dynamic memory handling issues in any complex C++ projects.
 - Add graphical output to unit tests.
-- Programmatically render static assets.
-
+- Programmatically render static graphical assets.
+- Help debug dynamic memory handling issues in any complex C++ projects.
+- ...
+  
 Requirements:
 
 - C++20
