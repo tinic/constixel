@@ -60,6 +60,6 @@
         "set": "cpp",
         "unordered_set": "cpp"
     },
-    "cmake.sourceDirectory": "/Users/turo/sixel-tools/tests",
+    "cmake.sourceDirectory": "/Users/turo/constixel/tests",
     "editor.autoClosingBrackets": "never"
 }
