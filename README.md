@@ -30,7 +30,7 @@ Minimal example:
 ```c++
 #include "constixel.h"
 
-#include <cstdio>
+#include <iostream>
 
 int main() {
     static constixel::image<constixel::format_8bit, 256, 256> image;
@@ -45,7 +45,7 @@ int main() {
     image.sixel([&out](char ch) mutable {
         out.push_back(ch);
     });
-    puts(out.c_str());
+    std::cout << out << std::endl;
 }
 ```
 
