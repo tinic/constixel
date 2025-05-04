@@ -199,12 +199,30 @@ void draw_rgb() {
             m[x, y] = (x << 0) | (y << 8);
         }
     }
-    image.blitRGBADiffused(0, 0, 256, 256, reinterpret_cast<const uint8_t *>(rgb.data()), 256, 256, 256 * 4);
-    std::string out;
-    image.sixel([&out](char ch) mutable {
-        out.push_back(ch);
-    });
-    puts(out.c_str());
+    {
+        image.blitRGBA(0, 0, 256, 256, reinterpret_cast<const uint8_t *>(rgb.data()), 256, 256, 256 * 4);
+        std::string out;
+        image.sixel([&out](char ch) mutable {
+            out.push_back(ch);
+        });
+        puts(out.c_str());
+    }
+    {
+        image.blitRGBADiffused(0, 0, 256, 256, reinterpret_cast<const uint8_t *>(rgb.data()), 256, 256, 256 * 4);
+        std::string out;
+        image.sixel([&out](char ch) mutable {
+            out.push_back(ch);
+        });
+        puts(out.c_str());
+    }
+    {
+        image.blitRGBADiffusedLinear(0, 0, 256, 256, reinterpret_cast<const uint8_t *>(rgb.data()), 256, 256, 256 * 4);
+        std::string out;
+        image.sixel([&out](char ch) mutable {
+            out.push_back(ch);
+        });
+        puts(out.c_str());
+    }
 }
 
 template <typename T, size_t I>
@@ -319,7 +337,9 @@ int main() {
     }
 #endif  // #if 1
 
+#if 1
     draw_rgb<constixel::image<constixel::format_2bit, 256, 256, 1>>();
     draw_rgb<constixel::image<constixel::format_4bit, 256, 256, 1>>();
     draw_rgb<constixel::image<constixel::format_8bit, 256, 256, 1>>();
+#endif  // #if 1
 }

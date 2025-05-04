@@ -83,7 +83,7 @@ class octree_impl {
     }
 
     constexpr uint8_t nearest(uint8_t r, uint8_t g, uint8_t b) const {
-        size_t n = 0;
+/*        size_t n = 0;
         for (int32_t lvl = 7; lvl >= 0; --lvl) {
             size_t ci = child_index(r, g, b, lvl);
             size_t next = static_cast<size_t>(nodes[n].child[ci]);
@@ -92,7 +92,7 @@ class octree_impl {
             n = next;
             if (nodes[n].palette != -1)
                 return static_cast<uint8_t>(nodes[n].palette);
-        }
+        }*/
         // fallback: brute-force
         int32_t best = 0, bestd = 1UL << 30;
         for (size_t i = 0; i < pal.size(); ++i) {
