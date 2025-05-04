@@ -8,7 +8,7 @@ Primary features and goals:
 - No dynamic allocations. The backbuffer and interal data structures can live as global static variables.
 - Minimalistic interface and single header implementation so it can be used without fuzz in any modern C++ project.
 - Ability to render text from fontbm generated font files. All constexpr safe.
-- 1, 2, 4 and 8bit palette based back buffers for minimal memory usage.
+- 1, 2, 4 and 8bit palette based back buffers for minimal memory usage. Reasonable standard palettes are provided.
 - Blit raw 32-bit RGBA image buffers into the palette backed back buffer (with or without dithering). 
 
 Applications:
