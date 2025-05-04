@@ -24,6 +24,7 @@ Requirements:
 - gcc 13 or newer
 - clang 16 or newer
 - MSVC 17 or newer
+- For sixel display you will need a capabable terminal. Windows Terminal, iTerm on MacOS and any Linux terminal will work. The Terminal app on MacOS does not support sixel.
 
 Minimal example:
 
