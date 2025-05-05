@@ -28,6 +28,9 @@ constixel is a minimalistic constexpr C++20+ graphics rendering library with the
 > [!NOTE]
 > The Terminal app on MacOS does not support sixel, please use iTerm2.
 
+> [!NOTE]
+> If you want to consteval either the sixel or image data you likely need to increase the constexpr ops limit. With g++ use '-fconstexpr-ops-limit=268435456' with clang use '-fconstexpr-steps=33554432'. The default limit in MSVC usually seems adequate.
+
 ## Minimal example
 
 ```c++
