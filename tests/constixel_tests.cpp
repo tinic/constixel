@@ -170,7 +170,7 @@ constexpr std::array<char, 8192> gen_separator() {
     size_t count = 0;
     constixel::image<constixel::format_8bit, 1024, 1> image;
     for (int32_t x = 0; x < 16; x++) {
-        image.line(x * 64, 0, x * 64 + 64, 0, constixel::color::GREY_RAMP_STOP - uint32_t(x));
+        image.line(x * 64, 0, x * 64 + 64, 0, static_cast<uint8_t>(constixel::color::GREY_RAMP_STOP - uint32_t(x)));
     }
     image.sixel([&sixel, &count](char ch) mutable {
         sixel[count++] = ch;
