@@ -1,6 +1,6 @@
 # constixel
 
-constixel is a minimalistic constexpr C++20+ graphics rendering library with the ability to output to a terminal using the sixel protocol.
+constixel is a single header minimalistic constexpr C++20+ graphics rendering library with the ability to output to a sixel image stream which can be viewed in most modern terminals.
 
 ## Primary features and goals
 
@@ -14,7 +14,7 @@ constixel is a minimalistic constexpr C++20+ graphics rendering library with the
 - Various other simple image manipulation operations.
 
 > [!NOTE]
-> This library is not designed for high fidelity graphics generation and should be more thought of a utility library.
+> This library is not designed for high fidelity graphics generation and should be more thought of a utility library for software development purposes.
 
 ## Applications
 
@@ -58,6 +58,7 @@ int main() {
         out.push_back(ch);
     });
     std::cout << out << std::endl;
+    return 0;
 }
 ```
 
@@ -101,6 +102,7 @@ int main() {
     static const auto sixel = gen_sixel();
     std::cout << "Actual byte size: " << strlen(sixel.data()) << "\n";
     std::cout << sixel.data() << std::endl;
+    return 0;
 }
 ```
 
@@ -225,28 +227,28 @@ class image {
 
     // Draw a filled rectangle
     void fillrect(int32_t x, int32_t y, int32_t w, int32_t h, uint32_t col, bool clip = true);
-    void fillrect(onst constixel::rect<int32_t> &r, uint32_t col, bool clip = true);
+    void fillrect(constixel::rect<int32_t> &r, uint32_t col, bool clip = true);
 
     // Draw a filled circle
     void fillcircle(int32_t x, int32_t y, int32_t r, uint32_t col, bool clip = true);
 
     // Get a populated RGBA buffer with the contents of this instance.
-    // Color 0 is special will be set to 0x0000000 in the returned buffer, 
-    // while all the other colors will be converted to a 0xffRRGGBB format.
+    // Color 0 is special and will be set to 0x0000000 in the returned buffer, 
+    // while all the other colors will be converted to a 0xffBBGGRR format.
     std::array<uint32_t, W * H> RGBA();
 
-    // Blit an RGBA buffer into this instance while color are quantizied to the internal palette. 
-    // NOTE: This is a slow operation.
+    // Blit an RGBA (little endian) buffer into this instance. Colors are quantizied to the internal palette. 
+    // NOTE: This is a slow operation due to the brute force color quantization.
     void blitRGBA(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
     void blitRGBA(const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
 
-    // Blit an RGBA buffer into this instance using line diffusion for better quality.
-    // NOTE: This is a slow operation.
+    // Blit an RGBA (little endian) buffer into this instance using line diffusion for better quality.
+    // NOTE: This is a slow operation due to the brute force color quantization.
     void blitRGBADiffused(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
     void blitRGBADiffused(const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
 
-    // Blit an RGBA buffer into this instance using line diffusion in linear color space for best quality.
-    // NOTE: This is a very slow operation.
+    // Blit an RGBA (little endian) buffer into this instance using line diffusion in linear color space for best quality.
+    // NOTE: This is a very slow operation due to the brute force color quantization.
     void blitRGBADiffusedLinear(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
     void blitRGBADiffusedLinear(const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
 
