@@ -19,4 +19,4 @@ else()
     message("Unknown compiler!")
 endif()
 
-add_executable(constixel_tests constixel_tests.cpp ${PROJECT_SOURCE_DIR}/../fontbm/src/external/lodepng/lodepng.cpp)
+add_executable(constixel_tests constixel_tests.cpp ${PROJECT_SOURCE_DIR}/../genfonts/fontbm/src/external/lodepng/lodepng.cpp)

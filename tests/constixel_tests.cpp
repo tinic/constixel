@@ -29,7 +29,7 @@ SOFTWARE.
 #include <vector>
 
 #include "../constixel.h"
-#include "../fontbm/src/external/lodepng/lodepng.h"
+#include "../genfonts/fontbm/src/external/lodepng/lodepng.h"
 
 #if 1
 constexpr std::string test0() {
