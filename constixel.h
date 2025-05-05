@@ -1084,6 +1084,54 @@ class format_8bit : public format {
     }
 };
 
+enum color : uint8_t {
+    BLACK_TRANSPARENT = 0,
+    BLACK_OPAQUE = 16,
+    WHITE = 1,
+    RED = 2,
+    GREEN = 3,
+    BLUE = 4,
+    YELLOW = 5,
+    CYAN = 6,
+    MAGENTA = 7,
+    GREY_80 = 8,
+    GREY_60 = 9,
+    GREY_40 = 10,
+    GREY_20 = 11,
+    DARK_RED = 12,
+    DARK_GREEN = 13,
+    DARK_BLUE = 14,
+    DARK_YELLOW = 15,
+
+    GREY_RAMP_START = 16,
+    GREY_RAMP_COUNT = 16,
+    GREY_RAMP_STOP = GREY_RAMP_START + 15,
+
+    RED_LUMA_RAMP_START = 32,
+    RED_LUMA_RAMP_COUNT = 16,
+    RED_LUMA_RAMP_STOP = RED_LUMA_RAMP_START + 15,
+
+    GREEN_LUMA_RAMP_START = 48,
+    GREEN_LUMA_RAMP_COUNT = 16,
+    GREEN_LUMA_RAMP_STOP = GREEN_LUMA_RAMP_START + 15,
+
+    BLUE_LUMA_RAMP_START = 64,
+    BLUE_LUMA_RAMP_COUNT = 16,
+    BLUE_LUMA_RAMP_STOP = BLUE_LUMA_RAMP_START + 15,
+
+    YELLOW_LUMA_RAMP_START = 80,
+    YELLOW_LUMA_RAMP_COUNT = 16,
+    YELLOW_LUMA_RAMP_STOP = YELLOW_LUMA_RAMP_START + 15,
+
+    CYAN_LUMA_RAMP_START = 96,
+    CYAN_LUMA_RAMP_COUNT = 16,
+    CYAN_LUMA_RAMP_STOP = CYAN_LUMA_RAMP_START + 15,
+
+    MAGENTA_LUMA_RAMP_START = 112,
+    MAGENTA_LUMA_RAMP_COUNT = 16,
+    MAGENTA_LUMA_RAMP_STOP = MAGENTA_LUMA_RAMP_START + 15
+};
+
 template <template <size_t, size_t, int32_t> class T, size_t W, size_t H, int32_t S = 1>
 class image {
     static_assert(sizeof(W) >= sizeof(uint32_t));
@@ -1093,53 +1141,9 @@ class image {
     static_assert(S >= 1 && S <= 256);
 
    public:
-    enum color : uint8_t {
-        BLACK_TRANSPARENT = 0,
-        BLACK_OPAQUE = 16,
-        WHITE = 1,
-        RED = 2,
-        GREEN = 3,
-        BLUE = 4,
-        YELLOW = 5,
-        CYAN = 6,
-        MAGENTA = 7,
-        GREY_80 = 8,
-        GREY_60 = 9,
-        GREY_40 = 10,
-        GREY_20 = 11,
-        DARK_RED = 12,
-        DARK_GREEN = 13,
-        DARK_BLUE = 14,
-        DARK_YELLOW = 15,
-
-        GREY_RAMP_START = 16,
-        GREY_RAMP_COUNT = 16,
-        GREY_RAMP_STOP = GREY_RAMP_START + 15,
-
-        RED_LUMA_RAMP_START = 32,
-        RED_LUMA_RAMP_COUNT = 16,
-        RED_LUMA_RAMP_STOP = RED_LUMA_RAMP_START + 15,
-
-        GREEN_LUMA_RAMP_START = 48,
-        GREEN_LUMA_RAMP_COUNT = 16,
-        GREEN_LUMA_RAMP_STOP = GREEN_LUMA_RAMP_START + 15,
-
-        BLUE_LUMA_RAMP_START = 64,
-        BLUE_LUMA_RAMP_COUNT = 16,
-        BLUE_LUMA_RAMP_STOP = BLUE_LUMA_RAMP_START + 15,
-
-        YELLOW_LUMA_RAMP_START = 80,
-        YELLOW_LUMA_RAMP_COUNT = 16,
-        YELLOW_LUMA_RAMP_STOP = YELLOW_LUMA_RAMP_START + 15,
-
-        CYAN_LUMA_RAMP_START = 96,
-        CYAN_LUMA_RAMP_COUNT = 16,
-        CYAN_LUMA_RAMP_STOP = CYAN_LUMA_RAMP_START + 15,
-
-        MAGENTA_LUMA_RAMP_START = 112,
-        MAGENTA_LUMA_RAMP_COUNT = 16,
-        MAGENTA_LUMA_RAMP_STOP = MAGENTA_LUMA_RAMP_START + 15
-    };
+    [[nodiscard]] constexpr int32_t bitdepth() const {
+        return T<W, H, S>::bits_per_pixel;
+    }
 
     [[nodiscard]] constexpr int32_t size() const {
         return T<W, H, S>::image_size;
@@ -1235,6 +1239,14 @@ class image {
         }
     }
 
+    constexpr void plot(int32_t x, int32_t y, uint32_t col) {
+        size_t _x = static_cast<size_t>(x);
+        _x %= W;
+        size_t _y = static_cast<size_t>(y);
+        _y %= H;
+        T<W, H, S>::plot(data, _x, _y, col);
+    }
+
     constexpr void line(const rect<int32_t> &l, uint32_t col, bool clip = true) {
         line(l.x, l.y, l.x + l.w, l.y + l.h);
     }
@@ -1321,14 +1333,6 @@ class image {
     }
 
    private:
-    constexpr void plot(int32_t x, int32_t y, uint32_t col) {
-        size_t _x = static_cast<size_t>(x);
-        _x %= W;
-        size_t _y = static_cast<size_t>(y);
-        _y %= H;
-        T<W, H, S>::plot(data, _x, _y, col);
-    }
-
     constexpr void span(int32_t x, int32_t w, int32_t y, uint32_t col, bool clip) {
         if (clip) {
             if (x < 0) {
