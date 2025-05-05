@@ -153,7 +153,7 @@ The most important member function of image:
 ```c++
 class image {
 
-    // First 16 colors in the palette
+    // Colors in the fixed internal palette
     enum color : uint8_t {
         BLACK = 0,
         WHITE = 1,
