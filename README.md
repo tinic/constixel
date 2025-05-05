@@ -2,6 +2,15 @@
 
 constixel is a single header minimalistic constexpr C++20+ graphics rendering library with the ability to output to a sixel image stream which can be viewed in most modern terminals.
 
+##### Table of Contents  
+[Primary features and goals](#primary-features-and-goals)  
+[Applications](#applications)  
+[Requirements](#requirements)  
+[Minimal example](#minimal-example)  
+[Consteval sixel example](#consteval-sixel-example)  
+[Consteval image example](#consteval-embedded-image-data-example)  
+[API](#api)  
+
 ## Primary features and goals
 
 - Completely constexpr. All operations, including the sixel output stream can be generated during compilation.
@@ -47,11 +56,11 @@ int main() {
 
     for (int32_t y = 0; y < 16; y++) {
         for (int32_t x = 0; x < 16; x++) {
-            image.fillrect(x * 16, y * 16, 16, 16, static_cast<uint8_t>(y * 16 + x));
+            image.fill_rect(x * 16, y * 16, 16, 16, static_cast<uint8_t>(y * 16 + x));
         }
     }
 
-    image.sixel2cout();
+    image.sixel_to_cout();
 
     return 0;
 }
@@ -61,7 +70,7 @@ int main() {
 
 ## Consteval sixel example
 
-As std::vector can not escape consteval (yet) we use std::array. Output of this example should be "Actual byte size: 18537" and the sixel image. The binary will contain the evaluated sixel string.
+As std::vector can not escape consteval (yet) so we use std::array. Output of this example should be "Actual byte size: 18537" and the sixel image. The binary will contain the evaluated sixel string.
 
 Compile as such:
 
@@ -79,7 +88,7 @@ consteval auto gen_sixel() {
 
     for (int32_t y = 0; y < 16; y++) {
         for (int32_t x = 0; x < 16; x++) {
-            image.fillrect(x * 16, y * 16, 16, 16, static_cast<uint8_t>(y * 16 + x));
+            image.fill_rect(x * 16, y * 16, 16, 16, static_cast<uint8_t>(y * 16 + x));
         }
     }
 
@@ -106,7 +115,7 @@ int main() {
 
 ## Consteval embedded image data example
 
-This example will consteval gen_image_1bit(), while dynamically generating the sixel string.
+This example will consteval gen_image_1bit() into a std::array, while dynamically generating the sixel string.
 
 ```c++
 #include "constixel.h"
@@ -117,7 +126,7 @@ consteval auto gen_image_1bit() {
     constixel::image<constixel::format_1bit, 256, 256, 1> image;
     for (int32_t y = 0; y < 16; y++) {
         for (int32_t x = 0; x < 16; x++) {
-            image.fillrect(x * 16, y * 16, 16, 16, static_cast<uint8_t>(y + x) & 1);
+            image.fill_rect(x * 16, y * 16, 16, 16, static_cast<uint8_t>(y + x) & 1);
         }
     }
     return image;
@@ -190,7 +199,7 @@ class image {
     int32_t height();
 
     // Return a reference to the internal pixel buffer
-    std::array<uint8_t, T<W, H, S>::image_size> &dataRef();
+    std::array<uint8_t, T<W, H, S>::image_size> &data_ref();
 
     // Return a clone of the internal pixel buffer
     std::array<uint8_t, T<W, H, S>::image_size> clone();
@@ -202,15 +211,15 @@ class image {
     void copy(const std::array<uint8_t, T<W, H, S>::image_size> &src);
 
     // Draw a line
-    void line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t col, uint32_t width = 1, bool clip = true);
-    void line(constixel::rect<int32_t> &l, uint32_t col, bool clip = true);
+    void line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, uint32_t width = 1, bool clip = true);
+    void line(constixel::rect<int32_t> &l, uint8_t col, bool clip = true);
 
     // Draw a filled rectangle
-    void fillrect(int32_t x, int32_t y, int32_t w, int32_t h, uint32_t col, bool clip = true);
-    void fillrect(constixel::rect<int32_t> &r, uint32_t col, bool clip = true);
+    void fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col, bool clip = true);
+    void fill_rect(constixel::rect<int32_t> &r, uint8_t col, bool clip = true);
 
     // Draw a filled circle
-    void fillcircle(int32_t x, int32_t y, int32_t r, uint32_t col, bool clip = true);
+    void fill_circle(int32_t x, int32_t y, int32_t r, uint8_t col, bool clip = true);
 
     // Get a populated RGBA buffer with the contents of this instance.
     // Color 0 is special and will be set to 0x0000000 in the returned buffer, 
@@ -219,21 +228,21 @@ class image {
 
     // Blit an RGBA (little endian) buffer into this instance. Colors are quantizied to the internal palette. 
     // NOTE: This is a slow operation due to the brute force color quantization and will likely not consteval.
-    void blitRGBA(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
-    void blitRGBA(const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
+    void blit_RGBA(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
+    void blit_RGBA(const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
 
     // Blit an RGBA (little endian) buffer into this instance using line diffusion for better quality.
     // NOTE: This is a slow operation due to the brute force color quantization and will likely not consteval.
-    void blitRGBADiffused(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
-    void blitRGBADiffused(const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
+    void blit_RGBA_diffused(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
+    void blit_RGBA_diffused(const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
 
     // Blit an RGBA (little endian) buffer into this instance using line diffusion in linear color space for best quality.
     // NOTE: This is a very slow operation due to the brute force color quantization and will likely not consteval.
-    void blitRGBADiffusedLinear(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
-    void blitRGBADiffusedLinear(const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
+    void blit_RGBA_diffused_linear(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
+    void blit_RGBA_diffused_linear(const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
 
     // Convert the current instance into a sixel stream and output it to std::cout
-    void sixel2cout();
+    void sixel_to_cout();
 
     // Convert the current instance into a sixel stream. Provide a lambda function in the form of:
     //
