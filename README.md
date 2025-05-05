@@ -164,8 +164,8 @@ class image {
     // Return a clone of this instance
     std::array<uint8_t, T<W, H, S>::image_size> clone();
 
-    // Clear the bitmap
-    int32_t clear();
+    // Clear the bitmap, i.e. set everything to color 0
+    void clear();
 
     // Copy another image into this instance. Overwrites the contents, no compositing occurs.
     void copy(const std::array<uint8_t, T<W, H, S>::image_size> &src);
