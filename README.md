@@ -97,7 +97,7 @@ int main() {
 
 ## Consteval embedded example
 
-This example will consteval gen_image_1bit(). We dynamically generate the sixel string here.
+This example will consteval gen_image_1bit(), while dynamically generating the sixel string.
 
 ```c++
 #include "constixel.h"
