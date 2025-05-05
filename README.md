@@ -185,10 +185,10 @@ class image {
     // Return a reference to the internal pixel buffer
     std::array<uint8_t, T<W, H, S>::image_size> &dataRef();
 
-    // Return a clone of this instance
+    // Return a clone of the internal pixel buffer
     std::array<uint8_t, T<W, H, S>::image_size> clone();
 
-    // Clear the bitmap, i.e. set everything to color 0
+    // Clear the image, i.e. set everything to color 0
     void clear();
 
     // Copy another image into this instance. Overwrites the contents, no compositing occurs.
