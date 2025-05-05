@@ -29,6 +29,7 @@ SOFTWARE.
 #include <bit>
 #include <cmath>
 #include <cstdint>
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -1330,6 +1331,17 @@ class image {
     template <typename F>
     constexpr void sixel(F &&charOut, const rect<int32_t> &r, bool preserveBackground = true) const {
         T<W, H, S>::sixel(data, charOut, r, preserveBackground);
+    }
+
+    constexpr void sixel_to_cout() const {
+        std::string out;
+        T<W, H, S>::sixel(
+            data,
+            [&out](char ch) mutable {
+                out.push_back(ch);
+            },
+            {0, 0, W, H}, true);
+        std::cout << out << std::endl;
     }
 
    private:
