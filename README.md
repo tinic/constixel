@@ -133,3 +133,70 @@ int main() {
 ```
 
 ![constixel](./media/constixel_1bit.jpg "Example in iTerm")
+
+## API
+
+The following image formats are available. [Width] is the width in pixels, [Height] is the height in pixels. [Scale] is an optional paramter to specify a scale factor for the sixel output. For instance setting this to 4 would scale the output by a factor of 4.
+
+```c++
+    constixel::image<constixel::format_1bit, [Width], [Height], [Scale]>
+    constixel::image<constixel::format_2bit, [Width], [Height], [Scale]>
+    constixel::image<constixel::format_4bit, [Width], [Height], [Scale]>
+    constixel::image<constixel::format_8bit, [Width], [Height], [Scale]>
+```
+
+```c++
+class image {
+    // Size in bytes of the image buffer
+    int32_t size();
+
+    // Width in pixel of the image buffer
+    int32_t width();
+
+    // Height in pixels of the image buffer
+    int32_t height();
+
+    // Return a reference to the internal pixel buffer
+    std::array<uint8_t, T<W, H, S>::image_size> &dataRef();
+
+    // Return a clone of this instance
+    std::array<uint8_t, T<W, H, S>::image_size> clone();
+
+    // Clear the bitmap
+    int32_t clear();
+
+    // Copy another image into this instance. Overwrites the contents, no compositing occurs.
+    void copy(const std::array<uint8_t, T<W, H, S>::image_size> &src);
+
+    // Draw a line
+    void line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t col, uint32_t width = 1, bool clip = true);
+
+    // Draw a filled rectangle
+    void fillrect(int32_t x, int32_t y, int32_t w, int32_t h, uint32_t col, bool clip = true);
+
+    // Draw a filled circle
+    void fillcircle(int32_t x, int32_t y, int32_t r, uint32_t col, bool clip = true);
+
+    // Get a populated RGBA buffer with the contents of this instance.
+    // Color 0 is special will be set to 0 in the returned buffer, while all the other colors which be converted with the alpha channel set to 0xFF.
+    std::array<uint32_t, W * H> RGBA();
+
+    // Blit an RGBA buffer into this instance. This is a slow operation.
+    void blitRGBA(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
+
+    // Blit an RGBA buffer into this instance using line diffusion. This is a slow operation.
+    void blitRGBADiffused(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
+
+    // Blit an RGBA buffer into this instance using line diffusion in linear color space. This is a very slow operation.
+    void blitRGBADiffusedLinear(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
+
+    // Convert the current instance in a sixel stream. Provide a lambda function in the form of:
+    //
+    // sixel([](char ch) mutable {
+    //    [do something with the character]
+    // });
+    //
+    void sixel(F &&charOut, const rect<int32_t> &r, bool preserveBackground = true);
+
+}
+```
