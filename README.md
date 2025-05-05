@@ -142,10 +142,10 @@ int main() {
 The following image formats are available. [Width] is the width in pixels, [Height] is the height in pixels. [Scale] is an optional paramter to specify a scale factor for the sixel output only. For instance setting this to 4 would scale the output of the sixel stream by a factor of 4.
 
 ```c++
-    constixel::image<constixel::format_1bit, [Width], [Height], [Scale]>
-    constixel::image<constixel::format_2bit, [Width], [Height], [Scale]>
-    constixel::image<constixel::format_4bit, [Width], [Height], [Scale]>
-    constixel::image<constixel::format_8bit, [Width], [Height], [Scale]>
+    constixel::image<constixel::format_1bit, [Width], [Height], [Scale=1]>
+    constixel::image<constixel::format_2bit, [Width], [Height], [Scale=1]>
+    constixel::image<constixel::format_4bit, [Width], [Height], [Scale=1]>
+    constixel::image<constixel::format_8bit, [Width], [Height], [Scale=1]>
 ```
 
 The most important member function of image:
