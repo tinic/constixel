@@ -227,7 +227,7 @@ class image {
 
     // Draw a filled rectangle
     void fillrect(int32_t x, int32_t y, int32_t w, int32_t h, uint32_t col, bool clip = true);
-    void fillrect(onst constixel::rect<int32_t> &r, uint32_t col, bool clip = true);
+    void fillrect(constixel::rect<int32_t> &r, uint32_t col, bool clip = true);
 
     // Draw a filled circle
     void fillcircle(int32_t x, int32_t y, int32_t r, uint32_t col, bool clip = true);
