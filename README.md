@@ -13,6 +13,9 @@ constixel is a minimalistic constexpr C++20+ graphics rendering library with the
 - Simple fillrect, line and fillcircle drawing functions.
 - Various other simple image manipulation operations.
 
+> [!NOTE]
+> This library is not designed for high fidelity graphics generation and should be more thought of a utility library.
+
 ## Applications
 
 - Interface rendering on embedded devices.
