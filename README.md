@@ -139,13 +139,13 @@ int main() {
 
 ## API
 
-The following image formats are available. [Width] is the width in pixels, [Height] is the height in pixels. [Scale] is an optional paramter to specify a scale factor for the sixel output. For instance setting this to 4 would scale the output by a factor of 4.
+The following image formats are available. [Width] is the width in pixels, [Height] is the height in pixels. [Scale] is an optional paramter to specify a scale factor for the sixel output only. For instance setting this to 4 would scale the output of the sixel stream by a factor of 4.
 
 ```c++
-    constixel::image<constixel::format_1bit, [Width], [Height], [Scale]>
-    constixel::image<constixel::format_2bit, [Width], [Height], [Scale]>
-    constixel::image<constixel::format_4bit, [Width], [Height], [Scale]>
-    constixel::image<constixel::format_8bit, [Width], [Height], [Scale]>
+    constixel::image<constixel::format_1bit, [Width], [Height], [Scale=1]>
+    constixel::image<constixel::format_2bit, [Width], [Height], [Scale=1]>
+    constixel::image<constixel::format_4bit, [Width], [Height], [Scale=1]>
+    constixel::image<constixel::format_8bit, [Width], [Height], [Scale=1]>
 ```
 
 The most important member function of image:
@@ -171,6 +171,27 @@ class image {
         DARK_GREEN = 13,
         DARK_BLUE = 14,
         DARK_YELLOW = 15
+
+        GREY_RAMP_START = 16,
+        GREY_RAMP_STOP = GREY_RAMP_START + 15,
+
+        RED_LUMA_RAMP_START = 32,
+        RED_LUMA_RAMP_STOP = RED_LUMA_RAMP_START + 15,
+
+        GREEN_LUMA_RAMP_START = 48,
+        GREEN_LUMA_RAMP_STOP = GREEN_LUMA_RAMP_START + 15,
+
+        BLUE_LUMA_RAMP_START = 64,
+        BLUE_LUMA_RAMP_STOP = BLUE_LUMA_RAMP_START + 15,
+
+        YELLOW_LUMA_RAMP_START = 80,
+        YELLOW_LUMA_RAMP_STOP = YELLOW_LUMA_RAMP_START + 15,
+
+        CYAN_LUMA_RAMP_START = 96,
+        CYAN_LUMA_RAMP_STOP = CYAN_LUMA_RAMP_START + 15,
+
+        MAGENTA_LUMA_RAMP_START = 112,
+        MAGENTA_LUMA_RAMP_STOP = MAGENTA_LUMA_RAMP_START + 15,
     };
 
     // Size in bytes of the image buffer
@@ -185,10 +206,10 @@ class image {
     // Return a reference to the internal pixel buffer
     std::array<uint8_t, T<W, H, S>::image_size> &dataRef();
 
-    // Return a clone of this instance
+    // Return a clone of the internal pixel buffer
     std::array<uint8_t, T<W, H, S>::image_size> clone();
 
-    // Clear the bitmap, i.e. set everything to color 0
+    // Clear the image, i.e. set everything to color 0
     void clear();
 
     // Copy another image into this instance. Overwrites the contents, no compositing occurs.
@@ -196,7 +217,7 @@ class image {
 
     // Draw a line
     void line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t col, uint32_t width = 1, bool clip = true);
-    void line(onst constixel::rect<int32_t> &l, uint32_t col, bool clip = true);
+    void line(constixel::rect<int32_t> &l, uint32_t col, bool clip = true);
 
     // Draw a filled rectangle
     void fillrect(int32_t x, int32_t y, int32_t w, int32_t h, uint32_t col, bool clip = true);
@@ -210,15 +231,18 @@ class image {
     // while all the other colors will be converted to a 0xffRRGGBB format.
     std::array<uint32_t, W * H> RGBA();
 
-    // Blit an RGBA buffer into this instance while color are quantizied to the internal palette. This is a slow operation.
+    // Blit an RGBA buffer into this instance while color are quantizied to the internal palette. 
+    // NOTE: This is a slow operation.
     void blitRGBA(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
     void blitRGBA(const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
 
-    // Blit an RGBA buffer into this instance using line diffusion for better quality. This is a slow operation.
+    // Blit an RGBA buffer into this instance using line diffusion for better quality.
+    // NOTE: This is a slow operation.
     void blitRGBADiffused(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
     void blitRGBADiffused(const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
 
-    // Blit an RGBA buffer into this instance using line diffusion in linear color space for best quality. This is a very slow operation.
+    // Blit an RGBA buffer into this instance using line diffusion in linear color space for best quality.
+    // NOTE: This is a very slow operation.
     void blitRGBADiffusedLinear(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
     void blitRGBADiffusedLinear(const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
 
