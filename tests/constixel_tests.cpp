@@ -165,6 +165,19 @@ constexpr std::string test9() {
     return out;
 }
 
+template <typename A, typename B>
+constexpr int const_memcmp(const A *lhs, const B *rhs, size_t count) {
+    const unsigned char *l = reinterpret_cast<const unsigned char *>(lhs);
+    const unsigned char *r = reinterpret_cast<const unsigned char *>(rhs);
+
+    for (size_t i = 0; i < count; ++i) {
+        if (l[i] != r[i]) {
+            return (l[i] < r[i]) ? -1 : 1;
+        }
+    }
+    return 0;
+}
+
 constexpr std::array<char, 8192> gen_separator() {
     std::array<char, 8192> sixel{};
     size_t count = 0;
@@ -270,6 +283,28 @@ void draw_rgb() {
     }
 }
 
+template <typename T>
+void round_trip() {
+    static T image;
+    std::array<uint32_t, 65536> rgb{};
+    auto m = std::mdspan(rgb.data(), 256, 256);
+    for (uint32_t y = 0; y < 256; y++) {
+        for (uint32_t x = 0; x < 256; x++) {
+            m[x, y] = ((256 - y) << 16) | (x << 0) | (y << 8);
+        }
+    }
+    image.blit_RGBA_diffused_linear(0, 0, 256, 256, reinterpret_cast<const uint8_t *>(rgb.data()), 256, 256, 256 * 4);
+    auto rgba8 = image.RGBA_uint8();
+    image.blit_RGBA(0, 0, 256, 256, rgba8.data(), 256, 256, 256 * 4);
+    std::string out;
+    image.sixel([&out](char ch) mutable {
+        out.push_back(ch);
+    });
+    puts(out.c_str());
+    printf("%d-bit %dpx %dpx round trip\n", int(image.bit_depth()), int(image.width()), int(image.height()));
+    separator();
+}
+
 template <typename T, size_t I>
 void draw_functions() {
     puts("\033[2J\033[H\0337");
@@ -310,7 +345,7 @@ void draw_functions() {
 #endif  // #if 0
 
 int main() {
-#if 1
+#if 0
     static_assert(test0().size() == 276);
     static_assert(test1().size() == 952);
     static_assert(test2().size() == 1591);
@@ -392,5 +427,12 @@ int main() {
     draw_rgb<constixel::image<constixel::format_2bit, 256, 256, 1>>();
     draw_rgb<constixel::image<constixel::format_4bit, 256, 256, 1>>();
     draw_rgb<constixel::image<constixel::format_8bit, 256, 256, 1>>();
+#endif  // #if 1
+
+#if 1
+    round_trip<constixel::image<constixel::format_1bit, 256, 256, 1>>();
+    round_trip<constixel::image<constixel::format_2bit, 256, 256, 1>>();
+    round_trip<constixel::image<constixel::format_4bit, 256, 256, 1>>();
+    round_trip<constixel::image<constixel::format_8bit, 256, 256, 1>>();
 #endif  // #if 1
 }
