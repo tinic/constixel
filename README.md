@@ -10,7 +10,6 @@ constixel is a single header minimalistic constexpr C++20+ graphics rendering li
 [Consteval sixel example](#constsixel)  
 [Consteval image example](#constimage)  
 [API](#api)  
-## Headers
 
 ## Primary features and goals
 
