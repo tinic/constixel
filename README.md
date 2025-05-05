@@ -210,15 +210,18 @@ class image {
     // while all the other colors will be converted to a 0xffRRGGBB format.
     std::array<uint32_t, W * H> RGBA();
 
-    // Blit an RGBA buffer into this instance while color are quantizied to the internal palette. This is a slow operation.
+    // Blit an RGBA buffer into this instance while color are quantizied to the internal palette. 
+    // NOTE: This is a slow operation.
     void blitRGBA(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
     void blitRGBA(const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
 
-    // Blit an RGBA buffer into this instance using line diffusion for better quality. This is a slow operation.
+    // Blit an RGBA buffer into this instance using line diffusion for better quality.
+    // NOTE: This is a slow operation.
     void blitRGBADiffused(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
     void blitRGBADiffused(const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
 
-    // Blit an RGBA buffer into this instance using line diffusion in linear color space for best quality. This is a very slow operation.
+    // Blit an RGBA buffer into this instance using line diffusion in linear color space for best quality.
+    // NOTE: This is a very slow operation.
     void blitRGBADiffusedLinear(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
     void blitRGBADiffusedLinear(const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
 
