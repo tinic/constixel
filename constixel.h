@@ -467,13 +467,29 @@ class format_1bit : public format {
         return 0;
     }
 
-    static constexpr auto RGBA(const std::array<uint8_t, image_size> &data) {
+    static constexpr auto RGBA_uint32(const std::array<uint8_t, image_size> &data) {
         std::array<uint32_t, W * H> rgba{};
         const uint8_t *ptr = &data.data();
         for (size_t y = 0; y < H; y++) {
             for (size_t x = 0; x < W; x++) {
                 uint8_t col = get(ptr, x);
                 rgba[y * W + x] = palette[col] | (col ? 0xFF000000 : 0x00000000);
+            }
+            ptr += bytes_per_line;
+        }
+        return rgba;
+    }
+
+    static constexpr auto RGBA_uint8(const std::array<uint8_t, image_size> &data) {
+        std::array<uint8_t, W * H * 4> rgba{};
+        const uint8_t *ptr = &data.data();
+        for (size_t y = 0; y < H; y++) {
+            for (size_t x = 0; x < W; x++) {
+                uint8_t col = get(ptr, x);
+                rgba[y * W * 4 + x * 4 + 0] = static_cast<uint8_t>((palette[col] >>  0) & 0xFF);
+                rgba[y * W * 4 + x * 4 + 1] = static_cast<uint8_t>((palette[col] >>  8) & 0xFF);
+                rgba[y * W * 4 + x * 4 + 2] = static_cast<uint8_t>((palette[col] >> 16) & 0xFF);
+                rgba[y * W * 4 + x * 4 + 3] = (col ? 0xFF : 0x00);
             }
             ptr += bytes_per_line;
         }
@@ -627,13 +643,29 @@ class format_2bit : public format {
         return 0;
     }
 
-    static constexpr auto RGBA(const std::array<uint8_t, image_size> &data) {
+    static constexpr auto RGBA_uint32(const std::array<uint8_t, image_size> &data) {
         std::array<uint32_t, W * H> rgba{};
         const uint8_t *ptr = &data.data();
         for (size_t y = 0; y < H; y++) {
             for (size_t x = 0; x < W; x++) {
                 uint8_t col = get(ptr, x);
                 rgba[y * W + x] = palette[col] | (col ? 0xFF000000 : 0x00000000);
+            }
+            ptr += bytes_per_line;
+        }
+        return rgba;
+    }
+
+    static constexpr auto RGBA_uint8(const std::array<uint8_t, image_size> &data) {
+        std::array<uint8_t, W * H * 4> rgba{};
+        const uint8_t *ptr = &data.data();
+        for (size_t y = 0; y < H; y++) {
+            for (size_t x = 0; x < W; x++) {
+                uint8_t col = get(ptr, x);
+                rgba[y * W * 4 + x * 4 + 0] = static_cast<uint8_t>((palette[col] >>  0) & 0xFF);
+                rgba[y * W * 4 + x * 4 + 1] = static_cast<uint8_t>((palette[col] >>  8) & 0xFF);
+                rgba[y * W * 4 + x * 4 + 2] = static_cast<uint8_t>((palette[col] >> 16) & 0xFF);
+                rgba[y * W * 4 + x * 4 + 3] = (col ? 0xFF : 0x00);
             }
             ptr += bytes_per_line;
         }
@@ -792,13 +824,29 @@ class format_4bit : public format {
         return 0;
     }
 
-    static constexpr auto RGBA(const std::array<uint8_t, image_size> &data) {
+    static constexpr auto RGBA_uint32(const std::array<uint8_t, image_size> &data) {
         std::array<uint32_t, W * H> rgba{};
         const uint8_t *ptr = &data.data();
         for (size_t y = 0; y < H; y++) {
             for (size_t x = 0; x < W; x++) {
                 uint8_t col = get(ptr, x);
                 rgba[y * W + x] = palette[col] | (col ? 0xFF000000 : 0x00000000);
+            }
+            ptr += bytes_per_line;
+        }
+        return rgba;
+    }
+
+    static constexpr auto RGBA_uint8(const std::array<uint8_t, image_size> &data) {
+        std::array<uint8_t, W * H * 4> rgba{};
+        const uint8_t *ptr = &data.data();
+        for (size_t y = 0; y < H; y++) {
+            for (size_t x = 0; x < W; x++) {
+                uint8_t col = get(ptr, x);
+                rgba[y * W * 4 + x * 4 + 0] = static_cast<uint8_t>((palette[col] >>  0) & 0xFF);
+                rgba[y * W * 4 + x * 4 + 1] = static_cast<uint8_t>((palette[col] >>  8) & 0xFF);
+                rgba[y * W * 4 + x * 4 + 2] = static_cast<uint8_t>((palette[col] >> 16) & 0xFF);
+                rgba[y * W * 4 + x * 4 + 3] = (col ? 0xFF : 0x00);
             }
             ptr += bytes_per_line;
         }
@@ -975,13 +1023,29 @@ class format_8bit : public format {
         }
     }
 
-    static constexpr auto RGBA(const std::array<uint8_t, image_size> &data) {
+    static constexpr auto RGBA_uint32(const std::array<uint8_t, image_size> &data) {
         std::array<uint32_t, W * H> rgba{};
         const uint8_t *ptr = &data.data();
         for (size_t y = 0; y < H; y++) {
             for (size_t x = 0; x < W; x++) {
                 uint8_t col = ptr[x];
                 rgba[y * W + x] = palette[col] | (col ? 0xFF000000 : 0x00000000);
+            }
+            ptr += bytes_per_line;
+        }
+        return rgba;
+    }
+
+    static constexpr auto RGBA_uint8(const std::array<uint8_t, image_size> &data) {
+        std::array<uint8_t, W * H * 4> rgba{};
+        const uint8_t *ptr = &data.data();
+        for (size_t y = 0; y < H; y++) {
+            for (size_t x = 0; x < W; x++) {
+                uint8_t col = ptr[x];
+                rgba[y * W * 4 + x * 4 + 0] = static_cast<uint8_t>((palette[col] >>  0) & 0xFF);
+                rgba[y * W * 4 + x * 4 + 1] = static_cast<uint8_t>((palette[col] >>  8) & 0xFF);
+                rgba[y * W * 4 + x * 4 + 2] = static_cast<uint8_t>((palette[col] >> 16) & 0xFF);
+                rgba[y * W * 4 + x * 4 + 3] = (col ? 0xFF : 0x00);
             }
             ptr += bytes_per_line;
         }
@@ -1277,7 +1341,11 @@ class image {
         fill_arc(x, y, abs(r), 3, 0, col, clip);
     }
 
-    constexpr std::array<uint32_t, W * H> RGBA() const {
+    constexpr std::array<uint32_t, W * H> RGBA_uint32() const {
+        return T<W, H, S>::RGBA();
+    }
+
+    constexpr std::array<uint8_t, W * H * 4> RGBA_uint8() const {
         return T<W, H, S>::RGBA();
     }
 
