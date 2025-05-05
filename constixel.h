@@ -374,12 +374,10 @@ class format {
     };
 
     template <size_t W, size_t H, int32_t S, typename PBT, size_t PBS, typename P, typename F, typename C, typename D>
-    static constexpr void sixel_image(const uint8_t *data, const P &palette, F &&charOut, const rect<int32_t> &_r, bool preserveBackground, const C &collect6,
+    static constexpr void sixel_image(const uint8_t *data, const P &palette, F &&charOut, const rect<int32_t> &_r, const C &collect6,
                                       const D &set6) {
         sixel_header(charOut);
-        if (!preserveBackground) {
-            sixel_raster_attributes<W, H, S>(charOut);
-        }
+        sixel_raster_attributes<W, H, S>(charOut);
         for (size_t c = 0; c < palette.size(); c++) {
             sixel_color(charOut, static_cast<uint16_t>(c), palette.data()[c]);
         }
@@ -550,9 +548,9 @@ class format_1bit : public format {
     }
 
     template <typename F>
-    static constexpr void sixel(const std::array<uint8_t, image_size> &data, F &&charOut, const rect<int32_t> &r, bool preserveBackground) {
+    static constexpr void sixel(const std::array<uint8_t, image_size> &data, F &&charOut, const rect<int32_t> &r) {
         sixel_image<W, H, S, uint8_t, bits_per_pixel>(
-            data.data(), palette, charOut, r, preserveBackground,
+            data.data(), palette, charOut, r,
             [](const uint8_t *dataRaw, size_t x, size_t col, size_t y) {
                 const uint8_t *ptr = &dataRaw[(y / S) * bytes_per_line + (x / S) / 8];
                 size_t x8 = (x / S) % 8;
@@ -732,9 +730,9 @@ class format_2bit : public format {
     }
 
     template <typename F>
-    static constexpr void sixel(const std::array<uint8_t, image_size> &data, F &&charOut, const rect<int32_t> &r, bool preserveBackground) {
+    static constexpr void sixel(const std::array<uint8_t, image_size> &data, F &&charOut, const rect<int32_t> &r) {
         sixel_image<W, H, S, uint8_t, bits_per_pixel>(
-            data.data(), palette, charOut, r, preserveBackground,
+            data.data(), palette, charOut, r,
             [](const uint8_t *dataRaw, size_t x, size_t col, size_t y) {
                 const uint8_t *ptr = &dataRaw[(y / S) * bytes_per_line + (x / S) / 4];
                 size_t x4 = (x / S) % 4;
@@ -915,9 +913,9 @@ class format_4bit : public format {
     }
 
     template <typename F>
-    static constexpr void sixel(const std::array<uint8_t, image_size> &data, F &&charOut, const rect<int32_t> &r, bool preserveBackground) {
+    static constexpr void sixel(const std::array<uint8_t, image_size> &data, F &&charOut, const rect<int32_t> &r) {
         sixel_image<W, H, S, uint8_t, bits_per_pixel>(
-            data.data(), palette, charOut, r, preserveBackground,
+            data.data(), palette, charOut, r,
             [](const uint8_t *dataRaw, size_t x, size_t col, size_t y) {
                 const uint8_t *ptr = &dataRaw[(y / S) * bytes_per_line + (x / S) / 2];
                 size_t x2 = (x / S) % 2;
@@ -1114,9 +1112,9 @@ class format_8bit : public format {
     }
 
     template <typename F>
-    static constexpr void sixel(const std::array<uint8_t, image_size> &data, F &&charOut, const rect<int32_t> &r, bool preserveBackground) {
+    static constexpr void sixel(const std::array<uint8_t, image_size> &data, F &&charOut, const rect<int32_t> &r) {
         sixel_image<W, H, S, uint8_t, bits_per_pixel>(
-            data.data(), palette, charOut, r, preserveBackground,
+            data.data(), palette, charOut, r,
             [](const uint8_t *dataRaw, size_t x, size_t col, size_t y) {
                 const uint8_t *ptr = &dataRaw[(y / S) * bytes_per_line + x / S];
                 uint8_t out = 0;
@@ -1398,13 +1396,13 @@ class image {
     }
 
     template <typename F>
-    constexpr void sixel(F &&charOut, bool preserveBackground = false) const {
-        T<W, H, S>::sixel(data, charOut, {0, 0, W, H}, preserveBackground);
+    constexpr void sixel(F &&charOut) const {
+        T<W, H, S>::sixel(data, charOut, {0, 0, W, H});
     }
 
     template <typename F>
-    constexpr void sixel(F &&charOut, const rect<int32_t> &r, bool preserveBackground = true) const {
-        T<W, H, S>::sixel(data, charOut, r, preserveBackground);
+    constexpr void sixel(F &&charOut, const rect<int32_t> &r) const {
+        T<W, H, S>::sixel(data, charOut, r);
     }
 
     constexpr void sixel_to_cout() const {
@@ -1414,7 +1412,7 @@ class image {
             [&out](char ch) mutable {
                 out.push_back(ch);
             },
-            {0, 0, W, H}, true);
+            {0, 0, W, H});
         std::cout << out << std::endl;
     }
 
