@@ -52,6 +52,7 @@ int main() {
     }
 
     image.sixel2cout();
+
     return 0;
 }
 ```
@@ -75,6 +76,7 @@ Compile as such:
 
 consteval auto gen_sixel() {
     constixel::image<constixel::format_8bit, 256, 256> image;
+
     for (int32_t y = 0; y < 16; y++) {
         for (int32_t x = 0; x < 16; x++) {
             image.fillrect(x * 16, y * 16, 16, 16, static_cast<uint8_t>(y * 16 + x));
@@ -88,13 +90,16 @@ consteval auto gen_sixel() {
     });
     *ptr++ = '\n';
     *ptr++ = 0;
+
     return sixel;
 }
 
 int main() {
     static const auto sixel = gen_sixel();
+
     std::cout << "Actual byte size: " << strlen(sixel.data()) << "\n";
     std::cout << sixel.data() << std::endl;
+
     return 0;
 }
 ```
@@ -120,15 +125,19 @@ consteval auto gen_image_1bit() {
 
 int main() {
     static const auto image = gen_image_1bit();
+
     printf("image width x height: %d %d x 1bit depth\n", int(image.width()), int(image.height()));
     printf("image instance byte size: %d\n", int(image.size()));
+
     size_t count = 0;
     image.sixel([&count](char ch) mutable {
         putc(ch, stdout);
         count++;
     });
     putc('\n', stdout);
+
     printf("sixel byte size: %d\n", int(count));
+
     return 0;
 }
 ```
