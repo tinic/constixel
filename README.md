@@ -56,7 +56,7 @@ int main() {
 
 ## Consteval sixel example
 
-As std::vector can not escape consteval (yet), we use std::array. Output of this example should be "Actual byte size: 18537" and the sixel image. The binary will contain the evaluated sixel string. Of course for embedded applications it's more useful to eval just the backbuffer rendering instead of the sixel string as it's smaller and fixed in size.
+As std::vector can not escape consteval (yet), we use std::array. Output of this example should be "Actual byte size: 18537" and the sixel image. The binary will contain the evaluated sixel string.
 
 Compile as such:
 
