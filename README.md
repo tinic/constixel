@@ -139,7 +139,7 @@ int main() {
 
 ## API
 
-The following image formats are available. [Width] is the width in pixels, [Height] is the height in pixels. [Scale] is an optional paramter to specify a scale factor for the sixel output. For instance setting this to 4 would scale the output by a factor of 4.
+The following image formats are available. [Width] is the width in pixels, [Height] is the height in pixels. [Scale] is an optional paramter to specify a scale factor for the sixel output only. For instance setting this to 4 would scale the output of the sixel stream by a factor of 4.
 
 ```c++
     constixel::image<constixel::format_1bit, [Width], [Height], [Scale]>
