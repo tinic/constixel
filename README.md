@@ -8,7 +8,10 @@ constixel is a minimalistic constexpr C++20+ graphics rendering library with the
 - No dynamic allocations. The backbuffer and interal data structures can live as global static variables.
 - Minimalistic interface and single header implementation so it can be used without fuzz in any modern C++ project.
 - 1, 2, 4 and 8bit palette based back buffers for minimal memory usage. Reasonable standard palettes are provided.
-- Blit raw 32-bit RGBA image buffers into the palette backed back buffer (with or without dithering). 
+- Blit raw 32-bit RGBA image buffers into the palette backed back buffer (with or without dithering).
+- Conversion into a RGBA buffer when needed.
+- Simple fillrect, line and fillcircle drawing functions.
+- Various other simple image manipulation operations.
 
 ## Applications
 
