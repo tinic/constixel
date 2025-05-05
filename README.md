@@ -238,7 +238,7 @@ class image {
     std::array<uint32_t, W * H> RGBA();
 
     // Blit an RGBA (little endian) buffer into this instance. Colors are quantizied to the internal palette. 
-    // NOTE: This is a slow operation due to the brute force color qsuantization.
+    // NOTE: This is a slow operation due to the brute force color quantization.
     void blitRGBA(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
     void blitRGBA(const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
 
