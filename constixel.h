@@ -462,6 +462,23 @@ class format_1bit : public format {
         }
     }
 
+    static constexpr uint8_t get(const uint8_t *line, size_t x) {
+        return 0;
+    }
+
+    static constexpr auto RGBA(const std::array<uint8_t, image_size> &data) {
+        std::array<uint32_t, W * H> rgba {};
+        const uint8_t *ptr = &data.data();
+        for (size_t y = 0; y < H; y++) {
+            for (size_t x = 0; x < W; x++) {
+                uint8_t col = get(ptr, x);
+                rgba[y * W + x] = palette[col] | (col ? 0xFF000000 : 0x00000000);
+            }
+            ptr += bytes_per_line;
+        }
+        return rgba;
+    }
+
     static constexpr void blitRGBA(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
         for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
             for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
@@ -603,6 +620,23 @@ class format_2bit : public format {
             yptr[xl4] &= ~(ml[xl0] & mr[xr0]);
             yptr[xl4] |= (ml[xl0] & mr[xr0] & c4);
         }
+    }
+
+    static constexpr uint8_t get(const uint8_t *line, size_t x) {
+        return 0;
+    }
+
+    static constexpr auto RGBA(const std::array<uint8_t, image_size> &data) {
+        std::array<uint32_t, W * H> rgba {};
+        const uint8_t *ptr = &data.data();
+        for (size_t y = 0; y < H; y++) {
+            for (size_t x = 0; x < W; x++) {
+                uint8_t col = get(ptr, x);
+                rgba[y * W + x] = palette[col] | (col ? 0xFF000000 : 0x00000000);
+            }
+            ptr += bytes_per_line;
+        }
+        return rgba;
     }
 
     static constexpr void blitRGBA(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
@@ -751,6 +785,23 @@ class format_4bit : public format {
             yptr[xl2] &= ~(ml[xl0] & mr[xr0]);
             yptr[xl2] |= (ml[xl0] & mr[xr0] & c2);
         }
+    }
+
+    static constexpr uint8_t get(const uint8_t *line, size_t x) {
+        return 0;
+    }
+
+    static constexpr auto RGBA(const std::array<uint8_t, image_size> &data) {
+        std::array<uint32_t, W * H> rgba {};
+        const uint8_t *ptr = &data.data();
+        for (size_t y = 0; y < H; y++) {
+            for (size_t x = 0; x < W; x++) {
+                uint8_t col = get(ptr, x);
+                rgba[y * W + x] = palette[col] | (col ? 0xFF000000 : 0x00000000);
+            }
+            ptr += bytes_per_line;
+        }
+        return rgba;
     }
 
     static constexpr void blitRGBA(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
@@ -921,6 +972,19 @@ class format_8bit : public format {
         for (size_t x = xl0; x < xr0; x++) {
             yptr[x] = static_cast<uint8_t>(col);
         }
+    }
+
+    static constexpr auto RGBA(const std::array<uint8_t, image_size> &data) {
+        std::array<uint32_t, W * H> rgba {};
+        const uint8_t *ptr = &data.data();
+        for (size_t y = 0; y < H; y++) {
+            for (size_t x = 0; x < W; x++) {
+                uint8_t col = ptr[x];
+                rgba[y * W + x] = palette[col] | (col ? 0xFF000000 : 0x00000000);
+            }
+            ptr += bytes_per_line;
+        }
+        return rgba;
     }
 
     static constexpr void blitRGBA(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
@@ -1123,6 +1187,10 @@ class image {
         }
     }
 
+    constexpr void line(const rect<int32_t> &l, uint32_t col, bool clip = true) {
+        line(l.x, l.y, l.x + l.w, l.y + l.h);
+    }
+
     constexpr void fillrect(int32_t x, int32_t y, int32_t w, int32_t h, uint32_t col, bool clip = true) {
         if (clip) {
             if (y < 0) {
@@ -1139,15 +1207,30 @@ class image {
         }
     }
 
+    constexpr void fillrect(const rect<int32_t> &r, uint32_t col, bool clip = true) {
+        fillrect(r.x, r.y, r.w, r.h);
+    }
+
     constexpr void fillcircle(int32_t x, int32_t y, int32_t r, uint32_t col, bool clip = true) {
         span(x - abs(r), 2 * abs(r) + 1, y, col, clip);
         fillarc(x, y, abs(r), 3, 0, col, clip);
+    }
+
+    constexpr std::array<uint32_t, W * H> RGBA() const {
+        return T<W, H, S>::RGBA();
     }
 
     constexpr void blitRGBA(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
         rect<int32_t> blitrect{x, y, w, h};
         blitrect &= {0, 0, W, H};
         blitrect &= {x, y, iw, ih};
+        T<W, H, S>::blitRGBA(data, blitrect, ptr, stride);
+    }
+
+    constexpr void blitRGBA(const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
+        rect<int32_t> blitrect{r};
+        blitrect &= {0, 0, W, H};
+        blitrect &= {r.x, r.y, iw, ih};
         T<W, H, S>::blitRGBA(data, blitrect, ptr, stride);
     }
 
@@ -1158,10 +1241,24 @@ class image {
         T<W, H, S>::blitRGBADiffused(data, blitrect, ptr, stride);
     }
 
+    constexpr void blitRGBADiffused(const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
+        rect<int32_t> blitrect{r};
+        blitrect &= {0, 0, W, H};
+        blitrect &= {r.x, r.y, iw, ih};
+        T<W, H, S>::blitRGBADiffused(data, blitrect, ptr, stride);
+    }
+
     constexpr void blitRGBADiffusedLinear(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
         rect<int32_t> blitrect{x, y, w, h};
         blitrect &= {0, 0, W, H};
         blitrect &= {x, y, iw, ih};
+        T<W, H, S>::blitRGBADiffusedLinear(data, blitrect, ptr, stride);
+    }
+
+    constexpr void blitRGBADiffusedLinear(const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
+        rect<int32_t> blitrect{r};
+        blitrect &= {0, 0, W, H};
+        blitrect &= {r.x, r.y, iw, ih};
         T<W, H, S>::blitRGBADiffusedLinear(data, blitrect, ptr, stride);
     }
 
