@@ -53,7 +53,7 @@ int main() {
         }
     }
 
-    image.sixel_to_cout();
+    image.sixel2cout();
     return 0;
 }
 ```
