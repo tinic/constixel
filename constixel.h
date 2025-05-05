@@ -467,7 +467,7 @@ class format_1bit : public format {
     }
 
     static constexpr auto RGBA(const std::array<uint8_t, image_size> &data) {
-        std::array<uint32_t, W * H> rgba {};
+        std::array<uint32_t, W * H> rgba{};
         const uint8_t *ptr = &data.data();
         for (size_t y = 0; y < H; y++) {
             for (size_t x = 0; x < W; x++) {
@@ -627,7 +627,7 @@ class format_2bit : public format {
     }
 
     static constexpr auto RGBA(const std::array<uint8_t, image_size> &data) {
-        std::array<uint32_t, W * H> rgba {};
+        std::array<uint32_t, W * H> rgba{};
         const uint8_t *ptr = &data.data();
         for (size_t y = 0; y < H; y++) {
             for (size_t x = 0; x < W; x++) {
@@ -792,7 +792,7 @@ class format_4bit : public format {
     }
 
     static constexpr auto RGBA(const std::array<uint8_t, image_size> &data) {
-        std::array<uint32_t, W * H> rgba {};
+        std::array<uint32_t, W * H> rgba{};
         const uint8_t *ptr = &data.data();
         for (size_t y = 0; y < H; y++) {
             for (size_t x = 0; x < W; x++) {
@@ -975,7 +975,7 @@ class format_8bit : public format {
     }
 
     static constexpr auto RGBA(const std::array<uint8_t, image_size> &data) {
-        std::array<uint32_t, W * H> rgba {};
+        std::array<uint32_t, W * H> rgba{};
         const uint8_t *ptr = &data.data();
         for (size_t y = 0; y < H; y++) {
             for (size_t x = 0; x < W; x++) {
@@ -1093,6 +1093,25 @@ class image {
     static_assert(S >= 1 && S <= 256);
 
    public:
+    enum color : uint8_t {
+        BLACK = 0,
+        WHITE = 1,
+        RED = 2,
+        GREEN = 3,
+        BLUE = 4,
+        YELLOW = 5,
+        CYAN = 6,
+        MAGENTA = 7,
+        GREY_80 = 8,
+        GREY_60 = 9,
+        GREY_40 = 10,
+        GREY_20 = 11,
+        DARK_RED = 12,
+        DARK_GREEN = 13,
+        DARK_BLUE = 14,
+        DARK_YELLOW = 15
+    };
+
     [[nodiscard]] constexpr int32_t size() const {
         return T<W, H, S>::image_size;
     }
