@@ -429,7 +429,7 @@ class format_1bit : public format {
     static constexpr size_t image_size = internal_height * bytes_per_line;
     static constexpr std::array<uint32_t, (1UL << bits_per_pixel)> palette = {0x00000000, 0x00ffffff};
 
-    static constexpr void plot(std::array<uint8_t, image_size> &data, size_t x0, size_t y, uint32_t col) {
+    static constexpr void plot(std::array<uint8_t, image_size> &data, size_t x0, size_t y, uint8_t col) {
         col &= (1UL << bits_per_pixel) - 1;
         size_t x8 = x0 / 8;
         x0 %= 8;
@@ -438,7 +438,7 @@ class format_1bit : public format {
         yptr[x8] |= static_cast<uint8_t>(col << (7 - x0));
     }
 
-    static constexpr void span(std::array<uint8_t, image_size> &data, size_t xl0, size_t xr0, size_t y, uint32_t col) {
+    static constexpr void span(std::array<uint8_t, image_size> &data, size_t xl0, size_t xr0, size_t y, uint8_t col) {
         col &= (1UL << bits_per_pixel) - 1;
         size_t xl8 = xl0 / 8;
         xl0 %= 8;
@@ -589,7 +589,7 @@ class format_2bit : public format {
 
     static constexpr const constixel::quantize<1UL << bits_per_pixel> quant = gen_quant();
 
-    static constexpr void plot(std::array<uint8_t, image_size> &data, size_t x0, size_t y, uint32_t col) {
+    static constexpr void plot(std::array<uint8_t, image_size> &data, size_t x0, size_t y, uint8_t col) {
         col &= (1UL << bits_per_pixel) - 1;
         size_t x4 = x0 / 4;
         x0 %= 4;
@@ -598,7 +598,7 @@ class format_2bit : public format {
         yptr[x4] |= static_cast<uint8_t>(col << (6 - x0 * 2));
     }
 
-    static constexpr void span(std::array<uint8_t, image_size> &data, size_t xl0, size_t xr0, size_t y, uint32_t col) {
+    static constexpr void span(std::array<uint8_t, image_size> &data, size_t xl0, size_t xr0, size_t y, uint8_t col) {
         col &= (1UL << bits_per_pixel) - 1;
         size_t xl4 = xl0 / 4;
         xl0 %= 4;
@@ -754,7 +754,7 @@ class format_4bit : public format {
 
     static constexpr const constixel::quantize<1UL << bits_per_pixel> quant = gen_quant();
 
-    static constexpr void plot(std::array<uint8_t, image_size> &data, size_t x0, size_t y, uint32_t col) {
+    static constexpr void plot(std::array<uint8_t, image_size> &data, size_t x0, size_t y, uint8_t col) {
         col &= (1UL << bits_per_pixel) - 1;
         size_t x2 = x0 / 2;
         x0 %= 2;
@@ -763,7 +763,7 @@ class format_4bit : public format {
         yptr[x2] |= static_cast<uint8_t>(col << (4 - x0 * 4));
     }
 
-    static constexpr void span(std::array<uint8_t, image_size> &data, size_t xl0, size_t xr0, size_t y, uint32_t col) {
+    static constexpr void span(std::array<uint8_t, image_size> &data, size_t xl0, size_t xr0, size_t y, uint8_t col) {
         col &= (1UL << bits_per_pixel) - 1;
         size_t xl2 = xl0 / 2;
         xl0 %= 2;
@@ -964,11 +964,11 @@ class format_8bit : public format {
 
     static constexpr const constixel::quantize<1UL << bits_per_pixel> quant = gen_quant();
 
-    static constexpr void plot(std::array<uint8_t, image_size> &data, size_t x0, size_t y, uint32_t col) {
+    static constexpr void plot(std::array<uint8_t, image_size> &data, size_t x0, size_t y, uint8_t col) {
         data.data()[y * bytes_per_line + x0] = static_cast<uint8_t>(col);
     }
 
-    static constexpr void span(std::array<uint8_t, image_size> &data, size_t xl0, size_t xr0, size_t y, uint32_t col) {
+    static constexpr void span(std::array<uint8_t, image_size> &data, size_t xl0, size_t xr0, size_t y, uint8_t col) {
         uint8_t *yptr = &data.data()[y * bytes_per_line];
         for (size_t x = xl0; x < xr0; x++) {
             yptr[x] = static_cast<uint8_t>(col);
@@ -1178,7 +1178,7 @@ class image {
         data = src;
     }
 
-    constexpr void line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t col, uint32_t width = 1, bool clip = true) {
+    constexpr void line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, uint32_t width = 1, bool clip = true) {
         int32_t steep = abs(y1 - y0) > abs(x1 - x0);
 
         if (steep) {
@@ -1240,7 +1240,7 @@ class image {
         }
     }
 
-    constexpr void plot(int32_t x, int32_t y, uint32_t col) {
+    constexpr void plot(int32_t x, int32_t y, uint8_t col) {
         size_t _x = static_cast<size_t>(x);
         _x %= W;
         size_t _y = static_cast<size_t>(y);
@@ -1248,11 +1248,11 @@ class image {
         T<W, H, S>::plot(data, _x, _y, col);
     }
 
-    constexpr void line(const rect<int32_t> &l, uint32_t col, bool clip = true) {
+    constexpr void line(const rect<int32_t> &l, uint8_t col, bool clip = true) {
         line(l.x, l.y, l.x + l.w, l.y + l.h);
     }
 
-    constexpr void fillrect(int32_t x, int32_t y, int32_t w, int32_t h, uint32_t col, bool clip = true) {
+    constexpr void fillrect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col, bool clip = true) {
         if (clip) {
             if (y < 0) {
                 h += y;
@@ -1268,11 +1268,11 @@ class image {
         }
     }
 
-    constexpr void fillrect(const rect<int32_t> &r, uint32_t col, bool clip = true) {
+    constexpr void fillrect(const rect<int32_t> &r, uint8_t col, bool clip = true) {
         fillrect(r.x, r.y, r.w, r.h);
     }
 
-    constexpr void fillcircle(int32_t x, int32_t y, int32_t r, uint32_t col, bool clip = true) {
+    constexpr void fillcircle(int32_t x, int32_t y, int32_t r, uint8_t col, bool clip = true) {
         span(x - abs(r), 2 * abs(r) + 1, y, col, clip);
         fillarc(x, y, abs(r), 3, 0, col, clip);
     }
@@ -1345,7 +1345,7 @@ class image {
     }
 
    private:
-    constexpr void span(int32_t x, int32_t w, int32_t y, uint32_t col, bool clip) {
+    constexpr void span(int32_t x, int32_t w, int32_t y, uint8_t col, bool clip) {
         if (clip) {
             if (x < 0) {
                 w += x;
@@ -1383,7 +1383,7 @@ class image {
         }
     }
 
-    constexpr void fillarc(int32_t x0, int32_t y0, int32_t r, uint8_t corners, int32_t delta, uint32_t col, bool clip) {
+    constexpr void fillarc(int32_t x0, int32_t y0, int32_t r, uint8_t corners, int32_t delta, uint8_t col, bool clip) {
         int32_t f = 1 - r;
         int32_t ddx = -2 * r;
         int32_t ddy = 1;
