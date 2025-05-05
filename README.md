@@ -145,6 +145,8 @@ The following image formats are available. [Width] is the width in pixels, [Heig
     constixel::image<constixel::format_8bit, [Width], [Height], [Scale]>
 ```
 
+The most important member function of image:
+
 ```c++
 class image {
     // Size in bytes of the image buffer
