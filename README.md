@@ -53,11 +53,7 @@ int main() {
         }
     }
 
-    std::string out;
-    image.sixel([&out](char ch) mutable {
-        out.push_back(ch);
-    });
-    std::cout << out << std::endl;
+    image.sixel_to_cout();
     return 0;
 }
 ```
