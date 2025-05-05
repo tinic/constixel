@@ -29,13 +29,12 @@ SOFTWARE.
 #include <bit>
 #include <cmath>
 #include <cstdint>
+#include <ctime>
 #include <iostream>
+#include <limits>
+#include <random>
 #include <string>
 #include <vector>
-
-#include <ctime>  
-#include <iostream> 
-#include <random> 
 
 namespace constixel {
 
@@ -227,28 +226,34 @@ class quantize {
     }
 };
 
-template <size_t N>
-struct hextree {
-    static constexpr uint32_t invalid = 0xffffffff;
+template <size_t N, typename T>
+class hextree {
+    static constexpr T bitslices = ((sizeof(T) * 8) / 4) - 1;
+    static constexpr T invalid = std::numeric_limits<T>::max();
 
     struct node {
-        uint32_t child[16] {};
+        T child[16]{};
         constexpr node() {
             for (auto &c : child) c = invalid;
         }
     };
+    public:
 
     std::array<node, N> nodes;
 
+    size_t byte_size() const {
+        return sizeof(node) * nodes.size();
+    }
+
     template <std::size_t NS>
-    constexpr hextree(const std::array<std::pair<uint32_t, uint32_t>, NS> &in) {
+    consteval hextree(const std::array<std::pair<T, T>, NS> &in) {
         nodes[0] = node{};
-        uint32_t node_cnt = 1;
+        T node_cnt = 1;
         for (auto [key, val] : in) {
-            uint32_t idx = 0;
-            for (int d = 0; d < 7; d++) {
-                uint32_t nib = (key >> ((7 - d) * 4)) & 0xF;
-                uint32_t next = nodes[idx].child[nib];
+            T idx = 0;
+            for (T d = 0; d < bitslices; d++) {
+                T nib = (key >> ((bitslices - d) * 4)) & 0xF;
+                T next = nodes[idx].child[nib];
                 if (next == invalid) {
                     next = node_cnt;
                     nodes[idx].child[nib] = next;
@@ -261,16 +266,16 @@ struct hextree {
     }
 
     template <std::size_t NS>
-    static consteval uint32_t size(const std::array<std::pair<uint32_t, uint32_t>, NS> &in) {
+    static consteval T size(const std::array<std::pair<T, T>, NS> &in) {
         std::vector<node> vnodes{1};
         vnodes.assign(1, node{});
         for (auto [key, val] : in) {
-            uint32_t idx = 0;
-            for (int d = 0; d < 7; d++) {
-                uint32_t nib = (key >> ((7 - d) * 4)) & 0xF;
-                uint32_t next = vnodes[idx].child[nib];
+            T idx = 0;
+            for (T d = 0; d < bitslices; d++) {
+                T nib = (key >> ((bitslices - d) * 4)) & 0xF;
+                T next = vnodes[idx].child[nib];
                 if (next == invalid) {
-                    next = static_cast<uint32_t>(vnodes.size());
+                    next = static_cast<T>(vnodes.size());
                     vnodes[idx].child[nib] = next;
                     vnodes.emplace_back();
                 }
@@ -278,16 +283,17 @@ struct hextree {
             }
             vnodes[idx].child[key & 0xF] = val;
         }
-        return vnodes.size();
+        return static_cast<T>(vnodes.size());
     }
 
-    constexpr uint32_t lookup(uint32_t key) const {
-        uint32_t idx = 0;
-        for (int d = 0; d < 7; ++d) {
-            uint32_t nib = (key >> ((7 - d) * 4)) & 0xF;
-            uint32_t next = nodes[idx].child[nib];
-            if (next == invalid)
+    constexpr T lookup(T key) const {
+        T idx = 0;
+        for (T d = 0; d < bitslices; ++d) {
+            T nib = (key >> ((bitslices - d) * 4)) & 0xF;
+            T next = nodes[idx].child[nib];
+            if (next == invalid) {
                 return 0;
+            }
             idx = next;
         }
         if (nodes[idx].child[key & 0xF] == invalid) {
