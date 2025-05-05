@@ -1,0 +1,3 @@
+[submodule "genfonts/fontbm"]
+	path = genfonts/fontbm
+	url = https://github.com/tinic/fontbm.git
