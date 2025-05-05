@@ -39,85 +39,6 @@ SOFTWARE.
 
 namespace constixel {
 
-struct entry {
-    uint32_t key;
-    uint32_t val;
-};
-
-template <size_t S>
-class phash {
-   public:
-    static constexpr size_t npow2(uint32_t v) {
-        v--;
-        v |= v >> 1;
-        v |= v >> 2;
-        v |= v >> 4;
-        v |= v >> 8;
-        v |= v >> 16;
-        v++;
-        return v;
-    }
-
-    static constexpr uint32_t bucket_size = npow2(S) * 4;
-    std::array<entry, bucket_size> bucket{};
-    static constexpr uint32_t mask = bucket_size - 1;
-    uint32_t scramble = 0xC0759187;
-
-    uint32_t hash32shiftmult(uint32_t key) {
-        uint32_t c2 = 0x27d4eb2d;  // a prime or an odd constant
-        key = (key ^ 61) ^ (key >> 16);
-        key = key + (key << 3);
-        key = key ^ (key >> 4);
-        key = key * c2;
-        key = key ^ (key >> 15);
-        return key;
-    }
-
-    uint32_t triple32(uint32_t x) {
-        x ^= x >> 17;
-        x *= 0xed5ad4bb;
-        x ^= x >> 11;
-        x *= 0xac4c1b51;
-        x ^= x >> 15;
-        x *= 0x31848bab;
-        x ^= x >> 14;
-        return x;
-    }
-
-    static constexpr uint32_t lowbias32(uint32_t x) {
-        x ^= x >> 16;
-        x *= 0x7feb352d;
-        x ^= x >> 15;
-        x *= 0x846ca68b;
-        x ^= x >> 16;
-        return x;
-    }
-
-    constexpr phash(const std::array<entry, S> &table) {
-        std::array<entry, bucket_size> a{};
-        for (size_t m = S; m < bucket_size; m++) {
-            printf("Trying bucket size %d\n", int(m));
-            for (uint32_t t = 0; t < 0xFFFFFFFF; t++) {
-                bool fail = false;
-                a.fill({0xFFFFFFFF, 0xFFFFFFFF});
-                for (size_t c = 0; c < table.size(); c++) {
-                    uint32_t idx = lowbias32(table[c].key + t) % m;
-                    if (a[idx].key != table[c].key && a[idx].val != 0xFFFFFFFF) {
-                        fail = true;
-                        break;
-                    }
-                    a[idx] = table[c];
-                }
-                if (!fail) {
-                    scramble = t;
-                    printf("yeah! %08d %08x\n", int(m), t);
-                    break;
-                }
-            }
-        }
-    }
-};
-
 static constexpr float fast_exp2(const float p) {
 #ifdef GCC_BROKEN_BITCAST
     return exp2f(p);
@@ -151,11 +72,6 @@ static constexpr float fast_pow(const float x, const float p) {
     return fast_exp2(p * fast_log2(x));
 #endif  // GCC_BROKEN_BITCAST
 }
-
-struct node {
-    int16_t child[8]{-1, -1, -1, -1, -1, -1, -1, -1};
-    int16_t color = -1;
-};
 
 static constexpr double m_pi_d = 3.14159265358979323846;
 
@@ -308,6 +224,76 @@ class quantize {
             }
         }
         return static_cast<uint8_t>(best);
+    }
+};
+
+template <size_t N>
+struct hextree {
+    static constexpr uint32_t invalid = 0xffffffff;
+
+    struct node {
+        uint32_t child[16] {};
+        constexpr node() {
+            for (auto &c : child) c = invalid;
+        }
+    };
+
+    std::array<node, N> nodes;
+
+    template <std::size_t NS>
+    constexpr hextree(const std::array<std::pair<uint32_t, uint32_t>, NS> &in) {
+        nodes[0] = node{};
+        uint32_t node_cnt = 1;
+        for (auto [key, val] : in) {
+            uint32_t idx = 0;
+            for (int d = 0; d < 7; d++) {
+                uint32_t nib = (key >> ((7 - d) * 4)) & 0xF;
+                uint32_t next = nodes[idx].child[nib];
+                if (next == invalid) {
+                    next = node_cnt;
+                    nodes[idx].child[nib] = next;
+                    node_cnt++;
+                }
+                idx = next;
+            }
+            nodes[idx].child[key & 0xF] = val;
+        }
+    }
+
+    template <std::size_t NS>
+    static consteval uint32_t size(const std::array<std::pair<uint32_t, uint32_t>, NS> &in) {
+        std::vector<node> vnodes{1};
+        vnodes.assign(1, node{});
+        for (auto [key, val] : in) {
+            uint32_t idx = 0;
+            for (int d = 0; d < 7; d++) {
+                uint32_t nib = (key >> ((7 - d) * 4)) & 0xF;
+                uint32_t next = vnodes[idx].child[nib];
+                if (next == invalid) {
+                    next = static_cast<uint32_t>(vnodes.size());
+                    vnodes[idx].child[nib] = next;
+                    vnodes.emplace_back();
+                }
+                idx = next;
+            }
+            vnodes[idx].child[key & 0xF] = val;
+        }
+        return vnodes.size();
+    }
+
+    constexpr uint32_t lookup(uint32_t key) const {
+        uint32_t idx = 0;
+        for (int d = 0; d < 7; ++d) {
+            uint32_t nib = (key >> ((7 - d) * 4)) & 0xF;
+            uint32_t next = nodes[idx].child[nib];
+            if (next == invalid)
+                return 0;
+            idx = next;
+        }
+        if (nodes[idx].child[key & 0xF] == invalid) {
+            return 0;
+        }
+        return nodes[idx].child[key & 0xF];
     }
 };
 
