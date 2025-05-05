@@ -172,33 +172,42 @@ class image {
 
     // Draw a line
     void line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t col, uint32_t width = 1, bool clip = true);
+    void line(onst constixel::rect<int32_t> &l, uint32_t col, bool clip = true);
 
     // Draw a filled rectangle
     void fillrect(int32_t x, int32_t y, int32_t w, int32_t h, uint32_t col, bool clip = true);
+    void fillrect(onst constixel::rect<int32_t> &r, uint32_t col, bool clip = true);
 
     // Draw a filled circle
     void fillcircle(int32_t x, int32_t y, int32_t r, uint32_t col, bool clip = true);
 
     // Get a populated RGBA buffer with the contents of this instance.
-    // Color 0 is special will be set to 0 in the returned buffer, while all the other colors which be converted with the alpha channel set to 0xFF.
+    // Color 0 is special will be set to 0x0000000 in the returned buffer, 
+    // while all the other colors will be converted to a 0xffRRGGBB format.
     std::array<uint32_t, W * H> RGBA();
 
-    // Blit an RGBA buffer into this instance. This is a slow operation.
+    // Blit an RGBA buffer into this instance while color are quantizied to the internal palette. This is a slow operation.
     void blitRGBA(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
+    void blitRGBA(const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
 
-    // Blit an RGBA buffer into this instance using line diffusion. This is a slow operation.
+    // Blit an RGBA buffer into this instance using line diffusion for better quality. This is a slow operation.
     void blitRGBADiffused(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
+    void blitRGBADiffused(const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
 
-    // Blit an RGBA buffer into this instance using line diffusion in linear color space. This is a very slow operation.
+    // Blit an RGBA buffer into this instance using line diffusion in linear color space for best quality. This is a very slow operation.
     void blitRGBADiffusedLinear(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
+    void blitRGBADiffusedLinear(const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
 
-    // Convert the current instance in a sixel stream. Provide a lambda function in the form of:
+    // Convert the current instance into a sixel stream. Provide a lambda function in the form of:
     //
-    // sixel([](char ch) mutable {
+    // image.sixel([](char ch) {
     //    [do something with the character]
     // });
     //
-    void sixel(F &&charOut, const rect<int32_t> &r, bool preserveBackground = true);
+    // Optionall you can provide a rectangle to get a portion of the image only.
+    //
+    void sixel(F &&charOut, bool preserveBackground = true);
+    void sixel(F &&charOut, const constixel::rect<int32_t> &r, bool preserveBackground = true);
 
 }
 ```
