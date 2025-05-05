@@ -33,7 +33,90 @@ SOFTWARE.
 #include <string>
 #include <vector>
 
+#include <ctime>  
+#include <iostream> 
+#include <random> 
+
 namespace constixel {
+
+struct entry {
+    uint32_t key;
+    uint32_t val;
+};
+
+template <size_t S>
+class phash {
+   public:
+    static constexpr size_t npow2(uint32_t v) {
+        v--;
+        v |= v >> 1;
+        v |= v >> 2;
+        v |= v >> 4;
+        v |= v >> 8;
+        v |= v >> 16;
+        v++;
+        return v;
+    }
+
+    static constexpr uint32_t bucket_size = npow2(S) * 4;
+    std::array<entry, bucket_size> bucket{};
+    static constexpr uint32_t mask = bucket_size - 1;
+    uint32_t scramble = 0xC0759187;
+
+    uint32_t hash32shiftmult(uint32_t key) {
+        uint32_t c2 = 0x27d4eb2d;  // a prime or an odd constant
+        key = (key ^ 61) ^ (key >> 16);
+        key = key + (key << 3);
+        key = key ^ (key >> 4);
+        key = key * c2;
+        key = key ^ (key >> 15);
+        return key;
+    }
+
+    uint32_t triple32(uint32_t x) {
+        x ^= x >> 17;
+        x *= 0xed5ad4bb;
+        x ^= x >> 11;
+        x *= 0xac4c1b51;
+        x ^= x >> 15;
+        x *= 0x31848bab;
+        x ^= x >> 14;
+        return x;
+    }
+
+    static constexpr uint32_t lowbias32(uint32_t x) {
+        x ^= x >> 16;
+        x *= 0x7feb352d;
+        x ^= x >> 15;
+        x *= 0x846ca68b;
+        x ^= x >> 16;
+        return x;
+    }
+
+    constexpr phash(const std::array<entry, S> &table) {
+        std::array<entry, bucket_size> a{};
+        for (size_t m = S; m < bucket_size; m++) {
+            printf("Trying bucket size %d\n", int(m));
+            for (uint32_t t = 0; t < 0xFFFFFFFF; t++) {
+                bool fail = false;
+                a.fill({0xFFFFFFFF, 0xFFFFFFFF});
+                for (size_t c = 0; c < table.size(); c++) {
+                    uint32_t idx = lowbias32(table[c].key + t) % m;
+                    if (a[idx].key != table[c].key && a[idx].val != 0xFFFFFFFF) {
+                        fail = true;
+                        break;
+                    }
+                    a[idx] = table[c];
+                }
+                if (!fail) {
+                    scramble = t;
+                    printf("yeah! %08d %08x\n", int(m), t);
+                    break;
+                }
+            }
+        }
+    }
+};
 
 static constexpr float fast_exp2(const float p) {
 #ifdef GCC_BROKEN_BITCAST
@@ -374,8 +457,7 @@ class format {
     };
 
     template <size_t W, size_t H, int32_t S, typename PBT, size_t PBS, typename P, typename F, typename C, typename D>
-    static constexpr void sixel_image(const uint8_t *data, const P &palette, F &&charOut, const rect<int32_t> &_r, const C &collect6,
-                                      const D &set6) {
+    static constexpr void sixel_image(const uint8_t *data, const P &palette, F &&charOut, const rect<int32_t> &_r, const C &collect6, const D &set6) {
         sixel_header(charOut);
         sixel_raster_attributes<W, H, S>(charOut);
         for (size_t c = 0; c < palette.size(); c++) {
@@ -642,7 +724,7 @@ class format_2bit : public format {
     static constexpr uint8_t get(const uint8_t *line, size_t x) {
         size_t x4 = x / 4;
         size_t xb = x % 4;
-        return (line[x4] >> ((3-xb) * 2)) & 0x3;
+        return (line[x4] >> ((3 - xb) * 2)) & 0x3;
     }
 
     static constexpr auto RGBA_uint32(const std::array<uint8_t, image_size> &data) {
@@ -825,7 +907,7 @@ class format_4bit : public format {
     static constexpr uint8_t get(const uint8_t *line, size_t x) {
         size_t x2 = x / 2;
         size_t xb = x % 2;
-        return (line[x2] >> ((1-xb) * 4)) & 0xF;
+        return (line[x2] >> ((1 - xb) * 4)) & 0xF;
     }
 
     static constexpr auto RGBA_uint32(const std::array<uint8_t, image_size> &data) {
@@ -1407,12 +1489,11 @@ class image {
 
     constexpr void sixel_to_cout() const {
         std::string out;
-        T<W, H, S>::sixel(
-            data,
-            [&out](char ch) mutable {
-                out.push_back(ch);
-            },
-            {0, 0, W, H});
+        T<W, H, S>::sixel(data,
+                          [&out](char ch) mutable {
+                              out.push_back(ch);
+                          },
+                          {0, 0, W, H});
         std::cout << out << std::endl;
     }
 
