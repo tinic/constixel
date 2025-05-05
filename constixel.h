@@ -1109,7 +1109,28 @@ class image {
         DARK_RED = 12,
         DARK_GREEN = 13,
         DARK_BLUE = 14,
-        DARK_YELLOW = 15
+        DARK_YELLOW = 15,
+
+        GREY_RAMP_START = 16,
+        GREY_RAMP_STOP = GREY_RAMP_START + 15,
+
+        RED_LUMA_RAMP_START = 32,
+        RED_LUMA_RAMP_STOP = RED_LUMA_RAMP_START + 15,
+
+        GREEN_LUMA_RAMP_START = 48,
+        GREEN_LUMA_RAMP_STOP = GREEN_LUMA_RAMP_START + 15,
+
+        BLUE_LUMA_RAMP_START = 64,
+        BLUE_LUMA_RAMP_STOP = BLUE_LUMA_RAMP_START + 15,
+
+        YELLOW_LUMA_RAMP_START = 80,
+        YELLOW_LUMA_RAMP_STOP = YELLOW_LUMA_RAMP_START + 15,
+
+        CYAN_LUMA_RAMP_START = 96,
+        CYAN_LUMA_RAMP_STOP = CYAN_LUMA_RAMP_START + 15,
+
+        MAGENTA_LUMA_RAMP_START = 112,
+        MAGENTA_LUMA_RAMP_STOP = MAGENTA_LUMA_RAMP_START + 15
     };
 
     [[nodiscard]] constexpr int32_t size() const {
