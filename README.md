@@ -42,8 +42,6 @@ constixel is a single header minimalistic constexpr C++20+ graphics rendering li
 ```c++
 #include "constixel.h"
 
-#include <iostream>
-
 int main() {
     static constixel::image<constixel::format_8bit, 256, 256> image;
 
@@ -73,7 +71,6 @@ Compile as such:
 ```c++
 #include "constixel.h"
 
-#include <iostream>
 #include <cstring>
 
 consteval auto gen_sixel() {
