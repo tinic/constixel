@@ -22,7 +22,7 @@ constixel is a single header minimalistic constexpr C++20+ graphics rendering li
 - Send graphical data to your terminal through a serial connection from any embedded device.
 - Add graphical output to unit tests.
 - Programmatically render static graphical assets.
-- Help debug dynamic memory handling issues in any complex C++ projects.
+- Help debug dynamic memory handling issues in complex C++ projects.
 - ...
   
 ## Requirements
