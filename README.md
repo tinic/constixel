@@ -54,3 +54,78 @@ int main() {
 
 ![constixel](./media/constixel.jpg "Example in iTerm")
 
+## Consteval sixel example
+
+As std::vector can not escape consteval (yet), we use std::array. Output of this example should be "Actual byte size: 18537" and the sixel image. The binary will contain the evaluated sixel string. Of course for embedded applications it's more useful to eval just the backbuffer rendering instead of the sixel string as it's smaller and fixed in size.
+
+Compile as such:
+
+```bash
+> g++ -fconstexpr-ops-limit=268435456 -std=c++23 constixel.cpp -o constixel -Os
+```
+
+```c++
+#include "constixel.h"
+
+#include <iostream>
+#include <cstring>
+
+consteval auto gen_sixel() {
+    constixel::image<constixel::format_8bit, 256, 256> image;
+    for (int32_t y = 0; y < 16; y++) {
+        for (int32_t x = 0; x < 16; x++) {
+            image.fillrect(x * 16, y * 16, 16, 16, static_cast<uint8_t>(y * 16 + x));
+        }
+    }
+
+    std::array<char, 32767> sixel;
+    char *ptr = sixel.data();
+    image.sixel([&ptr](char ch) mutable {
+	      *ptr++ = ch;
+    });
+    *ptr++ = '\n';
+    *ptr++ = 0;
+    return sixel;
+}
+
+int main() {
+    static const auto sixel = gen_sixel();
+    std::cout << "Actual byte size: " << strlen(sixel.data()) << "\n";
+    std::cout << sixel.data() << std::endl;
+}
+```
+
+## Consteval embedded example
+
+This example will consteval gen_image_1bit(). We dynamically generate the sixel string here.
+
+```c++
+#include "constixel.h"
+
+#include <cstring>
+
+consteval auto gen_image_1bit() {
+    constixel::image<constixel::format_1bit, 256, 256, 1> image;
+    for (int32_t y = 0; y < 16; y++) {
+        for (int32_t x = 0; x < 16; x++) {
+            image.fillrect(x * 16, y * 16, 16, 16, static_cast<uint8_t>(y + x) & 1);
+        }
+    }
+    return image;
+}
+
+int main() {
+    static const auto image = gen_image_1bit();
+    printf("image width x height: %d %d x 1bit depth\n", int(image.width()), int(image.height()));
+    printf("image instance byte size: %d\n", int(image.size()));
+    size_t count = 0;
+    image.sixel([&count](char ch) mutable {
+	      putc(ch, stdout);
+	      count++;
+    });
+    putc('\n', stdout);
+    printf("sixel byte size: %d\n", int(count));
+    return 0;
+}```
+
+![constixel](./media/constixel_1bit.jpg "Example in iTerm")
