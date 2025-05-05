@@ -233,7 +233,7 @@ class image {
     void fillcircle(int32_t x, int32_t y, int32_t r, uint32_t col, bool clip = true);
 
     // Get a populated RGBA buffer with the contents of this instance.
-    // Color 0 is special will be set to 0x0000000 in the returned buffer, 
+    // Color 0 is special and will be set to 0x0000000 in the returned buffer, 
     // while all the other colors will be converted to a 0xffRRGGBB format.
     std::array<uint32_t, W * H> RGBA();
 
