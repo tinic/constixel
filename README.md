@@ -81,7 +81,7 @@ consteval auto gen_sixel() {
     std::array<char, 32767> sixel;
     char *ptr = sixel.data();
     image.sixel([&ptr](char ch) mutable {
-	      *ptr++ = ch;
+        *ptr++ = ch;
     });
     *ptr++ = '\n';
     *ptr++ = 0;
