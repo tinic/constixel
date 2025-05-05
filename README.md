@@ -234,7 +234,7 @@ class image {
 
     // Get a populated RGBA buffer with the contents of this instance.
     // Color 0 is special and will be set to 0x0000000 in the returned buffer, 
-    // while all the other colors will be converted to a 0xffRRGGBB format.
+    // while all the other colors will be converted to a 0xffBBGGRR format.
     std::array<uint32_t, W * H> RGBA();
 
     // Blit an RGBA buffer into this instance while color are quantizied to the internal palette. 
