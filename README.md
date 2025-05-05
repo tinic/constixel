@@ -156,50 +156,49 @@ The following image formats are available. [Width] is the width in pixels, [Heig
 The most important member function of image:
 
 ```c++
+// Colors in the fixed internal palette
+enum color : uint8_t {
+    BLACK_TRANSPARENT = 0,
+    BLACK_OPAQUE = 16,
+    WHITE = 1,
+    RED = 2,
+    GREEN = 3,
+    BLUE = 4,
+    YELLOW = 5,
+    CYAN = 6,
+    MAGENTA = 7,
+    GREY_80 = 8,
+    GREY_60 = 9,
+    GREY_40 = 10,
+    GREY_20 = 11,
+    DARK_RED = 12,
+    DARK_GREEN = 13,
+    DARK_BLUE = 14,
+    DARK_YELLOW = 15
+
+    GREY_RAMP_START = 16,
+    GREY_RAMP_STOP = GREY_RAMP_START + 15,
+
+    RED_LUMA_RAMP_START = 32,
+    RED_LUMA_RAMP_STOP = RED_LUMA_RAMP_START + 15,
+
+    GREEN_LUMA_RAMP_START = 48,
+    GREEN_LUMA_RAMP_STOP = GREEN_LUMA_RAMP_START + 15,
+
+    BLUE_LUMA_RAMP_START = 64,
+    BLUE_LUMA_RAMP_STOP = BLUE_LUMA_RAMP_START + 15,
+
+    YELLOW_LUMA_RAMP_START = 80,
+    YELLOW_LUMA_RAMP_STOP = YELLOW_LUMA_RAMP_START + 15,
+
+    CYAN_LUMA_RAMP_START = 96,
+    CYAN_LUMA_RAMP_STOP = CYAN_LUMA_RAMP_START + 15,
+
+    MAGENTA_LUMA_RAMP_START = 112,
+    MAGENTA_LUMA_RAMP_STOP = MAGENTA_LUMA_RAMP_START + 15,
+};
+
 class image {
-
-    // Colors in the fixed internal palette
-    enum color : uint8_t {
-        BLACK_TRANSPARENT = 0,
-        BLACK_OPAQUE = 16,
-        WHITE = 1,
-        RED = 2,
-        GREEN = 3,
-        BLUE = 4,
-        YELLOW = 5,
-        CYAN = 6,
-        MAGENTA = 7,
-        GREY_80 = 8,
-        GREY_60 = 9,
-        GREY_40 = 10,
-        GREY_20 = 11,
-        DARK_RED = 12,
-        DARK_GREEN = 13,
-        DARK_BLUE = 14,
-        DARK_YELLOW = 15
-
-        GREY_RAMP_START = 16,
-        GREY_RAMP_STOP = GREY_RAMP_START + 15,
-
-        RED_LUMA_RAMP_START = 32,
-        RED_LUMA_RAMP_STOP = RED_LUMA_RAMP_START + 15,
-
-        GREEN_LUMA_RAMP_START = 48,
-        GREEN_LUMA_RAMP_STOP = GREEN_LUMA_RAMP_START + 15,
-
-        BLUE_LUMA_RAMP_START = 64,
-        BLUE_LUMA_RAMP_STOP = BLUE_LUMA_RAMP_START + 15,
-
-        YELLOW_LUMA_RAMP_START = 80,
-        YELLOW_LUMA_RAMP_STOP = YELLOW_LUMA_RAMP_START + 15,
-
-        CYAN_LUMA_RAMP_START = 96,
-        CYAN_LUMA_RAMP_STOP = CYAN_LUMA_RAMP_START + 15,
-
-        MAGENTA_LUMA_RAMP_START = 112,
-        MAGENTA_LUMA_RAMP_STOP = MAGENTA_LUMA_RAMP_START + 15,
-    };
-
     // Size in bytes of the image buffer
     int32_t size();
 
