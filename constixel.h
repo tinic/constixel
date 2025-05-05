@@ -1,5 +1,5 @@
-#ifndef _SIXEL_H_
-#define _SIXEL_H_
+#ifndef _CONSTIXEL_H_
+#define _CONSTIXEL_H_
 
 #include <algorithm>
 #include <array>
@@ -491,7 +491,7 @@ class format_1bit : public format {
     }
 
     template <typename F>
-    static constexpr void sixel(std::array<uint8_t, image_size> &data, F &&charOut, const rect<int32_t> &r, bool preserveBackground) {
+    static constexpr void sixel(const std::array<uint8_t, image_size> &data, F &&charOut, const rect<int32_t> &r, bool preserveBackground) {
         sixel_image<W, H, S, uint8_t, bits_per_pixel>(
             data.data(), palette, charOut, r, preserveBackground,
             [](const uint8_t *dataRaw, size_t x, size_t col, size_t y) {
@@ -638,7 +638,7 @@ class format_2bit : public format {
     }
 
     template <typename F>
-    static constexpr void sixel(std::array<uint8_t, image_size> &data, F &&charOut, const rect<int32_t> &r, bool preserveBackground) {
+    static constexpr void sixel(const std::array<uint8_t, image_size> &data, F &&charOut, const rect<int32_t> &r, bool preserveBackground) {
         sixel_image<W, H, S, uint8_t, bits_per_pixel>(
             data.data(), palette, charOut, r, preserveBackground,
             [](const uint8_t *dataRaw, size_t x, size_t col, size_t y) {
@@ -786,7 +786,7 @@ class format_4bit : public format {
     }
 
     template <typename F>
-    static constexpr void sixel(std::array<uint8_t, image_size> &data, F &&charOut, const rect<int32_t> &r, bool preserveBackground) {
+    static constexpr void sixel(const std::array<uint8_t, image_size> &data, F &&charOut, const rect<int32_t> &r, bool preserveBackground) {
         sixel_image<W, H, S, uint8_t, bits_per_pixel>(
             data.data(), palette, charOut, r, preserveBackground,
             [](const uint8_t *dataRaw, size_t x, size_t col, size_t y) {
@@ -956,7 +956,7 @@ class format_8bit : public format {
     }
 
     template <typename F>
-    static constexpr void sixel(std::array<uint8_t, image_size> &data, F &&charOut, const rect<int32_t> &r, bool preserveBackground) {
+    static constexpr void sixel(const std::array<uint8_t, image_size> &data, F &&charOut, const rect<int32_t> &r, bool preserveBackground) {
         sixel_image<W, H, S, uint8_t, bits_per_pixel>(
             data.data(), palette, charOut, r, preserveBackground,
             [](const uint8_t *dataRaw, size_t x, size_t col, size_t y) {
@@ -1006,7 +1006,7 @@ class image {
     static_assert(S >= 1 && S <= 256);
 
    public:
-    [[nodiscard]] constexpr int32_t Size() const {
+    [[nodiscard]] constexpr int32_t size() const {
         return T<W, H, S>::image_size;
     }
 
@@ -1143,12 +1143,12 @@ class image {
     }
 
     template <typename F>
-    constexpr void sixel(F &&charOut, bool preserveBackground = false) {
+    constexpr void sixel(F &&charOut, bool preserveBackground = false) const {
         T<W, H, S>::sixel(data, charOut, {0, 0, W, H}, preserveBackground);
     }
 
     template <typename F>
-    constexpr void sixel(F &&charOut, const rect<int32_t> &r, bool preserveBackground = true) {
+    constexpr void sixel(F &&charOut, const rect<int32_t> &r, bool preserveBackground = true) const {
         T<W, H, S>::sixel(data, charOut, r, preserveBackground);
     }
 
@@ -1238,4 +1238,5 @@ class image {
 };
 
 }  // namespace constixel
-#endif  // #ifndef _SIXEL_H_
+
+#endif  // #ifndef _CONSTIXEL_H_
