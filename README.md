@@ -3,12 +3,12 @@
 constixel is a single header minimalistic constexpr C++20+ graphics rendering library with the ability to output to a sixel image stream which can be viewed in most modern terminals.
 
 ##### Table of Contents  
-[Primary features and goals](#features)  
+[Primary features and goals](#primary-features-and-goals)  
 [Applications](#applications)  
-[Requirements](#requirement)  
-[Minimal example](#minimal)  
-[Consteval sixel example](#constsixel)  
-[Consteval image example](#constimage)  
+[Requirements](#requirements)  
+[Minimal example](#minimal-example)  
+[Consteval sixel example](#consteval-sixel-example)  
+[Consteval image example](#consteval-embedded-image-data-example)  
 [API](#api)  
 
 ## Primary features and goals
