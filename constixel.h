@@ -480,7 +480,7 @@ class format_1bit : public format {
         return rgba;
     }
 
-    static constexpr void blitRGBA(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
+    static constexpr void blit_RGBA(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
         for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
             for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
                 uint32_t R = ptr[y * static_cast<size_t>(stride) + x * 4 + 0];
@@ -491,7 +491,7 @@ class format_1bit : public format {
         }
     }
 
-    static constexpr void blitRGBADiffused(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
+    static constexpr void blit_RGBA_diffused(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
         int32_t err = 0;
         for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
             for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
@@ -506,7 +506,7 @@ class format_1bit : public format {
         }
     }
 
-    static constexpr void blitRGBADiffusedLinear(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
+    static constexpr void blit_RGBA_diffused_linear(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
         for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
             float err_r = 0;
             float err_g = 0;
@@ -640,7 +640,7 @@ class format_2bit : public format {
         return rgba;
     }
 
-    static constexpr void blitRGBA(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
+    static constexpr void blit_RGBA(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
         for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
             for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
                 plot(data, (x + static_cast<uint32_t>(r.x)), (y + static_cast<uint32_t>(r.y)),
@@ -650,7 +650,7 @@ class format_2bit : public format {
         }
     }
 
-    static constexpr void blitRGBADiffused(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
+    static constexpr void blit_RGBA_diffused(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
         for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
             int32_t err_r = 0;
             int32_t err_g = 0;
@@ -671,7 +671,7 @@ class format_2bit : public format {
         }
     }
 
-    static constexpr void blitRGBADiffusedLinear(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
+    static constexpr void blit_RGBA_diffused_linear(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
         for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
             float err_r = 0;
             float err_g = 0;
@@ -805,7 +805,7 @@ class format_4bit : public format {
         return rgba;
     }
 
-    static constexpr void blitRGBA(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
+    static constexpr void blit_RGBA(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
         for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
             for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
                 plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)),
@@ -815,7 +815,7 @@ class format_4bit : public format {
         }
     }
 
-    static constexpr void blitRGBADiffused(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
+    static constexpr void blit_RGBA_diffused(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
         for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
             int32_t err_r = 0;
             int32_t err_g = 0;
@@ -836,7 +836,7 @@ class format_4bit : public format {
         }
     }
 
-    static constexpr void blitRGBADiffusedLinear(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
+    static constexpr void blit_RGBA_diffused_linear(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
         for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
             float err_r = 0;
             float err_g = 0;
@@ -988,7 +988,7 @@ class format_8bit : public format {
         return rgba;
     }
 
-    static constexpr void blitRGBA(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
+    static constexpr void blit_RGBA(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
         for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
             for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
                 data.data()[(y + static_cast<size_t>(r.y)) * bytes_per_line + (x + static_cast<size_t>(r.x))] =
@@ -998,7 +998,7 @@ class format_8bit : public format {
         }
     }
 
-    static constexpr void blitRGBADiffused(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
+    static constexpr void blit_RGBA_diffused(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
         for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
             int32_t err_r = 0;
             int32_t err_g = 0;
@@ -1019,7 +1019,7 @@ class format_8bit : public format {
         }
     }
 
-    static constexpr void blitRGBADiffusedLinear(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
+    static constexpr void blit_RGBA_diffused_linear(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
         for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
             float err_r = 0;
             float err_g = 0;
@@ -1142,7 +1142,7 @@ class image {
     static_assert(S >= 1 && S <= 256);
 
    public:
-    [[nodiscard]] constexpr int32_t bitdepth() const {
+    [[nodiscard]] constexpr int32_t bit_depth() const {
         return T<W, H, S>::bits_per_pixel;
     }
 
@@ -1166,7 +1166,7 @@ class image {
         return v < 0 ? -v : v;
     }
 
-    [[nodiscard]] constexpr std::array<uint8_t, T<W, H, S>::image_size> &dataRef() const {
+    [[nodiscard]] constexpr std::array<uint8_t, T<W, H, S>::image_size> &data_ref() const {
         return data;
     }
 
@@ -1227,9 +1227,9 @@ class image {
         } else if (width > 1) {
             for (; x0 <= x1; x0++) {
                 if (steep) {
-                    fillcircle(y0, x0, (width + 1) / 2, col, clip);
+                    fill_circle(y0, x0, (width + 1) / 2, col, clip);
                 } else {
-                    fillcircle(x0, y0, (width + 1) / 2, col, clip);
+                    fill_circle(x0, y0, (width + 1) / 2, col, clip);
                 }
                 err -= dy;
                 if (err < 0) {
@@ -1252,7 +1252,7 @@ class image {
         line(l.x, l.y, l.x + l.w, l.y + l.h);
     }
 
-    constexpr void fillrect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col, bool clip = true) {
+    constexpr void fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col, bool clip = true) {
         if (clip) {
             if (y < 0) {
                 h += y;
@@ -1268,59 +1268,59 @@ class image {
         }
     }
 
-    constexpr void fillrect(const rect<int32_t> &r, uint8_t col, bool clip = true) {
-        fillrect(r.x, r.y, r.w, r.h);
+    constexpr void fill_rect(const rect<int32_t> &r, uint8_t col, bool clip = true) {
+        fill_rect(r.x, r.y, r.w, r.h);
     }
 
-    constexpr void fillcircle(int32_t x, int32_t y, int32_t r, uint8_t col, bool clip = true) {
+    constexpr void fill_circle(int32_t x, int32_t y, int32_t r, uint8_t col, bool clip = true) {
         span(x - abs(r), 2 * abs(r) + 1, y, col, clip);
-        fillarc(x, y, abs(r), 3, 0, col, clip);
+        fill_arc(x, y, abs(r), 3, 0, col, clip);
     }
 
     constexpr std::array<uint32_t, W * H> RGBA() const {
         return T<W, H, S>::RGBA();
     }
 
-    constexpr void blitRGBA(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
+    constexpr void blit_RGBA(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
         rect<int32_t> blitrect{x, y, w, h};
         blitrect &= {0, 0, W, H};
         blitrect &= {x, y, iw, ih};
-        T<W, H, S>::blitRGBA(data, blitrect, ptr, stride);
+        T<W, H, S>::blit_RGBA(data, blitrect, ptr, stride);
     }
 
-    constexpr void blitRGBA(const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
+    constexpr void blit_RGBA(const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
         rect<int32_t> blitrect{r};
         blitrect &= {0, 0, W, H};
         blitrect &= {r.x, r.y, iw, ih};
-        T<W, H, S>::blitRGBA(data, blitrect, ptr, stride);
+        T<W, H, S>::blit_RGBA(data, blitrect, ptr, stride);
     }
 
-    constexpr void blitRGBADiffused(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
+    constexpr void blit_RGBA_diffused(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
         rect<int32_t> blitrect{x, y, w, h};
         blitrect &= {0, 0, W, H};
         blitrect &= {x, y, iw, ih};
-        T<W, H, S>::blitRGBADiffused(data, blitrect, ptr, stride);
+        T<W, H, S>::blit_RGBA_diffused(data, blitrect, ptr, stride);
     }
 
-    constexpr void blitRGBADiffused(const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
+    constexpr void blit_RGBA_diffused(const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
         rect<int32_t> blitrect{r};
         blitrect &= {0, 0, W, H};
         blitrect &= {r.x, r.y, iw, ih};
-        T<W, H, S>::blitRGBADiffused(data, blitrect, ptr, stride);
+        T<W, H, S>::blit_RGBA_diffused(data, blitrect, ptr, stride);
     }
 
-    constexpr void blitRGBADiffusedLinear(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
+    constexpr void blit_RGBA_diffused_linear(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
         rect<int32_t> blitrect{x, y, w, h};
         blitrect &= {0, 0, W, H};
         blitrect &= {x, y, iw, ih};
-        T<W, H, S>::blitRGBADiffusedLinear(data, blitrect, ptr, stride);
+        T<W, H, S>::blit_RGBA_diffused_linear(data, blitrect, ptr, stride);
     }
 
-    constexpr void blitRGBADiffusedLinear(const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
+    constexpr void blit_RGBA_diffused_linear(const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
         rect<int32_t> blitrect{r};
         blitrect &= {0, 0, W, H};
         blitrect &= {r.x, r.y, iw, ih};
-        T<W, H, S>::blitRGBADiffusedLinear(data, blitrect, ptr, stride);
+        T<W, H, S>::blit_RGBA_diffused_linear(data, blitrect, ptr, stride);
     }
 
     template <typename F>
@@ -1333,7 +1333,7 @@ class image {
         T<W, H, S>::sixel(data, charOut, r, preserveBackground);
     }
 
-    constexpr void sixel2cout() const {
+    constexpr void sixel_to_cout() const {
         std::string out;
         T<W, H, S>::sixel(
             data,
@@ -1383,7 +1383,7 @@ class image {
         }
     }
 
-    constexpr void fillarc(int32_t x0, int32_t y0, int32_t r, uint8_t corners, int32_t delta, uint8_t col, bool clip) {
+    constexpr void fill_arc(int32_t x0, int32_t y0, int32_t r, uint8_t corners, int32_t delta, uint8_t col, bool clip) {
         int32_t f = 1 - r;
         int32_t ddx = -2 * r;
         int32_t ddy = 1;
