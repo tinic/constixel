@@ -23,7 +23,7 @@ constixel is a single header minimalistic constexpr C++20(+) 2d graphics renderi
 - Various other simple image manipulation operations.
 
 > [!NOTE]
-> This library is not designed for high fidelity graphics generation and should be more thought of a utility library for software development purposes.
+> This library is not designed for high fidelity graphics generation and should be more thought of a utility library for software development purposes. Despite that, on HiDPI screens like on Macs the results generally look fairly good.
 
 ## Applications
 
