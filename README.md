@@ -204,7 +204,7 @@ class image {
     //    [do something with the character]
     // });
     //
-    // Optionall you can provide a rectangle to get a portion of the image only.
+    // Optionally you can provide a rectangle to get a portion of the image only.
     //
     void sixel(F &&charOut, bool preserveBackground = true);
     void sixel(F &&charOut, const constixel::rect<int32_t> &r, bool preserveBackground = true);
