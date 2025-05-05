@@ -23,6 +23,7 @@ SOFTWARE.
 */
 
 #include <chrono>
+#include <cstdint>
 #include <cstdio>
 #include <iostream>
 #include <string>
@@ -431,27 +432,18 @@ int main() {
     round_trip<constixel::image<constixel::format_8bit, 256, 256, 1>>();
 #endif  // #if 1
 
-    constixel::phash<96> hash(
-        {constixel::entry{32, 0},   constixel::entry{65, 1},       constixel::entry{66, 2},    constixel::entry{67, 3},       constixel::entry{68, 4},
-         constixel::entry{69, 5},   constixel::entry{70, 6},       constixel::entry{71, 7},    constixel::entry{72, 8},       constixel::entry{73, 9},
-         constixel::entry{74, 10},  constixel::entry{75, 11},      constixel::entry{76, 12},   constixel::entry{77, 13},      constixel::entry{78, 14},
-         constixel::entry{79, 15},  constixel::entry{80, 16},      constixel::entry{81, 17},   constixel::entry{82, 18},      constixel::entry{83, 19},
-         constixel::entry{84, 20},  constixel::entry{85, 21},      constixel::entry{86, 22},   constixel::entry{87, 23},      constixel::entry{88, 24},
-         constixel::entry{89, 25},  constixel::entry{90, 26},      constixel::entry{97, 27},   constixel::entry{98, 28},      constixel::entry{99, 29},
-         constixel::entry{100, 30}, constixel::entry{101, 31},     constixel::entry{102, 32},  constixel::entry{103, 33},     constixel::entry{104, 34},
-         constixel::entry{105, 35}, constixel::entry{106, 36},     constixel::entry{107, 37},  constixel::entry{108, 38},     constixel::entry{109, 39},
-         constixel::entry{110, 40}, constixel::entry{111, 41},     constixel::entry{112, 42},  constixel::entry{113, 43},     constixel::entry{114, 44},
-         constixel::entry{115, 45}, constixel::entry{116, 46},     constixel::entry{117, 47},  constixel::entry{118, 48},     constixel::entry{119, 49},
-         constixel::entry{120, 50}, constixel::entry{121, 51},     constixel::entry{122, 52},  constixel::entry{36, 53},      constixel::entry{48, 54},
-         constixel::entry{49, 55},  constixel::entry{50, 56},      constixel::entry{51, 57},   constixel::entry{52, 58},      constixel::entry{53, 59},
-         constixel::entry{54, 60},  constixel::entry{55, 61},      constixel::entry{56, 62},   constixel::entry{57, 63},      constixel::entry{38, 64},
-         constixel::entry{33, 65},  constixel::entry{63, 66},      constixel::entry{40, 67},   constixel::entry{41, 68},      constixel::entry{91, 69},
-         constixel::entry{93, 70},  constixel::entry{123, 71},     constixel::entry{125, 72},  constixel::entry{64, 73},      constixel::entry{35, 74},
-         constixel::entry{47, 75},  constixel::entry{124, 76},     constixel::entry{92, 77},   constixel::entry{45, 78},      constixel::entry{39, 79},
-         constixel::entry{34, 80},  constixel::entry{44, 81},      constixel::entry{46, 82},   constixel::entry{58, 83},      constixel::entry{59, 84},
-         constixel::entry{60, 85},  constixel::entry{62, 86},      constixel::entry{61, 87},   constixel::entry{43, 88},      constixel::entry{126, 89},
-         constixel::entry{95, 90},  constixel::entry{94, 91},      constixel::entry{42, 92},   constixel::entry{178, 93},     constixel::entry{37, 94},
-         constixel::entry{96, 95}});
+    static constexpr auto map = std::array<std::pair<uint32_t, uint32_t>, 96>{
+        {{32, 0},   {65, 1},   {66, 2},   {67, 3},   {68, 4},   {69, 5},   {70, 6},   {71, 7},   {72, 8},   {73, 9},   {74, 10},  {75, 11},
+         {76, 12},  {77, 13},  {78, 14},  {79, 15},  {80, 16},  {81, 17},  {82, 18},  {83, 19},  {84, 20},  {85, 21},  {86, 22},  {87, 23},
+         {88, 24},  {89, 25},  {90, 26},  {97, 27},  {98, 28},  {99, 29},  {100, 30}, {101, 31}, {102, 32}, {103, 33}, {104, 34}, {105, 35},
+         {106, 36}, {107, 37}, {108, 38}, {109, 39}, {110, 40}, {111, 41}, {112, 42}, {113, 43}, {114, 44}, {115, 45}, {116, 46}, {117, 47},
+         {118, 48}, {119, 49}, {120, 50}, {121, 51}, {122, 52}, {36, 53},  {48, 54},  {49, 55},  {50, 56},  {51, 57},  {52, 58},  {53, 59},
+         {54, 60},  {55, 61},  {56, 62},  {57, 63},  {38, 64},  {33, 65},  {63, 66},  {40, 67},  {41, 68},  {91, 69},  {93, 70},  {123, 71},
+         {125, 72}, {64, 73},  {35, 74},  {47, 75},  {124, 76}, {92, 77},  {45, 78},  {39, 79},  {34, 80},  {44, 81},  {46, 82},  {58, 83},
+         {59, 84},  {60, 85},  {62, 86},  {61, 87},  {43, 88},  {126, 89}, {95, 90},  {94, 91},  {42, 92},  {178, 93}, {37, 94},  {96, 95}}};
+    constixel::hextree<constixel::hextree<0>::size(map)> h(map);
 
-    printf("%08x\n", hash.scramble);
+    for (uint32_t c = 0; c < 256; c++) {
+        printf("%08x %08x\n", int(c), int(h.lookup(c)));
+    }
 }
