@@ -227,7 +227,7 @@ class image {
     void blitRGBADiffusedLinear(const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
 
     // Convert the current instance into a sixel stream and output it to std::cout
-    void sixel_to_cout();
+    void sixel2cout();
 
     // Convert the current instance into a sixel stream. Provide a lambda function in the form of:
     //
