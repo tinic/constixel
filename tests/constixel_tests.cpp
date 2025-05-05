@@ -166,11 +166,11 @@ constexpr std::string test9() {
 }
 
 constexpr std::array<char, 8192> gen_separator() {
-    std::array<char, 8192> sixel {};
+    std::array<char, 8192> sixel{};
     size_t count = 0;
     constixel::image<constixel::format_8bit, 1024, 1> image;
     for (int32_t x = 0; x < 16; x++) {
-        image.line(x * 64, 0, x*64 + 64, 0, constixel::color::GREY_RAMP_STOP -uint32_t(x));
+        image.line(x * 64, 0, x * 64 + 64, 0, constixel::color::GREY_RAMP_STOP - uint32_t(x));
     }
     image.sixel([&sixel, &count](char ch) mutable {
         sixel[count++] = ch;
@@ -187,12 +187,8 @@ void separator() {
 template <typename T>
 void draw_image_cut(const std::vector<uint8_t> &rgbaimage, int32_t w, int32_t h) {
     static T image;
-    std::string out{};
     image.blitRGBA(0, 0, w, h, rgbaimage.data(), w, h, w * 4);
-    image.sixel([&out](char ch) mutable {
-        out.push_back(ch);
-    });
-    puts(out.c_str());
+    image.sixel_to_cout();
     printf("%d-bit %dpx %dpx cut\n", int(image.bitdepth()), int(image.width()), int(image.height()));
     separator();
 }
@@ -200,12 +196,8 @@ void draw_image_cut(const std::vector<uint8_t> &rgbaimage, int32_t w, int32_t h)
 template <typename T>
 void draw_image_diffused(const std::vector<uint8_t> &rgbaimage, int32_t w, int32_t h) {
     static T image;
-    std::string out{};
     image.blitRGBADiffused(0, 0, w, h, rgbaimage.data(), w, h, w * 4);
-    image.sixel([&out](char ch) mutable {
-        out.push_back(ch);
-    });
-    puts(out.c_str());
+    image.sixel_to_cout();
     printf("%d-bit %dpx %dpx diffused\n", int(image.bitdepth()), int(image.width()), int(image.height()));
     separator();
 }
@@ -213,12 +205,8 @@ void draw_image_diffused(const std::vector<uint8_t> &rgbaimage, int32_t w, int32
 template <typename T>
 void draw_image_linear(const std::vector<uint8_t> &rgbaimage, int32_t w, int32_t h) {
     static T image;
-    std::string out{};
     image.blitRGBADiffusedLinear(0, 0, w, h, rgbaimage.data(), w, h, w * 4);
-    image.sixel([&out](char ch) mutable {
-        out.push_back(ch);
-    });
-    puts(out.c_str());
+    image.sixel_to_cout();
     printf("%d-bit %dpx %dpx diffused linear\n", int(image.bitdepth()), int(image.width()), int(image.height()));
     separator();
 }
