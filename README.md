@@ -202,15 +202,15 @@ class image {
     void copy(const std::array<uint8_t, T<W, H, S>::image_size> &src);
 
     // Draw a line
-    void line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t col, uint32_t width = 1, bool clip = true);
-    void line(constixel::rect<int32_t> &l, uint32_t col, bool clip = true);
+    void line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, uint32_t width = 1, bool clip = true);
+    void line(constixel::rect<int32_t> &l, uint8_t col, bool clip = true);
 
     // Draw a filled rectangle
-    void fillrect(int32_t x, int32_t y, int32_t w, int32_t h, uint32_t col, bool clip = true);
-    void fillrect(constixel::rect<int32_t> &r, uint32_t col, bool clip = true);
+    void fillrect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col, bool clip = true);
+    void fillrect(constixel::rect<int32_t> &r, uint8_t col, bool clip = true);
 
     // Draw a filled circle
-    void fillcircle(int32_t x, int32_t y, int32_t r, uint32_t col, bool clip = true);
+    void fillcircle(int32_t x, int32_t y, int32_t r, uint8_t col, bool clip = true);
 
     // Get a populated RGBA buffer with the contents of this instance.
     // Color 0 is special and will be set to 0x0000000 in the returned buffer, 
