@@ -152,6 +152,27 @@ The most important member function of image:
 
 ```c++
 class image {
+
+    // First 16 colors in the palette
+    enum color : uint8_t {
+        BLACK = 0,
+        WHITE = 1,
+        RED = 2,
+        GREEN = 3,
+        BLUE = 4,
+        YELLOW = 5,
+        CYAN = 6,
+        MAGENTA = 7,
+        GREY_80 = 8,
+        GREY_60 = 9,
+        GREY_40 = 10,
+        GREY_20 = 11,
+        DARK_RED = 12,
+        DARK_GREEN = 13,
+        DARK_BLUE = 14,
+        DARK_YELLOW = 15
+    };
+
     // Size in bytes of the image buffer
     int32_t size();
 
