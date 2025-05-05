@@ -120,12 +120,13 @@ int main() {
     printf("image instance byte size: %d\n", int(image.size()));
     size_t count = 0;
     image.sixel([&count](char ch) mutable {
-	      putc(ch, stdout);
-	      count++;
+        putc(ch, stdout);
+        count++;
     });
     putc('\n', stdout);
     printf("sixel byte size: %d\n", int(count));
     return 0;
-}```
+}
+```
 
 ![constixel](./media/constixel_1bit.jpg "Example in iTerm")
