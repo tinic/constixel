@@ -247,7 +247,7 @@ class image {
     void blitRGBADiffused(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
     void blitRGBADiffused(const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
 
-    // Blit an RGBA buffer into this instance using line diffusion in linear color space for best quality.
+    // Blit an RGBA (little endian) buffer into this instance using line diffusion in linear color space for best quality.
     // NOTE: This is a very slow operation due to the brute force color quantization.
     void blitRGBADiffusedLinear(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
     void blitRGBADiffusedLinear(const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
