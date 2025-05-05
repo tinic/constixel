@@ -40,7 +40,7 @@ constexpr std::string test0() {
     constixel::image<constixel::format_1bit, 32, 31> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
-        image.fillrect(c * 2, c * 2, 8, 8, c & 1);
+        image.fill_rect(c * 2, c * 2, 8, 8, c & 1);
     }
     image.sixel([&out](char ch) mutable {
         out.push_back(ch);
@@ -53,7 +53,7 @@ constexpr std::string test1() {
     constixel::image<constixel::format_2bit, 112, 64> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
-        image.fillrect(c * 4 - 16, c * 4 - 16, 44, 31, static_cast<uint8_t>(c));
+        image.fill_rect(c * 4 - 16, c * 4 - 16, 44, 31, static_cast<uint8_t>(c));
     }
     image.sixel([&out](char ch) mutable {
         out.push_back(ch);
@@ -66,7 +66,7 @@ constexpr std::string test2() {
     constixel::image<constixel::format_4bit, 128, 127> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
-        image.fillrect(c * 4 - 16, c * 4 - 16, 44, 31, static_cast<uint8_t>(c));
+        image.fill_rect(c * 4 - 16, c * 4 - 16, 44, 31, static_cast<uint8_t>(c));
     }
     image.sixel([&out](char ch) mutable {
         out.push_back(ch);
@@ -79,7 +79,7 @@ constexpr std::string test3() {
     constixel::image<constixel::format_1bit, 127, 101> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
-        image.fillcircle(c, c, 256 - c * 16, static_cast<uint8_t>(c));
+        image.fill_circle(c, c, 256 - c * 16, static_cast<uint8_t>(c));
     }
     image.sixel([&out](char ch) mutable {
         out.push_back(ch);
@@ -92,7 +92,7 @@ constexpr std::string test4() {
     constixel::image<constixel::format_2bit, 111, 95> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
-        image.fillcircle(c, c, 256 - c * 16, static_cast<uint8_t>(c));
+        image.fill_circle(c, c, 256 - c * 16, static_cast<uint8_t>(c));
     }
     image.sixel([&out](char ch) mutable {
         out.push_back(ch);
@@ -105,7 +105,7 @@ constexpr std::string test5() {
     constixel::image<constixel::format_4bit, 7, 128, 8> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
-        image.fillcircle(c, c, 256 - c * 16, static_cast<uint8_t>(c));
+        image.fill_circle(c, c, 256 - c * 16, static_cast<uint8_t>(c));
     }
     image.sixel([&out](char ch) mutable {
         out.push_back(ch);
@@ -187,27 +187,27 @@ void separator() {
 template <typename T>
 void draw_image_cut(const std::vector<uint8_t> &rgbaimage, int32_t w, int32_t h) {
     static T image;
-    image.blitRGBA(0, 0, w, h, rgbaimage.data(), w, h, w * 4);
-    image.sixel2cout();
-    printf("%d-bit %dpx %dpx cut\n", int(image.bitdepth()), int(image.width()), int(image.height()));
+    image.blit_RGBA(0, 0, w, h, rgbaimage.data(), w, h, w * 4);
+    image.sixel_to_cout();
+    printf("%d-bit %dpx %dpx cut\n", int(image.bit_depth()), int(image.width()), int(image.height()));
     separator();
 }
 
 template <typename T>
 void draw_image_diffused(const std::vector<uint8_t> &rgbaimage, int32_t w, int32_t h) {
     static T image;
-    image.blitRGBADiffused(0, 0, w, h, rgbaimage.data(), w, h, w * 4);
-    image.sixel2cout();
-    printf("%d-bit %dpx %dpx diffused\n", int(image.bitdepth()), int(image.width()), int(image.height()));
+    image.blit_RGBA_diffused(0, 0, w, h, rgbaimage.data(), w, h, w * 4);
+    image.sixel_to_cout();
+    printf("%d-bit %dpx %dpx diffused\n", int(image.bit_depth()), int(image.width()), int(image.height()));
     separator();
 }
 
 template <typename T>
 void draw_image_linear(const std::vector<uint8_t> &rgbaimage, int32_t w, int32_t h) {
     static T image;
-    image.blitRGBADiffusedLinear(0, 0, w, h, rgbaimage.data(), w, h, w * 4);
-    image.sixel2cout();
-    printf("%d-bit %dpx %dpx diffused linear\n", int(image.bitdepth()), int(image.width()), int(image.height()));
+    image.blit_RGBA_diffused_linear(0, 0, w, h, rgbaimage.data(), w, h, w * 4);
+    image.sixel_to_cout();
+    printf("%d-bit %dpx %dpx diffused linear\n", int(image.bit_depth()), int(image.width()), int(image.height()));
     separator();
 }
 
@@ -216,7 +216,7 @@ void draw_palette() {
     static T image;
     for (int32_t y = 0; y < 16; y++) {
         for (int32_t x = 0; x < 16; x++) {
-            image.fillrect(x, y, 1, 1, static_cast<uint8_t>(y * 16 + x));
+            image.fill_rect(x, y, 1, 1, static_cast<uint8_t>(y * 16 + x));
         }
     }
     std::string out;
@@ -224,7 +224,7 @@ void draw_palette() {
         out.push_back(ch);
     });
     puts(out.c_str());
-    printf("%d-bit %dpx %dpx\n", int(image.bitdepth()), int(image.width()), int(image.height()));
+    printf("%d-bit %dpx %dpx\n", int(image.bit_depth()), int(image.width()), int(image.height()));
     separator();
 }
 
@@ -239,33 +239,33 @@ void draw_rgb() {
         }
     }
     {
-        image.blitRGBA(0, 0, 256, 256, reinterpret_cast<const uint8_t *>(rgb.data()), 256, 256, 256 * 4);
+        image.blit_RGBA(0, 0, 256, 256, reinterpret_cast<const uint8_t *>(rgb.data()), 256, 256, 256 * 4);
         std::string out;
         image.sixel([&out](char ch) mutable {
             out.push_back(ch);
         });
         puts(out.c_str());
-        printf("%d-bit %dpx %dpx cut\n", int(image.bitdepth()), int(image.width()), int(image.height()));
+        printf("%d-bit %dpx %dpx cut\n", int(image.bit_depth()), int(image.width()), int(image.height()));
         separator();
     }
     {
-        image.blitRGBADiffused(0, 0, 256, 256, reinterpret_cast<const uint8_t *>(rgb.data()), 256, 256, 256 * 4);
+        image.blit_RGBA_diffused(0, 0, 256, 256, reinterpret_cast<const uint8_t *>(rgb.data()), 256, 256, 256 * 4);
         std::string out;
         image.sixel([&out](char ch) mutable {
             out.push_back(ch);
         });
         puts(out.c_str());
-        printf("%d-bit %dpx %dpx diffused\n", int(image.bitdepth()), int(image.width()), int(image.height()));
+        printf("%d-bit %dpx %dpx diffused\n", int(image.bit_depth()), int(image.width()), int(image.height()));
         separator();
     }
     {
-        image.blitRGBADiffusedLinear(0, 0, 256, 256, reinterpret_cast<const uint8_t *>(rgb.data()), 256, 256, 256 * 4);
+        image.blit_RGBA_diffused_linear(0, 0, 256, 256, reinterpret_cast<const uint8_t *>(rgb.data()), 256, 256, 256 * 4);
         std::string out;
         image.sixel([&out](char ch) mutable {
             out.push_back(ch);
         });
         puts(out.c_str());
-        printf("%d-bit %dpx %dpx diffused linear\n", int(image.bitdepth()), int(image.width()), int(image.height()));
+        printf("%d-bit %dpx %dpx diffused linear\n", int(image.bit_depth()), int(image.width()), int(image.height()));
         separator();
     }
 }
@@ -276,13 +276,13 @@ void draw_functions() {
     static T image;
     image.clear();
     for (int32_t c = 0; c < I; c++) {
-        image.fillrect(16 + c * 37, c * 32, 128, 128, static_cast<uint8_t>(c));
+        image.fill_rect(16 + c * 37, c * 32, 128, 128, static_cast<uint8_t>(c));
         std::string out("\0338");
         image.sixel([&out](char ch) mutable {
             out.push_back(ch);
         });
         puts(out.c_str());
-        printf("%d-bit %dpx %dpx fillrect\n", int(image.bitdepth()), int(image.width()), int(image.height()));
+        printf("%d-bit %dpx %dpx fill_rect\n", int(image.bit_depth()), int(image.width()), int(image.height()));
         separator();
     }
     for (int32_t c = 0; c < I; c++) {
@@ -292,17 +292,17 @@ void draw_functions() {
             out.push_back(ch);
         });
         puts(out.c_str());
-        printf("%d-bit %dpx %dpx line\n", int(image.bitdepth()), int(image.width()), int(image.height()));
+        printf("%d-bit %dpx %dpx line\n", int(image.bit_depth()), int(image.width()), int(image.height()));
         separator();
     }
     for (int32_t c = 0; c < I; c++) {
-        image.fillcircle(600, 384, 256 - c * 16, static_cast<uint8_t>(c));
+        image.fill_circle(600, 384, 256 - c * 16, static_cast<uint8_t>(c));
         std::string out("\0338");
         image.sixel([&out](char ch) mutable {
             out.push_back(ch);
         });
         puts(out.c_str());
-        printf("%d-bit %dpx %dpx circle\n", int(image.bitdepth()), int(image.width()), int(image.height()));
+        printf("%d-bit %dpx %dpx circle\n", int(image.bit_depth()), int(image.width()), int(image.height()));
         separator();
     }
 }
