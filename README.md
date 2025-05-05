@@ -58,6 +58,7 @@ int main() {
         out.push_back(ch);
     });
     std::cout << out << std::endl;
+    return 0;
 }
 ```
 
@@ -101,6 +102,7 @@ int main() {
     static const auto sixel = gen_sixel();
     std::cout << "Actual byte size: " << strlen(sixel.data()) << "\n";
     std::cout << sixel.data() << std::endl;
+    return 0;
 }
 ```
 
