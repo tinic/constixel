@@ -244,7 +244,7 @@ void draw_rgb() {
     std::array<uint32_t, 65536> rgb{};
     for (uint32_t y = 0; y < 256; y++) {
         for (uint32_t x = 0; x < 256; x++) {
-            rgb.data()[y * 256 + x] = ((256 - y) << 16) | (x << 0) | (y << 8);
+            rgb.data()[y * 256 + x] = ((255 - y) << 16) | (x << 0) | (y << 8);
         }
     }
     {
@@ -285,7 +285,7 @@ void round_trip() {
     std::array<uint32_t, 65536> rgb{};
     for (uint32_t y = 0; y < 256; y++) {
         for (uint32_t x = 0; x < 256; x++) {
-            rgb.data()[y * 256 + x] = ((256 - y) << 16) | (x << 0) | (y << 8);
+            rgb.data()[y * 256 + x] = ((255 - y) << 16) | (x << 0) | (y << 8);
         }
     }
     image.blit_RGBA_diffused_linear(0, 0, 256, 256, reinterpret_cast<const uint8_t *>(rgb.data()), 256, 256, 256 * 4);
