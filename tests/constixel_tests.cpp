@@ -22,12 +22,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include <unistd.h>
-
 #include <chrono>
 #include <cstdio>
 #include <iostream>
-#include <mdspan>
 #include <string>
 #include <vector>
 
@@ -245,10 +242,9 @@ template <typename T>
 void draw_rgb() {
     static T image;
     std::array<uint32_t, 65536> rgb{};
-    auto m = std::mdspan(rgb.data(), 256, 256);
     for (uint32_t y = 0; y < 256; y++) {
         for (uint32_t x = 0; x < 256; x++) {
-            m[x, y] = ((256 - y) << 16) | (x << 0) | (y << 8);
+            rgb.data()[y * 256 + x] = ((256 - y) << 16) | (x << 0) | (y << 8);
         }
     }
     {
@@ -287,10 +283,9 @@ template <typename T>
 void round_trip() {
     static T image;
     std::array<uint32_t, 65536> rgb{};
-    auto m = std::mdspan(rgb.data(), 256, 256);
     for (uint32_t y = 0; y < 256; y++) {
         for (uint32_t x = 0; x < 256; x++) {
-            m[x, y] = ((256 - y) << 16) | (x << 0) | (y << 8);
+            rgb.data()[y * 256 + x] = ((256 - y) << 16) | (x << 0) | (y << 8);
         }
     }
     image.blit_RGBA_diffused_linear(0, 0, 256, 256, reinterpret_cast<const uint8_t *>(rgb.data()), 256, 256, 256 * 4);
