@@ -158,7 +158,8 @@ class image {
 
     // Colors in the fixed internal palette
     enum color : uint8_t {
-        BLACK = 0,
+        BLACK_TRANSPARENT = 0,
+        BLACK_OPAQUE = 16,
         WHITE = 1,
         RED = 2,
         GREEN = 3,
