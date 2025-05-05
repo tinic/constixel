@@ -70,7 +70,7 @@ int main() {
 
 ## Consteval sixel example
 
-As std::vector can not escape consteval (yet) we use std::array. Output of this example should be "Actual byte size: 18537" and the sixel image. The binary will contain the evaluated sixel string.
+As std::vector can not escape consteval (yet) so we use std::array. Output of this example should be "Actual byte size: 18537" and the sixel image. The binary will contain the evaluated sixel string.
 
 Compile as such:
 
@@ -115,7 +115,7 @@ int main() {
 
 ## Consteval embedded image data example
 
-This example will consteval gen_image_1bit(), while dynamically generating the sixel string.
+This example will consteval gen_image_1bit() into a std::array, while dynamically generating the sixel string.
 
 ```c++
 #include "constixel.h"
