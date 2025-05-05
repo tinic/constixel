@@ -1333,7 +1333,7 @@ class image {
         T<W, H, S>::sixel(data, charOut, r, preserveBackground);
     }
 
-    constexpr void sixel_to_cout() const {
+    constexpr void sixel2cout() const {
         std::string out;
         T<W, H, S>::sixel(
             data,

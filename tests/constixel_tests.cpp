@@ -188,7 +188,7 @@ template <typename T>
 void draw_image_cut(const std::vector<uint8_t> &rgbaimage, int32_t w, int32_t h) {
     static T image;
     image.blitRGBA(0, 0, w, h, rgbaimage.data(), w, h, w * 4);
-    image.sixel_to_cout();
+    image.sixel2cout();
     printf("%d-bit %dpx %dpx cut\n", int(image.bitdepth()), int(image.width()), int(image.height()));
     separator();
 }
@@ -197,7 +197,7 @@ template <typename T>
 void draw_image_diffused(const std::vector<uint8_t> &rgbaimage, int32_t w, int32_t h) {
     static T image;
     image.blitRGBADiffused(0, 0, w, h, rgbaimage.data(), w, h, w * 4);
-    image.sixel_to_cout();
+    image.sixel2cout();
     printf("%d-bit %dpx %dpx diffused\n", int(image.bitdepth()), int(image.width()), int(image.height()));
     separator();
 }
@@ -206,7 +206,7 @@ template <typename T>
 void draw_image_linear(const std::vector<uint8_t> &rgbaimage, int32_t w, int32_t h) {
     static T image;
     image.blitRGBADiffusedLinear(0, 0, w, h, rgbaimage.data(), w, h, w * 4);
-    image.sixel_to_cout();
+    image.sixel2cout();
     printf("%d-bit %dpx %dpx diffused linear\n", int(image.bitdepth()), int(image.width()), int(image.height()));
     separator();
 }
