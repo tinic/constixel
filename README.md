@@ -99,6 +99,10 @@ int main() {
 
 This example will consteval gen_image_1bit(), while dynamically generating the sixel string.
 
+```bash
+> g++ -fconstexpr-ops-limit=268435456 -std=c++23 constixel_1bit.cpp -o constixel_1bit -Os
+```
+
 ```c++
 #include "constixel.h"
 
