@@ -78,14 +78,16 @@ Include a text font and pass the struct name as a template parameter to the draw
 #include "fonts/sf_compact_display_medium_48_mono.h"
 
 int main() {
+    using namespace constixel;
+
     static constexpr std::array<const char *, 5> strings {
         "ABCDEFGHIJKLM", "NOPQRTSUVWXYZ", "abcdefghijklm", "nopqrstuvwxyz","1234567890&@.,?!'"""
     };
 
-    constixel::image<constixel::format_8bit, 512, 312, 1> image;
+    image<format_8bit, 512, 312, 1> image;
     for (size_t i = 0; i < strings.size(); i++) { 
-        uint8_t col = constixel::color::GREY_RAMP_STOP - static_cast<uint8_t>(i * 3);
-        image.draw_string_mono<constixel::sf_compact_display_medium_48_mono>(16, 48 * static_cast<int32_t>(i) + 16, strings.at(i), col);
+        uint8_t col = color::GREY_RAMP_STOP - static_cast<uint8_t>(i * 3);
+        image.draw_string_mono<sf_compact_display_medium_48_mono>(16, 48 * static_cast<int32_t>(i) + 16, strings.at(i), col);
     }
     image.sixel_to_cout();
 
