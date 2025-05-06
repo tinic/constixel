@@ -1723,8 +1723,8 @@ class image {
         return x;
     }
 
-    constexpr void line(const rect<int32_t> &l, uint8_t col) {
-        line(l.x, l.y, l.x + l.w, l.y + l.h);
+    constexpr void line(const rect<int32_t> &l, uint8_t col, uint32_t width = 1) {
+        line(l.x, l.y, l.x + l.w, l.y + l.h, width);
     }
 
     constexpr void fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col) {
