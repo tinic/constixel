@@ -237,7 +237,7 @@ class hextree {
     };
 
    public:
-    std::array<node, N> nodes;
+    std::array<node, N> nodes {};
 
     [[nodiscard]] size_t byte_size() const {
         return sizeof(node) * nodes.size();
@@ -387,7 +387,7 @@ class format {
 
     template <typename F>
     static constexpr void png_marker(F &&charOut) {
-        charOut(0x89);
+        charOut(static_cast<char>(0x89));
         charOut(0x50);
         charOut(0x4E);
         charOut(0x47);
@@ -1632,8 +1632,16 @@ class image {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wimplicit-int-conversion"
 #endif  // #if __clang__
+#if __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
+#endif  // #if __GCC__
+
             const char_info &ch_info = FONT::char_table.at(FONT::glyph_tree.lookup(utf32));
 #if __clang__
+#pragma GCC diagnostic pop
+#endif  // #if __clang__
+#if __GNUC__
 #pragma GCC diagnostic pop
 #endif  // #if __clang__
             if (*str == 0) {
@@ -1671,8 +1679,15 @@ class image {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wimplicit-int-conversion"
 #endif  // #if __clang__
+#if __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
+#endif  // #if __GCC__
             const char_info &ch_info = FONT::char_table.at(FONT::glyph_tree.lookup(utf32));
 #if __clang__
+#pragma GCC diagnostic pop
+#endif  // #if __clang__
+#if __GNUC__
 #pragma GCC diagnostic pop
 #endif  // #if __clang__
             draw_char_mono<FONT>(x, y, ch_info, col);
@@ -1707,8 +1722,15 @@ class image {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wimplicit-int-conversion"
 #endif  // #if __clang__
+#if __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
+#endif  // #if __GCC__
             const char_info &ch_info = FONT::char_table.at(FONT::glyph_tree.lookup(utf32));
 #if __clang__
+#pragma GCC diagnostic pop
+#endif  // #if __clang__
+#if __GNUC__
 #pragma GCC diagnostic pop
 #endif  // #if __clang__
             draw_char<FONT>(x, y, ch_info, col);
@@ -1826,7 +1848,7 @@ class image {
         const int32_t y2 = y + static_cast<int32_t>(ch.height);
         for (int32_t yy = y; yy < y2; yy++) {
             for (int32_t xx = x; xx < x2; xx++) {
-                const int32_t x_off = (xx - x) + static_cast<int32_t>((ch.x % 8));
+                const int32_t x_off = (xx - x) + ch.x % 8;
                 const int32_t bit_index = 7 - (x_off % 8);
                 const size_t byte_index = static_cast<size_t>(ch_data_off + x_off / 8);
                 if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
@@ -1850,7 +1872,7 @@ class image {
         const int32_t y2 = y + static_cast<int32_t>(ch.height);
         for (int32_t yy = y; yy < y2; yy++) {
             for (int32_t xx = x; xx < x2; xx++) {
-                const int32_t x_off = (xx - x) + static_cast<int32_t>((ch.x % 2));
+                const int32_t x_off = (xx - x) + ch.x % 2;
                 const int32_t bit_index = (1 - (x_off % 2)) * 4;
                 const size_t byte_index = static_cast<size_t>(ch_data_off + x_off / 2);
                 if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
