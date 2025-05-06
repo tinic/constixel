@@ -179,7 +179,7 @@ class quantize {
     static constexpr size_t palette_size = S;
     const std::array<uint32_t, palette_size> &pal;
 
-   public:
+ public:
     explicit constexpr quantize(const std::array<uint32_t, palette_size> &palette) : pal(palette) {
         for (size_t i = 0; i < pal.size(); ++i) {
             linearpal[i * 3 + 0] = srgb_to_linear(static_cast<float>((pal[i] >> 16) & 0xFF) * (1.0f / 255.0f));
@@ -236,8 +236,8 @@ class hextree {
         }
     };
 
-   public:
-    std::array<node, N> nodes {};
+ public:
+    std::array<node, N> nodes{};
 
     [[nodiscard]] size_t byte_size() const {
         return sizeof(node) * nodes.size();
@@ -344,7 +344,7 @@ struct rect {
 };
 
 class format {
-   public:
+ public:
     static constexpr uint32_t adler32(const uint8_t *data, std::size_t len, uint32_t adler32_sum) {
         uint32_t adler32_s1 = adler32_sum & 0xFFFF;
         uint32_t adler32_s2 = adler32_sum >> 16;
@@ -675,7 +675,7 @@ class format {
 
 template <size_t W, size_t H, int32_t S>
 class format_1bit : public format {
-   public:
+ public:
     static constexpr size_t bits_per_pixel = 1;
     static constexpr size_t bytes_per_line = (W * bits_per_pixel + 7) / 8;
     static constexpr size_t internal_height = ((H + 5) / 6) * 6;
@@ -855,7 +855,7 @@ class format_1bit : public format {
 
 template <size_t W, size_t H, int32_t S>
 class format_2bit : public format {
-   public:
+ public:
     static constexpr size_t bits_per_pixel = 2;
     static constexpr size_t bytes_per_line = (W * bits_per_pixel + 7) / 8;
     static constexpr size_t internal_height = ((H + 5) / 6) * 6;
@@ -1045,7 +1045,7 @@ class format_2bit : public format {
 
 template <size_t W, size_t H, int32_t S>
 class format_4bit : public format {
-   public:
+ public:
     static constexpr size_t bits_per_pixel = 4;
     static constexpr size_t bytes_per_line = (W * bits_per_pixel + 7) / 8;
     static constexpr size_t internal_height = ((H + 5) / 6) * 6;
@@ -1236,7 +1236,7 @@ class format_4bit : public format {
 
 template <size_t W, size_t H, int32_t S>
 class format_8bit : public format {
-   public:
+ public:
     static constexpr size_t bits_per_pixel = 8;
     static constexpr size_t bytes_per_line = W;
     static constexpr size_t internal_height = ((H + 5) / 6) * 6;
@@ -1244,11 +1244,22 @@ class format_8bit : public format {
 
     static consteval const std::array<uint32_t, (1UL << bits_per_pixel)> gen_palette() {
         std::array<uint32_t, (1UL << bits_per_pixel)> pal{};
-        // clang-format off
-        pal[ 0] = 0x000000; pal[ 1] = 0xffffff; pal[ 2] = 0xff0000; pal[ 3] = 0x00ff00;
-        pal[ 4] = 0x0000ff; pal[ 5] = 0xffff00; pal[ 6] = 0x00ffff; pal[ 7] = 0xff00ff;
-        pal[ 8] = 0x333333; pal[ 9] = 0x666666; pal[10] = 0x999999; pal[11] = 0xcccccc;
-        pal[12] = 0x7f0000; pal[13] = 0x007f00; pal[14] = 0x00007f; pal[15] = 0x7f7f00;
+        pal[0] = 0x000000;
+        pal[1] = 0xffffff;
+        pal[2] = 0xff0000;
+        pal[3] = 0x00ff00;
+        pal[4] = 0x0000ff;
+        pal[5] = 0xffff00;
+        pal[6] = 0x00ffff;
+        pal[7] = 0xff00ff;
+        pal[8] = 0x333333;
+        pal[9] = 0x666666;
+        pal[10] = 0x999999;
+        pal[11] = 0xcccccc;
+        pal[12] = 0x7f0000;
+        pal[13] = 0x007f00;
+        pal[14] = 0x00007f;
+        pal[15] = 0x7f7f00;
         for (size_t c = 0; c < 16; c++) {
             uint32_t y = (0xff * static_cast<uint32_t>(c)) / 15;
             pal[0x10 + c] = (y << 16) | (y << 8) | (y << 0);
@@ -1256,20 +1267,19 @@ class format_8bit : public format {
         for (size_t c = 0; c < 8; c++) {
             uint32_t y = (0xff * static_cast<uint32_t>(c)) / 7;
             uint32_t x = (0xff * (static_cast<uint32_t>(c) + 1)) / 8;
-            pal[0x20 + c + 0] = ( y  << 16) | ( 0  << 8) | ( 0  << 0); // Rxx
-            pal[0x20 + c + 8] = (255 << 16) | ( x  << 8) | ( x  << 0); 
-            pal[0x30 + c + 0] = ( 0  << 16) | ( y  << 8) | ( 0  << 0); // Gxx
-            pal[0x30 + c + 8] = ( x  << 16) | (255 << 8) | ( x  << 0);
-            pal[0x40 + c + 0] = ( 0  << 16) | ( 0  << 8) | ( y  << 0); // Bxx
-            pal[0x40 + c + 8] = ( x  << 16) | ( x  << 8) | (255 << 0);
-            pal[0x50 + c + 0] = ( y  << 16) | ( y  << 8) | ( 0  << 0); // RGx
-            pal[0x50 + c + 8] = (255 << 16) | (255 << 8) | ( x  << 0);
-            pal[0x60 + c + 0] = ( 0  << 16) | ( y  << 8) | ( y  << 0); // xGB
-            pal[0x60 + c + 8] = ( x  << 16) | (255 << 8) | (255 << 0);
-            pal[0x70 + c + 0] = ( y  << 16) | ( 0  << 8) | ( y  << 0); // RxB
-            pal[0x70 + c + 8] = (255 << 16) | ( x  << 8) | (255 << 0);
+            pal[0x20 + c + 0] = (y << 16) | (0 << 8) | (0 << 0);
+            pal[0x20 + c + 8] = (255 << 16) | (x << 8) | (x << 0);
+            pal[0x30 + c + 0] = (0 << 16) | (y << 8) | (0 << 0);
+            pal[0x30 + c + 8] = (x << 16) | (255 << 8) | (x << 0);
+            pal[0x40 + c + 0] = (0 << 16) | (0 << 8) | (y << 0);
+            pal[0x40 + c + 8] = (x << 16) | (x << 8) | (255 << 0);
+            pal[0x50 + c + 0] = (y << 16) | (y << 8) | (0 << 0);
+            pal[0x50 + c + 8] = (255 << 16) | (255 << 8) | (x << 0);
+            pal[0x60 + c + 0] = (0 << 16) | (y << 8) | (y << 0);
+            pal[0x60 + c + 8] = (x << 16) | (255 << 8) | (255 << 0);
+            pal[0x70 + c + 0] = (y << 16) | (0 << 8) | (y << 0);
+            pal[0x70 + c + 8] = (255 << 16) | (x << 8) | (255 << 0);
         }
-        // clang-format on
         for (size_t c = 0; c < 8; c++) {
             constixel::oklab lft{static_cast<double>(c) / 7 - 0.2, 0.2, 0.0};
             constixel::oklab rgh{static_cast<double>(c) / 7 - 0.2, 0.2, 360.0};
@@ -1496,7 +1506,7 @@ class image {
     static_assert(W <= 16384 && H <= 16384);
     static_assert(S >= 1 && S <= 256);
 
-   public:
+ public:
     [[nodiscard]] static constexpr int32_t bit_depth() {
         return T<W, H, S>::bits_per_pixel;
     }
@@ -1837,7 +1847,7 @@ class image {
         std::cout << out << std::endl;
     }
 
-   private:
+ private:
     template <typename FONT>
     constexpr void draw_char_mono(int32_t x, int32_t y, const char_info &ch, uint8_t col) {
         static_assert(FONT::mono == true);
