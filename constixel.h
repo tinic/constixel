@@ -306,7 +306,6 @@ class hextree {
 };
 
 struct char_info {
-    uint32_t id;
     int16_t x;
     int16_t y;
     int16_t width;
@@ -426,7 +425,7 @@ class format {
     }
 
     template <typename F, typename P>
-    static constexpr void png_palette(F &&charOut, const P &palette, size_t PBS) {
+    static constexpr void png_palette(F &&charOut, const P &palette) {
         std::array<char, 256 * 3 + 4> header;
         uint32_t i = 0;
         header[i++] = 'P';
@@ -618,7 +617,7 @@ class format {
     static constexpr void png_image(const uint8_t *data, const P &palette, F &&charOut, const L &linePtr) {
         png_marker(charOut);
         png_header(charOut, W, H, PBS);
-        png_palette(charOut, palette, PBS);
+        png_palette(charOut, palette);
         png_idat_zlib_header(charOut);
         uint32_t adler32_sum = 1;
         for (size_t y = 0; y < H; y++) {
@@ -1596,6 +1595,10 @@ class image {
         }
     }
 
+    constexpr void line(const rect<int32_t> &l, uint8_t col, uint32_t width = 1) {
+        line(l.x, l.y, l.x + l.w, l.y + l.h, col, width);
+    }
+
     constexpr void plot(int32_t x, int32_t y, uint8_t col) {
         if (x < 0 || x >= static_cast<int32_t>(W) || y < 0 || y >= static_cast<int32_t>(H)) {
             return;
@@ -1604,7 +1607,8 @@ class image {
     }
 
     template <typename FONT>
-    constexpr int32_t string_width(int32_t x, int32_t y, const char *str) {
+    constexpr int32_t string_width(const char *str) {
+        int32_t x = 0;
         while (*str != 0) {
             uint32_t utf32 = 0;
             uint32_t lead = static_cast<uint32_t>(*str);
@@ -1711,10 +1715,6 @@ class image {
             x += ch_info.xadvance;
         }
         return x;
-    }
-
-    constexpr void line(const rect<int32_t> &l, uint8_t col, uint32_t width = 1) {
-        line(l.x, l.y, l.x + l.w, l.y + l.h, width);
     }
 
     constexpr void fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col) {

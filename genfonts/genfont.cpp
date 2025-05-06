@@ -188,7 +188,7 @@ int main(int argc, char* argv[]) {
                 ss << std::format("    static constexpr std::array<std::pair<uint32_t, uint32_t>, {}> glyph_table{{{{\n", font.chars.size());
             }
             for (size_t c = 0; c <font.chars.size(); c++) {
-                ss << std::format("        {{ 0x{:06x}, 0x{:06x} }},\n", font.chars[c].id, c);
+                ss << std::format("        {{ 0x{:06x}, 0x{:06x} }}{}\n", font.chars[c].id, c, (c < font.chars.size() - 1) ? "," : "");
             }
             ss << std::format("    }}}};\n\n");
             if (font.chars.size() < 65536 && max_id < 65536) {
@@ -199,17 +199,17 @@ int main(int argc, char* argv[]) {
 
             ss << std::format("    static constexpr std::array<char_info, {}> char_table{{{{\n", font.chars.size());
                  //                  { 0x000000,    0,    0,    0,    0,    6,    0,    0 },
-            ss << std::format("      // | unicode|    x|    y|    w|    h| xadv| xoff| yoff|\n");
+            ss << std::format("      //     x|    y|    w|    h| xadv| xoff| yoff|\n");
             for (size_t c = 0; c <font.chars.size(); c++) {
-                ss << std::format("        {{ 0x{:06x}, {:4}, {:4}, {:4}, {:4}, {:4}, {:4}, {:4} }},\n", 
-                    font.chars[c].id, 
+                ss << std::format("        {{ {:4}, {:4}, {:4}, {:4}, {:4}, {:4}, {:4} }}{}\n", 
                     font.chars[c].x, 
                     font.chars[c].y, 
                     font.chars[c].width, 
                     font.chars[c].height,
                     font.chars[c].xadvance,
                     font.chars[c].xoffset,
-                    font.chars[c].yoffset
+                    font.chars[c].yoffset,
+                    (c < font.chars.size() - 1) ? "," : ""
                  );
             }
 
@@ -244,8 +244,8 @@ int main(int argc, char* argv[]) {
                 }
 
                 ss << std::format("        ");
-                for (uint8_t p : bitmap) {
-                    ss << std::format("0x{:02x},", p);
+                for (size_t c = 0; c < bitmap.size(); c++) {
+                    ss << std::format("0x{:02x}{}", bitmap.data()[c], (c < bitmap.size() - 1) ? "," : "");
                     if ((breakline++&0xf)==0) {
                         ss << std::format("\n        ");
                     }
@@ -279,10 +279,14 @@ int main(int argc, char* argv[]) {
                 }
 
                 ss << std::format("        ");
-                for (uint8_t p : bitmap) {
-                    ss << std::format("0x{:02x},", p);
+                for (size_t c = 0; c < bitmap.size(); c++) {
+                    ss << std::format("0x{:02x}{}", bitmap.data()[c], (c < bitmap.size() - 1) ? "," : "");
                     if ((breakline++&0xf)==0) {
-                        ss << std::format("\n        ");
+                        if (c == (bitmap.size() - 1)) {
+                            ss << std::format("\n");
+                        } else {
+                            ss << std::format("\n        ");
+                        }
                     }
                 }
 
@@ -290,7 +294,7 @@ int main(int argc, char* argv[]) {
             }
 
             ss << std::format("}};\n\n");
-            ss << std::format("}};\n");
+            ss << std::format("}}\n");
 
             //std::cout << ss.str();
 
