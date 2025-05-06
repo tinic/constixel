@@ -1762,6 +1762,17 @@ class image {
         fill_rect(r.x, r.y, r.w, r.h, col);
     }
 
+    constexpr void stroke_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col, uint32_t width = 1) {
+        line(x, y, x + w, y, col, width);
+        line(x + w, y, x + w, y + h, col, width);
+        line(x + w, y + h, x, y + h, col, width);
+        line(x, y + h, x, y, col, width);
+    }
+
+    constexpr void stroke_rect(const rect<int32_t> &r, uint8_t col, uint32_t width = 1) {
+        stroke_rect(r.x, r.y, r.w, r.h, col, width);
+    }
+
     constexpr void fill_circle(int32_t x, int32_t y, int32_t r, uint8_t col) {
         span(x - abs(r), 2 * abs(r) + 1, y, col);
         fill_arc(x, y, abs(r), 3, 0, col);
