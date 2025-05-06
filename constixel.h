@@ -237,8 +237,8 @@ class hextree {
             for (auto &c : child) c = invalid;
         }
     };
-    public:
 
+   public:
     std::array<node, N> nodes;
 
     size_t byte_size() const {
@@ -356,6 +356,173 @@ struct rect {
 
 class format {
    public:
+    static constexpr uint32_t adler32(const uint8_t *p, std::size_t len, uint32_t adler = 1) {
+        constexpr uint32_t MOD = 65521;
+
+        uint32_t a = adler & 0xFFFF;
+        uint32_t b = adler >> 16;
+
+        while (len) {
+            std::size_t chunk = len > 5552 ? 5552 : len;  // partial to control overflow
+            len -= chunk;
+            for (; chunk; --chunk, ++p) {
+                a += *p;
+                b += a;
+            }
+            a %= MOD;
+            b %= MOD;
+        }
+        return (b << 16) | a;
+    }
+
+    template <typename F>
+    static constexpr void png_write_be(F &&charOut, uint32_t value) {
+        charOut(static_cast<char>((value >> 24) & 0xFF));
+        charOut(static_cast<char>((value >> 16) & 0xFF));
+        charOut(static_cast<char>((value >> 8) & 0xFF));
+        charOut(static_cast<char>((value >> 0) & 0xFF));
+    }
+
+    template <typename F, typename A>
+    static constexpr void png_write_crc32(F &&charOut, const A &array) {
+        size_t idx = 0;
+        uint32_t crc = 0xFFFFFFFFu;
+        auto len = array.size();
+        while (len--) {
+            crc ^= static_cast<uint8_t>(array.at(idx++));
+            for (int i = 0; i < 8; ++i) {
+                crc = (crc >> 1) ^ (0xEDB88320u & -(crc & 1u));
+            }
+        }
+        png_write_be(charOut, ~crc);
+    }
+
+    template <typename F, typename A>
+    static constexpr void png_write_array(F &&charOut, const A &array, size_t bytes) {
+        for (size_t c = 0; c < bytes; c++) {
+            charOut(static_cast<char>(array[c]));
+        }
+    }
+
+    template <typename F>
+    static constexpr void png_marker(F &&charOut) {
+        charOut(0x89);
+        charOut(0x50);
+        charOut(0x4E);
+        charOut(0x47);
+        charOut(0x0D);
+        charOut(0x0D);
+        charOut(0x1A);
+        charOut(0x0A);
+    }
+
+    template <typename F>
+    static constexpr void png_header(F &&charOut, size_t w, size_t h, size_t depth) {
+        const size_t chunkLength = 17;
+        std::array<char, chunkLength> header;
+        uint32_t index = 0;
+        header[index++] = 'I';
+        header[index++] = 'H';
+        header[index++] = 'D';
+        header[index++] = 'R';
+        header[index++] = static_cast<char>((w >> 24) & 0xFF);
+        header[index++] = static_cast<char>((w >> 16) & 0xFF);
+        header[index++] = static_cast<char>((w >> 8) & 0xFF);
+        header[index++] = static_cast<char>((w >> 0) & 0xFF);
+        header[index++] = static_cast<char>((h >> 24) & 0xFF);
+        header[index++] = static_cast<char>((h >> 16) & 0xFF);
+        header[index++] = static_cast<char>((h >> 8) & 0xFF);
+        header[index++] = static_cast<char>((h >> 0) & 0xFF);
+        header[index++] = static_cast<char>(depth);
+        header[index++] = 3;
+        header[index++] = 0;
+        header[index++] = 0;
+        header[index++] = 0;
+        png_write_be(charOut, index);
+        png_write_array(charOut, header, index);
+        png_write_crc32(charOut, header);
+    }
+
+    template <typename F, typename P>
+    static constexpr void png_palette(F &&charOut, const P &palette, size_t PBS) {
+        std::array<char, 256 + 4> header;
+        uint32_t index = 0;
+        header[index++] = 'P';
+        header[index++] = 'L';
+        header[index++] = 'T';
+        header[index++] = 'E';
+        for (size_t c = 0; c < palette.size(); c++) {
+            header[index++] = static_cast<char>((palette[c] >> 16) & 0xFF);
+            header[index++] = static_cast<char>((palette[c] >> 8) & 0xFF);
+            header[index++] = static_cast<char>((palette[c] >> 0) & 0xFF);
+        }
+        png_write_be(charOut, index);
+        png_write_array(charOut, header, index);
+        png_write_crc32(charOut, header);
+    }
+
+    template <typename F>
+    static constexpr void png_end(F &&charOut) {
+        const size_t chunkLength = 4;
+        std::array<char, chunkLength> header;
+        uint32_t index = 0;
+        header[index++] = 'I';
+        header[index++] = 'E';
+        header[index++] = 'N';
+        header[index++] = 'D';
+        png_write_be(charOut, index);
+        png_write_array(charOut, header, index);
+        png_write_crc32(charOut, header);
+    }
+
+    template <typename F>
+    static constexpr void png_idat(F &&charOut, const uint8_t *line, size_t bytes) {
+        while (bytes > 0) {
+            const size_t chunkLength = std::min(static_cast<size_t>(bytes + 4 + 7 + 1), static_cast<size_t>(256 + 4 + 7 + 1));
+            std::array<uint8_t, 256 + 4 + 1> header;
+            uint32_t index = 0;
+            header[index++] = 'I';
+            header[index++] = 'D';
+            header[index++] = 'A';
+            header[index++] = 'T';
+
+            header[index++] = 0x02;  // zlib magic header
+            header[index++] = 0x08;
+            header[index++] = 0x00;
+
+            header[index++] = ((chunkLength >> 0) & 0xFF);
+            header[index++] = ((chunkLength >> 8) & 0xFF);
+            header[index++] = (((chunkLength ^ 0xffff) >> 0) & 0xFF);
+            header[index++] = (((chunkLength ^ 0xffff) >> 8) & 0xFF);
+
+            uint32_t adlersum_start = index;
+
+            header[index++] = 0;  // row filter
+
+            header[index++] = 0x02;  // zlib header
+            header[index++] = 0x08;
+            header[index++] = 0x30;
+            header[index++] = 0x00;
+
+            size_t bytes_to_copy = std::min(static_cast<size_t>(256), bytes);
+            for (size_t c = 0; c < bytes_to_copy; c++) {
+                header[index++] = line[c];
+            }
+
+            header[index++] = 0x02;  // adler zlib trailer
+            header[index++] = 0x08;
+            header[index++] = 0x30;
+            header[index++] = 0x00;
+
+            png_write_be(charOut, adler32(&header[adlersum_start], index - adlersum_start));
+
+            png_write_be(charOut, index);
+            png_write_array(charOut, header, index);
+            png_write_crc32(charOut, header);
+            bytes -= bytes_to_copy;
+        }
+    }
+
     template <typename F>
     static constexpr void sixel_header(F &&charOut) {
         charOut(0x1b);
@@ -445,6 +612,17 @@ class format {
 
         uint32_t set[PBS / 32]{};
     };
+
+    template <size_t W, size_t H, int32_t S, typename PBT, size_t PBS, typename P, typename F, typename L>
+    static constexpr void png_image(const uint8_t *data, const P &palette, F &&charOut, const L &linePtr) {
+        png_marker(charOut);
+        png_header(charOut, W, H, PBS);
+        png_palette(charOut, palette, PBS);
+        for (size_t y = 0; y < H; y++) {
+            png_idat(charOut, linePtr(data, y), (W + PBS - 1) / PBS);
+        }
+        png_end(charOut);
+    }
 
     template <size_t W, size_t H, int32_t S, typename PBT, size_t PBS, typename P, typename F, typename C, typename D>
     static constexpr void sixel_image(const uint8_t *data, const P &palette, F &&charOut, const rect<int32_t> &_r, const C &collect6, const D &set6) {
@@ -617,6 +795,13 @@ class format_1bit : public format {
                 err_b = std::clamp(Bl - (n ? 1.0f : 0.0f), -c, c);
             }
         }
+    }
+
+    template <typename F>
+    static constexpr void png(const std::array<uint8_t, image_size> &data, F &&charOut) {
+        png_image<W, H, S, uint8_t, bits_per_pixel>(data.data(), palette, charOut, [](const uint8_t *dataRaw, size_t y) {
+            return dataRaw + y * bytes_per_line;
+        });
     }
 
     template <typename F>
@@ -802,6 +987,13 @@ class format_2bit : public format {
     }
 
     template <typename F>
+    static constexpr void png(const std::array<uint8_t, image_size> &data, F &&charOut) {
+        png_image<W, H, S, uint8_t, bits_per_pixel>(data.data(), palette, charOut, [](const uint8_t *dataRaw, size_t y) {
+            return dataRaw + y * bytes_per_line;
+        });
+    }
+
+    template <typename F>
     static constexpr void sixel(const std::array<uint8_t, image_size> &data, F &&charOut, const rect<int32_t> &r) {
         sixel_image<W, H, S, uint8_t, bits_per_pixel>(
             data.data(), palette, charOut, r,
@@ -982,6 +1174,13 @@ class format_4bit : public format {
                 err_b = std::clamp(Bl - quant.linearpal[n * 3 + 2], -1.0f, 1.0f);
             }
         }
+    }
+
+    template <typename F>
+    static constexpr void png(const std::array<uint8_t, image_size> &data, F &&charOut) {
+        png_image<W, H, S, uint8_t, bits_per_pixel>(data.data(), palette, charOut, [](const uint8_t *dataRaw, size_t y) {
+            return dataRaw + y * bytes_per_line;
+        });
     }
 
     template <typename F>
@@ -1181,6 +1380,13 @@ class format_8bit : public format {
                 err_b = std::clamp(Bl - quant.linearpal[n * 3 + 2], -1.0f, 1.0f);
             }
         }
+    }
+
+    template <typename F>
+    static constexpr void png(const std::array<uint8_t, image_size> &data, F &&charOut) {
+        png_image<W, H, S, uint8_t, bits_per_pixel>(data.data(), palette, charOut, [](const uint8_t *dataRaw, size_t y) {
+            return dataRaw + y * bytes_per_line;
+        });
     }
 
     template <typename F>
@@ -1402,7 +1608,8 @@ class image {
                 utf32 = ((lead & 0x0F) << 12) | ((static_cast<uint32_t>(str[1]) & 0x3F) << 6) | (static_cast<uint32_t>(str[3]) & 0x3F);
                 str += 3;
             } else if ((lead >> 3) == 0x1E) {
-                utf32 = ((lead & 0x07) << 18) | ((static_cast<uint32_t>(str[1]) & 0x3F) << 12) | ((static_cast<uint32_t>(str[2]) & 0x3F) << 6) | (static_cast<uint32_t>(str[3]) & 0x3F);
+                utf32 = ((lead & 0x07) << 18) | ((static_cast<uint32_t>(str[1]) & 0x3F) << 12) | ((static_cast<uint32_t>(str[2]) & 0x3F) << 6) |
+                        (static_cast<uint32_t>(str[3]) & 0x3F);
                 str += 4;
             } else {
                 return x;
@@ -1440,7 +1647,8 @@ class image {
                 utf32 = ((lead & 0x0F) << 12) | ((static_cast<uint32_t>(str[1]) & 0x3F) << 6) | (static_cast<uint32_t>(str[3]) & 0x3F);
                 str += 3;
             } else if ((lead >> 3) == 0x1E) {
-                utf32 = ((lead & 0x07) << 18) | ((static_cast<uint32_t>(str[1]) & 0x3F) << 12) | ((static_cast<uint32_t>(str[2]) & 0x3F) << 6) | (static_cast<uint32_t>(str[3]) & 0x3F);
+                utf32 = ((lead & 0x07) << 18) | ((static_cast<uint32_t>(str[1]) & 0x3F) << 12) | ((static_cast<uint32_t>(str[2]) & 0x3F) << 6) |
+                        (static_cast<uint32_t>(str[3]) & 0x3F);
                 str += 4;
             } else {
                 return x;
@@ -1475,7 +1683,8 @@ class image {
                 utf32 = ((lead & 0x0F) << 12) | ((static_cast<uint32_t>(str[1]) & 0x3F) << 6) | (static_cast<uint32_t>(str[3]) & 0x3F);
                 str += 3;
             } else if ((lead >> 3) == 0x1E) {
-                utf32 = ((lead & 0x07) << 18) | ((static_cast<uint32_t>(str[1]) & 0x3F) << 12) | ((static_cast<uint32_t>(str[2]) & 0x3F) << 6) | (static_cast<uint32_t>(str[3]) & 0x3F);
+                utf32 = ((lead & 0x07) << 18) | ((static_cast<uint32_t>(str[1]) & 0x3F) << 12) | ((static_cast<uint32_t>(str[2]) & 0x3F) << 6) |
+                        (static_cast<uint32_t>(str[3]) & 0x3F);
                 str += 4;
             } else {
                 return x;
@@ -1574,6 +1783,11 @@ class image {
     }
 
     template <typename F>
+    constexpr void png(F &&charOut) const {
+        T<W, H, S>::png(data, charOut);
+    }
+
+    template <typename F>
     constexpr void sixel(F &&charOut) const {
         T<W, H, S>::sixel(data, charOut, {0, 0, W, H});
     }
@@ -1594,16 +1808,15 @@ class image {
     }
 
    private:
-
-   template <typename FONT>
-   constexpr void draw_char_mono(int32_t x, int32_t y, const char_info &ch, uint8_t col) {
-       static_assert(FONT::mono == true);
-       int32_t ch_data_off = static_cast<int32_t>(ch.y) * static_cast<int32_t>(FONT::glyph_bitmap_stride) + static_cast<int32_t>(ch.x) / 8;
-       x += ch.xoffset;
-       y += ch.yoffset;
-       const int32_t x2 = x + static_cast<int32_t>(ch.width);
-       const int32_t y2 = y + static_cast<int32_t>(ch.height);
-       for (int32_t yy = y; yy < y2; yy++) {
+    template <typename FONT>
+    constexpr void draw_char_mono(int32_t x, int32_t y, const char_info &ch, uint8_t col) {
+        static_assert(FONT::mono == true);
+        int32_t ch_data_off = static_cast<int32_t>(ch.y) * static_cast<int32_t>(FONT::glyph_bitmap_stride) + static_cast<int32_t>(ch.x) / 8;
+        x += ch.xoffset;
+        y += ch.yoffset;
+        const int32_t x2 = x + static_cast<int32_t>(ch.width);
+        const int32_t y2 = y + static_cast<int32_t>(ch.height);
+        for (int32_t yy = y; yy < y2; yy++) {
             for (int32_t xx = x; xx < x2; xx++) {
                 const int32_t x_off = (xx - x) + static_cast<int32_t>((ch.x % 8));
                 const int32_t bit_index = 7 - (x_off % 8);
@@ -1628,20 +1841,20 @@ class image {
         const int32_t x2 = x + static_cast<int32_t>(ch.width);
         const int32_t y2 = y + static_cast<int32_t>(ch.height);
         for (int32_t yy = y; yy < y2; yy++) {
-             for (int32_t xx = x; xx < x2; xx++) {
-                 const int32_t x_off = (xx - x) + static_cast<int32_t>((ch.x % 2));
-                 const int32_t bit_index = (1 - (x_off % 2)) * 4;
-                 const size_t byte_index = static_cast<size_t>(ch_data_off + x_off / 2);
-                 if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
-                     const uint8_t a = (FONT::glyph_bitmap[byte_index] >> bit_index) & 0x7;
-                     plot(xx, yy, a ? col : 0);
-                 }
-             }
-             ch_data_off += FONT::glyph_bitmap_stride;
-         }
-     }
- 
-     constexpr void span(int32_t x, int32_t w, int32_t y, uint8_t col, bool clip) {
+            for (int32_t xx = x; xx < x2; xx++) {
+                const int32_t x_off = (xx - x) + static_cast<int32_t>((ch.x % 2));
+                const int32_t bit_index = (1 - (x_off % 2)) * 4;
+                const size_t byte_index = static_cast<size_t>(ch_data_off + x_off / 2);
+                if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
+                    const uint8_t a = (FONT::glyph_bitmap[byte_index] >> bit_index) & 0x7;
+                    plot(xx, yy, a ? col : 0);
+                }
+            }
+            ch_data_off += FONT::glyph_bitmap_stride;
+        }
+    }
+
+    constexpr void span(int32_t x, int32_t w, int32_t y, uint8_t col, bool clip) {
         if (clip) {
             if (x < 0) {
                 w += x;
