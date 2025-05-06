@@ -183,21 +183,21 @@ int main(int argc, char* argv[]) {
                 max_id = std::max(font.chars[c].id, max_id);
             }
             if (font.chars.size() < 65536 && max_id < 65536) {
-                ss << std::format("    static constexpr std::array<std::pair<uint16_t, uint16_t>> glyph_table{{{{\n");
+                ss << std::format("    static constexpr std::array<std::pair<uint16_t, uint16_t>, {}> glyph_table{{{{\n", font.chars.size());
             } else {
-                ss << std::format("    static constexpr std::array<std::pair<uint32_t, uint32_t>> glyph_table{{{{\n");
+                ss << std::format("    static constexpr std::array<std::pair<uint32_t, uint32_t>, {}> glyph_table{{{{\n", font.chars.size());
             }
             for (size_t c = 0; c <font.chars.size(); c++) {
-                ss << std::format("        {{ 0x{:06x}, 0x{:06} }},\n", font.chars[c].id, c);
+                ss << std::format("        {{ 0x{:06x}, 0x{:06x} }},\n", font.chars[c].id, c);
             }
             ss << std::format("    }}}};\n\n");
             if (font.chars.size() < 65536 && max_id < 65536) {
-                ss << std::format("    static constexpr hextree<hextree<0, uint16_t>, uint16_t> glyph_tree(glyph_table);\n\n");
+                ss << std::format("    static constexpr hextree<hextree<0, uint16_t>::size(glyph_table), uint16_t> glyph_tree{{glyph_table}};\n\n", font.chars.size() );
             } else {
-                ss << std::format("    static constexpr hextree<hextree<0, uint32_t>, uint32_t> glyph_tree(glyph_table);\n\n");
+                ss << std::format("    static constexpr hextree<hextree<0, uint32_t>::size(glyph_table), uint32_t> glyph_tree{{glyph_table}};\n\n", font.chars.size());
             }
 
-            ss << std::format("    static constexpr std::array<char_info, {}> char_table({{{{\n", font.chars.size());
+            ss << std::format("    static constexpr std::array<char_info, {}> char_table{{{{\n", font.chars.size());
                  //                  { 0x000000,    0,    0,    0,    0,    6,    0,    0 },
             ss << std::format("      // | unicode|    x|    y|    w|    h| xadv| xoff| yoff|\n");
             for (size_t c = 0; c <font.chars.size(); c++) {
@@ -222,7 +222,10 @@ int main(int argc, char* argv[]) {
                 std::vector<uint8_t> bitmap;
                 bitmap.assign(h * bpr, 0);
 
-                ss << std::format("    static constexpr mono = true;\n\n");
+                ss << std::format("    static constexpr bool mono = true;\n");
+                ss << std::format("    static constexpr size_t glyph_bitmap_width = {};\n", w);
+                ss << std::format("    static constexpr size_t glyph_bitmap_height = {};\n", h);
+                ss << std::format("    static constexpr size_t glyph_bitmap_stride = {};\n\n", bpr);
 
                 ss << std::format("    static constexpr std::array<uint8_t, {}> glyph_bitmap{{{{\n", h * bpr);
 
@@ -256,7 +259,10 @@ int main(int argc, char* argv[]) {
                 std::vector<uint8_t> bitmap;
                 bitmap.assign(h * bpr, 0);
 
-                ss << std::format("    static constexpr mono = false;\n\n");
+                ss << std::format("    static constexpr bool mono = false;\n");
+                ss << std::format("    static constexpr size_t glyph_bitmap_width = {};\n", w);
+                ss << std::format("    static constexpr size_t glyph_bitmap_height = {};\n", h);
+                ss << std::format("    static constexpr size_t glyph_bitmap_stride = {};\n\n", bpr);
 
                 ss << std::format("    static constexpr std::array<uint8_t, {}> glyph_bitmap{{{{\n", h * bpr);
 

@@ -245,6 +245,10 @@ class hextree {
         return sizeof(node) * nodes.size();
     }
 
+    hextree() = delete;
+    hextree(const hextree &) = delete;
+    hextree &operator=(const hextree &) = delete;
+
     template <std::size_t NS>
     consteval hextree(const std::array<std::pair<T, T>, NS> &in) {
         nodes[0] = node{};
@@ -266,7 +270,7 @@ class hextree {
     }
 
     template <std::size_t NS>
-    static consteval T size(const std::array<std::pair<T, T>, NS> &in) {
+    [[nodiscard]] static consteval T size(const std::array<std::pair<T, T>, NS> &in) {
         std::vector<node> vnodes{1};
         vnodes.assign(1, node{});
         for (auto [key, val] : in) {
@@ -286,7 +290,7 @@ class hextree {
         return static_cast<T>(vnodes.size());
     }
 
-    constexpr T lookup(T key) const {
+    [[nodiscard]] constexpr T lookup(T key) const {
         T idx = 0;
         for (T d = 0; d < bitslices; ++d) {
             T nib = (key >> ((bitslices - d) * 4)) & 0xF;
@@ -1377,11 +1381,105 @@ class image {
     }
 
     constexpr void plot(int32_t x, int32_t y, uint8_t col) {
-        size_t _x = static_cast<size_t>(x);
-        _x %= W;
-        size_t _y = static_cast<size_t>(y);
-        _y %= H;
-        T<W, H, S>::plot(data, _x, _y, col);
+        if (x < 0 || x >= W || y < 0 || y >= H) {
+            return;
+        }
+        T<W, H, S>::plot(data, static_cast<uint32_t>(x), static_cast<uint32_t>(y), col);
+    }
+
+    template <typename FONT>
+    constexpr int32_t string_width(int32_t x, int32_t y, const char *str) {
+        while (*str != 0) {
+            uint32_t utf32 = 0;
+            uint32_t lead = static_cast<uint32_t>(*str);
+            if (lead < 0x80) {
+                utf32 = lead;
+                str += 1;
+            } else if ((lead >> 5) == 0x06) {
+                utf32 = ((lead & 0x1F) << 6) | (static_cast<uint32_t>(str[1]) & 0x3F);
+                str += 2;
+            } else if ((lead >> 4) == 0x0E) {
+                utf32 = ((lead & 0x0F) << 12) | ((static_cast<uint32_t>(str[1]) & 0x3F) << 6) | (static_cast<uint32_t>(str[3]) & 0x3F);
+                str += 3;
+            } else if ((lead >> 3) == 0x1E) {
+                utf32 = ((lead & 0x07) << 18) | ((static_cast<uint32_t>(str[1]) & 0x3F) << 12) | ((static_cast<uint32_t>(str[2]) & 0x3F) << 6) | (static_cast<uint32_t>(str[3]) & 0x3F);
+                str += 4;
+            } else {
+                return x;
+            }
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wimplicit-int-conversion"
+            const char_info &ch_info = FONT::char_table.at(FONT::glyph_tree.lookup(utf32));
+#pragma GCC diagnostic pop
+            if (*str == 0) {
+                x += ch_info.width;
+            } else {
+                x += ch_info.xadvance;
+            }
+        }
+        return x;
+    }
+
+    template <typename FONT>
+    constexpr int32_t draw_string_mono(int32_t x, int32_t y, const char *str, uint8_t col) {
+        static_assert(FONT::mono == true);
+        while (*str != 0) {
+            uint32_t utf32 = 0;
+            uint32_t lead = static_cast<uint32_t>(*str);
+            if (lead < 0x80) {
+                utf32 = lead;
+                str += 1;
+            } else if ((lead >> 5) == 0x06) {
+                utf32 = ((lead & 0x1F) << 6) | (static_cast<uint32_t>(str[1]) & 0x3F);
+                str += 2;
+            } else if ((lead >> 4) == 0x0E) {
+                utf32 = ((lead & 0x0F) << 12) | ((static_cast<uint32_t>(str[1]) & 0x3F) << 6) | (static_cast<uint32_t>(str[3]) & 0x3F);
+                str += 3;
+            } else if ((lead >> 3) == 0x1E) {
+                utf32 = ((lead & 0x07) << 18) | ((static_cast<uint32_t>(str[1]) & 0x3F) << 12) | ((static_cast<uint32_t>(str[2]) & 0x3F) << 6) | (static_cast<uint32_t>(str[3]) & 0x3F);
+                str += 4;
+            } else {
+                return x;
+            }
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wimplicit-int-conversion"
+            const char_info &ch_info = FONT::char_table.at(FONT::glyph_tree.lookup(utf32));
+#pragma GCC diagnostic pop
+            draw_char_mono<FONT>(x, y, ch_info, col);
+            x += ch_info.xadvance;
+        }
+        return x;
+    }
+
+    template <typename FONT>
+    constexpr int32_t draw_string(int32_t x, int32_t y, const char *str, uint8_t col) {
+        static_assert(FONT::mono == false);
+        while (*str != 0) {
+            uint32_t utf32 = 0;
+            uint32_t lead = static_cast<uint32_t>(*str);
+            if (lead < 0x80) {
+                utf32 = lead;
+                str += 1;
+            } else if ((lead >> 5) == 0x06) {
+                utf32 = ((lead & 0x1F) << 6) | (static_cast<uint32_t>(str[1]) & 0x3F);
+                str += 2;
+            } else if ((lead >> 4) == 0x0E) {
+                utf32 = ((lead & 0x0F) << 12) | ((static_cast<uint32_t>(str[1]) & 0x3F) << 6) | (static_cast<uint32_t>(str[3]) & 0x3F);
+                str += 3;
+            } else if ((lead >> 3) == 0x1E) {
+                utf32 = ((lead & 0x07) << 18) | ((static_cast<uint32_t>(str[1]) & 0x3F) << 12) | ((static_cast<uint32_t>(str[2]) & 0x3F) << 6) | (static_cast<uint32_t>(str[3]) & 0x3F);
+                str += 4;
+            } else {
+                return x;
+            }
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wimplicit-int-conversion"
+            const char_info &ch_info = FONT::char_table.at(FONT::glyph_tree.lookup(utf32));
+#pragma GCC diagnostic pop
+            draw_char<FONT>(x, y, ch_info, col);
+            x += ch_info.xadvance;
+        }
+        return x;
     }
 
     constexpr void line(const rect<int32_t> &l, uint8_t col, bool clip = true) {
@@ -1413,11 +1511,11 @@ class image {
         fill_arc(x, y, abs(r), 3, 0, col, clip);
     }
 
-    constexpr std::array<uint32_t, W * H> RGBA_uint32() const {
+    [[nodiscard]] constexpr std::array<uint32_t, W * H> RGBA_uint32() const {
         return T<W, H, S>::RGBA_uint32(data);
     }
 
-    constexpr std::array<uint8_t, W * H * 4> RGBA_uint8() const {
+    [[nodiscard]] constexpr std::array<uint8_t, W * H * 4> RGBA_uint8() const {
         return T<W, H, S>::RGBA_uint8(data);
     }
 
@@ -1484,7 +1582,54 @@ class image {
     }
 
    private:
-    constexpr void span(int32_t x, int32_t w, int32_t y, uint8_t col, bool clip) {
+
+   template <typename FONT>
+   constexpr void draw_char_mono(int32_t x, int32_t y, const char_info &ch, uint8_t col) {
+       static_assert(FONT::mono == true);
+       int32_t ch_data_off = static_cast<int32_t>(ch.y) * static_cast<int32_t>(FONT::glyph_bitmap_stride) + static_cast<int32_t>(ch.x) / 8;
+       x += ch.xoffset;
+       y += ch.yoffset;
+       const int32_t x2 = x + static_cast<int32_t>(ch.width);
+       const int32_t y2 = y + static_cast<int32_t>(ch.height);
+       for (int32_t yy = y; yy < y2; yy++) {
+            for (int32_t xx = x; xx < x2; xx++) {
+                const int32_t x_off = (xx - x) + static_cast<int32_t>((ch.x % 8));
+                const int32_t bit_index = 7 - (x_off % 8);
+                const size_t byte_index = static_cast<size_t>(ch_data_off + x_off / 8);
+                if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
+                    const uint8_t a = (FONT::glyph_bitmap[byte_index] >> bit_index) & 1;
+                    if (a) {
+                        plot(xx, yy, col);
+                    }
+                }
+            }
+            ch_data_off += FONT::glyph_bitmap_stride;
+        }
+    }
+
+    template <typename FONT>
+    constexpr void draw_char(int32_t x, int32_t y, const char_info &ch, uint8_t col) {
+        static_assert(FONT::mono == false);
+        int32_t ch_data_off = static_cast<int32_t>(ch.y) * static_cast<int32_t>(FONT::glyph_bitmap_stride) + static_cast<int32_t>(ch.x) / 2;
+        x += ch.xoffset;
+        y += ch.yoffset;
+        const int32_t x2 = x + static_cast<int32_t>(ch.width);
+        const int32_t y2 = y + static_cast<int32_t>(ch.height);
+        for (int32_t yy = y; yy < y2; yy++) {
+             for (int32_t xx = x; xx < x2; xx++) {
+                 const int32_t x_off = (xx - x) + static_cast<int32_t>((ch.x % 2));
+                 const int32_t bit_index = (1 - (x_off % 2)) * 4;
+                 const size_t byte_index = static_cast<size_t>(ch_data_off + x_off / 2);
+                 if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
+                     const uint8_t a = (FONT::glyph_bitmap[byte_index] >> bit_index) & 0x7;
+                     plot(xx, yy, col);
+                 }
+             }
+             ch_data_off += FONT::glyph_bitmap_stride;
+         }
+     }
+ 
+     constexpr void span(int32_t x, int32_t w, int32_t y, uint8_t col, bool clip) {
         if (clip) {
             if (x < 0) {
                 w += x;
