@@ -356,23 +356,14 @@ struct rect {
 
 class format {
    public:
-    static constexpr uint32_t adler32(const uint8_t *p, std::size_t len, uint32_t adler = 1) {
-        constexpr uint32_t MOD = 65521;
-
-        uint32_t a = adler & 0xFFFF;
-        uint32_t b = adler >> 16;
-
-        while (len) {
-            std::size_t chunk = len > 5552 ? 5552 : len;  // partial to control overflow
-            len -= chunk;
-            for (; chunk; --chunk, ++p) {
-                a += *p;
-                b += a;
-            }
-            a %= MOD;
-            b %= MOD;
+    static constexpr uint32_t adler32(const uint8_t *data, std::size_t len, uint32_t adler32_sum) {
+        uint32_t adler32_s1 = adler32_sum & 0xFFFF;
+        uint32_t adler32_s2 = adler32_sum >> 16;
+        for (size_t c = 0; c < len; c++) {
+            adler32_s1 = (adler32_s1 + data[c]) % 65521;
+            adler32_s2 = (adler32_s2 + adler32_s1) % 65521;
         }
-        return (b << 16) | a;
+        return ((adler32_s2 << 16) | adler32_s1);
     }
 
     template <typename F>
@@ -384,17 +375,18 @@ class format {
     }
 
     template <typename F, typename A>
-    static constexpr void png_write_crc32(F &&charOut, const A &array) {
+    static constexpr void png_write_crc32(F &&charOut, const A &array, size_t bytes) {
         size_t idx = 0;
-        uint32_t crc = 0xFFFFFFFFu;
-        auto len = array.size();
+        uint32_t crc = 0xFFFFFFFF;
+        size_t len = bytes;
         while (len--) {
-            crc ^= static_cast<uint8_t>(array.at(idx++));
+            uint8_t d = static_cast<uint8_t>(array.at(idx++));
+            crc ^= d;
             for (int i = 0; i < 8; ++i) {
-                crc = (crc >> 1) ^ (0xEDB88320u & -(crc & 1u));
+                crc = (crc & 1) ? (crc >> 1) ^ 0xEDB88320u : crc >> 1;
             }
         }
-        png_write_be(charOut, ~crc);
+        png_write_be(charOut, crc ^ 0xFFFFFFFF);
     }
 
     template <typename F, typename A>
@@ -411,7 +403,7 @@ class format {
         charOut(0x4E);
         charOut(0x47);
         charOut(0x0D);
-        charOut(0x0D);
+        charOut(0x0A);
         charOut(0x1A);
         charOut(0x0A);
     }
@@ -420,107 +412,126 @@ class format {
     static constexpr void png_header(F &&charOut, size_t w, size_t h, size_t depth) {
         const size_t chunkLength = 17;
         std::array<char, chunkLength> header;
-        uint32_t index = 0;
-        header[index++] = 'I';
-        header[index++] = 'H';
-        header[index++] = 'D';
-        header[index++] = 'R';
-        header[index++] = static_cast<char>((w >> 24) & 0xFF);
-        header[index++] = static_cast<char>((w >> 16) & 0xFF);
-        header[index++] = static_cast<char>((w >> 8) & 0xFF);
-        header[index++] = static_cast<char>((w >> 0) & 0xFF);
-        header[index++] = static_cast<char>((h >> 24) & 0xFF);
-        header[index++] = static_cast<char>((h >> 16) & 0xFF);
-        header[index++] = static_cast<char>((h >> 8) & 0xFF);
-        header[index++] = static_cast<char>((h >> 0) & 0xFF);
-        header[index++] = static_cast<char>(depth);
-        header[index++] = 3;
-        header[index++] = 0;
-        header[index++] = 0;
-        header[index++] = 0;
-        png_write_be(charOut, index);
-        png_write_array(charOut, header, index);
-        png_write_crc32(charOut, header);
+        uint32_t i = 0;
+        header[i++] = 'I';
+        header[i++] = 'H';
+        header[i++] = 'D';
+        header[i++] = 'R';
+        header[i++] = static_cast<char>((w >> 24) & 0xFF);
+        header[i++] = static_cast<char>((w >> 16) & 0xFF);
+        header[i++] = static_cast<char>((w >> 8) & 0xFF);
+        header[i++] = static_cast<char>((w >> 0) & 0xFF);
+        header[i++] = static_cast<char>((h >> 24) & 0xFF);
+        header[i++] = static_cast<char>((h >> 16) & 0xFF);
+        header[i++] = static_cast<char>((h >> 8) & 0xFF);
+        header[i++] = static_cast<char>((h >> 0) & 0xFF);
+        header[i++] = static_cast<char>(depth);
+        header[i++] = 3;
+        header[i++] = 0;
+        header[i++] = 0;
+        header[i++] = 0;
+        png_write_be(charOut, i - 4);
+        png_write_array(charOut, header, i);
+        png_write_crc32(charOut, header, i);
     }
 
     template <typename F, typename P>
     static constexpr void png_palette(F &&charOut, const P &palette, size_t PBS) {
-        std::array<char, 256 + 4> header;
-        uint32_t index = 0;
-        header[index++] = 'P';
-        header[index++] = 'L';
-        header[index++] = 'T';
-        header[index++] = 'E';
+        std::array<char, 256 * 3 + 4> header;
+        uint32_t i = 0;
+        header[i++] = 'P';
+        header[i++] = 'L';
+        header[i++] = 'T';
+        header[i++] = 'E';
         for (size_t c = 0; c < palette.size(); c++) {
-            header[index++] = static_cast<char>((palette[c] >> 16) & 0xFF);
-            header[index++] = static_cast<char>((palette[c] >> 8) & 0xFF);
-            header[index++] = static_cast<char>((palette[c] >> 0) & 0xFF);
+            header[i++] = static_cast<char>((palette[c] >> 16) & 0xFF);
+            header[i++] = static_cast<char>((palette[c] >> 8) & 0xFF);
+            header[i++] = static_cast<char>((palette[c] >> 0) & 0xFF);
         }
-        png_write_be(charOut, index);
-        png_write_array(charOut, header, index);
-        png_write_crc32(charOut, header);
+        png_write_be(charOut, i - 4);
+        png_write_array(charOut, header, i);
+        png_write_crc32(charOut, header, i);
     }
 
     template <typename F>
     static constexpr void png_end(F &&charOut) {
-        const size_t chunkLength = 4;
-        std::array<char, chunkLength> header;
-        uint32_t index = 0;
-        header[index++] = 'I';
-        header[index++] = 'E';
-        header[index++] = 'N';
-        header[index++] = 'D';
-        png_write_be(charOut, index);
-        png_write_array(charOut, header, index);
-        png_write_crc32(charOut, header);
+        std::array<char, 4> header;
+        uint32_t i = 0;
+        header[i++] = 'I';
+        header[i++] = 'E';
+        header[i++] = 'N';
+        header[i++] = 'D';
+        png_write_be(charOut, i - 4);
+        png_write_array(charOut, header, i);
+        png_write_crc32(charOut, header, i);
     }
 
     template <typename F>
-    static constexpr void png_idat(F &&charOut, const uint8_t *line, size_t bytes) {
+    static constexpr void png_idat_zlib_header(F &&charOut) {
+        std::array<char, 6> header;
+        uint32_t i = 0;
+        header[i++] = 'I';
+        header[i++] = 'D';
+        header[i++] = 'A';
+        header[i++] = 'T';
+        header[i++] = 0x78;
+        header[i++] = 0x01;
+        png_write_be(charOut, i - 4);
+        png_write_array(charOut, header, i);
+        png_write_crc32(charOut, header, i);
+    }
+
+    template <typename F>
+    static constexpr void png_idat_zlib_stream(F &&charOut, const uint8_t *line, size_t bytes, uint32_t &adler32_sum) {
         while (bytes > 0) {
-            const size_t chunkLength = std::min(static_cast<size_t>(bytes + 4 + 7 + 1), static_cast<size_t>(256 + 4 + 7 + 1));
-            std::array<uint8_t, 256 + 4 + 1> header;
-            uint32_t index = 0;
-            header[index++] = 'I';
-            header[index++] = 'D';
-            header[index++] = 'A';
-            header[index++] = 'T';
+            static constexpr size_t max_data_use = 1024;
+            static constexpr size_t extra_data = 24;
+            static constexpr size_t max_stack_use = max_data_use + extra_data;
+            std::array<uint8_t, max_stack_use> header;
 
-            header[index++] = 0x02;  // zlib magic header
-            header[index++] = 0x08;
-            header[index++] = 0x00;
+            uint32_t i = 0;
+            header[i++] = 'I';
+            header[i++] = 'D';
+            header[i++] = 'A';
+            header[i++] = 'T';
+            header[i++] = 0x00;
 
-            header[index++] = ((chunkLength >> 0) & 0xFF);
-            header[index++] = ((chunkLength >> 8) & 0xFF);
-            header[index++] = (((chunkLength ^ 0xffff) >> 0) & 0xFF);
-            header[index++] = (((chunkLength ^ 0xffff) >> 8) & 0xFF);
+            size_t bytes_to_copy = std::min(static_cast<size_t>(max_data_use), bytes);
+            header[i++] = (((bytes_to_copy + 1) >> 0) & 0xFF);
+            header[i++] = (((bytes_to_copy + 1) >> 8) & 0xFF);
+            header[i++] = ((((bytes_to_copy + 1) ^ 0xffff) >> 0) & 0xFF);
+            header[i++] = ((((bytes_to_copy + 1) ^ 0xffff) >> 8) & 0xFF);
 
-            uint32_t adlersum_start = index;
-
-            header[index++] = 0;  // row filter
-
-            header[index++] = 0x02;  // zlib header
-            header[index++] = 0x08;
-            header[index++] = 0x30;
-            header[index++] = 0x00;
-
-            size_t bytes_to_copy = std::min(static_cast<size_t>(256), bytes);
+            uint32_t adlersum32_start_pos = i;
+            header[i++] = 0;
             for (size_t c = 0; c < bytes_to_copy; c++) {
-                header[index++] = line[c];
+                header[i++] = line[c];
             }
+            adler32_sum = adler32(&header[adlersum32_start_pos], i - adlersum32_start_pos, adler32_sum);
 
-            header[index++] = 0x02;  // adler zlib trailer
-            header[index++] = 0x08;
-            header[index++] = 0x30;
-            header[index++] = 0x00;
+            png_write_be(charOut, i - 4);
+            png_write_array(charOut, header, i);
+            png_write_crc32(charOut, header, i);
 
-            png_write_be(charOut, adler32(&header[adlersum_start], index - adlersum_start));
-
-            png_write_be(charOut, index);
-            png_write_array(charOut, header, index);
-            png_write_crc32(charOut, header);
             bytes -= bytes_to_copy;
         }
+    }
+
+    template <typename F>
+    static constexpr void png_idat_zlib_trailer(F &&charOut, uint32_t adler32_sum) {
+        std::array<char, 8> header;
+        uint32_t i = 0;
+        header[i++] = 'I';
+        header[i++] = 'D';
+        header[i++] = 'A';
+        header[i++] = 'T';
+        header[i++] = static_cast<char>((adler32_sum >> 24) & 0xFF);
+        header[i++] = static_cast<char>((adler32_sum >> 16) & 0xFF);
+        header[i++] = static_cast<char>((adler32_sum >> 8) & 0xFF);
+        header[i++] = static_cast<char>((adler32_sum >> 0) & 0xFF);
+        png_write_be(charOut, i - 4);
+        png_write_array(charOut, header, i);
+        png_write_crc32(charOut, header, i);
     }
 
     template <typename F>
@@ -573,9 +584,9 @@ class format {
     }
 
     template <typename F>
-    static constexpr void sixel_color(F &&charOut, uint16_t index, uint32_t col) {
+    static constexpr void sixel_color(F &&charOut, uint16_t i, uint32_t col) {
         charOut('#');
-        sixel_number(charOut, index);
+        sixel_number(charOut, i);
         charOut(';');
         charOut('2');
         charOut(';');
@@ -618,9 +629,14 @@ class format {
         png_marker(charOut);
         png_header(charOut, W, H, PBS);
         png_palette(charOut, palette, PBS);
+        png_idat_zlib_header(charOut);
+        uint32_t adler32_sum = 1;
         for (size_t y = 0; y < H; y++) {
-            png_idat(charOut, linePtr(data, y), (W + PBS - 1) / PBS);
+            size_t bpl = 0;
+            const uint8_t *ptr = linePtr(data, y, bpl);
+            png_idat_zlib_stream(charOut, ptr, bpl, adler32_sum);
         }
+        png_idat_zlib_trailer(charOut, adler32_sum);
         png_end(charOut);
     }
 
@@ -799,7 +815,8 @@ class format_1bit : public format {
 
     template <typename F>
     static constexpr void png(const std::array<uint8_t, image_size> &data, F &&charOut) {
-        png_image<W, H, S, uint8_t, bits_per_pixel>(data.data(), palette, charOut, [](const uint8_t *dataRaw, size_t y) {
+        png_image<W, H, S, uint8_t, bits_per_pixel>(data.data(), palette, charOut, [](const uint8_t *dataRaw, size_t y, size_t &bpl) {
+            bpl = bytes_per_line;
             return dataRaw + y * bytes_per_line;
         });
     }
@@ -988,7 +1005,8 @@ class format_2bit : public format {
 
     template <typename F>
     static constexpr void png(const std::array<uint8_t, image_size> &data, F &&charOut) {
-        png_image<W, H, S, uint8_t, bits_per_pixel>(data.data(), palette, charOut, [](const uint8_t *dataRaw, size_t y) {
+        png_image<W, H, S, uint8_t, bits_per_pixel>(data.data(), palette, charOut, [](const uint8_t *dataRaw, size_t y, size_t &bpl) {
+            bpl = bytes_per_line;
             return dataRaw + y * bytes_per_line;
         });
     }
@@ -1178,7 +1196,8 @@ class format_4bit : public format {
 
     template <typename F>
     static constexpr void png(const std::array<uint8_t, image_size> &data, F &&charOut) {
-        png_image<W, H, S, uint8_t, bits_per_pixel>(data.data(), palette, charOut, [](const uint8_t *dataRaw, size_t y) {
+        png_image<W, H, S, uint8_t, bits_per_pixel>(data.data(), palette, charOut, [](const uint8_t *dataRaw, size_t y, size_t &bpl) {
+            bpl = bytes_per_line;
             return dataRaw + y * bytes_per_line;
         });
     }
@@ -1384,7 +1403,8 @@ class format_8bit : public format {
 
     template <typename F>
     static constexpr void png(const std::array<uint8_t, image_size> &data, F &&charOut) {
-        png_image<W, H, S, uint8_t, bits_per_pixel>(data.data(), palette, charOut, [](const uint8_t *dataRaw, size_t y) {
+        png_image<W, H, S, uint8_t, bits_per_pixel>(data.data(), palette, charOut, [](const uint8_t *dataRaw, size_t y, size_t &bpl) {
+            bpl = bytes_per_line;
             return dataRaw + y * bytes_per_line;
         });
     }

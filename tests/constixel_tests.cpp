@@ -28,6 +28,8 @@ SOFTWARE.
 #include <iostream>
 #include <string>
 #include <vector>
+#include <fstream>
+#include <filesystem>
 
 #include "../constixel.h"
 #include "../fonts/sf_compact_display_bold_32_mono.h"
@@ -36,6 +38,33 @@ SOFTWARE.
 #include "../fonts/sf_mono_bold_48_mono.h"
 #include "../fonts/sf_mono_regular_18_mono.h"
 #include "../genfonts/fontbm/src/external/lodepng/lodepng.h"
+
+#if 0
+static constexpr void hexdump(const uint8_t* data, std::size_t len) {
+    for (std::size_t offset = 0; offset < len; offset += 16) {
+        std::print("{:08x}  ", offset);
+
+        for (std::size_t i = 0; i < 16; ++i) {
+            if (offset + i < len)
+                std::print("{:02x} ", data[offset + i]);
+            else
+                std::print("   ");
+            if (i == 7) std::print(" ");
+        }
+
+        std::print("|");
+        for (std::size_t i = 0; i < 16; ++i) {
+            if (offset + i < len) {
+                auto c = static_cast<unsigned char>(data[offset + i]);
+                std::print("{}", std::isprint(c) ? static_cast<char>(c) : '.');
+            } else {
+                std::print(" ");
+            }
+        }
+        std::print("|\n");
+    }
+}
+#endif  // #if 0
 
 #if 1
 constexpr std::string test0() {
@@ -163,6 +192,16 @@ constexpr std::string test9() {
         image.line(-8, -8, c * 8, 48, static_cast<uint8_t>(c), static_cast<uint8_t>(c));
     }
     image.sixel([&out](char ch) mutable {
+        out.push_back(ch);
+    });
+    return out;
+}
+
+constexpr std::string test10() {
+    constixel::image<constixel::format_1bit, 256, 256, 1> image;
+    image.fill_rect(0, 0, 256, 256, 2);
+    std::string out{};
+    image.png([&out](char ch) mutable {
         out.push_back(ch);
     });
     return out;
@@ -343,6 +382,7 @@ void draw_functions() {
     }
 }
 
+
 #endif  // #if 0
 
 int main() {
@@ -357,6 +397,7 @@ int main() {
     static_assert(test7().size() == 2419);
     static_assert(test8().size() == 333);
     static_assert(test9().size() == 6121);
+    static_assert(test10().size() == 16447);
 #endif  // #if 0
 
 #if 0
@@ -453,7 +494,7 @@ int main() {
     image.sixel_to_cout();
 #endif  // #if 0
 
-#if 0
+#if 1
     constixel::image<constixel::format_8bit, 512, 312, 1> image;
     static constexpr std::array<const char *, 5> strings {
         "ABCDEFGHIJKLM", "NOPQRTSUVWXYZ", "abcdefghijklm", "nopqrstuvwxyz","1234567890&@.,?!'"""
@@ -462,13 +503,13 @@ int main() {
         uint8_t col = constixel::color::GREY_RAMP_STOP - static_cast<uint8_t>(i * 3);
         image.draw_string_mono<constixel::sf_compact_display_medium_48_mono>(16, 48 * static_cast<int32_t>(i) + 16, strings.at(i), col);
     }
+    std::vector<char> out{};
+    image.png([&out](char ch) mutable {
+        out.push_back(ch);
+    });
+    std::ofstream file("constixel.png");
+    file.write( reinterpret_cast<const char*>(out.data()),
+                static_cast<std::streamsize>(out.size()));
     image.sixel_to_cout();
 #endif  // #if 0
-
-    constixel::image<constixel::format_8bit, 256, 256, 1> image;
-    image.fill_rect(0, 0, 256, 256, 2);
-    std::vector<char> out;
-    image.png([&out](char byte) mutable {
-        out.push_back(byte);
-    });
 }
