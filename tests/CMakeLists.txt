@@ -8,6 +8,11 @@ endif()
 
 project(constixel_tests)
 
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../.gitmodules")
+    execute_process(COMMAND git submodule update --init --recursive
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+endif()
+
 string(FIND ${CMAKE_CXX_COMPILER_ID} "Clang" IS_CLANG)
 if(NOT ${IS_CLANG} EQUAL -1)
     set(CMAKE_CXX_FLAGS "-Os -fconstexpr-steps=33554432 -Weffc++ -Wfloat-conversion -Wdouble-promotion -Wno-unused-parameter -Wuninitialized -Wno-psabi -Wshadow -Wnon-virtual-dtor -Wunused -Woverloaded-virtual -Wmisleading-indentation -Wnull-dereference -Wstrict-aliasing -Wcast-align -Wconversion")
