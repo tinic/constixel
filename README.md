@@ -7,7 +7,7 @@ constixel is a single header minimalistic constexpr C++20(+) 2d graphics renderi
 [Applications](#applications)  
 [Requirements](#requirements)  
 [Minimal example](#minimal-example)  
-[Text drawing example](#text-drawing-example)
+[Text drawing example](#text-drawing-example)  
 [Consteval sixel example](#consteval-sixel-example)  
 [Consteval image example](#consteval-embedded-image-data-example)  
 [API](#api)  
@@ -69,7 +69,7 @@ int main() {
 
 ![constixel](./media/constixel.jpg "Example in iTerm")
 
-## Test drawing example
+## Text drawing example
 
 Include a text font and pass the struct name as a template parameter to the draw_string function:
 
@@ -78,14 +78,16 @@ Include a text font and pass the struct name as a template parameter to the draw
 #include "fonts/sf_compact_display_medium_48_mono.h"
 
 int main() {
+    using namespace constixel;
+
     static constexpr std::array<const char *, 5> strings {
         "ABCDEFGHIJKLM", "NOPQRTSUVWXYZ", "abcdefghijklm", "nopqrstuvwxyz","1234567890&@.,?!'"""
     };
 
-    constixel::image<constixel::format_8bit, 512, 312, 1> image;
+    image<format_8bit, 512, 312, 1> image;
     for (size_t i = 0; i < strings.size(); i++) { 
-        uint8_t col = constixel::color::GREY_RAMP_STOP - static_cast<uint8_t>(i * 3);
-        image.draw_string_mono<constixel::sf_compact_display_medium_48_mono>(16, 48 * static_cast<int32_t>(i) + 16, strings.at(i), col);
+        uint8_t col = color::GREY_RAMP_STOP - static_cast<uint8_t>(i * 3);
+        image.draw_string_mono<sf_compact_display_medium_48_mono>(16, 48 * static_cast<int32_t>(i) + 16, strings.at(i), col);
     }
     image.sixel_to_cout();
 
