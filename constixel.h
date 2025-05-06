@@ -60,10 +60,6 @@ static constexpr float fast_log2(const float x) {
 #endif  // #ifdef GCC_BROKEN_BITCAST
 }
 
-static constexpr float fast_log(const float x) {
-    return fast_log2(x) * 0.69314718f;
-}
-
 static constexpr float fast_pow(const float x, const float p) {
 #ifdef GCC_BROKEN_BITCAST
     return powf(x, p);
@@ -243,7 +239,7 @@ class hextree {
    public:
     std::array<node, N> nodes;
 
-    size_t byte_size() const {
+    [[nodiscard]] size_t byte_size() const {
         return sizeof(node) * nodes.size();
     }
 
@@ -603,7 +599,7 @@ class format {
             set[idx] |= 1UL << (col & 0x1F);
         }
 
-        constexpr size_t genstack(std::array<PBT, PBS> &stack) {
+        constexpr size_t genstack(std::array<PBT, PBS> &stack) const {
             size_t count = 0;
             for (size_t c = 0; c < PBS / 32; c++) {
                 for (size_t d = 0; d < 32; d++) {
@@ -1502,19 +1498,19 @@ class image {
     static_assert(S >= 1 && S <= 256);
 
    public:
-    [[nodiscard]] constexpr int32_t bit_depth() const {
+    [[nodiscard]] static constexpr int32_t bit_depth() {
         return T<W, H, S>::bits_per_pixel;
     }
 
-    [[nodiscard]] constexpr int32_t size() const {
+    [[nodiscard]] static constexpr int32_t size() {
         return T<W, H, S>::image_size;
     }
 
-    [[nodiscard]] constexpr size_t width() const {
+    [[nodiscard]] static constexpr size_t width() {
         return W;
     }
 
-    [[nodiscard]] constexpr size_t height() const {
+    [[nodiscard]] static constexpr size_t height() {
         return H;
     }
 
@@ -1522,7 +1518,7 @@ class image {
         data.fill(0);
     }
 
-    [[nodiscard]] constexpr int32_t abs(int32_t v) const {
+    [[nodiscard]] static constexpr int32_t abs(int32_t v) {
         return v < 0 ? -v : v;
     }
 
@@ -1601,7 +1597,7 @@ class image {
     }
 
     constexpr void plot(int32_t x, int32_t y, uint8_t col) {
-        if (x < 0 || x >= W || y < 0 || y >= H) {
+        if (x < 0 || x >= static_cast<int32_t>(W) || y < 0 || y >= static_cast<int32_t>(H)) {
             return;
         }
         T<W, H, S>::plot(data, static_cast<uint32_t>(x), static_cast<uint32_t>(y), col);
@@ -1726,7 +1722,7 @@ class image {
             h += y;
             y = 0;
         }
-        if (y + h >= H) {
+        if (y + h >= static_cast<int32_t>(H)) {
             h = static_cast<int32_t>(H) - y;
         }
         h += y;
@@ -1736,7 +1732,7 @@ class image {
     }
 
     constexpr void fill_rect(const rect<int32_t> &r, uint8_t col) {
-        fill_rect(r.x, r.y, r.w, r.h);
+        fill_rect(r.x, r.y, r.w, r.h, col);
     }
 
     constexpr void fill_circle(int32_t x, int32_t y, int32_t r, uint8_t col) {
@@ -1871,10 +1867,10 @@ class image {
             w += x;
             x = 0;
         }
-        if ((x >= W) || (x + w < 0) || (y >= H) || (y < 0)) {
+        if ((x >= static_cast<int32_t>(W)) || (x + w < 0) || (y >= static_cast<int32_t>(H)) || (y < 0)) {
             return;
         }
-        if (x + w >= W) {
+        if (x + w >= static_cast<int32_t>(W)) {
             w = static_cast<int32_t>(W) - x;
         }
         size_t _xl = static_cast<size_t>(x);

@@ -423,7 +423,7 @@ int main() {
     puts("\n");
 #endif  // #if 1
 
-#if 1
+#if 0
     draw_functions<constixel::image<constixel::format_1bit, 768, 768>, 32>();
     draw_functions<constixel::image<constixel::format_2bit, 768, 768>, 32>();
     draw_functions<constixel::image<constixel::format_4bit, 768, 768>, 32>();
@@ -431,7 +431,7 @@ int main() {
     puts("\n");
 #endif  // #if 0
 
-#if 1
+#if 0
     draw_palette<constixel::image<constixel::format_1bit, 16, 16, 32>>();
     draw_palette<constixel::image<constixel::format_2bit, 16, 16, 32>>();
     draw_palette<constixel::image<constixel::format_4bit, 16, 16, 32>>();
@@ -439,7 +439,7 @@ int main() {
     puts("\n");
 #endif  // #if 1
 
-#if 1
+#if 0
     std::vector<uint8_t> rgbaimage;
     uint32_t w = 0;
     uint32_t h = 0;
@@ -463,14 +463,14 @@ int main() {
     }
 #endif  // #if 1
 
-#if 1
+#if 0
     draw_rgb<constixel::image<constixel::format_1bit, 256, 256, 1>>();
     draw_rgb<constixel::image<constixel::format_2bit, 256, 256, 1>>();
     draw_rgb<constixel::image<constixel::format_4bit, 256, 256, 1>>();
     draw_rgb<constixel::image<constixel::format_8bit, 256, 256, 1>>();
 #endif  // #if 1
 
-#if 1
+#if 0
     round_trip<constixel::image<constixel::format_1bit, 256, 256, 1>>();
     round_trip<constixel::image<constixel::format_2bit, 256, 256, 1>>();
     round_trip<constixel::image<constixel::format_4bit, 256, 256, 1>>();
@@ -486,7 +486,7 @@ int main() {
     }
 #endif  // #if 0
 
-#if 1
+#if 0
     {
         constixel::image<constixel::format_8bit, 1024, 1024, 1> image;
         image.draw_string_mono<constixel::sf_compact_display_bold_48_mono>(0, 0, "Pack my box with five dozen liquor jugs", 2);
@@ -497,7 +497,7 @@ int main() {
     }
 #endif  // #if 0
 
-#if 1
+#if 0
     {
         constixel::image<constixel::format_8bit, 512, 312, 1> image;
         static constexpr std::array<const char *, 5> strings{"ABCDEFGHIJKLM", "NOPQRTSUVWXYZ", "abcdefghijklm", "nopqrstuvwxyz",
