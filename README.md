@@ -210,6 +210,21 @@ class image {
     // Copy another image into this instance. Overwrites the contents, no compositing occurs.
     void copy(const std::array<uint8_t, T<W, H, S>::image_size> &src);
 
+    // Draw monochrome text. #include a monochrome font and specify the included struct as the template parameter.
+    // Returns the current x caret position pixels.
+    template <typename FONT>
+    constexpr int32_t draw_string_mono(int32_t x, int32_t y, const char *str, uint8_t col);
+
+    // Draw monochrome text. #include a grey font and specify the included struct as the template parameter.
+    // Returns the current x caret position in pixels.
+    // NOTE: This is a very slow operation due to the brute force color quantization and will likely not consteval.
+    template <typename FONT>
+    constexpr int32_t draw_string(int32_t x, int32_t y, const char *str, uint8_t col);
+
+    // Get the width of a string in pixels. #include a monochrome or grey font and specify the included struct as the template parameter
+    template <typename FONT>
+    constexpr int32_t string_width(int32_t x, int32_t y, const char *str);
+
     // Draw a line
     void line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, uint32_t width = 1, bool clip = true);
     void line(constixel::rect<int32_t> &l, uint8_t col, bool clip = true);
