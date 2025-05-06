@@ -25,11 +25,11 @@ SOFTWARE.
 #include <chrono>
 #include <cstdint>
 #include <cstdio>
+#include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
-#include <fstream>
-#include <filesystem>
 
 #include "../constixel.h"
 #include "../fonts/sf_compact_display_bold_32_mono.h"
@@ -382,7 +382,6 @@ void draw_functions() {
     }
 }
 
-
 #endif  // #if 0
 
 int main() {
@@ -424,7 +423,7 @@ int main() {
     puts("\n");
 #endif  // #if 1
 
-#if 0
+#if 1
     draw_functions<constixel::image<constixel::format_1bit, 768, 768>, 32>();
     draw_functions<constixel::image<constixel::format_2bit, 768, 768>, 32>();
     draw_functions<constixel::image<constixel::format_4bit, 768, 768>, 32>();
@@ -432,7 +431,7 @@ int main() {
     puts("\n");
 #endif  // #if 0
 
-#if 0
+#if 1
     draw_palette<constixel::image<constixel::format_1bit, 16, 16, 32>>();
     draw_palette<constixel::image<constixel::format_2bit, 16, 16, 32>>();
     draw_palette<constixel::image<constixel::format_4bit, 16, 16, 32>>();
@@ -440,7 +439,7 @@ int main() {
     puts("\n");
 #endif  // #if 1
 
-#if 0
+#if 1
     std::vector<uint8_t> rgbaimage;
     uint32_t w = 0;
     uint32_t h = 0;
@@ -464,52 +463,57 @@ int main() {
     }
 #endif  // #if 1
 
-#if 0
+#if 1
     draw_rgb<constixel::image<constixel::format_1bit, 256, 256, 1>>();
     draw_rgb<constixel::image<constixel::format_2bit, 256, 256, 1>>();
     draw_rgb<constixel::image<constixel::format_4bit, 256, 256, 1>>();
     draw_rgb<constixel::image<constixel::format_8bit, 256, 256, 1>>();
 #endif  // #if 1
 
-#if 0
+#if 1
     round_trip<constixel::image<constixel::format_1bit, 256, 256, 1>>();
     round_trip<constixel::image<constixel::format_2bit, 256, 256, 1>>();
     round_trip<constixel::image<constixel::format_4bit, 256, 256, 1>>();
     round_trip<constixel::image<constixel::format_8bit, 256, 256, 1>>();
 #endif  // #if 1
 
-#if 0
-    // FIXME!
-    constixel::image<constixel::format_2bit, 1024, 1024, 1> image;
-    image.draw_string_mono<constixel::sf_compact_display_bold_48_mono>(10, 20, "HELLO WORLD!", 1);
-    image.sixel_to_cout();
-#endif  // #if 0
-
-#if 0
-    constixel::image<constixel::format_8bit, 1024, 1024, 1> image;
-    image.draw_string_mono<constixel::sf_compact_display_bold_48_mono>(0, 0, "Pack my box with five dozen liquor jugs", 2);
-    image.draw_string_mono<constixel::sf_compact_display_bold_32_mono>(0, 50, "Pack my box with five dozen liquor jugs", 3);
-    image.draw_string_mono<constixel::sf_mono_regular_18_mono>(0, 100, "Pack my box with five dozen liquor jugs", 5);
-    image.draw_string_mono<constixel::sf_mono_bold_48_mono>(0, 200, "Pack my box with five dozen liquor jugs", 6);
-    image.sixel_to_cout();
+#if 1
+    {
+        // FIXME!
+        constixel::image<constixel::format_2bit, 1024, 1024, 1> image;
+        image.draw_string_mono<constixel::sf_compact_display_bold_48_mono>(10, 20, "HELLO WORLD!", 1);
+        image.sixel_to_cout();
+    }
 #endif  // #if 0
 
 #if 1
-    constixel::image<constixel::format_8bit, 512, 312, 1> image;
-    static constexpr std::array<const char *, 5> strings {
-        "ABCDEFGHIJKLM", "NOPQRTSUVWXYZ", "abcdefghijklm", "nopqrstuvwxyz","1234567890&@.,?!'"""
-    };
-    for (size_t i = 0; i < strings.size(); i++) { 
-        uint8_t col = constixel::color::GREY_RAMP_STOP - static_cast<uint8_t>(i * 3);
-        image.draw_string_mono<constixel::sf_compact_display_medium_48_mono>(16, 48 * static_cast<int32_t>(i) + 16, strings.at(i), col);
+    {
+        constixel::image<constixel::format_8bit, 1024, 1024, 1> image;
+        image.draw_string_mono<constixel::sf_compact_display_bold_48_mono>(0, 0, "Pack my box with five dozen liquor jugs", 2);
+        image.draw_string_mono<constixel::sf_compact_display_bold_32_mono>(0, 50, "Pack my box with five dozen liquor jugs", 3);
+        image.draw_string_mono<constixel::sf_mono_regular_18_mono>(0, 100, "Pack my box with five dozen liquor jugs", 5);
+        image.draw_string_mono<constixel::sf_mono_bold_48_mono>(0, 200, "Pack my box with five dozen liquor jugs", 6);
+        image.sixel_to_cout();
     }
-    std::vector<char> out{};
-    image.png([&out](char ch) mutable {
-        out.push_back(ch);
-    });
-    std::ofstream file("constixel.png");
-    file.write( reinterpret_cast<const char*>(out.data()),
-                static_cast<std::streamsize>(out.size()));
-    image.sixel_to_cout();
+#endif  // #if 0
+
+#if 1
+    {
+        constixel::image<constixel::format_8bit, 512, 312, 1> image;
+        static constexpr std::array<const char *, 5> strings{"ABCDEFGHIJKLM", "NOPQRTSUVWXYZ", "abcdefghijklm", "nopqrstuvwxyz",
+                                                             "1234567890&@.,?!'"
+                                                             ""};
+        for (size_t i = 0; i < strings.size(); i++) {
+            uint8_t col = constixel::color::GREY_RAMP_STOP - static_cast<uint8_t>(i * 3);
+            image.draw_string_mono<constixel::sf_compact_display_medium_48_mono>(16, 48 * static_cast<int32_t>(i) + 16, strings.at(i), col);
+        }
+        std::vector<char> out{};
+        image.png([&out](char ch) mutable {
+            out.push_back(ch);
+        });
+        std::ofstream file("constixel.png");
+        file.write(reinterpret_cast<const char *>(out.data()), static_cast<std::streamsize>(out.size()));
+        image.sixel_to_cout();
+    }
 #endif  // #if 0
 }
