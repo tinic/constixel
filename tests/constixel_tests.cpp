@@ -38,16 +38,27 @@ SOFTWARE.
 #include "../fonts/sf_mono_bold_48_mono.h"
 #include "../fonts/sf_mono_regular_18_mono.h"
 
+#if __GNUC__
 #pragma GCC diagnostic push
+
 #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
 #pragma GCC diagnostic ignored "-Wold-style-cast"
+#pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+#pragma GCC diagnostic ignored "-Wpadded"
+
+#if __clang__
 #pragma GCC diagnostic ignored "-Wimplicit-int-conversion"
 #pragma GCC diagnostic ignored "-Wshorten-64-to-32"
-#pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+#pragma GCC diagnostic ignored "-Wsuggest-destructor-override"
+#pragma GCC diagnostic ignored "-Wweak-vtables"
+#endif  // #if __clang__
 
 #include "../genfonts/fontbm/src/external/lodepng/lodepng.h"
 
 #pragma GCC diagnostic pop
+
+#pragma GCC diagnostic ignored "-Wunused-function"
+#endif  // #if __GNUC__
 
 #if 0
 static constexpr void hexdump(const uint8_t* data, std::size_t len) {
@@ -77,7 +88,7 @@ static constexpr void hexdump(const uint8_t* data, std::size_t len) {
 #endif  // #if 0
 
 #if 1
-constexpr std::string test0() {
+static constexpr std::string test0() {
     std::string out{};
     constixel::image<constixel::format_1bit, 32, 31> image;
     image.clear();
@@ -90,7 +101,7 @@ constexpr std::string test0() {
     return out;
 }
 
-constexpr std::string test1() {
+static constexpr std::string test1() {
     std::string out{};
     constixel::image<constixel::format_2bit, 112, 64> image;
     image.clear();
@@ -116,7 +127,7 @@ constexpr std::string test2() {
     return out;
 }
 
-constexpr std::string test3() {
+static constexpr std::string test3() {
     std::string out{};
     constixel::image<constixel::format_1bit, 127, 101> image;
     image.clear();
@@ -129,7 +140,7 @@ constexpr std::string test3() {
     return out;
 }
 
-constexpr std::string test4() {
+static constexpr std::string test4() {
     std::string out{};
     constixel::image<constixel::format_2bit, 111, 95> image;
     image.clear();
@@ -142,7 +153,7 @@ constexpr std::string test4() {
     return out;
 }
 
-constexpr std::string test5() {
+static constexpr std::string test5() {
     std::string out{};
     constixel::image<constixel::format_4bit, 7, 128, 8> image;
     image.clear();
@@ -155,7 +166,7 @@ constexpr std::string test5() {
     return out;
 }
 
-constexpr std::string test6() {
+static constexpr std::string test6() {
     std::string out{};
     constixel::image<constixel::format_1bit, 127, 101> image;
     image.clear();
@@ -168,7 +179,7 @@ constexpr std::string test6() {
     return out;
 }
 
-constexpr std::string test7() {
+static constexpr std::string test7() {
     std::string out{};
     constixel::image<constixel::format_2bit, 111, 95> image;
     image.clear();
@@ -181,7 +192,7 @@ constexpr std::string test7() {
     return out;
 }
 
-constexpr std::string test8() {
+static constexpr std::string test8() {
     std::string out{};
     constixel::image<constixel::format_4bit, 7, 7, 8> image;
     image.clear();
@@ -194,7 +205,7 @@ constexpr std::string test8() {
     return out;
 }
 
-constexpr std::string test9() {
+static constexpr std::string test9() {
     std::string out{};
     constixel::image<constixel::format_8bit, 64, 64> image;
     image.clear();
@@ -207,7 +218,7 @@ constexpr std::string test9() {
     return out;
 }
 
-constexpr std::string test10() {
+static constexpr std::string test10() {
     constixel::image<constixel::format_1bit, 256, 256, 1> image;
     image.fill_rect(0, 0, 256, 256, 2);
     std::string out{};
@@ -217,20 +228,7 @@ constexpr std::string test10() {
     return out;
 }
 
-template <typename A, typename B>
-constexpr int const_memcmp(const A *lhs, const B *rhs, size_t count) {
-    const unsigned char *l = reinterpret_cast<const unsigned char *>(lhs);
-    const unsigned char *r = reinterpret_cast<const unsigned char *>(rhs);
-
-    for (size_t i = 0; i < count; ++i) {
-        if (l[i] != r[i]) {
-            return (l[i] < r[i]) ? -1 : 1;
-        }
-    }
-    return 0;
-}
-
-constexpr std::array<char, 8192> gen_separator() {
+static constexpr std::array<char, 8192> gen_separator() {
     std::array<char, 8192> sixel{};
     size_t count = 0;
     constixel::image<constixel::format_8bit, 1024, 1> image;
@@ -244,7 +242,7 @@ constexpr std::array<char, 8192> gen_separator() {
     return sixel;
 }
 
-void separator() {
+static constexpr void separator() {
     static auto sixel = gen_separator();
     puts(sixel.data());
 }
@@ -360,7 +358,7 @@ void draw_functions() {
     puts("\033[2J\033[H\0337");
     static T image;
     image.clear();
-    for (int32_t c = 0; c < I; c++) {
+    for (int32_t c = 0; c < static_cast<int32_t>(I); c++) {
         image.fill_rect(16 + c * 37, c * 32, 128, 128, static_cast<uint8_t>(c));
         std::string out("\0338");
         image.sixel([&out](char ch) mutable {
@@ -370,7 +368,7 @@ void draw_functions() {
         printf("%d-bit %dpx %dpx fill_rect\n", int(image.bit_depth()), int(image.width()), int(image.height()));
         separator();
     }
-    for (int32_t c = 0; c < I; c++) {
+    for (int32_t c = 0; c < static_cast<int32_t>(I); c++) {
         image.line(16, 16, 64 + c * 42, 700, static_cast<uint8_t>(c), static_cast<uint8_t>(c));
         std::string out("\0338");
         image.sixel([&out](char ch) mutable {
@@ -380,7 +378,7 @@ void draw_functions() {
         printf("%d-bit %dpx %dpx line\n", int(image.bit_depth()), int(image.width()), int(image.height()));
         separator();
     }
-    for (int32_t c = 0; c < I; c++) {
+    for (int32_t c = 0; c < static_cast<int32_t>(I); c++) {
         image.fill_circle(600, 384, 256 - c * 16, static_cast<uint8_t>(c));
         std::string out("\0338");
         image.sixel([&out](char ch) mutable {
