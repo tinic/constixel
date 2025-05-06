@@ -303,7 +303,7 @@ class hextree {
     }
 };
 
-struct character {
+struct char_info {
     uint32_t id;
     int16_t x;
     int16_t y;
@@ -314,18 +314,12 @@ struct character {
     int16_t yoffset;
 };
 
-struct font {
+struct font_info {
     std::string face;
     int8_t size;
     int8_t bold : 1;
     int8_t italic : 1;
     int8_t outline : 1;
-};
-
-struct kerning {
-    int16_t amount;
-    int16_t first;
-    int16_t second;
 };
 
 template <typename T>

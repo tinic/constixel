@@ -32,6 +32,8 @@ SOFTWARE.
 #include "../constixel.h"
 #include "../genfonts/fontbm/src/external/lodepng/lodepng.h"
 
+#include "fonts/sf_compact_display_bold_18_mono.h"
+
 #if 1
 constexpr std::string test0() {
     std::string out{};
