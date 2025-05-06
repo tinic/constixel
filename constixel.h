@@ -1407,10 +1407,14 @@ class image {
             } else {
                 return x;
             }
+#if __clang__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wimplicit-int-conversion"
+#endif  // #if __clang__
             const char_info &ch_info = FONT::char_table.at(FONT::glyph_tree.lookup(utf32));
+#if __clang__
 #pragma GCC diagnostic pop
+#endif  // #if __clang__
             if (*str == 0) {
                 x += ch_info.width;
             } else {
