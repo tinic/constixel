@@ -211,7 +211,7 @@ class image {
     void copy(const std::array<uint8_t, T<W, H, S>::image_size> &src);
 
     // Draw monochrome text. #include a monochrome font and specify the included struct as the template parameter.
-    // Returns the current x caret position pixels.
+    // Returns the current x caret position in pixels.
     template <typename FONT>
     constexpr int32_t draw_string_mono(int32_t x, int32_t y, const char *str, uint8_t col);
 
