@@ -38,6 +38,12 @@ SOFTWARE.
 
 namespace constixel {
 
+#if defined(__GCC__) || defined(__clang__)
+#define CONSTIXEL_FLATTEN __attribute__((flatten)) 
+#else  // #if defined(__GCC__) || defined(__clang__)
+#define CONSTIXEL_FLATTEN 
+#endif  // #if defined(__GCC__) || defined(__clang__)
+
 [[nodiscard]] static constexpr float fast_exp2(const float p) {
     const float offset = (p < 0) ? 1.0f : 0.0f;
     const float clipp = (p < -126) ? -126.0f : p;
@@ -822,7 +828,7 @@ class format_1bit : public format {
                 }
                 return out;
             },
-            [](const uint8_t *dataRaw, size_t x, size_t w, size_t y, palette_bitset<uint8_t, 32> &set) {
+            [](const uint8_t *dataRaw, size_t x, size_t w, size_t y, palette_bitset<uint8_t, 32> &set) CONSTIXEL_FLATTEN {
                 int32_t inc = y % S;
                 for (size_t y6 = 0; y6 < 6; y6++) {
                     if ((y + y6) < H * S) {
@@ -1012,7 +1018,7 @@ class format_2bit : public format {
                 }
                 return out;
             },
-            [](const uint8_t *dataRaw, size_t x, size_t w, size_t y, palette_bitset<uint8_t, 32> &set) {
+            [](const uint8_t *dataRaw, size_t x, size_t w, size_t y, palette_bitset<uint8_t, 32> &set) CONSTIXEL_FLATTEN {
                 int32_t inc = y % S;
                 for (size_t y6 = 0; y6 < 6; y6++) {
                     if ((y + y6) < H * S) {
@@ -1203,7 +1209,7 @@ class format_4bit : public format {
                 }
                 return out;
             },
-            [](const uint8_t *dataRaw, size_t x, size_t w, size_t y, palette_bitset<uint8_t, 32> &set) {
+            [](const uint8_t *dataRaw, size_t x, size_t w, size_t y, palette_bitset<uint8_t, 32> &set) CONSTIXEL_FLATTEN {
                 int32_t inc = y % S;
                 for (size_t y6 = 0; y6 < 6; y6++) {
                     if ((y + y6) < H * S) {
@@ -1419,7 +1425,7 @@ class format_8bit : public format {
                 }
                 return out;
             },
-            [](const uint8_t *dataRaw, size_t x, size_t w, size_t y, palette_bitset<uint8_t, 1UL << bits_per_pixel> &set) {
+            [](const uint8_t *dataRaw, size_t x, size_t w, size_t y, palette_bitset<uint8_t, 1UL << bits_per_pixel> &set) CONSTIXEL_FLATTEN {
                 const uint8_t *ptr = &dataRaw[(y / S) * bytes_per_line + x / S];
                 int32_t inc = y % S;
                 for (size_t y6 = 0; y6 < 6; y6++) {
