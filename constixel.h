@@ -21,8 +21,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#ifndef _CONSTIXEL_H_
-#define _CONSTIXEL_H_
+#ifndef CONSTIXEL_H_
+#define CONSTIXEL_H_
 
 #include <algorithm>
 #include <array>
@@ -75,7 +75,7 @@ static constexpr float fast_pow(const float x, const float p) {
 static constexpr double m_pi_d = 3.14159265358979323846;
 
 static consteval double cos(double x, int32_t terms = 10) {
-    x = x - 6.283185307179586 * int(x / 6.283185307179586);  // wrap x to [0, 2π)
+    x = x - 6.283185307179586 * static_cast<int32_t>(x / 6.283185307179586);  // wrap x to [0, 2π)
     double res = 1.0, term = 1.0;
     double x2 = x * x;
     for (int32_t i = 1; i < terms; ++i) {
@@ -86,7 +86,7 @@ static consteval double cos(double x, int32_t terms = 10) {
 }
 
 static consteval double sin(double x, int32_t terms = 10) {
-    x = x - 6.283185307179586 * int(x / 6.283185307179586);  // wrap x to [0, 2π)
+    x = x - 6.283185307179586 * static_cast<int32_t>(x / 6.283185307179586);  // wrap x to [0, 2π)
     double res = x, term = x;
     double x2 = x * x;
     for (int32_t i = 1; i < terms; ++i) {
@@ -184,7 +184,7 @@ class quantize {
     const std::array<uint32_t, palette_size> &pal;
 
    public:
-    constexpr quantize(const std::array<uint32_t, palette_size> &palette) : pal(palette) {
+    explicit constexpr quantize(const std::array<uint32_t, palette_size> &palette) : pal(palette) {
         for (size_t i = 0; i < pal.size(); ++i) {
             linearpal[i * 3 + 0] = srgb_to_linear(static_cast<float>((pal[i] >> 16) & 0xFF) * (1.0f / 255.0f));
             linearpal[i * 3 + 1] = srgb_to_linear(static_cast<float>((pal[i] >> 8) & 0xFF) * (1.0f / 255.0f));
@@ -234,7 +234,9 @@ class hextree {
     struct node {
         T child[16]{};
         constexpr node() {
-            for (auto &c : child) c = invalid;
+            for (auto &c : child) {
+                c = invalid;
+            }
         }
     };
 
@@ -250,7 +252,7 @@ class hextree {
     hextree &operator=(const hextree &) = delete;
 
     template <std::size_t NS>
-    consteval hextree(const std::array<std::pair<T, T>, NS> &in) {
+    explicit consteval hextree(const std::array<std::pair<T, T>, NS> &in) {
         nodes[0] = node{};
         T node_cnt = 1;
         for (auto [key, val] : in) {
@@ -867,7 +869,7 @@ class format_2bit : public format {
 
     static constexpr const constixel::quantize<1UL << bits_per_pixel> gen_quant() {
         return constixel::quantize<1UL << bits_per_pixel>(palette);
-    };
+    }
 
     static constexpr const constixel::quantize<1UL << bits_per_pixel> quant = gen_quant();
 
@@ -1058,7 +1060,7 @@ class format_4bit : public format {
 
     static constexpr const constixel::quantize<1UL << bits_per_pixel> gen_quant() {
         return constixel::quantize<1UL << bits_per_pixel>(palette);
-    };
+    }
 
     static constexpr const constixel::quantize<1UL << bits_per_pixel> quant = gen_quant();
 
@@ -1294,7 +1296,7 @@ class format_8bit : public format {
 
     static constexpr const constixel::quantize<1UL << bits_per_pixel> gen_quant() {
         return constixel::quantize<1UL << bits_per_pixel>(palette);
-    };
+    }
 
     static constexpr const constixel::quantize<1UL << bits_per_pixel> quant = gen_quant();
 
@@ -1921,4 +1923,4 @@ class image {
 
 }  // namespace constixel
 
-#endif  // #ifndef _CONSTIXEL_H_
+#endif  // CONSTIXEL_H_
