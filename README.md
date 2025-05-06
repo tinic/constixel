@@ -21,6 +21,7 @@ constixel is a single header minimalistic constexpr C++20(+) 2d graphics renderi
 - Blit raw 32-bit RGBA image buffers into the palette backed back buffer (with or without dithering).
 - Conversion into a RGBA buffer when needed.
 - Simple fillrect, line and fillcircle drawing functions.
+- A simplistic uncompressed png encoder is included to reduce dependencies.
 - Various other simple image manipulation operations.
 
 > [!NOTE]
@@ -285,6 +286,14 @@ class image {
     // NOTE: This is a very slow operation due to the brute force color quantization and will likely not consteval.
     void blit_RGBA_diffused_linear(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
     void blit_RGBA_diffused_linear(const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
+
+    // Generate an uncompressed png file. Provide a lambda function in the form of:
+    //
+    // image.png([](char ch) {
+    //    [do something with the character]
+    // });
+    //
+    void png(F &&charOut);
 
     // Convert the current instance into a sixel stream and output it to std::cout
     void sixel_to_cout();
