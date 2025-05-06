@@ -32,7 +32,10 @@ SOFTWARE.
 #include "../constixel.h"
 #include "../genfonts/fontbm/src/external/lodepng/lodepng.h"
 
-#include "fonts/sf_compact_display_bold_18_mono.h"
+#include "../fonts/sf_compact_display_bold_48_mono.h"
+#include "../fonts/sf_compact_display_bold_32_mono.h"
+#include "../fonts/sf_mono_regular_18_mono.h"
+#include "../fonts/sf_mono_bold_48_mono.h"
 
 #if 1
 constexpr std::string test0() {
@@ -433,4 +436,18 @@ int main() {
     round_trip<constixel::image<constixel::format_4bit, 256, 256, 1>>();
     round_trip<constixel::image<constixel::format_8bit, 256, 256, 1>>();
 #endif  // #if 1
+
+#if 0
+    // FIXME!
+    constixel::image<constixel::format_2bit, 1024, 1024, 1> image;
+    image.draw_string_mono<constixel::sf_compact_display_bold_48_mono>(10, 20, "HELLO WORLD!", 1);
+    image.sixel_to_cout();
+#endif  // #if 0
+
+    constixel::image<constixel::format_8bit, 1024, 1024, 1> image;
+    image.draw_string_mono<constixel::sf_compact_display_bold_48_mono>(0, 0, "Pack my box with five dozen liquor jugs", 2);
+    image.draw_string_mono<constixel::sf_compact_display_bold_32_mono>(0, 50, "Pack my box with five dozen liquor jugs", 3);
+    image.draw_string_mono<constixel::sf_mono_regular_18_mono>(0, 100, "Pack my box with five dozen liquor jugs", 5);
+    image.draw_string_mono<constixel::sf_mono_bold_48_mono>(0, 200, "Pack my box with five dozen liquor jugs", 6);
+    image.sixel_to_cout();
 }
