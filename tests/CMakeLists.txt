@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.15)
 
 set(CMAKE_CXX_STANDARD 23)
 
+#set(CMAKE_C_COMPILER "gcc-14")
+#set(CMAKE_CXX_COMPILER "g++-14")
+
 if(CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 12)
     message(FATAL_ERROR "Requires at least gcc 12")
 endif()
