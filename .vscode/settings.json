@@ -60,7 +60,8 @@
         "set": "cpp",
         "unordered_set": "cpp",
         "cinttypes": "cpp",
-        "span": "cpp"
+        "span": "cpp",
+        "iterator": "cpp"
     },
     "cmake.sourceDirectory": "/Users/turo/constixel/tests",
     "editor.autoClosingBrackets": "never"
