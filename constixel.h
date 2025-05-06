@@ -1538,7 +1538,7 @@ class image {
         data = src;
     }
 
-    constexpr void line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, uint32_t width = 1) {
+    constexpr void line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, uint32_t stroke_width = 1) {
         int32_t steep = abs(y1 - y0) > abs(x1 - x0);
 
         if (steep) {
@@ -1571,7 +1571,7 @@ class image {
             ystep = -1;
         }
 
-        if (width == 1) {
+        if (stroke_width == 1) {
             for (; x0 <= x1; x0++) {
                 if (steep) {
                     plot(y0, x0, col);
@@ -1584,12 +1584,12 @@ class image {
                     err += dx;
                 }
             }
-        } else if (width > 1) {
+        } else if (stroke_width > 1) {
             for (; x0 <= x1; x0++) {
                 if (steep) {
-                    fill_circle(y0, x0, (width + 1) / 2, col);
+                    fill_circle(y0, x0, (stroke_width + 1) / 2, col);
                 } else {
-                    fill_circle(x0, y0, (width + 1) / 2, col);
+                    fill_circle(x0, y0, (stroke_width + 1) / 2, col);
                 }
                 err -= dy;
                 if (err < 0) {
@@ -1600,8 +1600,8 @@ class image {
         }
     }
 
-    constexpr void line(const rect<int32_t> &l, uint8_t col, uint32_t width = 1) {
-        line(l.x, l.y, l.x + l.w, l.y + l.h, col, width);
+    constexpr void line(const rect<int32_t> &l, uint8_t col, uint32_t stroke_width = 1) {
+        line(l.x, l.y, l.x + l.w, l.y + l.h, col, stroke_width);
     }
 
     constexpr void plot(int32_t x, int32_t y, uint8_t col) {
@@ -1762,15 +1762,15 @@ class image {
         fill_rect(r.x, r.y, r.w, r.h, col);
     }
 
-    constexpr void stroke_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col, uint32_t width = 1) {
-        line(x, y, x + w, y, col, width);
-        line(x + w, y, x + w, y + h, col, width);
-        line(x + w, y + h, x, y + h, col, width);
-        line(x, y + h, x, y, col, width);
+    constexpr void stroke_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col, uint32_t stroke_width = 1) {
+        line(x, y, x + w, y, col, stroke_width);
+        line(x + w, y, x + w, y + h, col, stroke_width);
+        line(x + w, y + h, x, y + h, col, stroke_width);
+        line(x, y + h, x, y, col, stroke_width);
     }
 
-    constexpr void stroke_rect(const rect<int32_t> &r, uint8_t col, uint32_t width = 1) {
-        stroke_rect(r.x, r.y, r.w, r.h, col, width);
+    constexpr void stroke_rect(const rect<int32_t> &r, uint8_t col, uint32_t stroke_width = 1) {
+        stroke_rect(r.x, r.y, r.w, r.h, col, stroke_width);
     }
 
     constexpr void fill_circle(int32_t x, int32_t y, int32_t r, uint8_t col) {
