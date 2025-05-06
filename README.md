@@ -21,6 +21,7 @@ constixel is a single header minimalistic constexpr C++20(+) 2d graphics renderi
 - Blit raw 32-bit RGBA image buffers into the palette backed back buffer (with or without dithering).
 - Conversion into a RGBA buffer when needed.
 - Simple fillrect, line and fillcircle drawing functions.
+- A simplistic uncompressed png encoder is included to reduce dependencies.
 - Various other simple image manipulation operations.
 
 > [!NOTE]
