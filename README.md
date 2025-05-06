@@ -7,7 +7,7 @@ constixel is a single header minimalistic constexpr C++20(+) 2d graphics renderi
 [Applications](#applications)  
 [Requirements](#requirements)  
 [Minimal example](#minimal-example)  
-[Text drawing example](#text-drawing-example)
+[Text drawing example](#text-drawing-example)  
 [Consteval sixel example](#consteval-sixel-example)  
 [Consteval image example](#consteval-embedded-image-data-example)  
 [API](#api)  
@@ -69,7 +69,7 @@ int main() {
 
 ![constixel](./media/constixel.jpg "Example in iTerm")
 
-## Test drawing example
+## Text drawing example
 
 Include a text font and pass the struct name as a template parameter to the draw_string function:
 
