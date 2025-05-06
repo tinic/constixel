@@ -286,12 +286,16 @@ class image {
     constexpr int32_t string_width(const char *str);
 
     // Draw a line
-    void line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, uint32_t width = 1);
-    void line(constixel::rect<int32_t> &l, uint8_t col, uint32_t width = 1);
+    void line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, uint32_t stroke_width = 1);
+    void line(constixel::rect<int32_t> &l, uint8_t col, uint32_t stroke_width = 1);
 
     // Draw a filled rectangle
     void fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col);
     void fill_rect(constixel::rect<int32_t> &r, uint8_t col);
+
+    // Draw a stroked rectangle
+    void stroke_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col, uint32_t stroke_width = 1);
+    void stroke_rect(constixel::rect<int32_t> &r, uint8_t col, uint32_t stroke_width = 1);
 
     // Draw a filled circle
     void fill_circle(int32_t x, int32_t y, int32_t r, uint8_t col);
