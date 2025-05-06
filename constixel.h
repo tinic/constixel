@@ -1544,7 +1544,7 @@ class image {
         data = src;
     }
 
-    constexpr void line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, uint32_t width = 1, bool clip = true) {
+    constexpr void line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, uint32_t width = 1) {
         int32_t steep = abs(y1 - y0) > abs(x1 - x0);
 
         if (steep) {
@@ -1593,9 +1593,9 @@ class image {
         } else if (width > 1) {
             for (; x0 <= x1; x0++) {
                 if (steep) {
-                    fill_circle(y0, x0, (width + 1) / 2, col, clip);
+                    fill_circle(y0, x0, (width + 1) / 2, col);
                 } else {
-                    fill_circle(x0, y0, (width + 1) / 2, col, clip);
+                    fill_circle(x0, y0, (width + 1) / 2, col);
                 }
                 err -= dy;
                 if (err < 0) {
@@ -1723,33 +1723,31 @@ class image {
         return x;
     }
 
-    constexpr void line(const rect<int32_t> &l, uint8_t col, bool clip = true) {
+    constexpr void line(const rect<int32_t> &l, uint8_t col) {
         line(l.x, l.y, l.x + l.w, l.y + l.h);
     }
 
-    constexpr void fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col, bool clip = true) {
-        if (clip) {
-            if (y < 0) {
-                h += y;
-                y = 0;
-            }
-            if (y + h >= H) {
-                h = static_cast<int32_t>(H) - y;
-            }
+    constexpr void fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col) {
+        if (y < 0) {
+            h += y;
+            y = 0;
+        }
+        if (y + h >= H) {
+            h = static_cast<int32_t>(H) - y;
         }
         h += y;
         for (; y < h; y++) {
-            span(x, w, y, col, clip);
+            span(x, w, y, col);
         }
     }
 
-    constexpr void fill_rect(const rect<int32_t> &r, uint8_t col, bool clip = true) {
+    constexpr void fill_rect(const rect<int32_t> &r, uint8_t col) {
         fill_rect(r.x, r.y, r.w, r.h);
     }
 
-    constexpr void fill_circle(int32_t x, int32_t y, int32_t r, uint8_t col, bool clip = true) {
-        span(x - abs(r), 2 * abs(r) + 1, y, col, clip);
-        fill_arc(x, y, abs(r), 3, 0, col, clip);
+    constexpr void fill_circle(int32_t x, int32_t y, int32_t r, uint8_t col) {
+        span(x - abs(r), 2 * abs(r) + 1, y, col);
+        fill_arc(x, y, abs(r), 3, 0, col);
     }
 
     [[nodiscard]] constexpr std::array<uint32_t, W * H> RGBA_uint32() const {
@@ -1874,45 +1872,24 @@ class image {
         }
     }
 
-    constexpr void span(int32_t x, int32_t w, int32_t y, uint8_t col, bool clip) {
-        if (clip) {
-            if (x < 0) {
-                w += x;
-                x = 0;
-            }
-            if ((x >= W) || (x + w < 0) || (y >= H) || (y < 0)) {
-                return;
-            }
-            if (x + w >= W) {
-                w = static_cast<int32_t>(W) - x;
-            }
-            size_t _xl = static_cast<size_t>(x);
-            size_t _xr = static_cast<size_t>(x + w);
-            size_t _y = static_cast<size_t>(y);
-            T<W, H, S>::span(data, _xl, _xr, _y, col);
-        } else {
-            while (y < 0) {
-                y += H;
-            }
-            while (x < 0) {
-                x += W;
-            }
-            size_t _xl = static_cast<size_t>(x);
-            _xl %= W;
-            size_t _xr = static_cast<size_t>(x + w);
-            _xr %= W + 1;
-            size_t _y = static_cast<size_t>(y);
-            _y %= H;
-            if (_xl + static_cast<size_t>(w) <= W) {
-                T<W, H, S>::span(data, _xl, _xr, _y, col);
-            } else {
-                T<W, H, S>::span(data, _xl, W, _y, col);
-                T<W, H, S>::span(data, 0, _xr, _y, col);
-            }
+    constexpr void span(int32_t x, int32_t w, int32_t y, uint8_t col) {
+        if (x < 0) {
+            w += x;
+            x = 0;
         }
+        if ((x >= W) || (x + w < 0) || (y >= H) || (y < 0)) {
+            return;
+        }
+        if (x + w >= W) {
+            w = static_cast<int32_t>(W) - x;
+        }
+        size_t _xl = static_cast<size_t>(x);
+        size_t _xr = static_cast<size_t>(x + w);
+        size_t _y = static_cast<size_t>(y);
+        T<W, H, S>::span(data, _xl, _xr, _y, col);
     }
 
-    constexpr void fill_arc(int32_t x0, int32_t y0, int32_t r, uint8_t corners, int32_t delta, uint8_t col, bool clip) {
+    constexpr void fill_arc(int32_t x0, int32_t y0, int32_t r, uint8_t corners, int32_t delta, uint8_t col) {
         int32_t f = 1 - r;
         int32_t ddx = -2 * r;
         int32_t ddy = 1;
@@ -1931,15 +1908,15 @@ class image {
             f += ddy;
             if (++y < (x + 1)) {
                 if (corners & 1)
-                    span(x0 - x, 2 * x + delta, y0 + y, col, clip);
+                    span(x0 - x, 2 * x + delta, y0 + y, col);
                 if (corners & 2)
-                    span(x0 - x, 2 * x + delta, y0 - y, col, clip);
+                    span(x0 - x, 2 * x + delta, y0 - y, col);
             }
             if (x != px) {
                 if (corners & 1)
-                    span(x0 - py, 2 * py + delta, y0 + px, col, clip);
+                    span(x0 - py, 2 * py + delta, y0 + px, col);
                 if (corners & 2)
-                    span(x0 - py, 2 * py + delta, y0 - px, col, clip);
+                    span(x0 - py, 2 * py + delta, y0 - px, col);
                 px = x;
             }
             py = y;
