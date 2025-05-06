@@ -38,39 +38,27 @@ SOFTWARE.
 
 namespace constixel {
 
-static constexpr float fast_exp2(const float p) {
-#ifdef GCC_BROKEN_BITCAST
-    return exp2f(p);
-#else   // #ifdef GCC_BROKEN_BITCAST
+[[nodiscard]] static constexpr float fast_exp2(const float p) {
     const float offset = (p < 0) ? 1.0f : 0.0f;
     const float clipp = (p < -126) ? -126.0f : p;
     const float z = clipp - static_cast<float>(static_cast<int32_t>(clipp)) + offset;
     return std::bit_cast<float>(static_cast<uint32_t>((1 << 23) * (clipp + 121.2740575f + 27.7280233f / (4.84252568f - z) - 1.49012907f * z)));
-#endif  // #ifdef GCC_BROKEN_BITCAST
 }
 
-static constexpr float fast_log2(const float x) {
-#ifdef GCC_BROKEN_BITCAST
-    return log2f(x);
-#else   // #ifdef GCC_BROKEN_BITCAST
+[[nodiscard]] static constexpr float fast_log2(const float x) {
     uint32_t xi = std::bit_cast<uint32_t>(x);
     float xf = std::bit_cast<float>((xi & 0x007FFFFF) | 0x3f000000);
     const float y = static_cast<float>(xi) * 1.1920928955078125e-7f;
     return y - 124.22551499f - 1.498030302f * xf - 1.72587999f / (0.3520887068f + xf);
-#endif  // #ifdef GCC_BROKEN_BITCAST
 }
 
-static constexpr float fast_pow(const float x, const float p) {
-#ifdef GCC_BROKEN_BITCAST
-    return powf(x, p);
-#else   // GCC_BROKEN_BITCAST
+[[nodiscard]] static constexpr float fast_pow(const float x, const float p) {
     return fast_exp2(p * fast_log2(x));
-#endif  // GCC_BROKEN_BITCAST
 }
 
 static constexpr double m_pi_d = 3.14159265358979323846;
 
-static consteval double cos(double x, int32_t terms = 10) {
+[[nodiscard]] static consteval double cos(double x, int32_t terms = 10) {
     x = x - 6.283185307179586 * static_cast<int32_t>(x / 6.283185307179586);  // wrap x to [0, 2π)
     double res = 1.0, term = 1.0;
     double x2 = x * x;
@@ -81,7 +69,7 @@ static consteval double cos(double x, int32_t terms = 10) {
     return res;
 }
 
-static consteval double sin(double x, int32_t terms = 10) {
+[[nodiscard]] static consteval double sin(double x, int32_t terms = 10) {
     x = x - 6.283185307179586 * static_cast<int32_t>(x / 6.283185307179586);  // wrap x to [0, 2π)
     double res = x, term = x;
     double x2 = x * x;
@@ -92,7 +80,7 @@ static consteval double sin(double x, int32_t terms = 10) {
     return res;
 }
 
-static consteval double pow(double base, double exp, int32_t terms = 10) {
+[[nodiscard]] static consteval double pow(double base, double exp, int32_t terms = 10) {
     if (base <= 0.0)
         return (base == 0.0) ? 0.0 : 0.0 / 0.0;  // NaN for negative base
     double ln = 0.0, y = (base - 1) / (base + 1);
@@ -122,7 +110,7 @@ struct srgb {
     double r, g, b;
 };
 
-static consteval double linear_to_srgb(double c) {
+[[nodiscard]] static consteval double linear_to_srgb(double c) {
     if (c <= 0.0031308) {
         return 12.92 * c;
     } else {
@@ -130,7 +118,7 @@ static consteval double linear_to_srgb(double c) {
     }
 }
 
-static consteval double srgb_to_linear(double s) {
+[[nodiscard]] static consteval double srgb_to_linear(double s) {
     if (s <= 0.040449936) {
         return s / 12.92;
     } else {
@@ -138,7 +126,7 @@ static consteval double srgb_to_linear(double s) {
     }
 }
 
-static constexpr float linear_to_srgb(float c) {
+[[nodiscard]] static constexpr float linear_to_srgb(float c) {
     if (c <= 0.0031308f) {
         return 12.92f * c;
     } else {
@@ -146,7 +134,7 @@ static constexpr float linear_to_srgb(float c) {
     }
 }
 
-static constexpr float srgb_to_linear(float s) {
+[[nodiscard]] static constexpr float srgb_to_linear(float s) {
     if (s <= 0.040449936f) {
         return s / 12.92f;
     } else {
@@ -154,7 +142,7 @@ static constexpr float srgb_to_linear(float s) {
     }
 }
 
-static consteval srgb oklab_to_srgb(const oklab &oklab) {
+[[nodiscard]] static consteval srgb oklab_to_srgb(const oklab &oklab) {
     double l = oklab.l;
     double a = oklab.a;
     double b = oklab.b;
@@ -170,7 +158,7 @@ static consteval srgb oklab_to_srgb(const oklab &oklab) {
     return {linear_to_srgb(std::max(0.0, std::min(1.0, r))), linear_to_srgb(std::max(0.0, std::min(1.0, g))), linear_to_srgb(std::max(0.0, std::min(1.0, bl)))};
 }
 
-static consteval oklab oklch_to_oklab(const oklch &oklch) {
+[[nodiscard]] static consteval oklab oklch_to_oklab(const oklch &oklch) {
     return {oklch.l, oklch.c * cos(oklch.h * m_pi_d / 180.0), oklch.c * sin(oklch.h * m_pi_d / 180.0)};
 }
 
@@ -188,7 +176,7 @@ class quantize {
         }
     }
 
-    constexpr uint8_t nearest(int32_t r, int32_t g, int32_t b) const {
+    [[nodiscard]] constexpr uint8_t nearest(int32_t r, int32_t g, int32_t b) const {
         int32_t best = 0, bestd = 1UL << 30;
         for (size_t i = 0; i < pal.size(); ++i) {
             int32_t dr = r - static_cast<int32_t>((pal[i] >> 16) & 0xFF);
@@ -205,7 +193,7 @@ class quantize {
 
     std::array<float, palette_size * 3> linearpal{};
 
-    constexpr uint8_t nearest_linear(float r, float g, float b) const {
+    [[nodiscard]] constexpr uint8_t nearest_linear(float r, float g, float b) const {
         size_t best = 0;
         float bestd = 100.0f;
         for (size_t i = 0; i < pal.size(); ++i) {
@@ -345,7 +333,7 @@ struct rect {
 
 class format {
  public:
-    static constexpr uint32_t adler32(const uint8_t *data, std::size_t len, uint32_t adler32_sum) {
+    [[nodiscard]] static constexpr uint32_t adler32(const uint8_t *data, std::size_t len, uint32_t adler32_sum) {
         uint32_t adler32_s1 = adler32_sum & 0xFFFF;
         uint32_t adler32_s2 = adler32_sum >> 16;
         for (size_t c = 0; c < len; c++) {
@@ -471,7 +459,7 @@ class format {
     }
 
     template <typename F>
-    static constexpr void png_idat_zlib_stream(F &&charOut, const uint8_t *line, size_t bytes, uint32_t &adler32_sum) {
+    [[nodiscard]] static constexpr uint32_t png_idat_zlib_stream(F &&charOut, const uint8_t *line, size_t bytes, uint32_t adler32_sum) {
         while (bytes > 0) {
             static constexpr size_t max_data_use = 1024;
             static constexpr size_t extra_data = 24;
@@ -504,6 +492,7 @@ class format {
 
             bytes -= bytes_to_copy;
         }
+        return adler32_sum;
     }
 
     template <typename F>
@@ -598,7 +587,7 @@ class format {
             set[idx] |= 1UL << (col & 0x1F);
         }
 
-        constexpr size_t genstack(std::array<PBT, PBS> &stack) const {
+        [[nodiscard]] constexpr size_t genstack(std::array<PBT, PBS> &stack) const {
             size_t count = 0;
             for (size_t c = 0; c < PBS / 32; c++) {
                 for (size_t d = 0; d < 32; d++) {
@@ -623,7 +612,7 @@ class format {
         for (size_t y = 0; y < H; y++) {
             size_t bpl = 0;
             const uint8_t *ptr = linePtr(data, y, bpl);
-            png_idat_zlib_stream(charOut, ptr, bpl, adler32_sum);
+            adler32_sum = png_idat_zlib_stream(charOut, ptr, bpl, adler32_sum);
         }
         png_idat_zlib_trailer(charOut, adler32_sum);
         png_end(charOut);
@@ -716,13 +705,13 @@ class format_1bit : public format {
         }
     }
 
-    static constexpr uint8_t get(const uint8_t *line, size_t x) {
+    [[nodiscard]] static constexpr uint8_t get(const uint8_t *line, size_t x) {
         size_t x8 = x / 8;
         size_t xb = x % 8;
         return (line[x8] >> (7 - xb)) & 1;
     }
 
-    static constexpr auto RGBA_uint32(const std::array<uint8_t, image_size> &data) {
+    [[nodiscard]] static constexpr auto RGBA_uint32(const std::array<uint8_t, image_size> &data) {
         std::array<uint32_t, W * H> rgba{};
         const uint8_t *ptr = data.data();
         for (size_t y = 0; y < H; y++) {
@@ -735,7 +724,7 @@ class format_1bit : public format {
         return rgba;
     }
 
-    static constexpr auto RGBA_uint8(const std::array<uint8_t, image_size> &data) {
+    [[nodiscard]] static constexpr auto RGBA_uint8(const std::array<uint8_t, image_size> &data) {
         std::array<uint8_t, W * H * 4> rgba{};
         const uint8_t *ptr = data.data();
         for (size_t y = 0; y < H; y++) {
@@ -908,7 +897,7 @@ class format_2bit : public format {
         return (line[x4] >> ((3 - xb) * 2)) & 0x3;
     }
 
-    static constexpr auto RGBA_uint32(const std::array<uint8_t, image_size> &data) {
+    [[nodiscard]] static constexpr auto RGBA_uint32(const std::array<uint8_t, image_size> &data) {
         std::array<uint32_t, W * H> rgba{};
         const uint8_t *ptr = data.data();
         for (size_t y = 0; y < H; y++) {
@@ -921,7 +910,7 @@ class format_2bit : public format {
         return rgba;
     }
 
-    static constexpr auto RGBA_uint8(const std::array<uint8_t, image_size> &data) {
+    [[nodiscard]] static constexpr auto RGBA_uint8(const std::array<uint8_t, image_size> &data) {
         std::array<uint8_t, W * H * 4> rgba{};
         const uint8_t *ptr = data.data();
         for (size_t y = 0; y < H; y++) {
@@ -1093,13 +1082,13 @@ class format_4bit : public format {
         }
     }
 
-    static constexpr uint8_t get(const uint8_t *line, size_t x) {
+    [[nodiscard]] static constexpr uint8_t get(const uint8_t *line, size_t x) {
         size_t x2 = x / 2;
         size_t xb = x % 2;
         return (line[x2] >> ((1 - xb) * 4)) & 0xF;
     }
 
-    static constexpr auto RGBA_uint32(const std::array<uint8_t, image_size> &data) {
+    [[nodiscard]] static constexpr auto RGBA_uint32(const std::array<uint8_t, image_size> &data) {
         std::array<uint32_t, W * H> rgba{};
         const uint8_t *ptr = data.data();
         for (size_t y = 0; y < H; y++) {
@@ -1112,7 +1101,7 @@ class format_4bit : public format {
         return rgba;
     }
 
-    static constexpr auto RGBA_uint8(const std::array<uint8_t, image_size> &data) {
+    [[nodiscard]] static constexpr auto RGBA_uint8(const std::array<uint8_t, image_size> &data) {
         std::array<uint8_t, W * H * 4> rgba{};
         const uint8_t *ptr = data.data();
         for (size_t y = 0; y < H; y++) {
@@ -1316,7 +1305,7 @@ class format_8bit : public format {
         }
     }
 
-    static constexpr auto RGBA_uint32(const std::array<uint8_t, image_size> &data) {
+    [[nodiscard]] static constexpr auto RGBA_uint32(const std::array<uint8_t, image_size> &data) {
         std::array<uint32_t, W * H> rgba{};
         const uint8_t *ptr = data.data();
         for (size_t y = 0; y < H; y++) {
@@ -1329,7 +1318,7 @@ class format_8bit : public format {
         return rgba;
     }
 
-    static constexpr auto RGBA_uint8(const std::array<uint8_t, image_size> &data) {
+    [[nodiscard]] static constexpr auto RGBA_uint8(const std::array<uint8_t, image_size> &data) {
         std::array<uint8_t, W * H * 4> rgba{};
         const uint8_t *ptr = data.data();
         for (size_t y = 0; y < H; y++) {
@@ -1617,7 +1606,7 @@ class image {
     }
 
     template <typename FONT>
-    constexpr int32_t string_width(const char *str) {
+    [[nodiscard]] constexpr int32_t string_width(const char *str) {
         int32_t x = 0;
         while (*str != 0) {
             uint32_t utf32 = 0;
