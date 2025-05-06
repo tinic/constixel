@@ -33,6 +33,7 @@ SOFTWARE.
 #include "../genfonts/fontbm/src/external/lodepng/lodepng.h"
 
 #include "../fonts/sf_compact_display_bold_48_mono.h"
+#include "../fonts/sf_compact_display_medium_48_mono.h"
 #include "../fonts/sf_compact_display_bold_32_mono.h"
 #include "../fonts/sf_mono_regular_18_mono.h"
 #include "../fonts/sf_mono_bold_48_mono.h"
@@ -444,10 +445,22 @@ int main() {
     image.sixel_to_cout();
 #endif  // #if 0
 
+#if 0
     constixel::image<constixel::format_8bit, 1024, 1024, 1> image;
     image.draw_string_mono<constixel::sf_compact_display_bold_48_mono>(0, 0, "Pack my box with five dozen liquor jugs", 2);
     image.draw_string_mono<constixel::sf_compact_display_bold_32_mono>(0, 50, "Pack my box with five dozen liquor jugs", 3);
     image.draw_string_mono<constixel::sf_mono_regular_18_mono>(0, 100, "Pack my box with five dozen liquor jugs", 5);
     image.draw_string_mono<constixel::sf_mono_bold_48_mono>(0, 200, "Pack my box with five dozen liquor jugs", 6);
+    image.sixel_to_cout();
+#endif  // #if 0
+
+    constixel::image<constixel::format_8bit, 512, 312, 1> image;
+    static constexpr std::array<const char *, 5> strings {
+        "ABCDEFGHIJKLM", "NOPQRTSUVWXYZ", "abcdefghijklm", "nopqrstuvwxyz","1234567890&@.,?!'"""
+    };
+    for (size_t i = 0; i < strings.size(); i++) { 
+        uint8_t col = constixel::color::GREY_RAMP_STOP - static_cast<uint8_t>(i * 3);
+        image.draw_string_mono<constixel::sf_compact_display_medium_48_mono>(16, 48 * static_cast<int32_t>(i) + 16, strings.at(i), col);
+    }
     image.sixel_to_cout();
 }
