@@ -1622,7 +1622,7 @@ class image {
                  const size_t byte_index = static_cast<size_t>(ch_data_off + x_off / 2);
                  if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
                      const uint8_t a = (FONT::glyph_bitmap[byte_index] >> bit_index) & 0x7;
-                     plot(xx, yy, col);
+                     plot(xx, yy, a ? col : 0);
                  }
              }
              ch_data_off += FONT::glyph_bitmap_stride;
