@@ -30,13 +30,12 @@ SOFTWARE.
 #include <vector>
 
 #include "../constixel.h"
-#include "../genfonts/fontbm/src/external/lodepng/lodepng.h"
-
+#include "../fonts/sf_compact_display_bold_32_mono.h"
 #include "../fonts/sf_compact_display_bold_48_mono.h"
 #include "../fonts/sf_compact_display_medium_48_mono.h"
-#include "../fonts/sf_compact_display_bold_32_mono.h"
-#include "../fonts/sf_mono_regular_18_mono.h"
 #include "../fonts/sf_mono_bold_48_mono.h"
+#include "../fonts/sf_mono_regular_18_mono.h"
+#include "../genfonts/fontbm/src/external/lodepng/lodepng.h"
 
 #if 1
 constexpr std::string test0() {
@@ -454,6 +453,7 @@ int main() {
     image.sixel_to_cout();
 #endif  // #if 0
 
+#if 0
     constixel::image<constixel::format_8bit, 512, 312, 1> image;
     static constexpr std::array<const char *, 5> strings {
         "ABCDEFGHIJKLM", "NOPQRTSUVWXYZ", "abcdefghijklm", "nopqrstuvwxyz","1234567890&@.,?!'"""
@@ -463,4 +463,12 @@ int main() {
         image.draw_string_mono<constixel::sf_compact_display_medium_48_mono>(16, 48 * static_cast<int32_t>(i) + 16, strings.at(i), col);
     }
     image.sixel_to_cout();
+#endif  // #if 0
+
+    constixel::image<constixel::format_8bit, 256, 256, 1> image;
+    image.fill_rect(0, 0, 256, 256, 2);
+    std::vector<char> out;
+    image.png([&out](char byte) mutable {
+        out.push_back(byte);
+    });
 }
