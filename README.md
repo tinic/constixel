@@ -10,7 +10,7 @@ constixel is a single header minimalistic constexpr C++20(+) 2d graphics renderi
 [Text drawing example](#text-drawing-example)  
 [Consteval sixel example](#consteval-sixel-example)  
 [Consteval image example](#consteval-embedded-image-data-example)  
-[Saving a PNG to disk](#saving-a-png-to-disk)  
+[Saving a PNG to disk example](#saving-a-png-to-disk-example)  
 [API](#api)  
 
 ## Primary features and goals
@@ -184,7 +184,7 @@ int main() {
 
 ![constixel](./media/constixel_1bit.jpg "Example in iTerm")
 
-## Saving a PNG to disk
+## Saving a PNG to disk example
 
 ```
 #include "constixel.h"
