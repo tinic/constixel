@@ -283,7 +283,7 @@ class image {
 
     // Get the width of a utf8 string in pixels. #include a monochrome or grey font and specify the included struct as the template parameter
     template <typename FONT>
-    constexpr int32_t string_width(int32_t x, int32_t y, const char *str);
+    constexpr int32_t string_width(const char *str);
 
     // Draw a line
     void line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, uint32_t width = 1);
