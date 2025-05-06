@@ -318,14 +318,6 @@ struct char_info {
     int16_t yoffset;
 };
 
-struct font_info {
-    std::string face;
-    int8_t size;
-    int8_t bold : 1;
-    int8_t italic : 1;
-    int8_t outline : 1;
-};
-
 template <typename T>
 struct rect {
     T x = 0;
