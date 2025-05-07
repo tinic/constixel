@@ -355,7 +355,7 @@ void draw_rgb() {
 template <typename T>
 void round_trip() {
     static T image;
-    std::array<uint32_t, 65536> rgb{};
+    static std::array<uint32_t, 65536> rgb{};
     for (uint32_t y = 0; y < 256; y++) {
         for (uint32_t x = 0; x < 256; x++) {
             rgb.data()[y * 256 + x] = ((255 - y) << 16) | (x << 0) | (y << 8);
@@ -516,7 +516,7 @@ int main() {
 
 #if 1
     {
-        constixel::image<constixel::format_8bit, 1024, 1024, 1> image;
+        static constixel::image<constixel::format_8bit, 1024, 1024, 1> image;
         image.draw_string_mono<constixel::sf_compact_display_bold_48_mono>(0, 0, "Pack my box with five dozen liquor jugs", 2);
         image.draw_string_mono<constixel::sf_compact_display_bold_32_mono>(0, 50, "Pack my box with five dozen liquor jugs", 3);
         image.draw_string_mono<constixel::sf_mono_regular_18_mono>(0, 100, "Pack my box with five dozen liquor jugs", 5);
@@ -527,7 +527,7 @@ int main() {
 
 #if 1
     {
-        constixel::image<constixel::format_8bit, 512, 312, 1> image;
+        static constixel::image<constixel::format_8bit, 512, 312, 1> image;
         static constexpr std::array<const char *, 5> strings{"ABCDEFGHIJKLM", "NOPQRTSUVWXYZ", "abcdefghijklm", "nopqrstuvwxyz",
                                                              "1234567890&@.,?!'"
                                                              ""};
