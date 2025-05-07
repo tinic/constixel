@@ -431,7 +431,7 @@ int main() {
     static_assert(test7().size() == 2389);
     static_assert(test8().size() == 333);
     static_assert(test9().size() == 6037);
-//    static_assert(test10().size() == 12893);
+    static_assert(test10().size() == 12893);
 #endif  // #if 0
 
 #if 1
