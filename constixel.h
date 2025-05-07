@@ -39,9 +39,9 @@ SOFTWARE.
 namespace constixel {
 
 #if defined(__GCC__) || defined(__clang__)
-#define CONSTIXEL_FLATTEN __attribute__((flatten)) 
+#define CONSTIXEL_FLATTEN __attribute__((flatten))
 #else  // #if defined(__GCC__) || defined(__clang__)
-#define CONSTIXEL_FLATTEN 
+#define CONSTIXEL_FLATTEN
 #endif  // #if defined(__GCC__) || defined(__clang__)
 
 [[nodiscard]] static constexpr float fast_exp2(const float p) {
@@ -241,6 +241,10 @@ class hextree {
     hextree(const hextree &) = delete;
     hextree &operator=(const hextree &) = delete;
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4242)
+#endif  // #ifdef _MSC_VER
     template <std::size_t NS>
     explicit consteval hextree(const std::array<std::pair<T, T>, NS> &in) {
         nodes[0] = node{};
@@ -257,7 +261,7 @@ class hextree {
                 }
                 idx = next;
             }
-            nodes[idx].child[key & 0xF] = static_catval;
+            nodes[idx].child[key & 0xF] = val;
         }
     }
 
@@ -281,6 +285,9 @@ class hextree {
         }
         return static_cast<T>(vnodes.size());
     }
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif  // #ifdef _MSC_VER
 
     [[nodiscard]] constexpr T lookup(T key) const {
         T idx = 0;
@@ -1642,8 +1649,8 @@ class image {
 #pragma GCC diagnostic ignored "-Wconversion"
 #endif  // #if __GCC__
 #ifdef _MSC_VER
-#pragma warning( push )
-#pragma warning( disable : 4242 )
+#pragma warning(push)
+#pragma warning(disable : 4242)
 #endif  // #ifdef _MSC_VER
             const char_info &ch_info = FONT::char_table.at(FONT::glyph_tree.lookup(utf32));
 #if __clang__
@@ -1653,7 +1660,7 @@ class image {
 #pragma GCC diagnostic pop
 #endif  // #if __clang__
 #ifdef _MSC_VER
-#pragma warning( pop )
+#pragma warning(pop)
 #endif  // #ifdef _MSC_VER
             if (*str == 0) {
                 x += ch_info.width;
@@ -1695,8 +1702,8 @@ class image {
 #pragma GCC diagnostic ignored "-Wconversion"
 #endif  // #if __GCC__
 #ifdef _MSC_VER
-#pragma warning( push )
-#pragma warning( disable : 4242 )
+#pragma warning(push)
+#pragma warning(disable : 4242)
 #endif  // #ifdef _MSC_VER
             const char_info &ch_info = FONT::char_table.at(FONT::glyph_tree.lookup(utf32));
 #if __clang__
@@ -1706,7 +1713,7 @@ class image {
 #pragma GCC diagnostic pop
 #endif  // #if __clang__
 #ifdef _MSC_VER
-#pragma warning( pop )
+#pragma warning(pop)
 #endif  // #ifdef _MSC_VER
             draw_char_mono<FONT>(x, y, ch_info, col);
             x += ch_info.xadvance;
@@ -1745,8 +1752,8 @@ class image {
 #pragma GCC diagnostic ignored "-Wconversion"
 #endif  // #if __GCC__
 #ifdef _MSC_VER
-#pragma warning( push )
-#pragma warning( disable : 4242 )
+#pragma warning(push)
+#pragma warning(disable : 4242)
 #endif  // #ifdef _MSC_VER
             const char_info &ch_info = FONT::char_table.at(FONT::glyph_tree.lookup(utf32));
 #if __clang__
@@ -1756,7 +1763,7 @@ class image {
 #pragma GCC diagnostic pop
 #endif  // #if __clang__
 #ifdef _MSC_VER
-#pragma warning( pop )
+#pragma warning(pop)
 #endif  // #ifdef _MSC_VER
             draw_char<FONT>(x, y, ch_info, col);
             x += ch_info.xadvance;
