@@ -554,4 +554,13 @@ int main() {
         image.sixel_to_cout();
     }
 #endif  // #if 0
+
+#if 0
+    {
+        constixel::image<constixel::format_1bit, 1024, 256, 1> image;
+        image.draw_string_mono<constixel::sf_compact_display_medium_48_mono>(
+            0, 0, "日本語の文章には、漢字（常用漢字）、カタカナ、ひらがな、そして句読点が含まれています。", 1);
+        image.sixel_to_cout();
+    }
+#endif  // #if 0
 }
