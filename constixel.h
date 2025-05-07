@@ -1501,27 +1501,28 @@ class image {
     static_assert(S >= 1 && S <= 256);
 
  public:
-    [[nodiscard]] static constexpr int32_t bit_depth() {
+    [[nodiscard]] static constexpr size_t bit_depth() {
         return T<W, H, S>::bits_per_pixel;
     }
 
-    [[nodiscard]] static constexpr int32_t size() {
+    [[nodiscard]] static constexpr size_t size() {
         return T<W, H, S>::image_size;
     }
 
-    [[nodiscard]] static constexpr size_t width() {
-        return W;
+    [[nodiscard]] static constexpr int32_t width() {
+        return static_cast<int32_t>(W);
     }
 
-    [[nodiscard]] static constexpr size_t height() {
-        return H;
+    [[nodiscard]] static constexpr int32_t height() {
+        return static_cast<int32_t>(H);
     }
 
     constexpr void clear() {
         data.fill(0);
     }
 
-    [[nodiscard]] static constexpr int32_t abs(int32_t v) {
+    template <typename abs_T>
+    [[nodiscard]] static constexpr abs_T abs(abs_T v) {
         return v < 0 ? -v : v;
     }
 
@@ -1529,12 +1530,12 @@ class image {
         return data;
     }
 
-    [[nodiscard]] constexpr std::array<uint8_t, T<W, H, S>::image_size> clone() const {
-        return data;
+    [[nodiscard]] constexpr image<T, W, H, S> clone() const {
+        return *this;
     }
 
-    constexpr void copy(const std::array<uint8_t, T<W, H, S>::image_size> &src) {
-        data = src;
+    constexpr void copy(const image<T, W, H, S> &src) {
+        data = src.data;
     }
 
     constexpr void line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, uint32_t stroke_width = 1) {
