@@ -24,7 +24,7 @@ constixel is a single header minimalistic constexpr C++20(+) 2d graphics palette
 - Render proportional text with fonts genenerated by fontbm/bmfont. Project includes a set of pre-made fonts which are trivial to use. UTF-8 is supported.
 - A simplistic uncompressed png encoder is included to reduce dependencies.
 - Various other simple image manipulation operations.
-- Code is cpplint compliant, passes cppcheck and of course constexpr requirements.
+- Code is cpplint compliant, passes cppcheck and is of couse consteval runnable.
 
 > [!NOTE]
 > This library is not designed for high fidelity graphics generation and should be more thought of a utility library for software development purposes. Despite that, on HiDPI screens like on Macs the results generally look fairly good.
