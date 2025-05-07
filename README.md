@@ -1,6 +1,7 @@
 # constixel
 
 [![CMake on multiple platforms](https://github.com/tinic/constixel/actions/workflows/cmake-multi-platform.yml/badge.svg)](https://github.com/tinic/constixel/actions/workflows/cmake-multi-platform.yml)
+[![Microsoft C++ Code Analysis](https://github.com/tinic/constixel/actions/workflows/msvc.yml/badge.svg)](https://github.com/tinic/constixel/actions/workflows/msvc.yml)
 
 constixel is a single header minimalistic constexpr C++20(+) 2d graphics palette based rendering library with the ability to output to a sixel image stream which can be viewed in most modern terminals.
 
