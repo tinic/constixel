@@ -241,10 +241,6 @@ class hextree {
     hextree(const hextree &) = delete;
     hextree &operator=(const hextree &) = delete;
 
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4242)
-#endif  // #ifdef _MSC_VER
     template <std::size_t NS>
     explicit consteval hextree(const std::array<std::pair<T, T>, NS> &in) {
         nodes[0] = node{};
@@ -285,9 +281,6 @@ class hextree {
         }
         return static_cast<T>(vnodes.size());
     }
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif  // #ifdef _MSC_VER
 
     [[nodiscard]] constexpr T lookup(T key) const {
         T idx = 0;
