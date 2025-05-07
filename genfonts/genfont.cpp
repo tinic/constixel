@@ -167,7 +167,7 @@ int main(int argc, char* argv[]) {
 
             std::stringstream ss;
 
-            std::string name = std::format("{}_{}", slugify(std::filesystem::path(config.font_file).stem().string()), is_mono ? "mono" : "grey");
+            std::string name = std::format("{}_{}", slugify(std::filesystem::path(config.font_file).stem().string()), is_mono ? "mono" : "aa");
 
             ss << std::format("namespace constixel {{\n\n", slugify(font.face), abs(font.size));
             ss << std::format("struct {} {{\n\n", name);
@@ -211,8 +211,6 @@ int main(int argc, char* argv[]) {
             ss << std::format("    }}}};\n\n");
 
             if (font.smooth == 1) {
-                // mono
-
                 size_t bpr = ((w + 7) / 8);
                 std::vector<uint8_t> bitmap;
                 bitmap.assign(h * bpr, 0);
@@ -265,10 +263,11 @@ int main(int argc, char* argv[]) {
                     *ptr |= (a >> 4) << ((1 - x % 2) * 4);
                 };
 
+
                 int32_t breakline = 1;
                 for (size_t y = 0; y < h; y++) {
                     for (size_t x = 0; x < w; x++) {
-                        plot(x, y, rgbaimage[y * w * 4 + x * 4 + 0]);
+                        plot(x, y, rgbaimage[y * w * 4 + x * 4 + 3]);
                     }
                 }
 
@@ -306,7 +305,3 @@ int main(int argc, char* argv[]) {
     }
     return 0;
 }
-
-/*
-cd ../otf ; ../build/genfont --font-file SF-Compact-Display-Regular.otf.fnt --out-dir ../../fonts ; cd ../build
-*/

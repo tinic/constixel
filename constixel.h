@@ -38,12 +38,6 @@ SOFTWARE.
 
 namespace constixel {
 
-#if defined(__GCC__) || defined(__clang__)
-#define CONSTIXEL_FLATTEN __attribute__((flatten))
-#else  // #if defined(__GCC__) || defined(__clang__)
-#define CONSTIXEL_FLATTEN
-#endif  // #if defined(__GCC__) || defined(__clang__)
-
 [[nodiscard]] static constexpr float fast_exp2(const float p) {
     const float offset = (p < 0) ? 1.0f : 0.0f;
     const float clipp = (p < -126) ? -126.0f : p;
@@ -682,6 +676,10 @@ class format_1bit : public format {
     static constexpr size_t image_size = internal_height * bytes_per_line;
     static constexpr std::array<uint32_t, (1UL << bits_per_pixel)> palette = {0x00000000, 0x00ffffff};
 
+    static constexpr void compose(std::array<uint8_t, image_size> &, size_t, size_t, float, float, float, float) {
+        static_assert(false, "composing not supported on 1-bit format, use a mono font.");
+    }
+
     static constexpr void plot(std::array<uint8_t, image_size> &data, size_t x0, size_t y, uint8_t col) {
         col &= (1UL << bits_per_pixel) - 1;
         size_t x8 = x0 / 8;
@@ -833,7 +831,7 @@ class format_1bit : public format {
                 }
                 return out;
             },
-            [](const uint8_t *data_raw, size_t x, size_t w, size_t y, palette_bitset<uint8_t, 32> &set) CONSTIXEL_FLATTEN {
+            [](const uint8_t *data_raw, size_t x, size_t w, size_t y, palette_bitset<uint8_t, 32> &set) {
                 int32_t inc = y % S;
                 for (size_t y6 = 0; y6 < 6; y6++) {
                     if ((y + y6) < H * S) {
@@ -865,6 +863,10 @@ class format_2bit : public format {
     }
 
     static constexpr const constixel::quantize<1UL << bits_per_pixel> quant = gen_quant();
+
+    static constexpr void compose(std::array<uint8_t, image_size> &, size_t, size_t, float, float, float, float) {
+        static_assert(false, "composing not supported on 2-bit format, use a mono font.");
+    }
 
     static constexpr void plot(std::array<uint8_t, image_size> &data, size_t x0, size_t y, uint8_t col) {
         col &= (1UL << bits_per_pixel) - 1;
@@ -1021,7 +1023,7 @@ class format_2bit : public format {
                 }
                 return out;
             },
-            [](const uint8_t *data_raw, size_t x, size_t w, size_t y, palette_bitset<uint8_t, 32> &set) CONSTIXEL_FLATTEN {
+            [](const uint8_t *data_raw, size_t x, size_t w, size_t y, palette_bitset<uint8_t, 32> &set) {
                 int32_t inc = y % S;
                 for (size_t y6 = 0; y6 < 6; y6++) {
                     if ((y + y6) < H * S) {
@@ -1054,6 +1056,10 @@ class format_4bit : public format {
     }
 
     static constexpr const constixel::quantize<1UL << bits_per_pixel> quant = gen_quant();
+
+    static constexpr void compose(std::array<uint8_t, image_size> &, size_t, size_t, float, float, float, float) {
+        static_assert(false, "composing not supported on 4-bit format, use a mono font.");
+    }
 
     static constexpr void plot(std::array<uint8_t, image_size> &data, size_t x0, size_t y, uint8_t col) {
         col &= (1UL << bits_per_pixel) - 1;
@@ -1210,7 +1216,7 @@ class format_4bit : public format {
                 }
                 return out;
             },
-            [](const uint8_t *data_raw, size_t x, size_t w, size_t y, palette_bitset<uint8_t, 32> &set) CONSTIXEL_FLATTEN {
+            [](const uint8_t *data_raw, size_t x, size_t w, size_t y, palette_bitset<uint8_t, 32> &set) {
                 int32_t inc = y % S;
                 for (size_t y6 = 0; y6 < 6; y6++) {
                     if ((y + y6) < H * S) {
@@ -1299,8 +1305,8 @@ class format_8bit : public format {
 
     static constexpr const constixel::quantize<1UL << bits_per_pixel> quant = gen_quant();
 
-    static constexpr void plot(std::array<uint8_t, image_size> &data, size_t x0, size_t y, uint8_t col) {
-        data.data()[y * bytes_per_line + x0] = static_cast<uint8_t>(col);
+    static constexpr void plot(std::array<uint8_t, image_size> &data, size_t x, size_t y, uint8_t col) {
+        data.data()[y * bytes_per_line + x] = static_cast<uint8_t>(col);
     }
 
     static constexpr void span(std::array<uint8_t, image_size> &data, size_t xl0, size_t xr0, size_t y, uint8_t col) {
@@ -1308,6 +1314,14 @@ class format_8bit : public format {
         for (size_t x = xl0; x < xr0; x++) {
             yptr[x] = static_cast<uint8_t>(col);
         }
+    }
+
+    static constexpr void compose(std::array<uint8_t, image_size> &data, size_t x, size_t y, float cola, float colr, float colg, float colb) {
+        size_t bg = static_cast<size_t>(data.data()[y * bytes_per_line + x]);
+        float Rl = colr + quant.linearpal[bg * 3 + 0] * (1.0f - cola);
+        float Gl = colg + quant.linearpal[bg * 3 + 1] * (1.0f - cola);
+        float Bl = colb + quant.linearpal[bg * 3 + 2] * (1.0f - cola);
+        plot(data, x, y, quant.nearest_linear(Rl, Gl, Bl));
     }
 
     [[nodiscard]] static constexpr auto RGBA_uint32(const std::array<uint8_t, image_size> &data) {
@@ -1424,7 +1438,7 @@ class format_8bit : public format {
                 }
                 return out;
             },
-            [](const uint8_t *data_raw, size_t x, size_t w, size_t y, palette_bitset<uint8_t, 1UL << bits_per_pixel> &set) CONSTIXEL_FLATTEN {
+            [](const uint8_t *data_raw, size_t x, size_t w, size_t y, palette_bitset<uint8_t, 1UL << bits_per_pixel> &set) {
                 const uint8_t *ptr = &data_raw[(y / S) * bytes_per_line + x / S];
                 int32_t inc = y % S;
                 for (size_t y6 = 0; y6 < 6; y6++) {
@@ -1605,6 +1619,13 @@ class image {
         line(l.x, l.y, l.x + l.w, l.y + l.h, col, stroke_width);
     }
 
+    constexpr void compose(int32_t x, int32_t y, float cola, float colr, float colg, float colb) {
+        if (x < 0 || x >= static_cast<int32_t>(W) || y < 0 || y >= static_cast<int32_t>(H)) {
+            return;
+        }
+        T<W, H, S>::compose(data, static_cast<uint32_t>(x), static_cast<uint32_t>(y), cola, colr, colg, colb);
+    }
+
     constexpr void plot(int32_t x, int32_t y, uint8_t col) {
         if (x < 0 || x >= static_cast<int32_t>(W) || y < 0 || y >= static_cast<int32_t>(H)) {
             return;
@@ -1646,7 +1667,7 @@ class image {
 
     template <typename FONT>
     constexpr int32_t draw_string_mono(int32_t x, int32_t y, const char *str, uint8_t col) {
-        static_assert(FONT::mono == true);
+        static_assert(FONT::mono == true, "Can't use a antialiased font to draw mono/pixelized text.");
         while (*str != 0) {
             uint32_t utf32 = 0;
             uint32_t lead = static_cast<uint32_t>(*str);
@@ -1674,8 +1695,8 @@ class image {
     }
 
     template <typename FONT>
-    constexpr int32_t draw_string(int32_t x, int32_t y, const char *str, uint8_t col) {
-        static_assert(FONT::mono == false);
+    constexpr int32_t draw_string_aa(int32_t x, int32_t y, const char *str, uint8_t col) {
+        static_assert(FONT::mono == false, "Can't use a mono font to draw antialiased text.");
         while (*str != 0) {
             uint32_t utf32 = 0;
             uint32_t lead = static_cast<uint32_t>(*str);
@@ -1696,7 +1717,7 @@ class image {
                 return x;
             }
             const char_info &ch_info = FONT::char_table.at(FONT::glyph_tree.lookup(static_cast<FONT::lookup_type>(utf32)));
-            draw_char<FONT>(x, y, ch_info, col);
+            draw_char_aa<FONT>(x, y, ch_info, col);
             x += ch_info.xadvance;
         }
         return x;
@@ -1814,7 +1835,7 @@ class image {
  private:
     template <typename FONT>
     constexpr void draw_char_mono(int32_t x, int32_t y, const char_info &ch, uint8_t col) {
-        static_assert(FONT::mono == true);
+        static_assert(FONT::mono == true, "Can't use a antialiased font to draw mono/pixelized text.");
         int32_t ch_data_off = static_cast<int32_t>(ch.y) * static_cast<int32_t>(FONT::glyph_bitmap_stride) + static_cast<int32_t>(ch.x) / 8;
         x += ch.xoffset;
         y += ch.yoffset;
@@ -1836,22 +1857,45 @@ class image {
         }
     }
 
+    static consteval auto init_a2al() {
+        std::array<float, 16> a2al{};
+        for (size_t c = 0; c < 16; c++) {
+            a2al[c] = constixel::srgb_to_linear(static_cast<float>(c) * (1.0f / 15.0f));
+        }
+        return a2al;
+    }
+
     template <typename FONT>
-    constexpr void draw_char(int32_t x, int32_t y, const char_info &ch, uint8_t col) {
-        static_assert(FONT::mono == false);
+    constexpr void draw_char_aa(int32_t x, int32_t y, const char_info &ch, uint8_t col) {
+        static_assert(FONT::mono == false, "Can't use a mono font to draw antialiased text.");
+        static constexpr std::array<float, 16> a2al = init_a2al();
         int32_t ch_data_off = static_cast<int32_t>(ch.y) * static_cast<int32_t>(FONT::glyph_bitmap_stride) + static_cast<int32_t>(ch.x) / 2;
         x += ch.xoffset;
         y += ch.yoffset;
         const int32_t x2 = x + static_cast<int32_t>(ch.width);
         const int32_t y2 = y + static_cast<int32_t>(ch.height);
+        uint32_t rgba = format.palette[col];
+        float R = static_cast<float>((rgba >> 16) & 0xFF) * (1.0f / 255.0f);
+        float G = static_cast<float>((rgba >> 8) & 0xFF) * (1.0f / 255.0f);
+        float B = static_cast<float>((rgba >> 0) & 0xFF) * (1.0f / 255.0f);
+        float Rl = constixel::srgb_to_linear(R);
+        float Gl = constixel::srgb_to_linear(G);
+        float Bl = constixel::srgb_to_linear(B);
         for (int32_t yy = y; yy < y2; yy++) {
             for (int32_t xx = x; xx < x2; xx++) {
                 const int32_t x_off = (xx - x) + ch.x % 2;
                 const int32_t bit_index = (1 - (x_off % 2)) * 4;
                 const size_t byte_index = static_cast<size_t>(ch_data_off + x_off / 2);
                 if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
-                    const uint8_t a = (FONT::glyph_bitmap[byte_index] >> bit_index) & 0x7;
-                    plot(xx, yy, a ? col : 0);
+                    const uint8_t a = (FONT::glyph_bitmap[byte_index] >> bit_index) & 0xF;
+                    if (a != 0) {
+                        if (a == 0xF) {
+                            plot(xx, yy, col);
+                        } else {
+                            float Al = a2al[a];
+                            compose(xx, yy, Al, Rl * Al, Gl * Al, Bl * Al);
+                        }
+                    }
                 }
             }
             ch_data_off += FONT::glyph_bitmap_stride;
