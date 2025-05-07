@@ -1277,7 +1277,7 @@ class format_8bit : public format {
         }
         for (size_t c = 0; c < 8; c++) {
             constixel::oklab lft{static_cast<double>(c) / 7 - 0.2, 0.2, 0.0};
-            constixel::oklab rgh{static_cast<double>(c) / 7 - 0.2, 0.2, 360.0};
+            constixel::oklab rgh{static_cast<double>(c) / 7 - 0.2, 0.2, 337.5};
             for (size_t d = 0; d < 16; d++) {
                 auto res = constixel::oklab_to_srgb(constixel::oklch_to_oklab(constixel::oklch{
                     std::lerp(lft.l, rgh.l, static_cast<double>(d) / 15.0),
