@@ -239,7 +239,7 @@ static constexpr std::string test10() {
     return out;
 }
 
-static constexpr std::array<char, 8192> gen_separator() {
+static std::array<char, 8192> gen_separator() {
     std::array<char, 8192> sixel{};
     size_t count = 0;
     constixel::image<constixel::format_8bit, 1024, 1> image;
@@ -253,7 +253,7 @@ static constexpr std::array<char, 8192> gen_separator() {
     return sixel;
 }
 
-static constexpr void separator() {
+static void separator() {
     static auto sixel = gen_separator();
     puts(sixel.data());
 }
