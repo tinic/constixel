@@ -467,9 +467,9 @@ class format {
     template <typename F>
     [[nodiscard]] static constexpr uint32_t png_idat_zlib_stream(F &&charOut, const uint8_t *line, size_t bytes, uint32_t adler32_sum) {
         while (bytes > 0) {
-            static constexpr size_t max_data_use = 1024;
-            static constexpr size_t extra_data = 24;
-            static constexpr size_t max_stack_use = max_data_use + extra_data;
+            const size_t max_data_use = 1024;
+            const size_t extra_data = 24;
+            const size_t max_stack_use = max_data_use + extra_data;
             std::array<uint8_t, max_stack_use> header;
 
             uint32_t i = 0;
