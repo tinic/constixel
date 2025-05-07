@@ -52,13 +52,18 @@ SOFTWARE.
 #pragma GCC diagnostic ignored "-Wsuggest-destructor-override"
 #pragma GCC diagnostic ignored "-Wweak-vtables"
 #endif  // #if __clang__
+#endif  // #if __GNUC__
 
 #include "fontbm/src/external/lodepng/lodepng.h"
 
+#if __GNUC__
 #pragma GCC diagnostic pop
-
 #pragma GCC diagnostic ignored "-Wunused-function"
 #endif  // #if __GNUC__
+
+#ifndef CMAKE_PROJECT_PATH
+#define CMAKE_PROJECT_PATH "."
+#endif  // #ifndef CMAKE_PROJECT_PATH
 
 #if 0
 static constexpr void hexdump(const uint8_t* data, std::size_t len) {
@@ -90,7 +95,7 @@ static constexpr void hexdump(const uint8_t* data, std::size_t len) {
 #if 1
 static constexpr std::string test0() {
     std::string out{};
-    out.reserve(1UL<<20);
+    out.reserve(1UL << 20);
     constixel::image<constixel::format_1bit, 32, 31> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
@@ -104,7 +109,7 @@ static constexpr std::string test0() {
 
 static constexpr std::string test1() {
     std::string out{};
-    out.reserve(1UL<<20);
+    out.reserve(1UL << 20);
     constixel::image<constixel::format_2bit, 112, 64> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
@@ -118,7 +123,7 @@ static constexpr std::string test1() {
 
 constexpr std::string test2() {
     std::string out{};
-    out.reserve(1UL<<20);
+    out.reserve(1UL << 20);
     constixel::image<constixel::format_4bit, 128, 127> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
@@ -132,7 +137,7 @@ constexpr std::string test2() {
 
 static constexpr std::string test3() {
     std::string out{};
-    out.reserve(1UL<<20);
+    out.reserve(1UL << 20);
     constixel::image<constixel::format_1bit, 127, 101> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
@@ -146,7 +151,7 @@ static constexpr std::string test3() {
 
 static constexpr std::string test4() {
     std::string out{};
-    out.reserve(1UL<<20);
+    out.reserve(1UL << 20);
     constixel::image<constixel::format_2bit, 111, 95> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
@@ -160,7 +165,7 @@ static constexpr std::string test4() {
 
 static constexpr std::string test5() {
     std::string out{};
-    out.reserve(1UL<<20);
+    out.reserve(1UL << 20);
     constixel::image<constixel::format_4bit, 7, 128, 8> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
@@ -174,7 +179,7 @@ static constexpr std::string test5() {
 
 static constexpr std::string test6() {
     std::string out{};
-    out.reserve(1UL<<20);
+    out.reserve(1UL << 20);
     constixel::image<constixel::format_1bit, 127, 101> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
@@ -188,7 +193,7 @@ static constexpr std::string test6() {
 
 static constexpr std::string test7() {
     std::string out{};
-    out.reserve(1UL<<20);
+    out.reserve(1UL << 20);
     constixel::image<constixel::format_2bit, 111, 95> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
@@ -202,7 +207,7 @@ static constexpr std::string test7() {
 
 static constexpr std::string test8() {
     std::string out{};
-    out.reserve(1UL<<20);
+    out.reserve(1UL << 20);
     constixel::image<constixel::format_4bit, 7, 7, 8> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
@@ -216,7 +221,7 @@ static constexpr std::string test8() {
 
 static constexpr std::string test9() {
     std::string out{};
-    out.reserve(1UL<<20);
+    out.reserve(1UL << 20);
     constixel::image<constixel::format_8bit, 64, 64> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
@@ -232,7 +237,7 @@ static constexpr std::string test10() {
     constixel::image<constixel::format_1bit, 256, 256, 1> image;
     image.fill_rect(0, 0, 256, 256, 2);
     std::string out{};
-    out.reserve(1UL<<20);
+    out.reserve(1UL << 20);
     image.png([&out](char ch) mutable {
         out.push_back(ch);
     });
@@ -294,7 +299,7 @@ void draw_palette() {
         }
     }
     std::string out;
-    out.reserve(1UL<<20);
+    out.reserve(1UL << 20);
     image.sixel([&out](char ch) mutable {
         out.push_back(ch);
     });
@@ -315,7 +320,7 @@ void draw_rgb() {
     {
         image.blit_RGBA(0, 0, 256, 256, reinterpret_cast<const uint8_t *>(rgb.data()), 256, 256, 256 * 4);
         std::string out;
-        out.reserve(1UL<<20);
+        out.reserve(1UL << 20);
         image.sixel([&out](char ch) mutable {
             out.push_back(ch);
         });
@@ -326,7 +331,7 @@ void draw_rgb() {
     {
         image.blit_RGBA_diffused(0, 0, 256, 256, reinterpret_cast<const uint8_t *>(rgb.data()), 256, 256, 256 * 4);
         std::string out;
-        out.reserve(1UL<<20);
+        out.reserve(1UL << 20);
         image.sixel([&out](char ch) mutable {
             out.push_back(ch);
         });
@@ -337,7 +342,7 @@ void draw_rgb() {
     {
         image.blit_RGBA_diffused_linear(0, 0, 256, 256, reinterpret_cast<const uint8_t *>(rgb.data()), 256, 256, 256 * 4);
         std::string out;
-        out.reserve(1UL<<20);
+        out.reserve(1UL << 20);
         image.sixel([&out](char ch) mutable {
             out.push_back(ch);
         });
@@ -360,7 +365,7 @@ void round_trip() {
     auto rgba8 = image.RGBA_uint8();
     image.blit_RGBA(0, 0, 256, 256, rgba8.data(), 256, 256, 256 * 4);
     std::string out;
-    out.reserve(1UL<<20);
+    out.reserve(1UL << 20);
     image.sixel([&out](char ch) mutable {
         out.push_back(ch);
     });
@@ -371,13 +376,14 @@ void round_trip() {
 
 template <typename T, size_t I>
 void draw_functions() {
-    puts("\033[2J\033[H\0337");
     static T image;
     image.clear();
+    puts("\033[2J\033[H");
     for (int32_t c = 0; c < static_cast<int32_t>(I); c++) {
         image.fill_rect(16 + c * 37, c * 32, 128, 128, static_cast<uint8_t>(c));
-        std::string out("\0338");
-        out.reserve(1UL<<20);
+        puts("\033[H");
+        std::string out;
+        out.reserve(1UL << 20);
         image.sixel([&out](char ch) mutable {
             out.push_back(ch);
         });
@@ -387,8 +393,9 @@ void draw_functions() {
     }
     for (int32_t c = 0; c < static_cast<int32_t>(I); c++) {
         image.line(16, 16, 64 + c * 42, 700, static_cast<uint8_t>(c), static_cast<uint8_t>(c));
-        std::string out("\0338");
-        out.reserve(1UL<<20);
+        puts("\033[H");
+        std::string out;
+        out.reserve(1UL << 20);
         image.sixel([&out](char ch) mutable {
             out.push_back(ch);
         });
@@ -398,8 +405,9 @@ void draw_functions() {
     }
     for (int32_t c = 0; c < static_cast<int32_t>(I); c++) {
         image.fill_circle(600, 384, 256 - c * 16, static_cast<uint8_t>(c));
-        std::string out("\0338");
-        out.reserve(1UL<<20);
+        puts("\033[H");
+        std::string out;
+        out.reserve(1UL << 20);
         image.sixel([&out](char ch) mutable {
             out.push_back(ch);
         });
@@ -427,7 +435,8 @@ int main() {
 #endif  // #if 0
 
 #if 1
-    puts("\033[2J\033[H\0337");
+#ifndef _MSC_VER
+    puts("\033[3J\033[H");
     puts(test0().c_str());
     puts("\n");
     puts(test1().c_str());
@@ -448,6 +457,7 @@ int main() {
     puts("\n");
     puts(test9().c_str());
     puts("\n");
+#endif  // #ifndef _MSC_VER
 #endif  // #if 1
 
 #if 1
@@ -472,7 +482,9 @@ int main() {
     uint32_t h = 0;
     constexpr int32_t ow = 1024;
     constexpr int32_t oh = 902;
-    if (lodepng::decode(rgbaimage, w, h, "../../media/larikeet.png") == 0) {
+
+    std::filesystem::path p{CMAKE_PROJECT_PATH "/../media/larikeet.png"};
+    if (lodepng::decode(rgbaimage, w, h, p.lexically_normal().string().c_str()) == 0) {
         draw_image_cut<constixel::image<constixel::format_1bit, ow, oh>>(rgbaimage, int32_t(w), int32_t(h));
         draw_image_cut<constixel::image<constixel::format_2bit, ow, oh>>(rgbaimage, int32_t(w), int32_t(h));
         draw_image_cut<constixel::image<constixel::format_4bit, ow, oh>>(rgbaimage, int32_t(w), int32_t(h));
@@ -535,7 +547,7 @@ int main() {
             image.draw_string_mono<constixel::sf_compact_display_medium_48_mono>(16, 48 * static_cast<int32_t>(i) + 16, strings.at(i), col);
         }
         std::vector<char> out{};
-        out.reserve(1UL<<20);
+        out.reserve(1UL << 20);
         image.png([&out](char ch) mutable {
             out.push_back(ch);
         });
