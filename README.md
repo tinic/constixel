@@ -42,7 +42,7 @@ constixel is a single header minimalistic constexpr C++20(+) 2d graphics palette
 ## Requirements
 
 - C++20
-- gcc 13 or newer, clang 16 or newer, MSVC 17 or newer
+- gcc 14 or newer, clang 16 or newer, MSVC 17 or newer
 - For viewing the sixel image you will need a capabable terminal. Windows Terminal, iTerm2 on MacOS and any Linux terminal will work.
 
 > [!NOTE]
