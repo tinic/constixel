@@ -593,6 +593,10 @@ class format {
             set[idx] |= 1UL << (col & 0x1F);
         }
 
+        constexpr void clear() {
+            set.fill(0);
+        }
+
         [[nodiscard]] constexpr size_t genstack(std::array<PBT, PBS> &stack) const {
             size_t count = 0;
             for (size_t c = 0; c < PBS / 32; c++) {
@@ -605,7 +609,7 @@ class format {
             return count;
         }
 
-        uint32_t set[PBS / 32]{};
+        std::array<uint32_t, PBS / 32> set{};
     };
 
     template <size_t W, size_t H, int32_t S, typename PBT, size_t PBS, typename P, typename F, typename L>
@@ -633,8 +637,9 @@ class format {
         }
         const auto r = rect<int32_t>{_r.x * S, _r.y * S, _r.w * S, _r.h * S} & rect<int32_t>{0, 0, W * S, H * S};
         std::array<PBT, std::max(32UL, 1UL << PBS)> stack{};
+        palette_bitset<PBT, std::max(32UL, 1UL << PBS)> pset{};
         for (size_t y = static_cast<size_t>(r.y); y < static_cast<size_t>(r.y + r.h); y += 6) {
-            palette_bitset<PBT, std::max(32UL, 1UL << PBS)> pset;
+            pset.clear();
             set6(data, static_cast<size_t>(r.x), static_cast<size_t>(r.w), y, pset);
             size_t stackCount = pset.genstack(stack);
             for (size_t s = 0; s < stackCount; s++) {
