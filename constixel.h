@@ -350,15 +350,15 @@ class format {
     }
 
     template <typename F>
-    static constexpr void png_write_be(F &&charOut, uint32_t value) {
-        charOut(static_cast<char>((value >> 24) & 0xFF));
-        charOut(static_cast<char>((value >> 16) & 0xFF));
-        charOut(static_cast<char>((value >> 8) & 0xFF));
-        charOut(static_cast<char>((value >> 0) & 0xFF));
+    static constexpr void png_write_be(F &&char_out, uint32_t value) {
+        char_out(static_cast<char>((value >> 24) & 0xFF));
+        char_out(static_cast<char>((value >> 16) & 0xFF));
+        char_out(static_cast<char>((value >> 8) & 0xFF));
+        char_out(static_cast<char>((value >> 0) & 0xFF));
     }
 
     template <typename F, typename A>
-    static constexpr void png_write_crc32(F &&charOut, const A &array, size_t bytes) {
+    static constexpr void png_write_crc32(F &&char_out, const A &array, size_t bytes) {
         size_t idx = 0;
         uint32_t crc = 0xFFFFFFFF;
         size_t len = bytes;
@@ -369,30 +369,30 @@ class format {
                 crc = (crc & 1) ? (crc >> 1) ^ 0xEDB88320u : crc >> 1;
             }
         }
-        png_write_be(charOut, crc ^ 0xFFFFFFFF);
+        png_write_be(char_out, crc ^ 0xFFFFFFFF);
     }
 
     template <typename F, typename A>
-    static constexpr void png_write_array(F &&charOut, const A &array, size_t bytes) {
+    static constexpr void png_write_array(F &&char_out, const A &array, size_t bytes) {
         for (size_t c = 0; c < bytes; c++) {
-            charOut(static_cast<char>(array[c]));
+            char_out(static_cast<char>(array[c]));
         }
     }
 
     template <typename F>
-    static constexpr void png_marker(F &&charOut) {
-        charOut(static_cast<char>(0x89));
-        charOut(0x50);
-        charOut(0x4E);
-        charOut(0x47);
-        charOut(0x0D);
-        charOut(0x0A);
-        charOut(0x1A);
-        charOut(0x0A);
+    static constexpr void png_marker(F &&char_out) {
+        char_out(static_cast<char>(0x89));
+        char_out(0x50);
+        char_out(0x4E);
+        char_out(0x47);
+        char_out(0x0D);
+        char_out(0x0A);
+        char_out(0x1A);
+        char_out(0x0A);
     }
 
     template <typename F>
-    static constexpr void png_header(F &&charOut, size_t w, size_t h, size_t depth) {
+    static constexpr void png_header(F &&char_out, size_t w, size_t h, size_t depth) {
         const size_t chunkLength = 17;
         std::array<char, chunkLength> header;
         uint32_t i = 0;
@@ -413,13 +413,13 @@ class format {
         header[i++] = 0;
         header[i++] = 0;
         header[i++] = 0;
-        png_write_be(charOut, i - 4);
-        png_write_array(charOut, header, i);
-        png_write_crc32(charOut, header, i);
+        png_write_be(char_out, i - 4);
+        png_write_array(char_out, header, i);
+        png_write_crc32(char_out, header, i);
     }
 
     template <typename F, typename P>
-    static constexpr void png_palette(F &&charOut, const P &palette) {
+    static constexpr void png_palette(F &&char_out, const P &palette) {
         std::array<char, 256 * 3 + 4> header;
         uint32_t i = 0;
         header[i++] = 'P';
@@ -431,26 +431,26 @@ class format {
             header[i++] = static_cast<char>((palette[c] >> 8) & 0xFF);
             header[i++] = static_cast<char>((palette[c] >> 0) & 0xFF);
         }
-        png_write_be(charOut, i - 4);
-        png_write_array(charOut, header, i);
-        png_write_crc32(charOut, header, i);
+        png_write_be(char_out, i - 4);
+        png_write_array(char_out, header, i);
+        png_write_crc32(char_out, header, i);
     }
 
     template <typename F>
-    static constexpr void png_end(F &&charOut) {
+    static constexpr void png_end(F &&char_out) {
         std::array<char, 4> header;
         uint32_t i = 0;
         header[i++] = 'I';
         header[i++] = 'E';
         header[i++] = 'N';
         header[i++] = 'D';
-        png_write_be(charOut, i - 4);
-        png_write_array(charOut, header, i);
-        png_write_crc32(charOut, header, i);
+        png_write_be(char_out, i - 4);
+        png_write_array(char_out, header, i);
+        png_write_crc32(char_out, header, i);
     }
 
     template <typename F>
-    static constexpr void png_idat_zlib_header(F &&charOut) {
+    static constexpr void png_idat_zlib_header(F &&char_out) {
         std::array<char, 6> header;
         uint32_t i = 0;
         header[i++] = 'I';
@@ -459,13 +459,13 @@ class format {
         header[i++] = 'T';
         header[i++] = 0x78;
         header[i++] = 0x01;
-        png_write_be(charOut, i - 4);
-        png_write_array(charOut, header, i);
-        png_write_crc32(charOut, header, i);
+        png_write_be(char_out, i - 4);
+        png_write_array(char_out, header, i);
+        png_write_crc32(char_out, header, i);
     }
 
     template <typename F>
-    [[nodiscard]] static constexpr uint32_t png_idat_zlib_stream(F &&charOut, const uint8_t *line, size_t bytes, uint32_t adler32_sum) {
+    [[nodiscard]] static constexpr uint32_t png_idat_zlib_stream(F &&char_out, const uint8_t *line, size_t bytes, uint32_t adler32_sum) {
         while (bytes > 0) {
             const size_t max_data_use = 1024;
             const size_t extra_data = 24;
@@ -492,9 +492,9 @@ class format {
             }
             adler32_sum = adler32(&header[adlersum32_start_pos], i - adlersum32_start_pos, adler32_sum);
 
-            png_write_be(charOut, i - 4);
-            png_write_array(charOut, header, i);
-            png_write_crc32(charOut, header, i);
+            png_write_be(char_out, i - 4);
+            png_write_array(char_out, header, i);
+            png_write_crc32(char_out, header, i);
 
             bytes -= bytes_to_copy;
         }
@@ -502,7 +502,7 @@ class format {
     }
 
     template <typename F>
-    static constexpr void png_idat_zlib_trailer(F &&charOut, uint32_t adler32_sum) {
+    static constexpr void png_idat_zlib_trailer(F &&char_out, uint32_t adler32_sum) {
         std::array<char, 8> header;
         uint32_t i = 0;
         header[i++] = 'I';
@@ -513,77 +513,77 @@ class format {
         header[i++] = static_cast<char>((adler32_sum >> 16) & 0xFF);
         header[i++] = static_cast<char>((adler32_sum >> 8) & 0xFF);
         header[i++] = static_cast<char>((adler32_sum >> 0) & 0xFF);
-        png_write_be(charOut, i - 4);
-        png_write_array(charOut, header, i);
-        png_write_crc32(charOut, header, i);
+        png_write_be(char_out, i - 4);
+        png_write_array(char_out, header, i);
+        png_write_crc32(char_out, header, i);
     }
 
     template <typename F>
-    static constexpr void sixel_header(F &&charOut) {
-        charOut(0x1b);
-        charOut('P');
-        charOut('0');
-        charOut(';');
-        charOut('1');
-        charOut(';');
-        charOut('0');
-        charOut('q');
+    static constexpr void sixel_header(F &&char_out) {
+        char_out(0x1b);
+        char_out('P');
+        char_out('0');
+        char_out(';');
+        char_out('1');
+        char_out(';');
+        char_out('0');
+        char_out('q');
     }
 
     template <size_t W, size_t H, size_t S, typename F>
-    static constexpr void sixel_raster_attributes(F &&charOut) {
-        charOut('\"');
-        sixel_number(charOut, 2);
-        charOut(';');
-        sixel_number(charOut, 2);
-        charOut(';');
-        sixel_number(charOut, W * S);
-        charOut(';');
-        sixel_number(charOut, H * S);
+    static constexpr void sixel_raster_attributes(F &&char_out) {
+        char_out('\"');
+        sixel_number(char_out, 2);
+        char_out(';');
+        sixel_number(char_out, 2);
+        char_out(';');
+        sixel_number(char_out, W * S);
+        char_out(';');
+        sixel_number(char_out, H * S);
     }
 
     template <typename F>
-    static constexpr void sixel_number(F &&charOut, uint16_t u) {
+    static constexpr void sixel_number(F &&char_out, uint16_t u) {
         if (u < 10) {
-            charOut(static_cast<char>('0' + u));
+            char_out(static_cast<char>('0' + u));
         } else if (u < 100) {
-            charOut(static_cast<char>('0' + (((u / 10) % 10))));
-            charOut(static_cast<char>('0' + (u % 10)));
+            char_out(static_cast<char>('0' + (((u / 10) % 10))));
+            char_out(static_cast<char>('0' + (u % 10)));
         } else if (u < 1000) {
-            charOut(static_cast<char>('0' + ((u / 100) % 10)));
-            charOut(static_cast<char>('0' + ((u / 10) % 10)));
-            charOut(static_cast<char>('0' + (u % 10)));
+            char_out(static_cast<char>('0' + ((u / 100) % 10)));
+            char_out(static_cast<char>('0' + ((u / 10) % 10)));
+            char_out(static_cast<char>('0' + (u % 10)));
         } else if (u < 10000) {
-            charOut(static_cast<char>('0' + ((u / 1000) % 10)));
-            charOut(static_cast<char>('0' + ((u / 100) % 10)));
-            charOut(static_cast<char>('0' + ((u / 10) % 10)));
-            charOut(static_cast<char>('0' + (u % 10)));
+            char_out(static_cast<char>('0' + ((u / 1000) % 10)));
+            char_out(static_cast<char>('0' + ((u / 100) % 10)));
+            char_out(static_cast<char>('0' + ((u / 10) % 10)));
+            char_out(static_cast<char>('0' + (u % 10)));
         } else {
-            charOut(static_cast<char>('0' + ((u / 10000) % 10)));
-            charOut(static_cast<char>('0' + ((u / 1000) % 10)));
-            charOut(static_cast<char>('0' + ((u / 100) % 10)));
-            charOut(static_cast<char>('0' + ((u / 10) % 10)));
-            charOut(static_cast<char>('0' + (u % 10)));
+            char_out(static_cast<char>('0' + ((u / 10000) % 10)));
+            char_out(static_cast<char>('0' + ((u / 1000) % 10)));
+            char_out(static_cast<char>('0' + ((u / 100) % 10)));
+            char_out(static_cast<char>('0' + ((u / 10) % 10)));
+            char_out(static_cast<char>('0' + (u % 10)));
         }
     }
 
     template <typename F>
-    static constexpr void sixel_color(F &&charOut, uint16_t i, uint32_t col) {
-        charOut('#');
-        sixel_number(charOut, i);
-        charOut(';');
-        charOut('2');
-        charOut(';');
+    static constexpr void sixel_color(F &&char_out, uint16_t i, uint32_t col) {
+        char_out('#');
+        sixel_number(char_out, i);
+        char_out(';');
+        char_out('2');
+        char_out(';');
         for (size_t c = 0; c < 3; c++) {
-            sixel_number(charOut, static_cast<uint16_t>((((col >> (8 * (2 - c))) & 0xFF) * 100) / 255));
-            charOut(';');
+            sixel_number(char_out, static_cast<uint16_t>((((col >> (8 * (2 - c))) & 0xFF) * 100) / 255));
+            char_out(';');
         }
     }
 
     template <typename F>
-    static constexpr void sixel_end(F &&charOut) {
-        charOut(0x1b);
-        charOut('\\');
+    static constexpr void sixel_end(F &&char_out) {
+        char_out(0x1b);
+        char_out('\\');
     }
 
     template <typename PBT, size_t PBS>
@@ -613,27 +613,27 @@ class format {
     };
 
     template <size_t W, size_t H, int32_t S, typename PBT, size_t PBS, typename P, typename F, typename L>
-    static constexpr void png_image(const uint8_t *data, const P &palette, F &&charOut, const L &linePtr) {
-        png_marker(charOut);
-        png_header(charOut, W, H, PBS);
-        png_palette(charOut, palette);
-        png_idat_zlib_header(charOut);
+    static constexpr void png_image(const uint8_t *data, const P &palette, F &&char_out, const L &line_ptr) {
+        png_marker(char_out);
+        png_header(char_out, W, H, PBS);
+        png_palette(char_out, palette);
+        png_idat_zlib_header(char_out);
         uint32_t adler32_sum = 1;
         for (size_t y = 0; y < H; y++) {
             size_t bpl = 0;
-            const uint8_t *ptr = linePtr(data, y, bpl);
-            adler32_sum = png_idat_zlib_stream(charOut, ptr, bpl, adler32_sum);
+            const uint8_t *ptr = line_ptr(data, y, bpl);
+            adler32_sum = png_idat_zlib_stream(char_out, ptr, bpl, adler32_sum);
         }
-        png_idat_zlib_trailer(charOut, adler32_sum);
-        png_end(charOut);
+        png_idat_zlib_trailer(char_out, adler32_sum);
+        png_end(char_out);
     }
 
     template <size_t W, size_t H, int32_t S, typename PBT, size_t PBS, typename P, typename F, typename C, typename D>
-    static constexpr void sixel_image(const uint8_t *data, const P &palette, F &&charOut, const rect<int32_t> &_r, const C &collect6, const D &set6) {
-        sixel_header(charOut);
-        sixel_raster_attributes<W, H, S>(charOut);
+    static constexpr void sixel_image(const uint8_t *data, const P &palette, F &&char_out, const rect<int32_t> &_r, const C &collect6, const D &set6) {
+        sixel_header(char_out);
+        sixel_raster_attributes<W, H, S>(char_out);
         for (size_t c = 0; c < palette.size(); c++) {
-            sixel_color(charOut, static_cast<uint16_t>(c), palette.data()[c]);
+            sixel_color(char_out, static_cast<uint16_t>(c), palette.data()[c]);
         }
         const auto r = rect<int32_t>{_r.x * S, _r.y * S, _r.w * S, _r.h * S} & rect<int32_t>{0, 0, W * S, H * S};
         std::array<PBT, std::max(32UL, 1UL << PBS)> stack{};
@@ -641,35 +641,35 @@ class format {
         for (size_t y = static_cast<size_t>(r.y); y < static_cast<size_t>(r.y + r.h); y += 6) {
             pset.clear();
             set6(data, static_cast<size_t>(r.x), static_cast<size_t>(r.w), y, pset);
-            size_t stackCount = pset.genstack(stack);
-            for (size_t s = 0; s < stackCount; s++) {
+            size_t stack_count = pset.genstack(stack);
+            for (size_t s = 0; s < stack_count; s++) {
                 PBT col = stack[s];
                 if (col != 0) {
-                    charOut('$');
+                    char_out('$');
                 }
-                charOut('#');
-                sixel_number(charOut, static_cast<uint16_t>(col));
+                char_out('#');
+                sixel_number(char_out, static_cast<uint16_t>(col));
                 for (size_t x = static_cast<size_t>(r.x); x < static_cast<size_t>(r.x + r.w); x++) {
                     PBT bits6 = collect6(data, x, col, y);
-                    uint16_t repeatCount = 0;
+                    uint16_t repeat_count = 0;
                     for (size_t xr = (x + 1); xr < (std::min(x + 255, W * S)); xr++) {
                         if (bits6 == collect6(data, xr, col, y)) {
-                            repeatCount++;
+                            repeat_count++;
                             continue;
                         }
                         break;
                     }
-                    if (repeatCount > 3) {
-                        charOut('!');
-                        sixel_number(charOut, repeatCount + 1);
-                        x += repeatCount;
+                    if (repeat_count > 3) {
+                        char_out('!');
+                        sixel_number(char_out, repeat_count + 1);
+                        x += repeat_count;
                     }
-                    charOut(static_cast<char>('?' + bits6));
+                    char_out(static_cast<char>('?' + bits6));
                 }
             }
-            charOut('-');
+            char_out('-');
         }
-        sixel_end(charOut);
+        sixel_end(char_out);
     }
 };
 
@@ -803,19 +803,19 @@ class format_1bit : public format {
     }
 
     template <typename F>
-    static constexpr void png(const std::array<uint8_t, image_size> &data, F &&charOut) {
-        png_image<W, H, S, uint8_t, bits_per_pixel>(data.data(), palette, charOut, [](const uint8_t *dataRaw, size_t y, size_t &bpl) {
+    static constexpr void png(const std::array<uint8_t, image_size> &data, F &&char_out) {
+        png_image<W, H, S, uint8_t, bits_per_pixel>(data.data(), palette, char_out, [](const uint8_t *data_raw, size_t y, size_t &bpl) {
             bpl = bytes_per_line;
-            return dataRaw + y * bytes_per_line;
+            return data_raw + y * bytes_per_line;
         });
     }
 
     template <typename F>
-    static constexpr void sixel(const std::array<uint8_t, image_size> &data, F &&charOut, const rect<int32_t> &r) {
+    static constexpr void sixel(const std::array<uint8_t, image_size> &data, F &&char_out, const rect<int32_t> &r) {
         sixel_image<W, H, S, uint8_t, bits_per_pixel>(
-            data.data(), palette, charOut, r,
-            [](const uint8_t *dataRaw, size_t x, size_t col, size_t y) {
-                const uint8_t *ptr = &dataRaw[(y / S) * bytes_per_line + (x / S) / 8];
+            data.data(), palette, char_out, r,
+            [](const uint8_t *data_raw, size_t x, size_t col, size_t y) {
+                const uint8_t *ptr = &data_raw[(y / S) * bytes_per_line + (x / S) / 8];
                 size_t x8 = (x / S) % 8;
                 uint8_t out = 0;
                 int32_t inc = y % S;
@@ -833,12 +833,12 @@ class format_1bit : public format {
                 }
                 return out;
             },
-            [](const uint8_t *dataRaw, size_t x, size_t w, size_t y, palette_bitset<uint8_t, 32> &set) CONSTIXEL_FLATTEN {
+            [](const uint8_t *data_raw, size_t x, size_t w, size_t y, palette_bitset<uint8_t, 32> &set) CONSTIXEL_FLATTEN {
                 int32_t inc = y % S;
                 for (size_t y6 = 0; y6 < 6; y6++) {
                     if ((y + y6) < H * S) {
                         for (size_t xx = 0; xx < (w + S - 1) / S; xx++) {
-                            const uint8_t *ptr = &dataRaw[((y + y6) / S) * bytes_per_line + (xx + x) / 8];
+                            const uint8_t *ptr = &data_raw[((y + y6) / S) * bytes_per_line + (xx + x) / 8];
                             size_t x8 = (xx + x) % 8;
                             set.mark((((*ptr) >> (7 - x8)) & 1));
                         }
@@ -991,19 +991,19 @@ class format_2bit : public format {
     }
 
     template <typename F>
-    static constexpr void png(const std::array<uint8_t, image_size> &data, F &&charOut) {
-        png_image<W, H, S, uint8_t, bits_per_pixel>(data.data(), palette, charOut, [](const uint8_t *dataRaw, size_t y, size_t &bpl) {
+    static constexpr void png(const std::array<uint8_t, image_size> &data, F &&char_out) {
+        png_image<W, H, S, uint8_t, bits_per_pixel>(data.data(), palette, char_out, [](const uint8_t *data_raw, size_t y, size_t &bpl) {
             bpl = bytes_per_line;
-            return dataRaw + y * bytes_per_line;
+            return data_raw + y * bytes_per_line;
         });
     }
 
     template <typename F>
-    static constexpr void sixel(const std::array<uint8_t, image_size> &data, F &&charOut, const rect<int32_t> &r) {
+    static constexpr void sixel(const std::array<uint8_t, image_size> &data, F &&char_out, const rect<int32_t> &r) {
         sixel_image<W, H, S, uint8_t, bits_per_pixel>(
-            data.data(), palette, charOut, r,
-            [](const uint8_t *dataRaw, size_t x, size_t col, size_t y) {
-                const uint8_t *ptr = &dataRaw[(y / S) * bytes_per_line + (x / S) / 4];
+            data.data(), palette, char_out, r,
+            [](const uint8_t *data_raw, size_t x, size_t col, size_t y) {
+                const uint8_t *ptr = &data_raw[(y / S) * bytes_per_line + (x / S) / 4];
                 size_t x4 = (x / S) % 4;
                 uint8_t out = 0;
                 int32_t inc = y % S;
@@ -1021,12 +1021,12 @@ class format_2bit : public format {
                 }
                 return out;
             },
-            [](const uint8_t *dataRaw, size_t x, size_t w, size_t y, palette_bitset<uint8_t, 32> &set) CONSTIXEL_FLATTEN {
+            [](const uint8_t *data_raw, size_t x, size_t w, size_t y, palette_bitset<uint8_t, 32> &set) CONSTIXEL_FLATTEN {
                 int32_t inc = y % S;
                 for (size_t y6 = 0; y6 < 6; y6++) {
                     if ((y + y6) < H * S) {
                         for (size_t xx = 0; xx < (w + S - 1) / S; xx++) {
-                            const uint8_t *ptr = &dataRaw[((y + y6) / S) * bytes_per_line + (xx + x) / 4];
+                            const uint8_t *ptr = &data_raw[((y + y6) / S) * bytes_per_line + (xx + x) / 4];
                             size_t x4 = (xx + x) % 4;
                             set.mark((((*ptr) >> (6 - x4 * 2)) & 3));
                         }
@@ -1180,19 +1180,19 @@ class format_4bit : public format {
     }
 
     template <typename F>
-    static constexpr void png(const std::array<uint8_t, image_size> &data, F &&charOut) {
-        png_image<W, H, S, uint8_t, bits_per_pixel>(data.data(), palette, charOut, [](const uint8_t *dataRaw, size_t y, size_t &bpl) {
+    static constexpr void png(const std::array<uint8_t, image_size> &data, F &&char_out) {
+        png_image<W, H, S, uint8_t, bits_per_pixel>(data.data(), palette, char_out, [](const uint8_t *data_raw, size_t y, size_t &bpl) {
             bpl = bytes_per_line;
-            return dataRaw + y * bytes_per_line;
+            return data_raw + y * bytes_per_line;
         });
     }
 
     template <typename F>
-    static constexpr void sixel(const std::array<uint8_t, image_size> &data, F &&charOut, const rect<int32_t> &r) {
+    static constexpr void sixel(const std::array<uint8_t, image_size> &data, F &&char_out, const rect<int32_t> &r) {
         sixel_image<W, H, S, uint8_t, bits_per_pixel>(
-            data.data(), palette, charOut, r,
-            [](const uint8_t *dataRaw, size_t x, size_t col, size_t y) {
-                const uint8_t *ptr = &dataRaw[(y / S) * bytes_per_line + (x / S) / 2];
+            data.data(), palette, char_out, r,
+            [](const uint8_t *data_raw, size_t x, size_t col, size_t y) {
+                const uint8_t *ptr = &data_raw[(y / S) * bytes_per_line + (x / S) / 2];
                 size_t x2 = (x / S) % 2;
                 uint8_t out = 0;
                 int32_t inc = y % S;
@@ -1210,12 +1210,12 @@ class format_4bit : public format {
                 }
                 return out;
             },
-            [](const uint8_t *dataRaw, size_t x, size_t w, size_t y, palette_bitset<uint8_t, 32> &set) CONSTIXEL_FLATTEN {
+            [](const uint8_t *data_raw, size_t x, size_t w, size_t y, palette_bitset<uint8_t, 32> &set) CONSTIXEL_FLATTEN {
                 int32_t inc = y % S;
                 for (size_t y6 = 0; y6 < 6; y6++) {
                     if ((y + y6) < H * S) {
                         for (size_t xx = 0; xx < (w + S - 1) / S; xx++) {
-                            const uint8_t *ptr = &dataRaw[((y + y6) / S) * bytes_per_line + (xx + x) / 2];
+                            const uint8_t *ptr = &data_raw[((y + y6) / S) * bytes_per_line + (xx + x) / 2];
                             size_t x2 = (xx + x) % 2;
                             set.mark((((*ptr) >> (4 - x2 * 4)) & 0xF));
                         }
@@ -1395,19 +1395,19 @@ class format_8bit : public format {
     }
 
     template <typename F>
-    static constexpr void png(const std::array<uint8_t, image_size> &data, F &&charOut) {
-        png_image<W, H, S, uint8_t, bits_per_pixel>(data.data(), palette, charOut, [](const uint8_t *dataRaw, size_t y, size_t &bpl) {
+    static constexpr void png(const std::array<uint8_t, image_size> &data, F &&char_out) {
+        png_image<W, H, S, uint8_t, bits_per_pixel>(data.data(), palette, char_out, [](const uint8_t *data_raw, size_t y, size_t &bpl) {
             bpl = bytes_per_line;
-            return dataRaw + y * bytes_per_line;
+            return data_raw + y * bytes_per_line;
         });
     }
 
     template <typename F>
-    static constexpr void sixel(const std::array<uint8_t, image_size> &data, F &&charOut, const rect<int32_t> &r) {
+    static constexpr void sixel(const std::array<uint8_t, image_size> &data, F &&char_out, const rect<int32_t> &r) {
         sixel_image<W, H, S, uint8_t, bits_per_pixel>(
-            data.data(), palette, charOut, r,
-            [](const uint8_t *dataRaw, size_t x, size_t col, size_t y) {
-                const uint8_t *ptr = &dataRaw[(y / S) * bytes_per_line + x / S];
+            data.data(), palette, char_out, r,
+            [](const uint8_t *data_raw, size_t x, size_t col, size_t y) {
+                const uint8_t *ptr = &data_raw[(y / S) * bytes_per_line + x / S];
                 uint8_t out = 0;
                 int32_t inc = y % S;
                 for (size_t y6 = 0; y6 < 6; y6++) {
@@ -1424,8 +1424,8 @@ class format_8bit : public format {
                 }
                 return out;
             },
-            [](const uint8_t *dataRaw, size_t x, size_t w, size_t y, palette_bitset<uint8_t, 1UL << bits_per_pixel> &set) CONSTIXEL_FLATTEN {
-                const uint8_t *ptr = &dataRaw[(y / S) * bytes_per_line + x / S];
+            [](const uint8_t *data_raw, size_t x, size_t w, size_t y, palette_bitset<uint8_t, 1UL << bits_per_pixel> &set) CONSTIXEL_FLATTEN {
+                const uint8_t *ptr = &data_raw[(y / S) * bytes_per_line + x / S];
                 int32_t inc = y % S;
                 for (size_t y6 = 0; y6 < 6; y6++) {
                     if ((y + y6) < H * S) {
@@ -1786,18 +1786,18 @@ class image {
     }
 
     template <typename F>
-    constexpr void png(F &&charOut) const {
-        T<W, H, S>::png(data, charOut);
+    constexpr void png(F &&char_out) const {
+        T<W, H, S>::png(data, char_out);
     }
 
     template <typename F>
-    constexpr void sixel(F &&charOut) const {
-        T<W, H, S>::sixel(data, charOut, {0, 0, W, H});
+    constexpr void sixel(F &&char_out) const {
+        T<W, H, S>::sixel(data, char_out, {0, 0, W, H});
     }
 
     template <typename F>
-    constexpr void sixel(F &&charOut, const rect<int32_t> &r) const {
-        T<W, H, S>::sixel(data, charOut, r);
+    constexpr void sixel(F &&char_out, const rect<int32_t> &r) const {
+        T<W, H, S>::sixel(data, char_out, r);
     }
 
     constexpr void sixel_to_cout() const {
