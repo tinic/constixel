@@ -552,9 +552,11 @@ int main() {
         }
 
         image.clear();
+        std::array<uint8_t, 5> cols = {0,4,3,125,1};
         for (size_t i = 0; i < strings.size(); i++) {
             uint8_t col = constixel::color::GREY_RAMP_STOP - static_cast<uint8_t>(i * 3);
-            image.draw_string_aa<constixel::sf_compact_display_medium_48_aa>(16, 48 * static_cast<int32_t>(i) + 16, strings.at(i), col);
+            image.fill_rect(0,static_cast<int32_t>(i)*52+22,512,52,cols.at(i));
+            image.draw_string_aa<constixel::sf_compact_display_medium_48_aa>(16, 52 * static_cast<int32_t>(i) + 16, strings.at(i), col);
         }
         out.clear();
         image.png([&out](char ch) mutable {
