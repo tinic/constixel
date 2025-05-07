@@ -257,7 +257,7 @@ class hextree {
                 }
                 idx = next;
             }
-            nodes[idx].child[key & 0xF] = val;
+            nodes[idx].child[key & 0xF] = static_catval;
         }
     }
 
@@ -1641,7 +1641,10 @@ class image {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wconversion"
 #endif  // #if __GCC__
-
+#ifdef _MSC_VER
+#pragma warning( push )
+#pragma warning( disable : 4242 )
+#endif  // #ifdef _MSC_VER
             const char_info &ch_info = FONT::char_table.at(FONT::glyph_tree.lookup(utf32));
 #if __clang__
 #pragma GCC diagnostic pop
@@ -1649,6 +1652,9 @@ class image {
 #if __GNUC__
 #pragma GCC diagnostic pop
 #endif  // #if __clang__
+#ifdef _MSC_VER
+#pragma warning( pop )
+#endif  // #ifdef _MSC_VER
             if (*str == 0) {
                 x += ch_info.width;
             } else {
@@ -1688,6 +1694,10 @@ class image {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wconversion"
 #endif  // #if __GCC__
+#ifdef _MSC_VER
+#pragma warning( push )
+#pragma warning( disable : 4242 )
+#endif  // #ifdef _MSC_VER
             const char_info &ch_info = FONT::char_table.at(FONT::glyph_tree.lookup(utf32));
 #if __clang__
 #pragma GCC diagnostic pop
@@ -1695,6 +1705,9 @@ class image {
 #if __GNUC__
 #pragma GCC diagnostic pop
 #endif  // #if __clang__
+#ifdef _MSC_VER
+#pragma warning( pop )
+#endif  // #ifdef _MSC_VER
             draw_char_mono<FONT>(x, y, ch_info, col);
             x += ch_info.xadvance;
         }
@@ -1731,6 +1744,10 @@ class image {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wconversion"
 #endif  // #if __GCC__
+#ifdef _MSC_VER
+#pragma warning( push )
+#pragma warning( disable : 4242 )
+#endif  // #ifdef _MSC_VER
             const char_info &ch_info = FONT::char_table.at(FONT::glyph_tree.lookup(utf32));
 #if __clang__
 #pragma GCC diagnostic pop
@@ -1738,6 +1755,9 @@ class image {
 #if __GNUC__
 #pragma GCC diagnostic pop
 #endif  // #if __clang__
+#ifdef _MSC_VER
+#pragma warning( pop )
+#endif  // #ifdef _MSC_VER
             draw_char<FONT>(x, y, ch_info, col);
             x += ch_info.xadvance;
         }
