@@ -388,7 +388,7 @@ void draw_functions() {
             out.push_back(ch);
         });
         puts(out.c_str());
-        printf("%d-bit %dpx %dpx fill_rect\n", int(image.bit_depth()), int(image.width()), int(image.height()));
+        printf("%d-bit %dpx %dpx fill_rect  \n", int(image.bit_depth()), int(image.width()), int(image.height()));
         separator();
     }
     for (int32_t c = 0; c < static_cast<int32_t>(I); c++) {
@@ -400,7 +400,7 @@ void draw_functions() {
             out.push_back(ch);
         });
         puts(out.c_str());
-        printf("%d-bit %dpx %dpx line\n", int(image.bit_depth()), int(image.width()), int(image.height()));
+        printf("%d-bit %dpx %dpx line       \n", int(image.bit_depth()), int(image.width()), int(image.height()));
         separator();
     }
     for (int32_t c = 0; c < static_cast<int32_t>(I); c++) {
@@ -412,7 +412,7 @@ void draw_functions() {
             out.push_back(ch);
         });
         puts(out.c_str());
-        printf("%d-bit %dpx %dpx circle\n", int(image.bit_depth()), int(image.width()), int(image.height()));
+        printf("%d-bit %dpx %dpx circle     \n", int(image.bit_depth()), int(image.width()), int(image.height()));
         separator();
     }
 }
