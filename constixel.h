@@ -823,11 +823,11 @@ class format_1bit : public format {
                     out >>= 1;
                     if ((y + y6) < H * S) {
                         out |= ((((*ptr) >> (7 - x8)) & 1) == col) ? (1UL << 5) : 0;
-                    }
-                    if (y6 != 5) {
-                        if (++inc >= S) {
-                            inc = 0;
-                            ptr += bytes_per_line;
+                        if (y6 != 5) {
+                            if (++inc >= S) {
+                                inc = 0;
+                                ptr += bytes_per_line;
+                            }
                         }
                     }
                 }
@@ -842,8 +842,6 @@ class format_1bit : public format {
                             size_t x8 = (xx + x) % 8;
                             set.mark((((*ptr) >> (7 - x8)) & 1));
                         }
-                    }
-                    if (y6 != 5) {
                         if (++inc >= S) {
                             inc = 0;
                         }
@@ -1013,11 +1011,11 @@ class format_2bit : public format {
                     out >>= 1;
                     if ((y + y6) < H * S) {
                         out |= ((((*ptr) >> (6 - x4 * 2)) & 3) == col) ? (1UL << 5) : 0;
-                    }
-                    if (y6 != 5) {
-                        if (++inc >= S) {
-                            inc = 0;
-                            ptr += bytes_per_line;
+                        if (y6 != 5) {
+                            if (++inc >= S) {
+                                inc = 0;
+                                ptr += bytes_per_line;
+                            }
                         }
                     }
                 }
@@ -1032,8 +1030,6 @@ class format_2bit : public format {
                             size_t x4 = (xx + x) % 4;
                             set.mark((((*ptr) >> (6 - x4 * 2)) & 3));
                         }
-                    }
-                    if (y6 != 5) {
                         if (++inc >= S) {
                             inc = 0;
                         }
@@ -1204,11 +1200,11 @@ class format_4bit : public format {
                     out >>= 1;
                     if ((y + y6) < H * S) {
                         out |= ((((*ptr) >> (4 - x2 * 4)) & 0xF) == col) ? (1UL << 5) : 0;
-                    }
-                    if (y6 != 5) {
-                        if (++inc >= S) {
-                            inc = 0;
-                            ptr += bytes_per_line;
+                        if (y6 != 5) {
+                            if (++inc >= S) {
+                                inc = 0;
+                                ptr += bytes_per_line;
+                            }
                         }
                     }
                 }
@@ -1223,8 +1219,6 @@ class format_4bit : public format {
                             size_t x2 = (xx + x) % 2;
                             set.mark((((*ptr) >> (4 - x2 * 4)) & 0xF));
                         }
-                    }
-                    if (y6 != 5) {
                         if (++inc >= S) {
                             inc = 0;
                         }
@@ -1420,11 +1414,11 @@ class format_8bit : public format {
                     out >>= 1;
                     if ((y + y6) < H * S) {
                         out |= (*ptr == col) ? (1UL << 5) : 0;
-                    }
-                    if (y6 != 5) {
-                        if (++inc >= S) {
-                            inc = 0;
-                            ptr += bytes_per_line;
+                        if (y6 != 5) {
+                            if (++inc >= S) {
+                                inc = 0;
+                                ptr += bytes_per_line;
+                            }
                         }
                     }
                 }
@@ -1438,11 +1432,11 @@ class format_8bit : public format {
                         for (size_t xx = 0; xx < (w + S - 1) / S; xx++) {
                             set.mark(ptr[xx + x]);
                         }
-                    }
-                    if (y6 != 5) {
-                        if (++inc >= S) {
-                            inc = 0;
-                            ptr += bytes_per_line;
+                        if (y6 != 5) {
+                            if (++inc >= S) {
+                                inc = 0;
+                                ptr += bytes_per_line;
+                            }
                         }
                     }
                 }
