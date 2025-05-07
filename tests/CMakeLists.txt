@@ -42,6 +42,4 @@ add_executable(constixel_tests constixel_tests.cpp ${PROJECT_SOURCE_DIR}/../genf
 
 target_compile_definitions(constixel_tests PRIVATE CMAKE_PROJECT_PATH="${PROJECT_SOURCE_DIR}")
 
-message(WARNING ${PROJECT_SOURCE_DIR})
-
 target_include_directories(constixel_tests PRIVATE ${PROJECT_SOURCE_DIR}/.. ${PROJECT_SOURCE_DIR}/../genfonts/)
