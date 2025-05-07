@@ -435,7 +435,6 @@ int main() {
 #endif  // #if 0
 
 #if 1
-#ifndef _MSC_VER
     puts("\033[3J\033[H");
     puts(test0().c_str());
     puts("\n");
@@ -457,7 +456,6 @@ int main() {
     puts("\n");
     puts(test9().c_str());
     puts("\n");
-#endif  // #ifndef _MSC_VER
 #endif  // #if 1
 
 #if 1
