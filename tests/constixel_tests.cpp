@@ -28,14 +28,18 @@ SOFTWARE.
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
 
 #include "constixel.h"
+#include "fonts/sf_compact_rounded_black_48_aa.h"
+#include "fonts/sf_mono_bold_48_aa.h"
+#include "fonts/sf_compact_rounded_black_48_mono.h"
 #include "fonts/sf_compact_display_bold_32_mono.h"
 #include "fonts/sf_compact_display_bold_48_mono.h"
 #include "fonts/sf_compact_display_medium_48_mono.h"
+#include "fonts/sf_compact_display_medium_48_aa.h"
 #include "fonts/sf_mono_bold_48_mono.h"
 #include "fonts/sf_mono_regular_18_mono.h"
 
@@ -541,13 +545,30 @@ int main() {
         image.png([&out](char ch) mutable {
             out.push_back(ch);
         });
-        std::ofstream file("constixel.png");
-        file.write(reinterpret_cast<const char *>(out.data()), static_cast<std::streamsize>(out.size()));
-        image.sixel_to_cout();
+        {
+            std::ofstream file("constixel_mono.png", std::ios::binary);
+            file.write(reinterpret_cast<const char *>(out.data()), static_cast<std::streamsize>(out.size()));
+            image.sixel_to_cout();
+        }
+
+        image.clear();
+        for (size_t i = 0; i < strings.size(); i++) {
+            uint8_t col = constixel::color::GREY_RAMP_STOP - static_cast<uint8_t>(i * 3);
+            image.draw_string_aa<constixel::sf_compact_display_medium_48_aa>(16, 48 * static_cast<int32_t>(i) + 16, strings.at(i), col);
+        }
+        out.clear();
+        image.png([&out](char ch) mutable {
+            out.push_back(ch);
+        });
+        {
+            std::ofstream file("constixel_aa.png", std::ios::binary);
+            file.write(reinterpret_cast<const char *>(out.data()), static_cast<std::streamsize>(out.size()));
+            image.sixel_to_cout();
+        }
     }
 #endif  // #if 0
 
-#if 0
+#if 1
     {
         constixel::image<constixel::format_1bit, 1024, 256, 1> image;
         image.draw_string_mono<constixel::sf_compact_display_medium_48_mono>(
@@ -555,4 +576,15 @@ int main() {
         image.sixel_to_cout();
     }
 #endif  // #if 0
+
+#if 1
+    {
+        auto image = std::make_unique<constixel::image<constixel::format_8bit, 1280, 384, 1>>();
+        for (int32_t x = 0; x < 16; x++) {
+            image->draw_string_aa<constixel::sf_compact_rounded_black_48_aa>(x * 8, x * 8, "Pack my box with five dozen liquor jugs", static_cast<uint8_t>(x));
+            image->draw_string_aa<constixel::sf_mono_bold_48_aa>(x * 8, x * 8 + 100, "Pack my box with five dozen liquor jugs", static_cast<uint8_t>(x));
+        }
+        image->sixel_to_cout();
+    }
+#endif // #if 0
 }
