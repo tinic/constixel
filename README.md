@@ -271,11 +271,11 @@ class image {
     template <typename FONT>
     constexpr int32_t draw_string_mono(int32_t x, int32_t y, const char *str, uint8_t col);
 
-    // Draw smoothed utf8 text. #include a grey font and specify the included struct as the template parameter.
+    // Draw smoothed utf8 text. #include a antialiased font and specify the included struct as the template parameter.
     // Returns the current x caret position in pixels.
     // NOTE: This is a very slow operation due to the brute force color quantization and will likely not consteval.
     template <typename FONT>
-    constexpr int32_t draw_string(int32_t x, int32_t y, const char *str, uint8_t col);
+    constexpr int32_t draw_string_aa(int32_t x, int32_t y, const char *str, uint8_t col);
 
     // Get the width of a utf8 string in pixels. #include a monochrome or grey font and specify the included struct as the template parameter
     template <typename FONT>
