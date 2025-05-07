@@ -31,12 +31,12 @@ SOFTWARE.
 #include <string>
 #include <vector>
 
-#include "../constixel.h"
-#include "../fonts/sf_compact_display_bold_32_mono.h"
-#include "../fonts/sf_compact_display_bold_48_mono.h"
-#include "../fonts/sf_compact_display_medium_48_mono.h"
-#include "../fonts/sf_mono_bold_48_mono.h"
-#include "../fonts/sf_mono_regular_18_mono.h"
+#include "constixel.h"
+#include "fonts/sf_compact_display_bold_32_mono.h"
+#include "fonts/sf_compact_display_bold_48_mono.h"
+#include "fonts/sf_compact_display_medium_48_mono.h"
+#include "fonts/sf_mono_bold_48_mono.h"
+#include "fonts/sf_mono_regular_18_mono.h"
 
 #if __GNUC__
 #pragma GCC diagnostic push
@@ -53,7 +53,7 @@ SOFTWARE.
 #pragma GCC diagnostic ignored "-Wweak-vtables"
 #endif  // #if __clang__
 
-#include "../genfonts/fontbm/src/external/lodepng/lodepng.h"
+#include "fontbm/src/external/lodepng/lodepng.h"
 
 #pragma GCC diagnostic pop
 
