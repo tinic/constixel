@@ -1497,7 +1497,8 @@ class image {
     static_assert(sizeof(W) >= sizeof(uint32_t));
     static_assert(sizeof(H) >= sizeof(uint32_t));
 
-    static_assert(W <= 16384 && H <= 16384);
+    static_assert(W > 0 && H > 0);
+    static_assert((W * S) <= 16384 && (H * S) <= 16384);
     static_assert(S >= 1 && S <= 256);
 
  public:

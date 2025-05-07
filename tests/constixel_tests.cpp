@@ -30,6 +30,7 @@ SOFTWARE.
 #include <iostream>
 #include <string>
 #include <vector>
+#include <memory>
 
 #include "constixel.h"
 #include "fonts/sf_compact_display_bold_32_mono.h"
@@ -516,12 +517,12 @@ int main() {
 
 #if 1
     {
-        static constixel::image<constixel::format_8bit, 1024, 1024, 1> image;
-        image.draw_string_mono<constixel::sf_compact_display_bold_48_mono>(0, 0, "Pack my box with five dozen liquor jugs", 2);
-        image.draw_string_mono<constixel::sf_compact_display_bold_32_mono>(0, 50, "Pack my box with five dozen liquor jugs", 3);
-        image.draw_string_mono<constixel::sf_mono_regular_18_mono>(0, 100, "Pack my box with five dozen liquor jugs", 5);
-        image.draw_string_mono<constixel::sf_mono_bold_48_mono>(0, 200, "Pack my box with five dozen liquor jugs", 6);
-        image.sixel_to_cout();
+        auto image = std::make_unique<constixel::image<constixel::format_8bit, 1024, 1024, 1>>();
+        image->draw_string_mono<constixel::sf_compact_display_bold_48_mono>(0, 0, "Pack my box with five dozen liquor jugs", 2);
+        image->draw_string_mono<constixel::sf_compact_display_bold_32_mono>(0, 50, "Pack my box with five dozen liquor jugs", 3);
+        image->draw_string_mono<constixel::sf_mono_regular_18_mono>(0, 100, "Pack my box with five dozen liquor jugs", 5);
+        image->draw_string_mono<constixel::sf_mono_bold_48_mono>(0, 200, "Pack my box with five dozen liquor jugs", 6);
+        image->sixel_to_cout();
     }
 #endif  // #if 0
 
