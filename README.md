@@ -66,8 +66,6 @@ int main() {
     }
 
     image.sixel_to_cout();
-
-    return 0;
 }
 ```
 
@@ -94,8 +92,6 @@ int main() {
         image.draw_string_mono<sf_compact_display_medium_48_mono>(16, 48 * static_cast<int32_t>(i) + 16, strings.at(i), col);
     }
     image.sixel_to_cout();
-
-    return 0;
 }
 ```
 
@@ -141,8 +137,6 @@ int main() {
 
     std::cout << "Actual byte size: " << strlen(sixel.data()) << "\n";
     std::cout << sixel.data() << std::endl;
-
-    return 0;
 }
 ```
 
@@ -179,8 +173,6 @@ int main() {
     putc('\n', stdout);
 
     printf("sixel byte size: %d\n", int(count));
-
-    return 0;
 }
 ```
 
@@ -209,8 +201,6 @@ int main() {
 
     std::ofstream file("constixel.png");
     file.write(reinterpret_cast<const char*>(out.data()), static_cast<std::streamsize>(out.size()));
-
-    return 0;
 }
 
 ```
