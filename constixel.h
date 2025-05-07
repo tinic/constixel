@@ -1644,6 +1644,7 @@ class image {
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4242)
+#pragma warning(disable : 4244)
 #endif  // #ifdef _MSC_VER
             const char_info &ch_info = FONT::char_table.at(FONT::glyph_tree.lookup(utf32));
 #if __clang__
@@ -1697,6 +1698,7 @@ class image {
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4242)
+#pragma warning(disable : 4244)
 #endif  // #ifdef _MSC_VER
             const char_info &ch_info = FONT::char_table.at(FONT::glyph_tree.lookup(utf32));
 #if __clang__
@@ -1747,6 +1749,7 @@ class image {
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4242)
+#pragma warning(disable : 4244)
 #endif  // #ifdef _MSC_VER
             const char_info &ch_info = FONT::char_table.at(FONT::glyph_tree.lookup(utf32));
 #if __clang__
