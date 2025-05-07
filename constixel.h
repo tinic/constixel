@@ -716,7 +716,7 @@ class format_1bit : public format {
         }
     }
 
-    [[nodiscard]] static constexpr uint8_t get(const uint8_t *line, size_t x) {
+    [[nodiscard]] static constexpr uint8_t get_col(const uint8_t *line, size_t x) {
         size_t x8 = x / 8;
         size_t xb = x % 8;
         return (line[x8] >> (7 - xb)) & 1;
@@ -727,7 +727,7 @@ class format_1bit : public format {
         const uint8_t *ptr = data.data();
         for (size_t y = 0; y < H; y++) {
             for (size_t x = 0; x < W; x++) {
-                uint8_t col = get(ptr, x);
+                uint8_t col = get_col(ptr, x);
                 rgba[y * W + x] = palette[col] | (col ? 0xFF000000 : 0x00000000);
             }
             ptr += bytes_per_line;
@@ -740,7 +740,7 @@ class format_1bit : public format {
         const uint8_t *ptr = data.data();
         for (size_t y = 0; y < H; y++) {
             for (size_t x = 0; x < W; x++) {
-                uint8_t col = get(ptr, x);
+                uint8_t col = get_col(ptr, x);
                 rgba[y * W * 4 + x * 4 + 0] = static_cast<uint8_t>((palette[col] >> 16) & 0xFF);
                 rgba[y * W * 4 + x * 4 + 1] = static_cast<uint8_t>((palette[col] >> 8) & 0xFF);
                 rgba[y * W * 4 + x * 4 + 2] = static_cast<uint8_t>((palette[col] >> 0) & 0xFF);
@@ -900,7 +900,7 @@ class format_2bit : public format {
         }
     }
 
-    static constexpr uint8_t get(const uint8_t *line, size_t x) {
+    static constexpr uint8_t get_col(const uint8_t *line, size_t x) {
         size_t x4 = x / 4;
         size_t xb = x % 4;
         return (line[x4] >> ((3 - xb) * 2)) & 0x3;
@@ -911,7 +911,7 @@ class format_2bit : public format {
         const uint8_t *ptr = data.data();
         for (size_t y = 0; y < H; y++) {
             for (size_t x = 0; x < W; x++) {
-                uint8_t col = get(ptr, x);
+                uint8_t col = get_col(ptr, x);
                 rgba[y * W + x] = palette[col] | (col ? 0xFF000000 : 0x00000000);
             }
             ptr += bytes_per_line;
@@ -924,7 +924,7 @@ class format_2bit : public format {
         const uint8_t *ptr = data.data();
         for (size_t y = 0; y < H; y++) {
             for (size_t x = 0; x < W; x++) {
-                uint8_t col = get(ptr, x);
+                uint8_t col = get_col(ptr, x);
                 rgba[y * W * 4 + x * 4 + 0] = static_cast<uint8_t>((palette[col] >> 16) & 0xFF);
                 rgba[y * W * 4 + x * 4 + 1] = static_cast<uint8_t>((palette[col] >> 8) & 0xFF);
                 rgba[y * W * 4 + x * 4 + 2] = static_cast<uint8_t>((palette[col] >> 0) & 0xFF);
@@ -1089,7 +1089,7 @@ class format_4bit : public format {
         }
     }
 
-    [[nodiscard]] static constexpr uint8_t get(const uint8_t *line, size_t x) {
+    [[nodiscard]] static constexpr uint8_t get_col(const uint8_t *line, size_t x) {
         size_t x2 = x / 2;
         size_t xb = x % 2;
         return (line[x2] >> ((1 - xb) * 4)) & 0xF;
@@ -1100,7 +1100,7 @@ class format_4bit : public format {
         const uint8_t *ptr = data.data();
         for (size_t y = 0; y < H; y++) {
             for (size_t x = 0; x < W; x++) {
-                uint8_t col = get(ptr, x);
+                uint8_t col = get_col(ptr, x);
                 rgba[y * W + x] = palette[col] | (col ? 0xFF000000 : 0x00000000);
             }
             ptr += bytes_per_line;
@@ -1113,7 +1113,7 @@ class format_4bit : public format {
         const uint8_t *ptr = data.data();
         for (size_t y = 0; y < H; y++) {
             for (size_t x = 0; x < W; x++) {
-                uint8_t col = get(ptr, x);
+                uint8_t col = get_col(ptr, x);
                 rgba[y * W * 4 + x * 4 + 0] = static_cast<uint8_t>((palette[col] >> 16) & 0xFF);
                 rgba[y * W * 4 + x * 4 + 1] = static_cast<uint8_t>((palette[col] >> 8) & 0xFF);
                 rgba[y * W * 4 + x * 4 + 2] = static_cast<uint8_t>((palette[col] >> 0) & 0xFF);
