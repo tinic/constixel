@@ -421,14 +421,14 @@ void draw_functions() {
 
 int main() {
 #if 1
-    static_assert(test0().size() == 276);
-    static_assert(test1().size() == 952);
-    static_assert(test2().size() == 1591);
+    static_assert(test0().size() == 290);
+    static_assert(test1().size() == 981);
+    static_assert(test2().size() == 1714);
     static_assert(test3().size() == 1738);
     static_assert(test4().size() == 1716);
-    static_assert(test5().size() == 2200);
-    static_assert(test6().size() == 1393);
-    static_assert(test7().size() == 2372);
+    static_assert(test5().size() == 2275);
+    static_assert(test6().size() == 1418);
+    static_assert(test7().size() == 2389);
     static_assert(test8().size() == 333);
     static_assert(test9().size() == 6037);
 //    static_assert(test10().size() == 12893);
@@ -513,15 +513,6 @@ int main() {
     round_trip<constixel::image<constixel::format_4bit, 256, 256, 1>>();
     round_trip<constixel::image<constixel::format_8bit, 256, 256, 1>>();
 #endif  // #if 1
-
-#if 1
-    {
-        // FIXME!
-        constixel::image<constixel::format_1bit, 4, 14, 1> image;
-        image.fill_rect(0, 7, 4, 200, 1);
-        image.sixel_to_cout();
-    }
-#endif  // #if 0
 
 #if 1
     {
