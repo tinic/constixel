@@ -203,7 +203,7 @@ int main() {
         out.push_back(ch);
     });
 
-    std::ofstream file("constixel.png");
+    std::ofstream file("constixel.png", std::ios::binary);
     file.write(reinterpret_cast<const char*>(out.data()), static_cast<std::streamsize>(out.size()));
 }
 
