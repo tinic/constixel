@@ -39,3 +39,5 @@ else()
 endif()
 
 add_executable(constixel_tests constixel_tests.cpp ${PROJECT_SOURCE_DIR}/../genfonts/fontbm/src/external/lodepng/lodepng.cpp)
+
+target_include_directories(constixel_tests PRIVATE ${PROJECT_SOURCE_DIR}/.. ${PROJECT_SOURCE_DIR}/../genfonts/)
