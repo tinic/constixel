@@ -517,8 +517,8 @@ int main() {
 #if 1
     {
         // FIXME!
-        constixel::image<constixel::format_2bit, 1024, 1024, 1> image;
-        image.draw_string_mono<constixel::sf_compact_display_bold_48_mono>(10, 20, "HELLO WORLD!", 1);
+        constixel::image<constixel::format_1bit, 4, 14, 1> image;
+        image.fill_rect(0, 7, 4, 200, 1);
         image.sixel_to_cout();
     }
 #endif  // #if 0
