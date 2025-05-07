@@ -177,12 +177,14 @@ int main(int argc, char* argv[]) {
                 max_id = std::max(font.chars[c].id, max_id);
             }
             if (font.chars.size() < 65536 && max_id < 65536) {
+                ss << std::format("    using lookup_type = uint16_t;\n\n", name);
                 ss << std::format("    static constexpr std::array<std::pair<uint16_t, uint16_t>, {}> glyph_table{{{{\n", font.chars.size());
                 for (size_t c = 0; c < font.chars.size(); c++) {
                     ss << std::format("        {{ uint16_t{{0x{:06x}}}, uint16_t{{0x{:06x}}} }}{}\n", font.chars[c].id, c,
                                       (c < font.chars.size() - 1) ? "," : "");
                 }
             } else {
+                ss << std::format("    using lookup_type = uint32_t;\n\n", name);
                 ss << std::format("    static constexpr std::array<std::pair<uint32_t, uint32_t>, {}> glyph_table{{{{\n", font.chars.size());
                 for (size_t c = 0; c < font.chars.size(); c++) {
                     ss << std::format("        {{ uint32_t{{0x{:06x}}}, uint32_t{{0x{:06x}}} }}{}\n", font.chars[c].id, c,

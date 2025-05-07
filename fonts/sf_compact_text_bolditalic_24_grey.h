@@ -2,6 +2,8 @@ namespace constixel {
 
 struct sf_compact_text_bolditalic_24_grey {
 
+    using lookup_type = uint16_t;
+
     static constexpr std::array<std::pair<uint16_t, uint16_t>, 95> glyph_table{{
         { uint16_t{0x000000}, uint16_t{0x000000} },
         { uint16_t{0x000041}, uint16_t{0x000001} },

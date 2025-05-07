@@ -1633,29 +1633,7 @@ class image {
             } else {
                 return x;
             }
-#if __clang__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wimplicit-int-conversion"
-#endif  // #if __clang__
-#if __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wconversion"
-#endif  // #if __GCC__
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4242)
-#pragma warning(disable : 4244)
-#endif  // #ifdef _MSC_VER
-            const char_info &ch_info = FONT::char_table.at(FONT::glyph_tree.lookup(utf32));
-#if __clang__
-#pragma GCC diagnostic pop
-#endif  // #if __clang__
-#if __GNUC__
-#pragma GCC diagnostic pop
-#endif  // #if __clang__
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif  // #ifdef _MSC_VER
+            const char_info &ch_info = FONT::char_table.at(FONT::glyph_tree.lookup(static_cast<FONT::lookup_type>(utf32)));
             if (*str == 0) {
                 x += ch_info.width;
             } else {
@@ -1687,29 +1665,7 @@ class image {
             } else {
                 return x;
             }
-#if __clang__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wimplicit-int-conversion"
-#endif  // #if __clang__
-#if __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wconversion"
-#endif  // #if __GCC__
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4242)
-#pragma warning(disable : 4244)
-#endif  // #ifdef _MSC_VER
-            const char_info &ch_info = FONT::char_table.at(FONT::glyph_tree.lookup(utf32));
-#if __clang__
-#pragma GCC diagnostic pop
-#endif  // #if __clang__
-#if __GNUC__
-#pragma GCC diagnostic pop
-#endif  // #if __clang__
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif  // #ifdef _MSC_VER
+            const char_info &ch_info = FONT::char_table.at(FONT::glyph_tree.lookup(static_cast<FONT::lookup_type>(utf32)));
             draw_char_mono<FONT>(x, y, ch_info, col);
             x += ch_info.xadvance;
         }
@@ -1738,29 +1694,7 @@ class image {
             } else {
                 return x;
             }
-#if __clang__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wimplicit-int-conversion"
-#endif  // #if __clang__
-#if __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wconversion"
-#endif  // #if __GCC__
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4242)
-#pragma warning(disable : 4244)
-#endif  // #ifdef _MSC_VER
-            const char_info &ch_info = FONT::char_table.at(FONT::glyph_tree.lookup(utf32));
-#if __clang__
-#pragma GCC diagnostic pop
-#endif  // #if __clang__
-#if __GNUC__
-#pragma GCC diagnostic pop
-#endif  // #if __clang__
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif  // #ifdef _MSC_VER
+            const char_info &ch_info = FONT::char_table.at(FONT::glyph_tree.lookup(static_cast<FONT::lookup_type>(utf32)));
             draw_char<FONT>(x, y, ch_info, col);
             x += ch_info.xadvance;
         }
