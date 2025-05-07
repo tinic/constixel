@@ -412,7 +412,7 @@ void draw_functions() {
 #endif  // #if 0
 
 int main() {
-#if 0
+#if 1
     static_assert(test0().size() == 276);
     static_assert(test1().size() == 952);
     static_assert(test2().size() == 1591);
@@ -420,13 +420,13 @@ int main() {
     static_assert(test4().size() == 1716);
     static_assert(test5().size() == 2200);
     static_assert(test6().size() == 1393);
-    static_assert(test7().size() == 2419);
+    static_assert(test7().size() == 2372);
     static_assert(test8().size() == 333);
-    static_assert(test9().size() == 6121);
-    static_assert(test10().size() == 16447);
+    static_assert(test9().size() == 6037);
+    static_assert(test10().size() == 12893);
 #endif  // #if 0
 
-#if 0
+#if 1
     puts("\033[2J\033[H\0337");
     puts(test0().c_str());
     puts("\n");
