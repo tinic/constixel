@@ -838,7 +838,7 @@ class format_1bit : public format {
                 for (size_t y6 = 0; y6 < 6; y6++) {
                     if ((y + y6) < H * S) {
                         for (size_t xx = 0; xx < (w + S - 1) / S; xx++) {
-                            const uint8_t *ptr = &dataRaw[(y / S) * bytes_per_line + (xx + x) / 8];
+                            const uint8_t *ptr = &dataRaw[((y + y6) / S) * bytes_per_line + (xx + x) / 8];
                             size_t x8 = (xx + x) % 8;
                             set.mark((((*ptr) >> (7 - x8)) & 1));
                         }
@@ -1028,7 +1028,7 @@ class format_2bit : public format {
                 for (size_t y6 = 0; y6 < 6; y6++) {
                     if ((y + y6) < H * S) {
                         for (size_t xx = 0; xx < (w + S - 1) / S; xx++) {
-                            const uint8_t *ptr = &dataRaw[(y / S) * bytes_per_line + (xx + x) / 4];
+                            const uint8_t *ptr = &dataRaw[((y + y6) / S) * bytes_per_line + (xx + x) / 4];
                             size_t x4 = (xx + x) % 4;
                             set.mark((((*ptr) >> (6 - x4 * 2)) & 3));
                         }
@@ -1219,7 +1219,7 @@ class format_4bit : public format {
                 for (size_t y6 = 0; y6 < 6; y6++) {
                     if ((y + y6) < H * S) {
                         for (size_t xx = 0; xx < (w + S - 1) / S; xx++) {
-                            const uint8_t *ptr = &dataRaw[(y / S) * bytes_per_line + (xx + x) / 2];
+                            const uint8_t *ptr = &dataRaw[((y + y6) / S) * bytes_per_line + (xx + x) / 2];
                             size_t x2 = (xx + x) % 2;
                             set.mark((((*ptr) >> (4 - x2 * 4)) & 0xF));
                         }
