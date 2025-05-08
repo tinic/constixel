@@ -468,6 +468,10 @@ int main() {
     draw_functions<constixel::image<constixel::format_2bit, 768, 768>, 32>();
     draw_functions<constixel::image<constixel::format_4bit, 768, 768>, 32>();
     draw_functions<constixel::image<constixel::format_8bit, 768, 768>, 32>();
+
+    draw_functions<constixel::image<constixel::format_1bit, 768, 768, 1, true>, 32>();
+    draw_functions<constixel::image<constixel::format_2bit, 768, 768, 1, true>, 32>();
+    draw_functions<constixel::image<constixel::format_4bit, 768, 768, 1, true>, 32>();
     puts("\n");
 #endif  // #if 0
 
@@ -476,6 +480,11 @@ int main() {
     draw_palette<constixel::image<constixel::format_2bit, 16, 16, 32>>();
     draw_palette<constixel::image<constixel::format_4bit, 16, 16, 32>>();
     draw_palette<constixel::image<constixel::format_8bit, 16, 16, 32>>();
+
+    draw_palette<constixel::image<constixel::format_1bit, 16, 16, 32, true>>();
+    draw_palette<constixel::image<constixel::format_2bit, 16, 16, 32, true>>();
+    draw_palette<constixel::image<constixel::format_4bit, 16, 16, 32, true>>();
+    draw_palette<constixel::image<constixel::format_8bit, 16, 16, 32, true>>();
     puts("\n");
 #endif  // #if 1
 
@@ -502,6 +511,11 @@ int main() {
         draw_image_linear<constixel::image<constixel::format_2bit, ow, oh>>(rgbaimage, int32_t(w), int32_t(h));
         draw_image_linear<constixel::image<constixel::format_4bit, ow, oh>>(rgbaimage, int32_t(w), int32_t(h));
         draw_image_linear<constixel::image<constixel::format_8bit, ow, oh>>(rgbaimage, int32_t(w), int32_t(h));
+
+        draw_image_linear<constixel::image<constixel::format_1bit, ow, oh, 1, true>>(rgbaimage, int32_t(w), int32_t(h));
+        draw_image_linear<constixel::image<constixel::format_2bit, ow, oh, 1, true>>(rgbaimage, int32_t(w), int32_t(h));
+        draw_image_linear<constixel::image<constixel::format_4bit, ow, oh, 1, true>>(rgbaimage, int32_t(w), int32_t(h));
+        draw_image_linear<constixel::image<constixel::format_8bit, ow, oh, 1, true>>(rgbaimage, int32_t(w), int32_t(h));
     }
 #endif  // #if 1
 
@@ -510,6 +524,11 @@ int main() {
     draw_rgb<constixel::image<constixel::format_2bit, 256, 256, 1>>();
     draw_rgb<constixel::image<constixel::format_4bit, 256, 256, 1>>();
     draw_rgb<constixel::image<constixel::format_8bit, 256, 256, 1>>();
+
+    draw_rgb<constixel::image<constixel::format_1bit, 256, 256, 1, true>>();
+    draw_rgb<constixel::image<constixel::format_2bit, 256, 256, 1, true>>();
+    draw_rgb<constixel::image<constixel::format_4bit, 256, 256, 1, true>>();
+    draw_rgb<constixel::image<constixel::format_8bit, 256, 256, 1, true>>();
 #endif  // #if 1
 
 #if MAINLINE_TESTS

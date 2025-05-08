@@ -686,7 +686,7 @@ class format {
     }
 };
 
-template <size_t W, size_t H, int32_t S>
+template <size_t W, size_t H, int32_t S, bool GR>
 class format_1bit : public format {
  public:
     static constexpr size_t bits_per_pixel = 1;
@@ -868,14 +868,21 @@ class format_1bit : public format {
     }
 };
 
-template <size_t W, size_t H, int32_t S>
+template <size_t W, size_t H, int32_t S, bool GR>
 class format_2bit : public format {
  public:
     static constexpr size_t bits_per_pixel = 2;
     static constexpr size_t bytes_per_line = (W * bits_per_pixel + 7) / 8;
     static constexpr size_t internal_height = ((H + 5) / 6) * 6;
     static constexpr size_t image_size = internal_height * bytes_per_line;
-    static constexpr std::array<uint32_t, (1UL << bits_per_pixel)> palette = {0x000000, 0xffffff, 0xff0000, 0x0077ff};
+    static consteval const std::array<uint32_t, (1UL << bits_per_pixel)> gen_palette() {
+        if (GR) {
+            return {0x000000, 0x444444, 0x888888, 0xffffff};
+        } else {
+            return {0x000000, 0xffffff, 0xff0000, 0x0077ff};
+        }
+    }
+    static constexpr std::array<uint32_t, (1UL << bits_per_pixel)> palette = gen_palette();
 
     static constexpr const constixel::quantize<1UL << bits_per_pixel> gen_quant() {
         return constixel::quantize<1UL << bits_per_pixel>(palette);
@@ -1060,15 +1067,25 @@ class format_2bit : public format {
     }
 };
 
-template <size_t W, size_t H, int32_t S>
+template <size_t W, size_t H, int32_t S, bool GR>
 class format_4bit : public format {
  public:
     static constexpr size_t bits_per_pixel = 4;
     static constexpr size_t bytes_per_line = (W * bits_per_pixel + 7) / 8;
     static constexpr size_t internal_height = ((H + 5) / 6) * 6;
     static constexpr size_t image_size = internal_height * bytes_per_line;
-    static constexpr std::array<uint32_t, (1UL << bits_per_pixel)> palette = {0x000000, 0xffffff, 0xff0000, 0x00ff00, 0x0000ff, 0xffff00, 0x00ffff, 0xff00ff,
-                                                                              0x333333, 0x666666, 0x999999, 0xcccccc, 0x7f0000, 0x007f00, 0x00007f, 0x7f7f00};
+
+    static consteval const std::array<uint32_t, (1UL << bits_per_pixel)> gen_palette() {
+        if (GR) {
+            return {0x000000, 0x111111, 0x222222, 0x333333, 0x444444, 0x555555, 0x666666, 0x777777,
+                    0x888888, 0x999999, 0xaaaaaa, 0xbbbbbb, 0xcccccc, 0xdddddd, 0xeeeeee, 0xffffff};
+        } else {
+            return {0x000000, 0xffffff, 0xff0000, 0x00ff00, 0x0000ff, 0xffff00, 0x00ffff, 0xff00ff,
+                    0x333333, 0x666666, 0x999999, 0xcccccc, 0x7f0000, 0x007f00, 0x00007f, 0x7f7f00};
+        }
+    }
+
+    static constexpr std::array<uint32_t, (1UL << bits_per_pixel)> palette = gen_palette();
 
     static constexpr const constixel::quantize<1UL << bits_per_pixel> gen_quant() {
         return constixel::quantize<1UL << bits_per_pixel>(palette);
@@ -1253,7 +1270,7 @@ class format_4bit : public format {
     }
 };
 
-template <size_t W, size_t H, int32_t S>
+template <size_t W, size_t H, int32_t S, bool GR>
 class format_8bit : public format {
  public:
     static constexpr size_t bits_per_pixel = 8;
@@ -1263,54 +1280,60 @@ class format_8bit : public format {
 
     static consteval const std::array<uint32_t, (1UL << bits_per_pixel)> gen_palette() {
         std::array<uint32_t, (1UL << bits_per_pixel)> pal{};
-        pal[0] = 0x000000;
-        pal[1] = 0xffffff;
-        pal[2] = 0xff0000;
-        pal[3] = 0x00ff00;
-        pal[4] = 0x0000ff;
-        pal[5] = 0xffff00;
-        pal[6] = 0x00ffff;
-        pal[7] = 0xff00ff;
-        pal[8] = 0x333333;
-        pal[9] = 0x666666;
-        pal[10] = 0x999999;
-        pal[11] = 0xcccccc;
-        pal[12] = 0x7f0000;
-        pal[13] = 0x007f00;
-        pal[14] = 0x00007f;
-        pal[15] = 0x7f7f00;
-        for (size_t c = 0; c < 16; c++) {
-            uint32_t y = (0xff * static_cast<uint32_t>(c)) / 15;
-            pal[0x10 + c] = (y << 16) | (y << 8) | (y << 0);
-        }
-        for (size_t c = 0; c < 8; c++) {
-            uint32_t y = (0xff * static_cast<uint32_t>(c)) / 7;
-            uint32_t x = (0xff * (static_cast<uint32_t>(c) + 1)) / 8;
-            pal[0x20 + c + 0] = (y << 16) | (0 << 8) | (0 << 0);
-            pal[0x20 + c + 8] = (255 << 16) | (x << 8) | (x << 0);
-            pal[0x30 + c + 0] = (0 << 16) | (y << 8) | (0 << 0);
-            pal[0x30 + c + 8] = (x << 16) | (255 << 8) | (x << 0);
-            pal[0x40 + c + 0] = (0 << 16) | (0 << 8) | (y << 0);
-            pal[0x40 + c + 8] = (x << 16) | (x << 8) | (255 << 0);
-            pal[0x50 + c + 0] = (y << 16) | (y << 8) | (0 << 0);
-            pal[0x50 + c + 8] = (255 << 16) | (255 << 8) | (x << 0);
-            pal[0x60 + c + 0] = (0 << 16) | (y << 8) | (y << 0);
-            pal[0x60 + c + 8] = (x << 16) | (255 << 8) | (255 << 0);
-            pal[0x70 + c + 0] = (y << 16) | (0 << 8) | (y << 0);
-            pal[0x70 + c + 8] = (255 << 16) | (x << 8) | (255 << 0);
-        }
-        for (size_t c = 0; c < 8; c++) {
-            constixel::oklab lft{static_cast<double>(c) / 7 - 0.2, 0.2, 0.0};
-            constixel::oklab rgh{static_cast<double>(c) / 7 - 0.2, 0.2, 337.5};
-            for (size_t d = 0; d < 16; d++) {
-                auto res = constixel::oklab_to_srgb(constixel::oklch_to_oklab(constixel::oklch{
-                    std::lerp(lft.l, rgh.l, static_cast<double>(d) / 15.0),
-                    std::lerp(lft.a, rgh.a, static_cast<double>(d) / 15.0),
-                    std::lerp(lft.b, rgh.b, static_cast<double>(d) / 15.0),
-                }));
-                pal[0x80 + c * 16 + d] = (static_cast<uint32_t>(std::max(0.0, std::min(1.0, res.r)) * 255.0) << 16) |
-                                         (static_cast<uint32_t>(std::max(0.0, std::min(1.0, res.g)) * 255.0) << 8) |
-                                         (static_cast<uint32_t>(std::max(0.0, std::min(1.0, res.b)) * 255.0) << 0);
+        if (GR) {
+            for (size_t c = 0; c < 256; c++) {
+                pal[c] = static_cast<uint32_t>((c << 16) | (c << 8) | c);
+            }
+        } else {
+            pal[0] = 0x000000;
+            pal[1] = 0xffffff;
+            pal[2] = 0xff0000;
+            pal[3] = 0x00ff00;
+            pal[4] = 0x0000ff;
+            pal[5] = 0xffff00;
+            pal[6] = 0x00ffff;
+            pal[7] = 0xff00ff;
+            pal[8] = 0x333333;
+            pal[9] = 0x666666;
+            pal[10] = 0x999999;
+            pal[11] = 0xcccccc;
+            pal[12] = 0x7f0000;
+            pal[13] = 0x007f00;
+            pal[14] = 0x00007f;
+            pal[15] = 0x7f7f00;
+            for (size_t c = 0; c < 16; c++) {
+                uint32_t y = (0xff * static_cast<uint32_t>(c)) / 15;
+                pal[0x10 + c] = (y << 16) | (y << 8) | (y << 0);
+            }
+            for (size_t c = 0; c < 8; c++) {
+                uint32_t y = (0xff * static_cast<uint32_t>(c)) / 7;
+                uint32_t x = (0xff * (static_cast<uint32_t>(c) + 1)) / 8;
+                pal[0x20 + c + 0] = (y << 16) | (0 << 8) | (0 << 0);
+                pal[0x20 + c + 8] = (255 << 16) | (x << 8) | (x << 0);
+                pal[0x30 + c + 0] = (0 << 16) | (y << 8) | (0 << 0);
+                pal[0x30 + c + 8] = (x << 16) | (255 << 8) | (x << 0);
+                pal[0x40 + c + 0] = (0 << 16) | (0 << 8) | (y << 0);
+                pal[0x40 + c + 8] = (x << 16) | (x << 8) | (255 << 0);
+                pal[0x50 + c + 0] = (y << 16) | (y << 8) | (0 << 0);
+                pal[0x50 + c + 8] = (255 << 16) | (255 << 8) | (x << 0);
+                pal[0x60 + c + 0] = (0 << 16) | (y << 8) | (y << 0);
+                pal[0x60 + c + 8] = (x << 16) | (255 << 8) | (255 << 0);
+                pal[0x70 + c + 0] = (y << 16) | (0 << 8) | (y << 0);
+                pal[0x70 + c + 8] = (255 << 16) | (x << 8) | (255 << 0);
+            }
+            for (size_t c = 0; c < 8; c++) {
+                constixel::oklab lft{static_cast<double>(c) / 7 - 0.2, 0.2, 0.0};
+                constixel::oklab rgh{static_cast<double>(c) / 7 - 0.2, 0.2, 337.5};
+                for (size_t d = 0; d < 16; d++) {
+                    auto res = constixel::oklab_to_srgb(constixel::oklch_to_oklab(constixel::oklch{
+                        std::lerp(lft.l, rgh.l, static_cast<double>(d) / 15.0),
+                        std::lerp(lft.a, rgh.a, static_cast<double>(d) / 15.0),
+                        std::lerp(lft.b, rgh.b, static_cast<double>(d) / 15.0),
+                    }));
+                    pal[0x80 + c * 16 + d] = (static_cast<uint32_t>(std::max(0.0, std::min(1.0, res.r)) * 255.0) << 16) |
+                                             (static_cast<uint32_t>(std::max(0.0, std::min(1.0, res.g)) * 255.0) << 8) |
+                                             (static_cast<uint32_t>(std::max(0.0, std::min(1.0, res.b)) * 255.0) << 0);
+                }
             }
         }
         return pal;
@@ -1525,7 +1548,7 @@ enum color : uint8_t {
     MAGENTA_LUMA_RAMP_STOP = MAGENTA_LUMA_RAMP_START + 15
 };
 
-template <template <size_t, size_t, int32_t> class T, size_t W, size_t H, int32_t S = 1>
+template <template <size_t, size_t, int32_t, bool> class T, size_t W, size_t H, int32_t S = 1, bool GR = false>
 class image {
     static_assert(sizeof(W) >= sizeof(uint32_t));
     static_assert(sizeof(H) >= sizeof(uint32_t));
@@ -1536,11 +1559,11 @@ class image {
 
  public:
     [[nodiscard]] static constexpr size_t bit_depth() {
-        return T<W, H, S>::bits_per_pixel;
+        return T<W, H, S, GR>::bits_per_pixel;
     }
 
     [[nodiscard]] static constexpr size_t size() {
-        return T<W, H, S>::image_size;
+        return T<W, H, S, GR>::image_size;
     }
 
     [[nodiscard]] static constexpr int32_t width() {
@@ -1560,7 +1583,7 @@ class image {
         return v < 0 ? -v : v;
     }
 
-    [[nodiscard]] constexpr std::array<uint8_t, T<W, H, S>::image_size> &data_ref() const {
+    [[nodiscard]] constexpr std::array<uint8_t, T<W, H, S, GR>::image_size> &data_ref() const {
         return data;
     }
 
@@ -1642,14 +1665,14 @@ class image {
         if (x < 0 || x >= static_cast<int32_t>(W) || y < 0 || y >= static_cast<int32_t>(H)) {
             return;
         }
-        T<W, H, S>::compose(data, static_cast<uint32_t>(x), static_cast<uint32_t>(y), cola, colr, colg, colb);
+        T<W, H, S, GR>::compose(data, static_cast<uint32_t>(x), static_cast<uint32_t>(y), cola, colr, colg, colb);
     }
 
     constexpr void plot(int32_t x, int32_t y, uint8_t col) {
         if (x < 0 || x >= static_cast<int32_t>(W) || y < 0 || y >= static_cast<int32_t>(H)) {
             return;
         }
-        T<W, H, S>::plot(data, static_cast<uint32_t>(x), static_cast<uint32_t>(y), col);
+        T<W, H, S, GR>::plot(data, static_cast<uint32_t>(x), static_cast<uint32_t>(y), col);
     }
 
     [[nodiscard]] constexpr uint8_t get_nearest_color(uint8_t r, uint8_t g, uint8_t b) const {
@@ -1776,8 +1799,8 @@ class image {
     }
 
     constexpr void fill_circle(int32_t cx, int32_t cy, int32_t r, uint8_t col) {
-        if ( r == 1) {
-            fill_rect(cx-1,cy-1,2,2,col);
+        if (r == 1) {
+            fill_rect(cx - 1, cy - 1, 2, 2, col);
             return;
         }
         fill_arc(cx, cy - 1, r, 9, 0, col);
@@ -1814,77 +1837,77 @@ class image {
     }
 
     [[nodiscard]] constexpr std::array<uint32_t, W * H> RGBA_uint32() const {
-        return T<W, H, S>::RGBA_uint32(data);
+        return T<W, H, S, GR>::RGBA_uint32(data);
     }
 
     [[nodiscard]] constexpr std::array<uint8_t, W * H * 4> RGBA_uint8() const {
-        return T<W, H, S>::RGBA_uint8(data);
+        return T<W, H, S, GR>::RGBA_uint8(data);
     }
 
     constexpr void blit_RGBA(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
         rect<int32_t> blitrect{x, y, w, h};
         blitrect &= {0, 0, W, H};
         blitrect &= {x, y, iw, ih};
-        T<W, H, S>::blit_RGBA(data, blitrect, ptr, stride);
+        T<W, H, S, GR>::blit_RGBA(data, blitrect, ptr, stride);
     }
 
     constexpr void blit_RGBA(const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
         rect<int32_t> blitrect{r};
         blitrect &= {0, 0, W, H};
         blitrect &= {r.x, r.y, iw, ih};
-        T<W, H, S>::blit_RGBA(data, blitrect, ptr, stride);
+        T<W, H, S, GR>::blit_RGBA(data, blitrect, ptr, stride);
     }
 
     constexpr void blit_RGBA_diffused(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
         rect<int32_t> blitrect{x, y, w, h};
         blitrect &= {0, 0, W, H};
         blitrect &= {x, y, iw, ih};
-        T<W, H, S>::blit_RGBA_diffused(data, blitrect, ptr, stride);
+        T<W, H, S, GR>::blit_RGBA_diffused(data, blitrect, ptr, stride);
     }
 
     constexpr void blit_RGBA_diffused(const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
         rect<int32_t> blitrect{r};
         blitrect &= {0, 0, W, H};
         blitrect &= {r.x, r.y, iw, ih};
-        T<W, H, S>::blit_RGBA_diffused(data, blitrect, ptr, stride);
+        T<W, H, S, GR>::blit_RGBA_diffused(data, blitrect, ptr, stride);
     }
 
     constexpr void blit_RGBA_diffused_linear(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
         rect<int32_t> blitrect{x, y, w, h};
         blitrect &= {0, 0, W, H};
         blitrect &= {x, y, iw, ih};
-        T<W, H, S>::blit_RGBA_diffused_linear(data, blitrect, ptr, stride);
+        T<W, H, S, GR>::blit_RGBA_diffused_linear(data, blitrect, ptr, stride);
     }
 
     constexpr void blit_RGBA_diffused_linear(const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
         rect<int32_t> blitrect{r};
         blitrect &= {0, 0, W, H};
         blitrect &= {r.x, r.y, iw, ih};
-        T<W, H, S>::blit_RGBA_diffused_linear(data, blitrect, ptr, stride);
+        T<W, H, S, GR>::blit_RGBA_diffused_linear(data, blitrect, ptr, stride);
     }
 
     template <typename F>
     constexpr void png(F &&char_out) const {
-        T<W, H, S>::png(data, char_out);
+        T<W, H, S, GR>::png(data, char_out);
     }
 
     template <typename F>
     constexpr void sixel(F &&char_out) const {
-        T<W, H, S>::sixel(data, char_out, {0, 0, W, H});
+        T<W, H, S, GR>::sixel(data, char_out, {0, 0, W, H});
     }
 
     template <typename F>
     constexpr void sixel(F &&char_out, const rect<int32_t> &r) const {
-        T<W, H, S>::sixel(data, char_out, r);
+        T<W, H, S, GR>::sixel(data, char_out, r);
     }
 
     constexpr void sixel_to_cout() const {
         std::string out;
-        T<W, H, S>::sixel(data,
-                          [&out](char ch) mutable {
-                              out.push_back(ch);
-                          },
-                          {0, 0, W, H});
+        T<W, H, S, GR>::sixel(data,
+                              [&out](char ch) mutable {
+                                  out.push_back(ch);
+                              },
+                              {0, 0, W, H});
         std::cout << out << std::endl;
     }
 
@@ -2003,7 +2026,7 @@ class image {
         size_t _xl = static_cast<size_t>(x);
         size_t _xr = static_cast<size_t>(x + w);
         size_t _y = static_cast<size_t>(y);
-        T<W, H, S>::span(data, _xl, _xr, _y, col);
+        T<W, H, S, GR>::span(data, _xl, _xr, _y, col);
     }
 
     constexpr void fill_arc(int32_t x0, int32_t y0, int32_t r, uint8_t corners, int32_t delta, uint8_t col) {
@@ -2042,8 +2065,8 @@ class image {
         }
     }
 
-    std::array<uint8_t, T<W, H, S>::image_size> data{};
-    T<W, H, S> format{};
+    std::array<uint8_t, T<W, H, S, GR>::image_size> data{};
+    T<W, H, S, GR> format{};
 };
 
 }  // namespace constixel
