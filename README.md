@@ -295,7 +295,18 @@ class image {
     void stroke_rect(constixel::rect<int32_t> &r, uint8_t col, uint32_t stroke_width = 1);
 
     // Draw a filled circle
-    void fill_circle(int32_t x, int32_t y, int32_t r, uint8_t col);
+    void fill_circle(int32_t x, int32_t y, int32_t radius, uint8_t col);
+
+    // Draw a filled circle with smoothing
+    // NOTE 1: This only works with constixel::format_8bit images
+    void fill_circle_aa(int32_t x, int32_t y, int32_t radius, uint8_t col);
+
+    // Draw a rounded rectangle
+    void fill_round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col);
+
+    // Draw a rounded rectangle with smoothing
+    // NOTE 1: This only works with constixel::format_8bit images
+    void fill_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col);
 
     // Get closest matching color in the palette for given rgb values (0-255 range)
     uint8_t get_nearest_color(uint8_t r, uint8_t g, uint8_t b);
