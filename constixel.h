@@ -1817,19 +1817,19 @@ class image {
         stroke_rect(r.x, r.y, r.w, r.h, col, stroke_width);
     }
 
-    constexpr void fill_circle(int32_t cx, int32_t cy, int32_t r, uint8_t col) {
-        if (r == 1) {
+    constexpr void fill_circle(int32_t cx, int32_t cy, int32_t radius, uint8_t col) {
+        if (radius == 1) {
             fill_rect(cx - 1, cy - 1, 2, 2, col);
             return;
         }
-        fill_arc(cx, cy - 1, r, 9, 0, col);
-        fill_arc(cx, cy, r, 10, 0, col);
-        fill_arc(cx, cy - 1, r, 1, -1, col);
-        fill_arc(cx, cy, r, 2, -1, col);
+        fill_arc(cx, cy - 1, radius, 9, 0, col);
+        fill_arc(cx, cy, radius, 10, 0, col);
+        fill_arc(cx, cy - 1, radius, 1, -1, col);
+        fill_arc(cx, cy, radius, 2, -1, col);
     }
 
-    constexpr void fill_round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t r, uint8_t col) {
-        int32_t cr = std::min((w) / 2, std::min((w) / 2, r));
+    constexpr void fill_round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col) {
+        int32_t cr = std::min((w) / 2, std::min((w) / 2, radius));
         int32_t dx = w - cr * 2;
         int32_t dy = h - cr * 2;
         fill_arc(x + cr, y + h - cr - 1, cr, 9, 0, col);
@@ -1841,8 +1841,12 @@ class image {
         fill_rect(x + cr, y, dx, h, col);
     }
 
-    constexpr void fill_circle_aa(int32_t cx, int32_t cy, int32_t r, uint8_t col) {
-        fill_circle_aa(cx, cy, r, 0, 0, col);
+    constexpr void fill_round_rect(const rect<int32_t> &r, int32_t radius, uint8_t col) {
+        stroke_rect(r.x, r.y, r.w, r.h, radius, col);
+    }
+
+    constexpr void fill_circle_aa(int32_t cx, int32_t cy, int32_t radius, uint8_t col) {
+        fill_circle_aa(cx, cy, radius, 0, 0, col);
     }
 
     constexpr void fill_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t r, uint8_t col) {
@@ -1853,6 +1857,10 @@ class image {
         fill_rect(x, y + cr, cr, dy, col);
         fill_rect(x + w - cr, y + cr, cr, dy, col);
         fill_rect(x + cr, y, dx, h, col);
+    }
+
+    constexpr void fill_round_rect_aa(const rect<int32_t> &r, int32_t radius, uint8_t col) {
+        fill_round_rect_aa(r.x, r.y, r.w, r.h, radius, col);
     }
 
     [[nodiscard]] constexpr std::array<uint32_t, W * H> RGBA_uint32() const {
