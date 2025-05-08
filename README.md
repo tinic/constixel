@@ -37,7 +37,7 @@ constixel is a single header minimalistic constexpr C++20 2D graphics palette ba
 ## Applications
 
 - Interface rendering on embedded devices.
-- Send graphical data to your terminal through a serial connection from any embedded device.
+- Send graphical data to your terminal through a serial or ssh connection from embedded or remote device.
 - Add graphical output to unit tests.
 - Programmatically render static graphical assets.
 - Help debug dynamic memory handling issues in complex C++ projects.
