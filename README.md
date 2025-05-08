@@ -273,7 +273,8 @@ class image {
 
     // Draw smoothed utf8 text. #include a antialiased font and specify the included struct as the template parameter.
     // Returns the current x caret position in pixels.
-    // NOTE: This is a very slow operation due to the brute force color quantization and will likely not consteval.
+    // NOTE 1: This only works with constixel::format_8bit images
+    // NOTE 2: This is a very slow operation due to the brute force color quantization and will likely not consteval.
     template <typename FONT>
     constexpr int32_t draw_string_aa(int32_t x, int32_t y, const char *str, uint8_t col);
 
