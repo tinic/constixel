@@ -836,7 +836,7 @@ class format_1bit : public format {
                 const uint8_t *ptr = &data_raw[(y / S) * bytes_per_line + (x / S) / 8];
                 size_t x8 = (x / S) % 8;
                 uint8_t out = 0;
-                int32_t inc = y % S;
+                size_t inc = y % S;
                 for (size_t y6 = 0; y6 < 6; y6++) {
                     out >>= 1;
                     if ((y + y6) < H * S) {
@@ -852,7 +852,7 @@ class format_1bit : public format {
                 return out;
             },
             [](const uint8_t *data_raw, size_t x, size_t w, size_t y, palette_bitset<uint8_t, 32> &set) {
-                int32_t inc = y % S;
+                size_t inc = y % S;
                 for (size_t y6 = 0; y6 < 6; y6++) {
                     if ((y + y6) < H * S) {
                         for (size_t xx = 0; xx < (w + S - 1) / S; xx++) {
@@ -1036,7 +1036,7 @@ class format_2bit : public format {
                 const uint8_t *ptr = &data_raw[(y / S) * bytes_per_line + (x / S) / 4];
                 size_t x4 = (x / S) % 4;
                 uint8_t out = 0;
-                int32_t inc = y % S;
+                size_t inc = y % S;
                 for (size_t y6 = 0; y6 < 6; y6++) {
                     out >>= 1;
                     if ((y + y6) < H * S) {
@@ -1052,7 +1052,7 @@ class format_2bit : public format {
                 return out;
             },
             [](const uint8_t *data_raw, size_t x, size_t w, size_t y, palette_bitset<uint8_t, 32> &set) {
-                int32_t inc = y % S;
+                size_t inc = y % S;
                 for (size_t y6 = 0; y6 < 6; y6++) {
                     if ((y + y6) < H * S) {
                         for (size_t xx = 0; xx < (w + S - 1) / S; xx++) {
@@ -1251,7 +1251,7 @@ class format_4bit : public format {
                 const uint8_t *ptr = &data_raw[(y / S) * bytes_per_line + (x / S) / 2];
                 size_t x2 = (x / S) % 2;
                 uint8_t out = 0;
-                int32_t inc = y % S;
+                size_t inc = y % S;
                 for (size_t y6 = 0; y6 < 6; y6++) {
                     out >>= 1;
                     if ((y + y6) < H * S) {
@@ -1267,7 +1267,7 @@ class format_4bit : public format {
                 return out;
             },
             [](const uint8_t *data_raw, size_t x, size_t w, size_t y, palette_bitset<uint8_t, 32> &set) {
-                int32_t inc = y % S;
+                size_t inc = y % S;
                 for (size_t y6 = 0; y6 < 6; y6++) {
                     if ((y + y6) < H * S) {
                         for (size_t xx = 0; xx < (w + S - 1) / S; xx++) {
@@ -1480,7 +1480,7 @@ class format_8bit : public format {
             [](const uint8_t *data_raw, size_t x, size_t col, size_t y) {
                 const uint8_t *ptr = &data_raw[(y / S) * bytes_per_line + x / S];
                 uint8_t out = 0;
-                int32_t inc = y % S;
+                size_t inc = y % S;
                 for (size_t y6 = 0; y6 < 6; y6++) {
                     out >>= 1;
                     if ((y + y6) < H * S) {
@@ -1497,7 +1497,7 @@ class format_8bit : public format {
             },
             [](const uint8_t *data_raw, size_t x, size_t w, size_t y, palette_bitset<uint8_t, 1UL << bits_per_pixel> &set) {
                 const uint8_t *ptr = &data_raw[(y / S) * bytes_per_line + x / S];
-                int32_t inc = y % S;
+                size_t inc = y % S;
                 for (size_t y6 = 0; y6 < 6; y6++) {
                     if ((y + y6) < H * S) {
                         for (size_t xx = 0; xx < (w + S - 1) / S; xx++) {
@@ -1976,12 +1976,12 @@ class image {
         float Rl = format.quant.linearpal[col * 3 + 0];
         float Gl = format.quant.linearpal[col * 3 + 1];
         float Bl = format.quant.linearpal[col * 3 + 2];
-        for (int y = y0; y <= cy; ++y) {
-            for (int x = x0; x <= cx; ++x) {
-                float dx = (x + 0.5f) - cx;
-                float dy = (y + 0.5f) - cy;
+        for (int32_t y = y0; y <= cy; ++y) {
+            for (int32_t x = x0; x <= cx; ++x) {
+                float dx = (static_cast<float>(x) + 0.5f) - static_cast<float>(cx);
+                float dy = (static_cast<float>(y) + 0.5f) - static_cast<float>(cy);
                 float dist_sq = dx * dx + dy * dy;
-                float a = r - fast_sqrtf(dist_sq);
+                float a = static_cast<float>(r) - fast_sqrtf(dist_sq);
                 a = std::clamp(a + 0.5f, 0.0f, 1.0f);
                 if (a != 0.0f) {
                     int32_t lx = x;
