@@ -1781,26 +1781,17 @@ class image {
     }
 
     constexpr void fill_circle_aa(int32_t cx, int32_t cy, int32_t r, uint8_t col) {
-        int32_t x0 = std::max(0, cx - r - 1);
-        int32_t y0 = std::max(0, cy - r - 1);
-        int32_t x1 = std::min(width - 1, cx + r + 1);
-        int32_t y1 = std::min(height - 1, cy + r + 1);
-        float r_sq = static_cast<float>(radius * radius);
-        for (int y = y0; y <= y1; ++y) {
-            for (int x = x0; x <= x1; ++x) {
-                float dx = (x + 0.5f) - cx;
-                float dy = (y + 0.5f) - cy;
-                float dist_sq = dx * dx + dy * dy;
+        fill_circle_aa(cx, cy, r, 0, 0, col);
+    }
 
-                float alpha = radius - fast_sqrtf(dist_sq);
-                alpha = std::clamp(alpha + 0.5f, 0.0f, 1.0f);
-                if ( a ) {
-                    if ( a >= 1.0f ) {
-                    } else {
-                    }
-                }
-            }
-        }
+    constexpr void fill_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t r, uint8_t col) {
+        int32_t cr = std::min((w) / 2, std::min((w) / 2, r));
+        int32_t dx = w - cr * 2;
+        int32_t dy = h - cr * 2;
+        fill_circle_aa(x + cr, y + cr, cr, dx, dy, col);
+        fill_rect(x, y + cr, cr, dy, col);
+        fill_rect(x + w - cr, y + cr, cr, dy, col);
+        fill_rect(x + cr, y, dx, h, col);
     }
 
     [[nodiscard]] constexpr std::array<uint32_t, W * H> RGBA_uint32() const {
@@ -1879,6 +1870,40 @@ class image {
     }
 
  private:
+    constexpr void fill_circle_aa(int32_t cx, int32_t cy, int32_t r, int32_t ox, int32_t oy, uint8_t col) {
+        int32_t x0 = cx - r - 1;
+        int32_t y0 = cy - r - 1;
+        float Rl = format.quant.linearpal[col * 3 + 0];
+        float Gl = format.quant.linearpal[col * 3 + 1];
+        float Bl = format.quant.linearpal[col * 3 + 2];
+        for (int y = y0; y <= cy; ++y) {
+            for (int x = x0; x <= cx; ++x) {
+                float dx = (x + 0.5f) - cx;
+                float dy = (y + 0.5f) - cy;
+                float dist_sq = dx * dx + dy * dy;
+                float a = r - fast_sqrtf(dist_sq);
+                a = std::clamp(a + 0.5f, 0.0f, 1.0f);
+                if (a != 0.0f) {
+                    int32_t lx = x;
+                    int32_t ly = y;
+                    int32_t rx = cx + (x0 - x) + r + ox;
+                    int32_t ry = cy + (y0 - y) + r + oy;
+                    if (a >= 1.0f) {
+                        plot(lx, ly, col);
+                        plot(rx, ly, col);
+                        plot(rx, ry, col);
+                        plot(lx, ry, col);
+                    } else {
+                        compose(lx, ly, a, Rl * a, Gl * a, Bl * a);
+                        compose(rx, ly, a, Rl * a, Gl * a, Bl * a);
+                        compose(rx, ry, a, Rl * a, Gl * a, Bl * a);
+                        compose(lx, ly, a, Rl * a, Gl * a, Bl * a);
+                    }
+                }
+            }
+        }
+    }
+
     template <typename FONT>
     constexpr void draw_char_mono(int32_t x, int32_t y, const char_info &ch, uint8_t col) {
         static_assert(FONT::mono == true, "Can't use a antialiased font to draw mono/pixelized text.");
@@ -1903,18 +1928,19 @@ class image {
         }
     }
 
-    static consteval auto init_a2al() {
-        std::array<float, 16> a2al{};
+    static consteval auto gen_a2al() {
+        std::array<float, 16> a2alg{};
         for (size_t c = 0; c < 16; c++) {
-            a2al[c] = constixel::srgb_to_linear(static_cast<float>(c) * (1.0f / 15.0f));
+            a2alg[c] = constixel::srgb_to_linear(static_cast<float>(c) * (1.0f / 15.0f));
         }
-        return a2al;
+        return a2alg;
     }
+
+    static constexpr std::array<float, 16> a2al = gen_a2al();
 
     template <typename FONT>
     constexpr void draw_char_aa(int32_t x, int32_t y, const char_info &ch, uint8_t col) {
         static_assert(FONT::mono == false, "Can't use a mono font to draw antialiased text.");
-        static constexpr std::array<float, 16> a2al = init_a2al();
         int32_t ch_data_off = static_cast<int32_t>(ch.y) * static_cast<int32_t>(FONT::glyph_bitmap_stride) + static_cast<int32_t>(ch.x) / 2;
         x += ch.xoffset;
         y += ch.yoffset;
