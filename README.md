@@ -293,10 +293,12 @@ class image {
 
     // Draw a rounded rectangle
     void fill_round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col);
+    void fill_round_rect(const rect<int32_t> &r, int32_t radius, uint8_t col);
 
     // Draw a rounded rectangle with smoothing
     // NOTE 1: This only works with constixel::format_8bit images
     void fill_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col);
+    void fill_round_rect_aa(const rect<int32_t> &r, int32_t radius, uint8_t col);
 
     // Draw a stroked rectangle
     void stroke_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col, uint32_t stroke_width = 1);
