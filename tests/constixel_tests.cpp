@@ -425,7 +425,7 @@ void draw_functions() {
 #endif  // #if 0
 
 int main() {
-#if 0
+#if 1
     static_assert(test0().size() == 290);
     static_assert(test1().size() == 981);
     static_assert(test2().size() == 1714);
@@ -600,7 +600,7 @@ int main() {
     {
         auto image = std::make_unique<constixel::image<constixel::format_8bit, 512, 384, 1>>();
         image->fill_round_rect_aa(32, 32, 400, 100, 32, 3);
-        image->fill_round_rect_aa(32,200, 400, 64, 32, 3);
+        image->fill_round_rect_aa(32,200, 400, 64, 32, 1);
         image->sixel_to_cout();
     }
 #endif  // #if 0
