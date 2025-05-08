@@ -52,6 +52,25 @@ namespace constixel {
     return y - 124.22551499f - 1.498030302f * xf - 1.72587999f / (0.3520887068f + xf);
 }
 
+static constexpr float fast_sqrtf(const float x) {
+    int32_t i = std::bit_cast<int>(x);
+    int k = i & 0x00800000;
+    float y;
+    if (k != 0) {
+        i = 0x5ed9d098 - (i >> 1);
+        y = std::bit_cast<float>(i);
+        y = 2.33139729f * y * fmaf(-x, y * y, 1.07492042f);
+    } else {
+        i = 0x5f19d352 - (i >> 1);
+        y = std::bit_cast<float>(i);
+        y = 0.82420468f * y * fmaf(-x, y * y, 2.14996147f);
+    }
+    float c = x * y;
+    float r = fmaf(y, -c, 1.0f);
+    y = fmaf(0.5f * c, r, c);
+    return y;
+}
+
 [[nodiscard]] static constexpr float fast_pow(const float x, const float p) {
     return fast_exp2(p * fast_log2(x));
 }
@@ -1752,9 +1771,32 @@ class image {
         stroke_rect(r.x, r.y, r.w, r.h, col, stroke_width);
     }
 
-    constexpr void fill_circle(int32_t x, int32_t y, int32_t r, uint8_t col) {
-        span(x - abs(r), 2 * abs(r) + 1, y, col);
-        fill_arc(x, y, abs(r), 3, 0, col);
+    constexpr void fill_circle(int32_t cx, int32_t cy, int32_t r, uint8_t col) {
+        span(cx - abs(r), 2 * abs(r) + 1, cy, col);
+        fill_arc(cx, cy, abs(r), 3, 0, col);
+    }
+
+    constexpr void fill_circle_aa(int32_t cx, int32_t cy, int32_t r, uint8_t col) {
+        int32_t x0 = std::max(0, cx - r - 1);
+        int32_t y0 = std::max(0, cy - r - 1);
+        int32_t x1 = std::min(width - 1, cx + r + 1);
+        int32_t y1 = std::min(height - 1, cy + r + 1);
+        float r_sq = static_cast<float>(radius * radius);
+        for (int y = y0; y <= y1; ++y) {
+            for (int x = x0; x <= x1; ++x) {
+                float dx = (x + 0.5f) - cx;
+                float dy = (y + 0.5f) - cy;
+                float dist_sq = dx * dx + dy * dy;
+
+                float alpha = radius - fast_sqrtf(dist_sq);
+                alpha = std::clamp(alpha + 0.5f, 0.0f, 1.0f);
+                if ( a ) {
+                    if ( a >= 1.0f ) {
+                    } else {
+                    }
+                }
+            }
+        }
     }
 
     [[nodiscard]] constexpr std::array<uint32_t, W * H> RGBA_uint32() const {
