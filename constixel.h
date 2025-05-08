@@ -1096,8 +1096,12 @@ class format_4bit : public format {
 
     static constexpr const constixel::quantize<1UL << bits_per_pixel> quant = gen_quant();
 
-    static constexpr void compose(std::array<uint8_t, image_size> &, size_t, size_t, float, float, float, float) {
-        static_assert(false, "composing not supported on 4-bit format, use a mono font.");
+    static constexpr void compose(std::array<uint8_t, image_size> &data, size_t x, size_t y, float cola, float colr, float colg, float colb) {
+        size_t bg = static_cast<size_t>(get_col(data, x,y));
+        float Rl = colr + quant.linearpal[bg * 3 + 0] * (1.0f - cola);
+        float Gl = colg + quant.linearpal[bg * 3 + 1] * (1.0f - cola);
+        float Bl = colb + quant.linearpal[bg * 3 + 2] * (1.0f - cola);
+        plot(data, x, y, quant.nearest_linear(Rl, Gl, Bl));
     }
 
     static constexpr void plot(std::array<uint8_t, image_size> &data, size_t x0, size_t y, uint8_t col) {
@@ -1140,6 +1144,13 @@ class format_4bit : public format {
         return (line[x2] >> ((1 - xb) * 4)) & 0xF;
     }
 
+    [[nodiscard]] static constexpr uint8_t get_col(const std::array<uint8_t, image_size> &data, size_t x, size_t y) {
+        const uint8_t *ptr = data.data() + y * bytes_per_line;
+        size_t x2 = x / 2;
+        size_t xb = x % 2;
+        return (ptr[x2] >> ((1 - xb) * 4)) & 0xF;
+    }
+   
     [[nodiscard]] static constexpr auto RGBA_uint32(const std::array<uint8_t, image_size> &data) {
         std::array<uint32_t, W * H> rgba{};
         const uint8_t *ptr = data.data();
