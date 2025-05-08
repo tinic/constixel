@@ -1776,8 +1776,27 @@ class image {
     }
 
     constexpr void fill_circle(int32_t cx, int32_t cy, int32_t r, uint8_t col) {
-        span(cx - abs(r), 2 * abs(r) + 1, cy, col);
-        fill_arc(cx, cy, abs(r), 3, 0, col);
+        if ( r == 1) {
+            fill_rect(cx-1,cy-1,2,2,col);
+            return;
+        }
+        fill_arc(cx, cy - 1, r, 9, 0, col);
+        fill_arc(cx, cy, r, 10, 0, col);
+        fill_arc(cx, cy - 1, r, 1, -1, col);
+        fill_arc(cx, cy, r, 2, -1, col);
+    }
+
+    constexpr void fill_round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t r, uint8_t col) {
+        int32_t cr = std::min((w) / 2, std::min((w) / 2, r));
+        int32_t dx = w - cr * 2;
+        int32_t dy = h - cr * 2;
+        fill_arc(x + cr, y + h - cr - 1, cr, 9, 0, col);
+        fill_arc(x + cr, y + cr, cr, 10, 0, col);
+        fill_arc(x + w - cr, y + h - cr - 1, cr, 1, -1, col);
+        fill_arc(x + w - cr, y + cr, cr, 2, -1, col);
+        fill_rect(x, y + cr, cr, dy, col);
+        fill_rect(x + w - cr, y + cr, cr, dy, col);
+        fill_rect(x + cr, y, dx, h, col);
     }
 
     constexpr void fill_circle_aa(int32_t cx, int32_t cy, int32_t r, uint8_t col) {
@@ -1897,7 +1916,7 @@ class image {
                         compose(lx, ly, a, Rl * a, Gl * a, Bl * a);
                         compose(rx, ly, a, Rl * a, Gl * a, Bl * a);
                         compose(rx, ry, a, Rl * a, Gl * a, Bl * a);
-                        compose(lx, ly, a, Rl * a, Gl * a, Bl * a);
+                        compose(lx, ry, a, Rl * a, Gl * a, Bl * a);
                     }
                 }
             }
@@ -1996,6 +2015,8 @@ class image {
         int32_t px = x;
         int32_t py = y;
         delta++;
+        int32_t hl = corners & 4 ? 2 : 1;
+        int32_t hr = corners & 8 ? 1 : 0;
         while (y < x) {
             if (f >= 0) {
                 x--;
@@ -2006,15 +2027,15 @@ class image {
             f += ddy;
             if (++y < (x + 1)) {
                 if (corners & 1)
-                    span(x0 - x, 2 * x + delta, y0 + y, col);
+                    span(x0 - hr * x, hl * x + delta, y0 + y, col);
                 if (corners & 2)
-                    span(x0 - x, 2 * x + delta, y0 - y, col);
+                    span(x0 - hr * x, hl * x + delta, y0 - y, col);
             }
             if (x != px) {
                 if (corners & 1)
-                    span(x0 - py, 2 * py + delta, y0 + px, col);
+                    span(x0 - hr * py, hl * py + delta, y0 + px, col);
                 if (corners & 2)
-                    span(x0 - py, 2 * py + delta, y0 - px, col);
+                    span(x0 - hr * py, hl * py + delta, y0 - px, col);
                 px = x;
             }
             py = y;
