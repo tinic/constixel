@@ -1097,7 +1097,7 @@ class format_4bit : public format {
     static constexpr const constixel::quantize<1UL << bits_per_pixel> quant = gen_quant();
 
     static constexpr void compose(std::array<uint8_t, image_size> &data, size_t x, size_t y, float cola, float colr, float colg, float colb) {
-        size_t bg = static_cast<size_t>(get_col(data, x,y));
+        size_t bg = static_cast<size_t>(get_col(data, x, y));
         float Rl = colr + quant.linearpal[bg * 3 + 0] * (1.0f - cola);
         float Gl = colg + quant.linearpal[bg * 3 + 1] * (1.0f - cola);
         float Bl = colb + quant.linearpal[bg * 3 + 2] * (1.0f - cola);
@@ -1150,7 +1150,7 @@ class format_4bit : public format {
         size_t xb = x % 2;
         return (ptr[x2] >> ((1 - xb) * 4)) & 0xF;
     }
-   
+
     [[nodiscard]] static constexpr auto RGBA_uint32(const std::array<uint8_t, image_size> &data) {
         std::array<uint32_t, W * H> rgba{};
         const uint8_t *ptr = data.data();
@@ -1920,7 +1920,7 @@ class image {
         T<W, H, S, GR>::sixel(data, char_out, r);
     }
 
-    constexpr void sixel_to_cout() const {
+    void sixel_to_cout() const {
         std::string out;
         T<W, H, S, GR>::sixel(data,
                               [&out](char ch) mutable {
@@ -1931,14 +1931,28 @@ class image {
     }
 
     void png_to_iterm() const {
-        size_t buffer = 0;
-        size_t bits_collected = 0;
         std::string output;
         output.append("\033]1337;File=inline=1:");
+        append_png_as_base64(output);
+        output.append("\07");
+        std::cout << output << std::endl;
+    }
+
+    void png_to_kitty() const {
+        std::string output;
+        output.append("\033_Gf=100;");
+        append_png_as_base64(output);
+        output.append("\033\\");
+        std::cout << output << std::endl;
+    }
+
+ private:
+    void append_png_as_base64(std::string &output) const {
+        size_t buffer = 0;
+        size_t bits_collected = 0;
         T<W, H, S, GR>::png(data, [&buffer, &bits_collected, &output](char byte) mutable {
-            static constexpr char base64_chars[] =
-                "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-        
+            static constexpr char base64_chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
             buffer = (buffer << 8) | static_cast<uint8_t>(byte);
             bits_collected += 8;
             while (bits_collected >= 6) {
@@ -1946,18 +1960,16 @@ class image {
                 output.push_back(base64_chars[(buffer >> bits_collected) & 0x3F]);
             }
             return [&output]() mutable {
-                if (output.capacity() == 0) return;
+                if (output.capacity() == 0)
+                    return;
                 if (output.size() % 4) {
                     size_t padding = 4 - output.size() % 4;
                     while (padding--) output.push_back('=');
                 }
             };
         });
-        output.append("\07");
-        std::cout << output << std::endl;
     }
 
- private:
     constexpr void fill_circle_aa(int32_t cx, int32_t cy, int32_t r, int32_t ox, int32_t oy, uint8_t col) {
         int32_t x0 = cx - r - 1;
         int32_t y0 = cy - r - 1;
