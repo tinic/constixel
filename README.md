@@ -342,6 +342,12 @@ class image {
     // Convert the current instance into a sixel stream and output it to std::cout
     void sixel_to_cout();
 
+    // Convert the current instance into a png and display it in iTerm
+    void png_to_iterm();
+
+    // Convert the current instance into a png and display it in a terminal with kitty graphics support
+    void png_to_kitty();
+
     // Convert the current instance into a sixel stream. Provide a lambda function in the form of:
     //
     // image.sixel([](char ch) {
