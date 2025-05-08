@@ -59,15 +59,15 @@ static constexpr float fast_sqrtf(const float x) {
     if (k != 0) {
         i = 0x5ed9d098 - (i >> 1);
         y = std::bit_cast<float>(i);
-        y = 2.33139729f * y * fmaf(-x, y * y, 1.07492042f);
+        y = 2.33139729f * y * ((-x * y * y) + 1.07492042f);
     } else {
         i = 0x5f19d352 - (i >> 1);
         y = std::bit_cast<float>(i);
-        y = 0.82420468f * y * fmaf(-x, y * y, 2.14996147f);
+        y = 0.82420468f * y * ((-x * y * y) + 2.14996147f);
     }
     float c = x * y;
-    float r = fmaf(y, -c, 1.0f);
-    y = fmaf(0.5f * c, r, c);
+    float r = ((y * -c) + 1.0f);
+    y = ((0.5f * c * r) + c);
     return y;
 }
 
