@@ -97,8 +97,8 @@ static constexpr void hexdump(const uint8_t* data, std::size_t len) {
 }
 #endif  // #if 0
 
-#define SLOW_TESTS 1
-#define MAINLINE_TESTS 1
+#define SLOW_TESTS 0
+#define MAINLINE_TESTS 0
 
 #if MAINLINE_TESTS
 static constexpr std::string test0() {
@@ -715,6 +715,16 @@ int main() {
         int32_t sw = image->string_width<constixel::sf_compact_display_medium_48_aa>("ABCDEFGHIKLMNO");
         image->draw_string_aa<constixel::sf_compact_display_medium_48_aa>((512-sw)/2, 16, "ABCDEFGHIKLMNO", 15);
         image->sixel_to_cout();
+    }
+#endif  // #if 0
+
+#if 1
+    {
+        auto image = std::make_unique<constixel::image<constixel::format_1bit, 512, 96, 1, true>>();
+        image->fill_round_rect(0, 0, 512, 96, 32, 1);
+        int32_t sw = image->string_width<constixel::sf_compact_display_medium_48_aa>("ABCDEFGHIKLMNO");
+        image->draw_string_mono<constixel::sf_compact_display_medium_48_mono>((512-sw)/2, 16, "ABCDEFGHIKLMNO", 0);
+        image->png_to_iterm();
     }
 #endif  // #if 0
 

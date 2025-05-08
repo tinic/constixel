@@ -1930,6 +1930,33 @@ class image {
         std::cout << out << std::endl;
     }
 
+    void png_to_iterm() const {
+        size_t buffer = 0;
+        size_t bits_collected = 0;
+        std::string output;
+        output.append("\033]1337;File=inline=1:");
+        T<W, H, S, GR>::png(data, [&buffer, &bits_collected, &output](char byte) mutable {
+            static constexpr char base64_chars[] =
+                "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+        
+            buffer = (buffer << 8) | static_cast<uint8_t>(byte);
+            bits_collected += 8;
+            while (bits_collected >= 6) {
+                bits_collected -= 6;
+                output.push_back(base64_chars[(buffer >> bits_collected) & 0x3F]);
+            }
+            return [&output]() mutable {
+                if (output.capacity() == 0) return;
+                if (output.size() % 4) {
+                    size_t padding = 4 - output.size() % 4;
+                    while (padding--) output.push_back('=');
+                }
+            };
+        });
+        output.append("\07");
+        std::cout << output << std::endl;
+    }
+
  private:
     constexpr void fill_circle_aa(int32_t cx, int32_t cy, int32_t r, int32_t ox, int32_t oy, uint8_t col) {
         int32_t x0 = cx - r - 1;
