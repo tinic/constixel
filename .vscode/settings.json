@@ -64,5 +64,6 @@
         "iterator": "cpp"
     },
     "cmake.sourceDirectory": "/Users/turo/constixel/tests",
-    "editor.autoClosingBrackets": "never"
+    "editor.autoClosingBrackets": "never",
+    "terminal.integrated.enableImages": true
 }
