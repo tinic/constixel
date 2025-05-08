@@ -33,13 +33,13 @@ SOFTWARE.
 #include <vector>
 
 #include "constixel.h"
-#include "fonts/sf_compact_rounded_black_48_aa.h"
-#include "fonts/sf_mono_bold_48_aa.h"
-#include "fonts/sf_compact_rounded_black_48_mono.h"
 #include "fonts/sf_compact_display_bold_32_mono.h"
 #include "fonts/sf_compact_display_bold_48_mono.h"
-#include "fonts/sf_compact_display_medium_48_mono.h"
 #include "fonts/sf_compact_display_medium_48_aa.h"
+#include "fonts/sf_compact_display_medium_48_mono.h"
+#include "fonts/sf_compact_rounded_black_48_aa.h"
+#include "fonts/sf_compact_rounded_black_48_mono.h"
+#include "fonts/sf_mono_bold_48_aa.h"
 #include "fonts/sf_mono_bold_48_mono.h"
 #include "fonts/sf_mono_regular_18_mono.h"
 
@@ -97,6 +97,10 @@ static constexpr void hexdump(const uint8_t* data, std::size_t len) {
 }
 #endif  // #if 0
 
+#define SLOW_TESTS 1
+#define MAINLINE_TESTS 1
+
+#if MAINLINE_TESTS
 static constexpr std::string test0() {
     std::string out{};
     out.reserve(1UL << 20);
@@ -420,9 +424,7 @@ void draw_functions() {
         separator();
     }
 }
-
-#define SLOW_TESTS 1
-#define MAINLINE_TESTS 1
+#endif  // #ifdef MAINLINE_TESTS
 
 int main() {
 #if SLOW_TESTS
@@ -571,10 +573,10 @@ int main() {
         }
 
         image.clear();
-        std::array<uint8_t, 5> cols = {0,4,3,125,1};
+        std::array<uint8_t, 5> cols = {0, 4, 3, 125, 1};
         for (size_t i = 0; i < strings.size(); i++) {
             uint8_t col = constixel::color::GREY_RAMP_STOP - static_cast<uint8_t>(i * 3);
-            image.fill_rect(0,static_cast<int32_t>(i)*52+22,512,52,cols.at(i));
+            image.fill_rect(0, static_cast<int32_t>(i) * 52 + 22, 512, 52, cols.at(i));
             image.draw_string_aa<constixel::sf_compact_display_medium_48_aa>(16, 52 * static_cast<int32_t>(i) + 16, strings.at(i), col);
         }
         out.clear();
@@ -609,17 +611,17 @@ int main() {
         auto image = std::make_unique<constixel::image<constixel::format_8bit, 128, 256, 5>>();
         for (int32_t x = 0; x < 16; x++) {
             image->draw_string_aa<constixel::sf_compact_rounded_black_48_aa>(x * 7, x * 7, "Pack my box with five dozen liquor jugs", static_cast<uint8_t>(x));
-            image->draw_string_aa<constixel::sf_mono_bold_48_aa>(x * 7, x * 7 + 100, "Pack my box with five dozen liquor jugs", static_cast<uint8_t>(15-x));
+            image->draw_string_aa<constixel::sf_mono_bold_48_aa>(x * 7, x * 7 + 100, "Pack my box with five dozen liquor jugs", static_cast<uint8_t>(15 - x));
         }
         image->sixel_to_cout();
     }
-#endif // #if 0
+#endif  // #if 0
 
 #if MAINLINE_TESTS
     {
         auto image = std::make_unique<constixel::image<constixel::format_8bit, 768, 384, 1>>();
         image->fill_round_rect_aa(32, 32, 400, 100, 32, 3);
-        image->fill_round_rect_aa(32,200, 400, 64, 32, 1);
+        image->fill_round_rect_aa(32, 200, 400, 64, 32, 1);
         image->sixel_to_cout();
     }
 #endif  // #if 0
@@ -628,7 +630,7 @@ int main() {
     {
         auto image = std::make_unique<constixel::image<constixel::format_8bit, 768, 384, 1>>();
         image->fill_round_rect(32, 32, 400, 100, 32, 3);
-        image->fill_round_rect(32,200, 400, 64, 32, 1);
+        image->fill_round_rect(32, 200, 400, 64, 32, 1);
         image->sixel_to_cout();
     }
 #endif  // #if 0
@@ -641,7 +643,7 @@ int main() {
         image->fill_circle(14, 7, 7, 4);
 
         image->fill_circle_aa(4 + 24, 7, 4, 2);
-        image->fill_circle(4 + 24, 7,  4, 4);
+        image->fill_circle(4 + 24, 7, 4, 4);
 
         image->fill_circle_aa(4 + 24 + 8, 7, 2, 2);
         image->fill_circle(4 + 24 + 8, 7, 2, 4);
@@ -655,7 +657,7 @@ int main() {
         image->fill_circle_aa(4 + 24 + 8 + 4, 23, 1, 2);
 
         image->fill_circle(14, 40, 7, 4);
-        image->fill_circle(4 + 24, 40,  4, 4);
+        image->fill_circle(4 + 24, 40, 4, 4);
         image->fill_circle(4 + 24 + 8, 40, 2, 4);
         image->fill_circle(4 + 24 + 8 + 4, 40, 1, 4);
 
@@ -663,4 +665,16 @@ int main() {
     }
 #endif  // #if 0
 
+#if MAINLINE_TESTS
+    {
+        using image_type = constixel::image<constixel::format_8bit, 512, 512, 1, false>;
+
+        auto image = std::make_unique<image_type>();
+        image->draw_string_aa<constixel::sf_compact_rounded_black_48_aa>(0, 0, "Pack my box with five dozen liquor jugs", 1);
+        auto image_clone = std::make_unique<image_type>(image->clone());
+        auto image_copy = std::make_unique<image_type>();
+        image_copy->copy(*image_clone);
+        image_copy->sixel_to_cout();
+    }
+#endif  // #if 0
 }
