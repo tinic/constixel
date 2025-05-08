@@ -1633,6 +1633,10 @@ class image {
         T<W, H, S>::plot(data, static_cast<uint32_t>(x), static_cast<uint32_t>(y), col);
     }
 
+    [[nodiscard]] constexpr uint8_t get_nearest_color(uint8_t r, uint8_t g, uint8_t b) const {
+        return format.quant.nearest(r, g, b);
+    }
+
     template <typename FONT>
     [[nodiscard]] constexpr int32_t string_width(const char *str) {
         int32_t x = 0;
