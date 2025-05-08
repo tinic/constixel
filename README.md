@@ -274,7 +274,6 @@ class image {
     // Draw smoothed utf8 text. #include a antialiased font and specify the included struct as the template parameter.
     // Returns the current x caret position in pixels.
     // NOTE 1: This only works with constixel::format_8bit images
-    // NOTE 2: This is a very slow operation due to the brute force color quantization and will likely not consteval.
     template <typename FONT>
     constexpr int32_t draw_string_aa(int32_t x, int32_t y, const char *str, uint8_t col);
 
@@ -308,7 +307,7 @@ class image {
     // NOTE 1: This only works with constixel::format_8bit images
     void fill_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col);
 
-    // Get closest matching color in the palette for given rgb values (0-255 range)
+    // Get closest matching color in the palette for given rgb values
     uint8_t get_nearest_color(uint8_t r, uint8_t g, uint8_t b);
 
     // Get a populated RGBA buffer with the contents of this instance.
