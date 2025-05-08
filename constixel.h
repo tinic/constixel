@@ -689,6 +689,7 @@ class format {
 template <size_t W, size_t H, int32_t S, bool GR>
 class format_1bit : public format {
  public:
+    static constexpr bool grayscale = GR;
     static constexpr size_t bits_per_pixel = 1;
     static constexpr size_t bytes_per_line = (W * bits_per_pixel + 7) / 8;
     static constexpr size_t internal_height = ((H + 5) / 6) * 6;
@@ -871,6 +872,7 @@ class format_1bit : public format {
 template <size_t W, size_t H, int32_t S, bool GR>
 class format_2bit : public format {
  public:
+    static constexpr bool grayscale = GR;
     static constexpr size_t bits_per_pixel = 2;
     static constexpr size_t bytes_per_line = (W * bits_per_pixel + 7) / 8;
     static constexpr size_t internal_height = ((H + 5) / 6) * 6;
@@ -1070,6 +1072,7 @@ class format_2bit : public format {
 template <size_t W, size_t H, int32_t S, bool GR>
 class format_4bit : public format {
  public:
+    static constexpr bool grayscale = GR;
     static constexpr size_t bits_per_pixel = 4;
     static constexpr size_t bytes_per_line = (W * bits_per_pixel + 7) / 8;
     static constexpr size_t internal_height = ((H + 5) / 6) * 6;
@@ -1273,6 +1276,7 @@ class format_4bit : public format {
 template <size_t W, size_t H, int32_t S, bool GR>
 class format_8bit : public format {
  public:
+    static constexpr bool grayscale = GR;
     static constexpr size_t bits_per_pixel = 8;
     static constexpr size_t bytes_per_line = W;
     static constexpr size_t internal_height = ((H + 5) / 6) * 6;
@@ -1558,6 +1562,10 @@ class image {
     static_assert(S >= 1 && S <= 256);
 
  public:
+    [[nodiscard]] static constexpr size_t grayscale() {
+        return T<W, H, S, GR>::grayscale;
+    }
+
     [[nodiscard]] static constexpr size_t bit_depth() {
         return T<W, H, S, GR>::bits_per_pixel;
     }
