@@ -29,7 +29,7 @@ else()
 endif()
 
 if(NOT ${IS_CLANG} EQUAL -1)
-    set_source_files_properties(constixel_tests.cpp PROPERTIES COMPILE_FLAGS "-Os -fconstexpr-steps=33554432 -Weverything -Weffc++ -Wall -Wpedantic -Wextra -Wfloat-conversion -Wdouble-promotion -Wuninitialized -Wshadow -Wnon-virtual-dtor -Wunused -Woverloaded-virtual -Wmisleading-indentation -Wnull-dereference -Wstrict-aliasing -Wcast-align -Wconversion -Wno-c++98-compat -Wno-pre-c++14-compat -Wno-c++98-compat-local-type-template-args -Wno-c++20-compat -Wno-c++98-c++11-compat-binary-literal")
+    set_source_files_properties(constixel_tests.cpp PROPERTIES COMPILE_FLAGS "-Os -fconstexpr-steps=33554432 -Weverything -Weffc++ -Wall -Wpedantic -Wextra -Wfloat-conversion -Wdouble-promotion -Wuninitialized -Wshadow -Wnon-virtual-dtor -Wunused -Woverloaded-virtual -Wmisleading-indentation -Wnull-dereference -Wstrict-aliasing -Wcast-align -Wconversion -Wno-c++98-compat -Wno-pre-c++14-compat -Wno-c++98-compat-local-type-template-args -Wno-c++20-compat -Wno-c++98-c++11-compat-binary-literal -Wno-unsafe-buffer-usage")
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     set_source_files_properties(constixel_tests.cpp PROPERTIES COMPILE_FLAGS "-Os -fconstexpr-ops-limit=268435456 -Weffc++ -Wall -Wpedantic -Wextra -Wfloat-conversion -Wdouble-promotion -Wuninitialized -Wshadow -Wnon-virtual-dtor -Wunused -Woverloaded-virtual -Wmisleading-indentation -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wnull-dereference -Wstrict-aliasing -Wcast-align -Wconversion -Wno-volatile -Wuseless-cast")
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
