@@ -47,7 +47,7 @@ constixel is a single header minimalistic constexpr C++20 2D graphics palette ba
 
 - C++20
 - gcc 14 or newer, clang 16 or newer, MSVC 17 or newer
-- For viewing the sixel image you will need a capabable terminal. Windows Terminal, iTerm2 on MacOS and [some](https://www.arewesixelyet.com/) Linux terminals will work. In Visual Studio Code sixel display can enabled for all terminals using the ```"terminal.integrated.enableImages": true``` setting.
+- For viewing the sixel image you will need a sixel capabable terminal. Windows Terminal, iTerm2 on MacOS and [some](https://www.arewesixelyet.com/) Linux terminals will work. In Visual Studio Code sixel display can enabled for all terminals using the ```"terminal.integrated.enableImages": true``` setting. There is an option to output to a [kitty](https://sw.kovidgoyal.net/kitty/graphics-protocol/) graphics enabled terminal also.
 
 > [!NOTE]
 > The Terminal app on MacOS does not support sixel, please use iTerm2.
