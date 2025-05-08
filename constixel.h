@@ -1595,11 +1595,11 @@ class image {
         return data;
     }
 
-    [[nodiscard]] constexpr image<T, W, H, S> clone() const {
+    [[nodiscard]] constexpr image<T, W, H, S, GR> clone() const {
         return *this;
     }
 
-    constexpr void copy(const image<T, W, H, S> &src) {
+    constexpr void copy(const image<T, W, H, S, GR> &src) {
         data = src.data;
     }
 
