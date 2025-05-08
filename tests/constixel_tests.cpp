@@ -577,14 +577,20 @@ int main() {
             0, 0, "日本語の文章には、漢字（常用漢字）、カタカナ、ひらがな、そして句読点が含まれています。", 1);
         image.sixel_to_cout();
     }
+    {
+        constixel::image<constixel::format_8bit, 1024, 256, 1> image;
+        image.draw_string_aa<constixel::sf_compact_display_medium_48_aa>(
+            0, 0, "日本語の文章には、漢字（常用漢字）、カタカナ、ひらがな、そして句読点が含まれています。", 1);
+        image.sixel_to_cout();
+    }
 #endif  // #if 0
 
 #if 1
     {
-        auto image = std::make_unique<constixel::image<constixel::format_8bit, 1280, 384, 1>>();
+        auto image = std::make_unique<constixel::image<constixel::format_8bit, 128, 256, 5>>();
         for (int32_t x = 0; x < 16; x++) {
-            image->draw_string_aa<constixel::sf_compact_rounded_black_48_aa>(x * 8, x * 8, "Pack my box with five dozen liquor jugs", static_cast<uint8_t>(x));
-            image->draw_string_aa<constixel::sf_mono_bold_48_aa>(x * 8, x * 8 + 100, "Pack my box with five dozen liquor jugs", static_cast<uint8_t>(x));
+            image->draw_string_aa<constixel::sf_compact_rounded_black_48_aa>(x * 7, x * 7, "Pack my box with five dozen liquor jugs", static_cast<uint8_t>(x));
+            image->draw_string_aa<constixel::sf_mono_bold_48_aa>(x * 7, x * 7 + 100, "Pack my box with five dozen liquor jugs", static_cast<uint8_t>(15-x));
         }
         image->sixel_to_cout();
     }

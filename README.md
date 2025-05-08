@@ -297,6 +297,9 @@ class image {
     // Draw a filled circle
     void fill_circle(int32_t x, int32_t y, int32_t r, uint8_t col);
 
+    // Get closest matching color in the palette for given rgb values (0-255 range)
+    uint8_t get_nearest_color(uint8_t r, uint8_t g, uint8_t b);
+
     // Get a populated RGBA buffer with the contents of this instance.
     // Color 0 is special and will be set to 0x0000000 in the returned buffer, 
     // while all the other colors will be converted to a 0xffBBGGRR format.
