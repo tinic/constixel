@@ -1939,10 +1939,16 @@ class image {
     }
 
     void png_to_kitty() const {
-        std::string output;
-        output.append("\033_Gf=100;");
-        append_png_as_base64(output);
-        output.append("\033\\");
+        std::string base64{};
+        std::string output{};
+        append_png_as_base64(base64);
+        for (; base64.length();) {
+            output.append("\033_Gf=100;");
+            size_t bytes_to_append = std::min(base64.length(), static_cast<size_t>(4096));
+            output.append(base64.substr(0, bytes_to_append));
+            base64.erase(0, bytes_to_append);
+            output.append("\033\\");
+        }
         std::cout << output << std::endl;
     }
 
