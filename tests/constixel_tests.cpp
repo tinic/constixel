@@ -97,8 +97,8 @@ static constexpr void hexdump(const uint8_t* data, std::size_t len) {
 }
 #endif  // #if 0
 
-#define SLOW_TESTS 1
-#define MAINLINE_TESTS 1
+#define SLOW_TESTS 0
+#define MAINLINE_TESTS 0
 
 #if MAINLINE_TESTS
 static constexpr std::string test0() {
@@ -718,7 +718,7 @@ int main() {
     }
 #endif  // #if 0
 
-#if 0
+#if 1
     {
         auto image = std::make_unique<constixel::image<constixel::format_1bit, 512, 96, 1, true>>();
         image->fill_round_rect(0, 0, 512, 96, 32, 1);
