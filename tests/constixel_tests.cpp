@@ -677,4 +677,45 @@ int main() {
         image_copy->sixel_to_cout();
     }
 #endif  // #if 0
+
+#if MAINLINE_TESTS
+    {
+        auto image = std::make_unique<constixel::image<constixel::format_4bit, 512, 96, 1, true>>();
+        image->fill_round_rect_aa(0, 0, 512, 96, 32, 15);
+        int32_t sw = image->string_width<constixel::sf_compact_display_medium_48_aa>("ABCDEFGHIKLMNO");
+        image->draw_string_aa<constixel::sf_compact_display_medium_48_aa>((512-sw)/2, 16, "ABCDEFGHIKLMNO", 0);
+        image->sixel_to_cout();
+    }
+#endif  // #if 0
+
+#if MAINLINE_TESTS
+    {
+        auto image = std::make_unique<constixel::image<constixel::format_4bit, 512, 96, 1, false>>();
+        image->fill_round_rect_aa(0, 0, 512, 96, 32, 2);
+        int32_t sw = image->string_width<constixel::sf_compact_display_medium_48_aa>("ABCDEFGHIKLMNO");
+        image->draw_string_aa<constixel::sf_compact_display_medium_48_aa>((512-sw)/2, 16, "ABCDEFGHIKLMNO", 0);
+        image->sixel_to_cout();
+    }
+#endif  // #if 0
+
+#if MAINLINE_TESTS
+    {
+        auto image = std::make_unique<constixel::image<constixel::format_4bit, 512, 96, 1, false>>();
+        image->fill_round_rect_aa(0, 0, 512, 96, 32, constixel::color::GREY_20);
+        int32_t sw = image->string_width<constixel::sf_compact_display_medium_48_aa>("ABCDEFGHIKLMNO");
+        image->draw_string_aa<constixel::sf_compact_display_medium_48_aa>((512-sw)/2, 16, "ABCDEFGHIKLMNO", 2);
+        image->sixel_to_cout();
+    }
+#endif  // #if 0
+
+#if MAINLINE_TESTS
+    {
+        auto image = std::make_unique<constixel::image<constixel::format_4bit, 512, 96, 1, true>>();
+        image->fill_round_rect_aa(0, 0, 512, 96, 32, 3);
+        int32_t sw = image->string_width<constixel::sf_compact_display_medium_48_aa>("ABCDEFGHIKLMNO");
+        image->draw_string_aa<constixel::sf_compact_display_medium_48_aa>((512-sw)/2, 16, "ABCDEFGHIKLMNO", 15);
+        image->sixel_to_cout();
+    }
+#endif  // #if 0
+
 }
