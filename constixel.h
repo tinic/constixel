@@ -1920,13 +1920,9 @@ class image {
         y += ch.yoffset;
         const int32_t x2 = x + static_cast<int32_t>(ch.width);
         const int32_t y2 = y + static_cast<int32_t>(ch.height);
-        uint32_t rgba = format.palette[col];
-        float R = static_cast<float>((rgba >> 16) & 0xFF) * (1.0f / 255.0f);
-        float G = static_cast<float>((rgba >> 8) & 0xFF) * (1.0f / 255.0f);
-        float B = static_cast<float>((rgba >> 0) & 0xFF) * (1.0f / 255.0f);
-        float Rl = constixel::srgb_to_linear(R);
-        float Gl = constixel::srgb_to_linear(G);
-        float Bl = constixel::srgb_to_linear(B);
+        float Rl = format.quant.linearpal[col * 3 + 0];
+        float Gl = format.quant.linearpal[col * 3 + 1];
+        float Bl = format.quant.linearpal[col * 3 + 2];
         for (int32_t yy = y; yy < y2; yy++) {
             for (int32_t xx = x; xx < x2; xx++) {
                 const int32_t x_off = (xx - x) + ch.x % 2;
