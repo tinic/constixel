@@ -32,7 +32,7 @@ SOFTWARE.
 #include <string>
 #include <vector>
 
-#define SLOW_TESTS 0
+#define SLOW_TESTS 1
 #define MAINLINE_TESTS 1
 #define JP_TESTS 0
 
@@ -537,8 +537,8 @@ void draw_functions_aa() {
 
 template <typename FONT>
 void print_sizeof_font() {
-    std::print("{} {} {} ({}): {} bytes\n", FONT::name, FONT::style, FONT::size, FONT::mono ? "monochrome" : "antialiased",
-               sizeof(FONT::glyph_tree) + sizeof(FONT::glyph_bitmap) + sizeof(FONT::char_table));
+    printf("%s %s %d (%s): %d bytes\n", FONT::name, FONT::style, int(FONT::size), FONT::mono ? "monochrome" : "antialiased",
+               int(sizeof(FONT::glyph_tree) + sizeof(FONT::glyph_bitmap) + sizeof(FONT::char_table)));
 }
 
 #endif  // #ifdef MAINLINE_TESTS
