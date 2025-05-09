@@ -2192,7 +2192,7 @@ class image {
     }
 
     /*! Data formats for the convert function */
-    enum conversion_format {
+    enum device_format {
         STRAIGHT_THROUGH,     /*!< Just copy the data as is. */
         X_LEFT_TO_RIGHT_1BIT, /*!< 1-bit pixel data is stored from left to right, each byte containing 8 pixel values in the x direction. */
         Y_TOP_TO_BOTTOM_1BIT, /*!< 1-bit pixel data is stored from top to bottom, each byte containing 8 pixel values in the y direction. */
@@ -2210,7 +2210,7 @@ class image {
      * \param dst_format The desired data format.
      */
     template <typename F>
-    void convert(F &&char_out, conversion_format dst_format) {
+    void convert(F &&char_out, device_format dst_format) {
         switch (dst_format) {
             case STRAIGHT_THROUGH: {
                 for (auto c : data) {
@@ -2222,7 +2222,6 @@ class image {
                 for (auto c : data) {
                     char_out(static_cast<char>(c));
                 }
-                Ç
             } break;
             case Y_TOP_TO_BOTTOM_1BIT: {
                 static_assert(format.bit_depth == 1, "Bit depth must be 1.");
