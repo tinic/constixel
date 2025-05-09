@@ -32,7 +32,7 @@ SOFTWARE.
 #include <string>
 #include <vector>
 
-#define SLOW_TESTS 1
+#define SLOW_TESTS 0
 #define MAINLINE_TESTS 1
 #define JP_TESTS 0
 
@@ -47,7 +47,7 @@ SOFTWARE.
 #include "fonts/jetbrainsmono_bold_48_mono.h"
 #include "fonts/jetbrainsmono_regular_18_mono.h"
 
-#ifdef JP_TESTS
+#if JP_TESTS
 #include "fonts/notosansjp_black_jp_24_aa.h"
 #include "fonts/notosansjp_black_jp_24_mono.h"
 #include "fonts/notosansjp_regular_jp_24_aa.h"

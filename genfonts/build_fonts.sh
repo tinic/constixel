@@ -31,9 +31,9 @@ for font in "$FONT_DIR"/*.{ttf,otf}; do
   base="${font##*/}"
   base="${base%.*}"
   for size in "${SIZES[@]}"; do
-    ./fontbm/build/fontbm --font-file "$font" --font-size "$size" --chars "${CHARS}" --output "build/${base}_${size}" --texture-crop-width --texture-crop-height --tabular-numbers
+    ./fontbm/build/fontbm --font-file "$font" --font-size "$size" --chars "${CHARS}" --output "build/${base}_${size}" --extra-info --texture-crop-width --texture-crop-height --tabular-numbers
     ./build/genfont --font-file "build/${base}_${size}.fnt" --out-dir ../fonts
-    ./fontbm/build/fontbm --font-file "$font" --font-size "$size" --chars "${CHARS}" --output "build/${base}_${size}" --monochrome --texture-crop-width --texture-crop-height --tabular-numbers
+    ./fontbm/build/fontbm --font-file "$font" --font-size "$size" --chars "${CHARS}" --output "build/${base}_${size}" --monochrome --extra-info --texture-crop-width --texture-crop-height --tabular-numbers
     ./build/genfont --font-file "build/${base}_${size}.fnt" --out-dir ../fonts
   done
 done
