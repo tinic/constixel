@@ -1754,7 +1754,7 @@ class image {
         int32_t x = 0;
         while (*str != 0) {
             uint32_t utf32 = 0;
-            uint32_t lead = static_cast<uint32_t>(*str);
+            uint32_t lead = static_cast<uint32_t>(*str) & 0xFF;;
             if (lead < 0x80) {
                 utf32 = lead;
                 str += 1;
@@ -1762,7 +1762,7 @@ class image {
                 utf32 = ((lead & 0x1F) << 6) | (static_cast<uint32_t>(str[1]) & 0x3F);
                 str += 2;
             } else if ((lead >> 4) == 0x0E) {
-                utf32 = ((lead & 0x0F) << 12) | ((static_cast<uint32_t>(str[1]) & 0x3F) << 6) | (static_cast<uint32_t>(str[3]) & 0x3F);
+                utf32 = ((lead & 0x0F) << 12) | ((static_cast<uint32_t>(str[1]) & 0x3F) << 6) | (static_cast<uint32_t>(str[2]) & 0x3F);
                 str += 3;
             } else if ((lead >> 3) == 0x1E) {
                 utf32 = ((lead & 0x07) << 18) | ((static_cast<uint32_t>(str[1]) & 0x3F) << 12) | ((static_cast<uint32_t>(str[2]) & 0x3F) << 6) |
@@ -1803,7 +1803,7 @@ class image {
         static_assert(FONT::mono == true, "Can't use an antialiased font to draw mono/pixelized text.");
         while (*str != 0) {
             uint32_t utf32 = 0;
-            uint32_t lead = static_cast<uint32_t>(*str);
+            uint32_t lead = static_cast<uint32_t>(*str) & 0xFF;
             if (lead < 0x80) {
                 utf32 = lead;
                 str += 1;
@@ -1811,7 +1811,7 @@ class image {
                 utf32 = ((lead & 0x1F) << 6) | (static_cast<uint32_t>(str[1]) & 0x3F);
                 str += 2;
             } else if ((lead >> 4) == 0x0E) {
-                utf32 = ((lead & 0x0F) << 12) | ((static_cast<uint32_t>(str[1]) & 0x3F) << 6) | (static_cast<uint32_t>(str[3]) & 0x3F);
+                utf32 = ((lead & 0x0F) << 12) | ((static_cast<uint32_t>(str[1]) & 0x3F) << 6) | (static_cast<uint32_t>(str[2]) & 0x3F);
                 str += 3;
             } else if ((lead >> 3) == 0x1E) {
                 utf32 = ((lead & 0x07) << 18) | ((static_cast<uint32_t>(str[1]) & 0x3F) << 12) | ((static_cast<uint32_t>(str[2]) & 0x3F) << 6) |
@@ -1850,7 +1850,7 @@ class image {
         static_assert(FONT::mono == false, "Can't use a mono font to draw antialiased text.");
         while (*str != 0) {
             uint32_t utf32 = 0;
-            uint32_t lead = static_cast<uint32_t>(*str);
+            uint32_t lead = static_cast<uint32_t>(*str) & 0xFF;;
             if (lead < 0x80) {
                 utf32 = lead;
                 str += 1;
@@ -1858,7 +1858,7 @@ class image {
                 utf32 = ((lead & 0x1F) << 6) | (static_cast<uint32_t>(str[1]) & 0x3F);
                 str += 2;
             } else if ((lead >> 4) == 0x0E) {
-                utf32 = ((lead & 0x0F) << 12) | ((static_cast<uint32_t>(str[1]) & 0x3F) << 6) | (static_cast<uint32_t>(str[3]) & 0x3F);
+                utf32 = ((lead & 0x0F) << 12) | ((static_cast<uint32_t>(str[1]) & 0x3F) << 6) | (static_cast<uint32_t>(str[2]) & 0x3F);
                 str += 3;
             } else if ((lead >> 3) == 0x1E) {
                 utf32 = ((lead & 0x07) << 18) | ((static_cast<uint32_t>(str[1]) & 0x3F) << 12) | ((static_cast<uint32_t>(str[2]) & 0x3F) << 6) |
