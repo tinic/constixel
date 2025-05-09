@@ -362,5 +362,22 @@ class image {
     // Convert the current instance into a png and display it in a terminal with kitty graphics support
     void png_to_kitty();
 
+    /*! Data formats for the convert functions */
+    enum device_format {
+        STRAIGHT_THROUGH,     /*!< Just copy the data as is. */
+        X_LEFT_TO_RIGHT_1BIT, /*!< 1-bit pixel data is stored from left to right, each byte containing 8 pixel values in the x direction. */
+        Y_TOP_TO_BOTTOM_1BIT, /*!< 1-bit pixel data is stored from top to bottom, each byte containing 8 pixel values in the y direction. */
+        RGB565_8BIT_SERIAL,   /*!< RGB565 pixel data is stored from left to right, each two bytes containing 1 pixel value in the x direction.
+                                   Byte encoding: 0xRRRRRGGG 0xGGGBBBBB */
+        RGB666_8BIT_SERIAL_1, /*!< RGB565 pixel data is stored from left to right, each three bytes containing 1 pixel values in the x direction.
+                                   Byte encoding: 0x00RRRRRR 0x00GGGGGG 0x00BBBBBB */
+        RGB666_8BIT_SERIAL_2  /*!< RGB565 pixel data is stored from left to right, each three bytes containing 1 pixel values in the x direction.
+                                   Byte encoding: 0xRRRRRR00 0xGGGGGG00 0xBBBBBB00 */
+    };
+
+    // Convert the current instance into a byte stream formatted for embedded displays.
+    void convert(F &&char_out, device_format dst_format);
+    bool convert_chunk(char *dst, size_t chunk_size, size_t &chunk_actual, size_t &chunk_index, device_format dst_format);
+
 }
 ```
