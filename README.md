@@ -45,9 +45,8 @@ constixel is a single header minimalistic constexpr C++20 2D graphics palette ba
   
 ## Requirements
 
-- C++20
-- gcc 14 or newer, clang 16 or newer, MSVC 17 or newer
-- For viewing the sixel image you will need a sixel capabable terminal. Windows Terminal, iTerm2 on MacOS and [some](https://www.arewesixelyet.com/) Linux terminals will work. In Visual Studio Code sixel display can enabled for all terminals using the ```"terminal.integrated.enableImages": true``` setting. There is an option to output to a [kitty](https://sw.kovidgoyal.net/kitty/graphics-protocol/) graphics enabled terminal also.
+- C++20, i.e. gcc 13.3 or newer, clang 16 or newer, MSVC 17 or newer
+- For viewing the sixel image you will need a sixel capable terminal. Windows Terminal, iTerm2 on MacOS and [some](https://www.arewesixelyet.com/) Linux terminals will work. In Visual Studio Code sixel rendering can be enabled for all terminals using the ```"terminal.integrated.enableImages": true``` setting. There is also an option to output to a [kitty](https://sw.kovidgoyal.net/kitty/graphics-protocol/) graphics enabled terminal.
 
 > [!NOTE]
 > The Terminal app on MacOS does not support sixel, please use iTerm2.
@@ -343,15 +342,6 @@ class image {
     //
     void png(F &&charOut);
 
-    // Convert the current instance into a sixel stream and output it to std::cout
-    void sixel_to_cout();
-
-    // Convert the current instance into a png and display it in iTerm
-    void png_to_iterm();
-
-    // Convert the current instance into a png and display it in a terminal with kitty graphics support
-    void png_to_kitty();
-
     // Convert the current instance into a sixel stream. Provide a lambda function in the form of:
     //
     // image.sixel([](char ch) {
@@ -360,8 +350,17 @@ class image {
     //
     // Optionally you can provide a rectangle to get a portion of the image only.
     //
-    void sixel(F &&charOut, bool preserveBackground = true);
-    void sixel(F &&charOut, const constixel::rect<int32_t> &r, bool preserveBackground = true);
+    void sixel(F &&charOut);
+    void sixel(F &&charOut, const constixel::rect<int32_t> &r);
+
+    // Convert the current instance into a sixel stream and output it to std::cout
+    void sixel_to_cout();
+
+    // Convert the current instance into a png and display it in iTerm
+    void png_to_iterm();
+
+    // Convert the current instance into a png and display it in a terminal with kitty graphics support
+    void png_to_kitty();
 
 }
 ```
