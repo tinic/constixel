@@ -436,6 +436,49 @@ void draw_functions() {
         separator();
     }
 }
+
+template <typename T, size_t I>
+void draw_functions_aa() {
+    static T image;
+    image.clear();
+    puts("\033[2J\033[H");
+    for (int32_t c = 0; c < static_cast<int32_t>(I); c++) {
+        image.fill_rect(16 + c * 37, c * 32, 128, 128, static_cast<uint8_t>(c));
+        puts("\033[H");
+        std::string out;
+        out.reserve(1UL << 20);
+        image.sixel([&out](char ch) mutable {
+            out.push_back(ch);
+        });
+        puts(out.c_str());
+        printf("%d-bit %dpx %dpx fill_rect  \n", int(image.bit_depth()), int(image.width()), int(image.height()));
+        //separator();
+    }
+    for (int32_t c = 0; c < static_cast<int32_t>(I); c++) {
+        image.line_aa(16, 16, 64 + c * 42, 700, static_cast<uint8_t>(c), static_cast<uint8_t>(c));
+        puts("\033[H");
+        std::string out;
+        out.reserve(1UL << 20);
+        image.sixel([&out](char ch) mutable {
+            out.push_back(ch);
+        });
+        puts(out.c_str());
+        printf("%d-bit %dpx %dpx line       \n", int(image.bit_depth()), int(image.width()), int(image.height()));
+        //separator();
+    }
+    for (int32_t c = 0; c < static_cast<int32_t>(I); c++) {
+        image.fill_circle_aa(600, 384, 256 - c * 16, static_cast<uint8_t>(c));
+        puts("\033[H");
+        std::string out;
+        out.reserve(1UL << 20);
+        image.sixel([&out](char ch) mutable {
+            out.push_back(ch);
+        });
+        puts(out.c_str());
+        printf("%d-bit %dpx %dpx circle     \n", int(image.bit_depth()), int(image.width()), int(image.height()));
+        //separator();
+    }
+}
 #endif  // #ifdef MAINLINE_TESTS
 
 int main() {
@@ -486,6 +529,15 @@ int main() {
     draw_functions<constixel::image<constixel::format_1bit, 768, 768, 1, true>, 32>();
     draw_functions<constixel::image<constixel::format_2bit, 768, 768, 1, true>, 32>();
     draw_functions<constixel::image<constixel::format_4bit, 768, 768, 1, true>, 32>();
+    puts("\n");
+#endif  // #if 0
+
+#if MAINLINE_TESTS
+    draw_functions_aa<constixel::image<constixel::format_4bit, 768, 768>, 32>();
+    draw_functions_aa<constixel::image<constixel::format_8bit, 768, 768>, 32>();
+
+    draw_functions_aa<constixel::image<constixel::format_4bit, 768, 768, 1, true>, 32>();
+    draw_functions_aa<constixel::image<constixel::format_8bit, 768, 768, 1, true>, 32>();
     puts("\n");
 #endif  // #if 0
 
