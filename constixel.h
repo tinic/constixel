@@ -233,8 +233,11 @@ template <size_t N, typename T>
 class hextree {
     static constexpr T bitslices = ((sizeof(T) * 8) / 4) - 1;
 
+    static constexpr size_t child_nodes_n = 1UL << 4;
+    static constexpr size_t child_nodes_n_mask = child_nodes_n - 1;
+
     struct node {
-        T child[16]{};
+        T child[child_nodes_n]{};
         constexpr node() {
             for (auto &c : child) {
                 c = invalid;
@@ -261,7 +264,7 @@ class hextree {
         for (auto [key, val] : in) {
             T idx = 0;
             for (T d = 0; d < bitslices; d++) {
-                T nib = (key >> ((bitslices - d) * 4)) & 0xF;
+                T nib = (key >> ((bitslices - d) * 4)) & child_nodes_n_mask;
                 T next = nodes.at(idx).child[nib];
                 if (next == invalid) {
                     next = node_cnt;
@@ -270,7 +273,7 @@ class hextree {
                 }
                 idx = next;
             }
-            nodes.at(idx).child[key & 0xF] = val;
+            nodes.at(idx).child[key & child_nodes_n_mask] = val;
         }
     }
 
@@ -281,7 +284,7 @@ class hextree {
         for (auto [key, val] : in) {
             T idx = 0;
             for (T d = 0; d < bitslices; d++) {
-                T nib = (key >> ((bitslices - d) * 4)) & 0xF;
+                T nib = (key >> ((bitslices - d) * 4)) & child_nodes_n_mask;
                 T next = vnodes.at(idx).child[nib];
                 if (next == invalid) {
                     next = static_cast<T>(vnodes.size());
@@ -290,7 +293,7 @@ class hextree {
                 }
                 idx = next;
             }
-            vnodes.at(idx).child[key & 0xF] = val;
+            vnodes.at(idx).child[key & child_nodes_n_mask] = val;
         }
         return static_cast<T>(vnodes.size());
     }
@@ -298,14 +301,14 @@ class hextree {
     [[nodiscard]] constexpr T lookup(T key) const {
         T idx = 0;
         for (T d = 0; d < bitslices; ++d) {
-            T nib = (key >> ((bitslices - d) * 4)) & 0xF;
+            T nib = (key >> ((bitslices - d) * 4)) & child_nodes_n_mask;
             T next = nodes.at(idx).child[nib];
             if (next == invalid) {
                 return invalid;
             }
             idx = next;
         }
-        return nodes.at(idx).child[key & 0xF];
+        return nodes.at(idx).child[key & child_nodes_n_mask];
     }
 };
 
