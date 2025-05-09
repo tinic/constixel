@@ -186,7 +186,7 @@ int main() {
 
 ## Saving a PNG to disk example
 
-```
+```c++
 #include "constixel.h"
 #include <iostream>
 #include <filesystem>
