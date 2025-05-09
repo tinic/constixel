@@ -1583,32 +1583,32 @@ class image {
     }
 
     /**
-     * \brief Bit depth of the image
-     * \return Bit depth of the image
+     * \brief Bit depth of the image.
+     * \return Bit depth of the image.
      */
     [[nodiscard]] static constexpr size_t bit_depth() {
         return T<W, H, S, GR>::bits_per_pixel;
     }
 
     /**
-     * \brief Size in bytes of the image data
-     * \return Size in bytes of the image data
+     * \brief Size in bytes of the image data.
+     * \return Size in bytes of the image data.
      */
     [[nodiscard]] static constexpr size_t size() {
         return T<W, H, S, GR>::image_size;
     }
 
     /**
-     * \brief Width in pixels of the image
-     * \return Width in pixels of the image
+     * \brief Width in pixels of the image.
+     * \return Width in pixels of the image.
      */
     [[nodiscard]] static constexpr int32_t width() {
         return static_cast<int32_t>(W);
     }
 
     /**
-     * \brief Width in pixels of the image
-     * \return Width in pixels of the image
+     * \brief Width in pixels of the image.
+     * \return Width in pixels of the image.
      */
     [[nodiscard]] static constexpr int32_t height() {
         return static_cast<int32_t>(H);
@@ -1623,7 +1623,7 @@ class image {
 
     /**
      * \brief Get a reference to the underlying raw data of the image.
-     * \return const reference to the data array which contains the raw image data
+     * \return const reference to the data array which contains the raw image data.
      */
     [[nodiscard]] constexpr std::array<uint8_t, T<W, H, S, GR>::image_size> &data_ref() const {
         return data;
@@ -1631,27 +1631,27 @@ class image {
 
     /**
      * \brief Create a clone of this image.
-     * \return cloned image instance
+     * \return cloned image instance.
      */
     [[nodiscard]] constexpr image<T, W, H, S, GR> clone() const {
         return *this;
     }
     /**
      * \brief Copy source image into this instance. No compositing occurs.
-     * \param src source image
+     * \param src source image.
      */
     constexpr void copy(const image<T, W, H, S, GR> &src) {
         data = src.data;
     }
 
     /**
-     * \brief Draw a line with the specified color and thickness
-     * \param x0 starting x-coordinate in pixels
-     * \param y0 starting x-coordinate in pixels
-     * \param x1 ending x-coordinate in pixels
-     * \param y1 ending x-coordinate in pixels
-     * \param col palette color index to use
-     * \param stroke_width width of the stroke in pixels
+     * \brief Draw a line with the specified color and thickness.BLACK_OPAQUE
+     * \param x0 starting x-coordinate in pixels.
+     * \param y0 starting x-coordinate in pixels.
+     * \param x1 ending x-coordinate in pixels.
+     * \param y1 ending x-coordinate in pixels.
+     * \param col palette color index to use.
+     * \param stroke_width width of the stroke in pixels.
      */
     constexpr void line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, uint32_t stroke_width = 1) {
         int32_t steep = abs(y1 - y0) > abs(x1 - x0);
@@ -1716,10 +1716,10 @@ class image {
     }
 
     /**
-     * \brief Draw a line with the specified color and thickness
-     * \param rect rectangle containing the line coordinates in pixels
-     * \param col palette color index to use
-     * \param stroke_width width of the stroke in pixels
+     * \brief Draw a line with the specified color and thickness.
+     * \param rect rectangle containing the line coordinates in pixels.
+     * \param col palette color index to use.
+     * \param stroke_width width of the stroke in pixels.
      */
     constexpr void line(const rect<int32_t> &rect, uint8_t col, uint32_t stroke_width = 1) {
         line(rect.x, rect.y, rect.x + rect.w, rect.y + rect.h, col, stroke_width);
@@ -1727,9 +1727,9 @@ class image {
 
     /**
      * \brief Plot a single pixel at the specified coordinates used the supplied color.
-     * \param x x-coordinate in pixels
-     * \param y y-coordinate in pixels
-     * \param col palette color index to use
+     * \param x x-coordinate in pixels.
+     * \param y y-coordinate in pixels.
+     * \param col palette color index to use.
      */
     constexpr void plot(int32_t x, int32_t y, uint8_t col) {
         if (x < 0 || x >= static_cast<int32_t>(W) || y < 0 || y >= static_cast<int32_t>(H)) {
@@ -1750,7 +1750,7 @@ class image {
 
     /**
      * \brief Return the width of a string using the specified font in the template parameter.
-     * \param str UTF-8 string
+     * \param str UTF-8 string.
      */
     template <typename FONT>
     [[nodiscard]] constexpr int32_t string_width(const char *str) {
@@ -1786,14 +1786,14 @@ class image {
 
     /**
      * \brief Draw text at the specified coordinate. The template parameter selects which mono font to use. Only format_8bit targets are supported.
-     * \param x starting x-coordinate in pixels
-     * \param y starting y-coordinate in pixels
-     * \param str UTF-8 string
-     * \param col palette color index to use
+     * \param x starting x-coordinate in pixels.
+     * \param y starting y-coordinate in pixels.
+     * \param str UTF-8 string.
+     * \param col palette color index to use.
      */
     template <typename FONT>
     constexpr int32_t draw_string_mono(int32_t x, int32_t y, const char *str, uint8_t col) {
-        static_assert(FONT::mono == true, "Can't use a antialiased font to draw mono/pixelized text.");
+        static_assert(FONT::mono == true, "Can't use an antialiased font to draw mono/pixelized text.");
         while (*str != 0) {
             uint32_t utf32 = 0;
             uint32_t lead = static_cast<uint32_t>(*str);
@@ -1823,10 +1823,10 @@ class image {
     /**
      * \brief Draw antialiased text at the specified coordinate. The template parameter selects which antialiased font to use. Only format_8bit targets are
      * supported.
-     * \param x starting x-coordinate in pixels
-     * \param y starting y-coordinate in pixels
-     * \param str UTF-8 string
-     * \param col palette color index to use
+     * \param x starting x-coordinate in pixels.
+     * \param y starting y-coordinate in pixels.
+     * \param str UTF-8 string.
+     * \param col palette color index to use.
      */
     template <typename FONT>
     constexpr int32_t draw_string_aa(int32_t x, int32_t y, const char *str, uint8_t col) {
@@ -1859,11 +1859,11 @@ class image {
 
     /**
      * \brief Draw a fill rectangle with the specified color.
-     * \param x starting x-coordinate in pixels
-     * \param y starting y-coordinate in pixels
-     * \param w width of the rectangle
-     * \param h height of the rectangle
-     * \param col palette color index to use
+     * \param x starting x-coordinate in pixels.
+     * \param y starting y-coordinate in pixels.
+     * \param w width of the rectangle.
+     * \param h height of the rectangle.
+     * \param col palette color index to use.
      */
     constexpr void fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col) {
         if (y < 0) {
@@ -1881,8 +1881,8 @@ class image {
 
     /**
      * \brief Draw a fill rectangle with the specified color.
-     * \param rect rectangle containing the line coordinates in pixels
-     * \param col palette color index to use
+     * \param rect rectangle containing the line coordinates in pixels.
+     * \param col palette color index to use.
      */
     constexpr void fill_rect(const rect<int32_t> &rect, uint8_t col) {
         fill_rect(rect.x, rect.y, rect.w, rect.h, col);
@@ -1890,12 +1890,12 @@ class image {
 
     /**
      * \brief Draw a stroked rectangle with the specified color and stroke width.
-     * \param x starting x-coordinate in pixels
-     * \param y starting y-coordinate in pixels
-     * \param w width of the rectangle
-     * \param h height of the rectangle
-     * \param col palette color index to use
-     * \param stroke_width width of the stroke in pixels
+     * \param x starting x-coordinate in pixels.
+     * \param y starting y-coordinate in pixels.
+     * \param w width of the rectangle.
+     * \param h height of the rectangle.
+     * \param col palette color index to use.
+     * \param stroke_width width of the stroke in pixels.
      */
     constexpr void stroke_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col, uint32_t stroke_width = 1) {
         line(x, y, x + w, y, col, stroke_width);
@@ -1906,9 +1906,9 @@ class image {
 
     /**
      * \brief Draw a stroked rectangle with the specified color and stroke width.
-     * \param rect rectangle containing the line coordinates in pixels
-     * \param col palette color index to use
-     * \param stroke_width width of the stroke in pixels
+     * \param rect rectangle containing the line coordinates in pixels.
+     * \param col palette color index to use.
+     * \param stroke_width width of the stroke in pixels.
      */
     constexpr void stroke_rect(const rect<int32_t> &rect, uint8_t col, uint32_t stroke_width = 1) {
         stroke_rect(rect.x, rect.y, rect.w, rect.h, col, stroke_width);
@@ -1916,10 +1916,10 @@ class image {
 
     /**
      * \brief Draw a filled circle with the specified radius and color.
-     * \param cx center x-coordinate of the circle in pixels
-     * \param cy center y-coordinate of the circle in pixels
-     * \param radius radius of the circle in pixels
-     * \param col palette color index to use
+     * \param cx center x-coordinate of the circle in pixels.
+     * \param cy center y-coordinate of the circle in pixels.
+     * \param radius radius of the circle in pixels.
+     * \param col palette color index to use.
      */
     constexpr void fill_circle(int32_t cx, int32_t cy, int32_t radius, uint8_t col) {
         if (radius == 1) {
@@ -1933,11 +1933,11 @@ class image {
     }
 
     /**
-     * \brief Draw a antialiased filled circle with the specified radius and color. Only format_8bit targets are supported.
-     * \param cx center x-coordinate of the circle in pixels
-     * \param cy center y-coordinate of the circle in pixels
-     * \param radius radius of the circle in pixels
-     * \param col palette color index to use
+     * \brief Draw an antialiased filled circle with the specified radius and color. Only format_8bit targets are supported.
+     * \param cx center x-coordinate of the circle in pixels.
+     * \param cy center y-coordinate of the circle in pixels.
+     * \param radius radius of the circle in pixels.
+     * \param col palette color index to use.
      */
     constexpr void fill_circle_aa(int32_t cx, int32_t cy, int32_t radius, uint8_t col) {
         fill_circle_aa(cx, cy, radius, 0, 0, col);
@@ -1945,11 +1945,11 @@ class image {
 
     /**
      * \brief Draw a rounded rectangle with the specified color.
-     * \param x starting x-coordinate in pixels
-     * \param y starting y-coordinate in pixels
-     * \param w width of the rectangle
-     * \param h height of the rectangle
-     * \param col palette color index to use
+     * \param x starting x-coordinate in pixels.
+     * \param y starting y-coordinate in pixels.
+     * \param w width of the rectangle.
+     * \param h height of the rectangle.
+     * \param col palette color index to use.
      */
     constexpr void fill_round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col) {
         int32_t cr = std::min((w) / 2, std::min((w) / 2, radius));
@@ -1967,19 +1967,19 @@ class image {
     /**
      * \brief Draw a rounded rectangle with the specified color.
      * \param rect rectangle containing the line coordinates in pixels
-     * \param col palette color index to use
+     * \param col palette color index to use.
      */
     constexpr void fill_round_rect(const rect<int32_t> &rect, int32_t radius, uint8_t col) {
         stroke_rect(rect.x, rect.y, rect.w, rect.h, radius, col);
     }
 
     /**
-     * \brief Draw a antialiased rounded rectangle with the specified color. Only format_8bit targets are supported.
-     * \param x starting x-coordinate in pixels
-     * \param y starting y-coordinate in pixels
-     * \param w width of the rectangle
-     * \param h height of the rectangle
-     * \param col palette color index to use
+     * \brief Draw an antialiased rounded rectangle with the specified color. Only format_8bit targets are supported.
+     * \param x starting x-coordinate in pixels.
+     * \param y starting y-coordinate in pixels.
+     * \param w width of the rectangle.
+     * \param h height of the rectangle.
+     * \param col palette color index to use.
      */
     constexpr void fill_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t r, uint8_t col) {
         int32_t cr = std::min((w) / 2, std::min((w) / 2, r));
@@ -1992,22 +1992,41 @@ class image {
     }
 
     /**
-     * \brief Draw a antialiased rounded rectangle with the specified color. Only format_8bit targets are supported.
-     * \param rect rectangle containing the line coordinates in pixels
-     * \param col palette color index to use
+     * \brief Draw an antialiased rounded rectangle with the specified color. Only format_8bit targets are supported.
+     * \param rect rectangle containing the line coordinates in pixels.
+     * \param col palette color index to use.
      */
     constexpr void fill_round_rect_aa(const rect<int32_t> &rect, int32_t radius, uint8_t col) {
         fill_round_rect_aa(rect.x, rect.y, rect.w, rect.h, radius, col);
     }
 
+    /**
+     * \brief Convert this instance to an equivalent RGBA8 data array.
+     * \return RGBA8 array made of uint32_t values.
+     */
     [[nodiscard]] constexpr std::array<uint32_t, W * H> RGBA_uint32() const {
         return T<W, H, S, GR>::RGBA_uint32(data);
     }
 
+    /**
+     * \brief Convert this instance to an equivalent RGBA8 data array.
+     * \return RGBA8 array made of uint8_t values.
+     */
     [[nodiscard]] constexpr std::array<uint8_t, W * H * 4> RGBA_uint8() const {
         return T<W, H, S, GR>::RGBA_uint8(data);
     }
 
+    /**
+     * \brief Blit an RGBA8 buffer into this instance using brute force color mapping.
+     * \param x starting x-coordinate position in the target instance in pixels
+     * \param y starting y-coordinate position in the target instance in pixels
+     * \param w width of the rectangle. If the width is smaller than the RGBA8 buffer content will be clipped.
+     * \param h height of the rectangle. If the height is smaller than the RGBA8 buffer content will be clipped.
+     * \param ptr pointer to the RGBA8 buffer.
+     * \param iw width in pixels of the RGBA8 buffer.
+     * \param ih height in pixels of the RGBA8 buffer.
+     * \param stride bytes per line of pixels of the RGBA8 buffer.
+     */
     constexpr void blit_RGBA(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
         rect<int32_t> blitrect{x, y, w, h};
         blitrect &= {0, 0, W, H};
@@ -2015,13 +2034,32 @@ class image {
         T<W, H, S, GR>::blit_RGBA(data, blitrect, ptr, stride);
     }
 
-    constexpr void blit_RGBA(const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
-        rect<int32_t> blitrect{r};
+    /**
+     * \brief Blit an RGBA8 buffer into this instance using brute force color mapping.
+     * \param dstrect rectangular area in the target buffer to blit into. If the rectangle is smaller than the RGBA8 buffer, clipping occurs.
+     * \param ptr pointer to the RGBA8 buffer.
+     * \param iw width in pixels of the RGBA8 buffer.
+     * \param ih height in pixels of the RGBA8 buffer.
+     * \param stride bytes per line of pixels of the RGBA8 buffer.
+     */
+    constexpr void blit_RGBA(const rect<int32_t> &dstrect, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
+        rect<int32_t> blitrect{dstrect};
         blitrect &= {0, 0, W, H};
-        blitrect &= {r.x, r.y, iw, ih};
+        blitrect &= {dstrect.x, dstrect.y, iw, ih};
         T<W, H, S, GR>::blit_RGBA(data, blitrect, ptr, stride);
     }
 
+    /**
+     * \brief Blit an RGBA8 buffer into this instance using brute force color mapping. Simple integer based diffusion is applied.
+     * \param x starting x-coordinate position in the target instance in pixels
+     * \param y starting y-coordinate position in the target instance in pixels
+     * \param w width of the rectangle. If the width is smaller than the RGBA8 buffer content will be clipped.
+     * \param h height of the rectangle. If the height is smaller than the RGBA8 buffer content will be clipped.
+     * \param ptr pointer to the RGBA8 buffer.
+     * \param iw width in pixels of the RGBA8 buffer.
+     * \param ih height in pixels of the RGBA8 buffer.
+     * \param stride bytes per line of pixels of the RGBA8 buffer.
+     */
     constexpr void blit_RGBA_diffused(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
         rect<int32_t> blitrect{x, y, w, h};
         blitrect &= {0, 0, W, H};
@@ -2029,13 +2067,32 @@ class image {
         T<W, H, S, GR>::blit_RGBA_diffused(data, blitrect, ptr, stride);
     }
 
-    constexpr void blit_RGBA_diffused(const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
-        rect<int32_t> blitrect{r};
+    /**
+     * \brief Blit an RGBA8 buffer into this instance using brute force color mapping. Simple integer based diffusion is applied.
+     * \param dstrect rectangular area in the target buffer to blit into. If the rectangle is smaller than the RGBA8 buffer, clipping occurs.
+     * \param ptr pointer to the RGBA8 buffer.
+     * \param iw width in pixels of the RGBA8 buffer.
+     * \param ih height in pixels of the RGBA8 buffer.
+     * \param stride bytes per line of pixels of the RGBA8 buffer.
+     */
+    constexpr void blit_RGBA_diffused(const rect<int32_t> &dstrect, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
+        rect<int32_t> blitrect{dstrect};
         blitrect &= {0, 0, W, H};
-        blitrect &= {r.x, r.y, iw, ih};
+        blitrect &= {dstrect.x, dstrect.y, iw, ih};
         T<W, H, S, GR>::blit_RGBA_diffused(data, blitrect, ptr, stride);
     }
 
+    /**
+     * \brief Blit an RGBA8 buffer into this instance using brute force color mapping. Diffusion in linear color space is applied.
+     * \param x starting x-coordinate position in the target instance in pixels
+     * \param y starting y-coordinate position in the target instance in pixels
+     * \param w width of the rectangle. If the width is smaller than the RGBA8 buffer content will be clipped.
+     * \param h height of the rectangle. If the height is smaller than the RGBA8 buffer content will be clipped.
+     * \param ptr pointer to the RGBA8 buffer.
+     * \param iw width in pixels of the RGBA8 buffer.
+     * \param ih height in pixels of the RGBA8 buffer.
+     * \param stride bytes per line of pixels of the RGBA8 buffer.
+     */
     constexpr void blit_RGBA_diffused_linear(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
         rect<int32_t> blitrect{x, y, w, h};
         blitrect &= {0, 0, W, H};
@@ -2043,10 +2100,18 @@ class image {
         T<W, H, S, GR>::blit_RGBA_diffused_linear(data, blitrect, ptr, stride);
     }
 
-    constexpr void blit_RGBA_diffused_linear(const rect<int32_t> &r, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
-        rect<int32_t> blitrect{r};
+    /**
+     * \brief Blit an RGBA8 buffer into this instance using brute force color mapping. Diffusion in linear color space is applied.
+     * \param dstrect rectangular area in the target buffer to blit into. If the rectangle is smaller than the RGBA8 buffer, clipping occurs.
+     * \param ptr pointer to the RGBA8 buffer.
+     * \param iw width in pixels of the RGBA8 buffer.
+     * \param ih height in pixels of the RGBA8 buffer.
+     * \param stride bytes per line of pixels of the RGBA8 buffer.
+     */
+    constexpr void blit_RGBA_diffused_linear(const rect<int32_t> &dstrect, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
+        rect<int32_t> blitrect{dstrect};
         blitrect &= {0, 0, W, H};
-        blitrect &= {r.x, r.y, iw, ih};
+        blitrect &= {dstrect.x, dstrect.y, iw, ih};
         T<W, H, S, GR>::blit_RGBA_diffused_linear(data, blitrect, ptr, stride);
     }
 
@@ -2071,7 +2136,7 @@ class image {
     /**
      * \brief Convert the current instance into a sixel stream.
      * \param char_out A lambda function which consumes the sixel stream data one byte at a time
-     * \param rect clipping rectangle to show only a portion of the image
+     * \param rect clipping rectangle; to only show a portion of the image.
      */
     template <typename F>
     constexpr void sixel(F &&char_out, const rect<int32_t> &rect) const {
@@ -2198,7 +2263,7 @@ class image {
 
     template <typename FONT>
     constexpr void draw_char_mono(int32_t x, int32_t y, const char_info &ch, uint8_t col) {
-        static_assert(FONT::mono == true, "Can't use a antialiased font to draw mono/pixelized text.");
+        static_assert(FONT::mono == true, "Can't use an antialiased font to draw mono/pixelized text.");
         int32_t ch_data_off = static_cast<int32_t>(ch.y) * static_cast<int32_t>(FONT::glyph_bitmap_stride) + static_cast<int32_t>(ch.x) / 8;
         x += ch.xoffset;
         y += ch.yoffset;
