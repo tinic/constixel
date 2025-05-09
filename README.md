@@ -343,15 +343,6 @@ class image {
     //
     void png(F &&charOut);
 
-    // Convert the current instance into a sixel stream and output it to std::cout
-    void sixel_to_cout();
-
-    // Convert the current instance into a png and display it in iTerm
-    void png_to_iterm();
-
-    // Convert the current instance into a png and display it in a terminal with kitty graphics support
-    void png_to_kitty();
-
     // Convert the current instance into a sixel stream. Provide a lambda function in the form of:
     //
     // image.sixel([](char ch) {
@@ -360,8 +351,17 @@ class image {
     //
     // Optionally you can provide a rectangle to get a portion of the image only.
     //
-    void sixel(F &&charOut, bool preserveBackground = true);
-    void sixel(F &&charOut, const constixel::rect<int32_t> &r, bool preserveBackground = true);
+    void sixel(F &&charOut);
+    void sixel(F &&charOut, const constixel::rect<int32_t> &r);
+
+    // Convert the current instance into a sixel stream and output it to std::cout
+    void sixel_to_cout();
+
+    // Convert the current instance into a png and display it in iTerm
+    void png_to_iterm();
+
+    // Convert the current instance into a png and display it in a terminal with kitty graphics support
+    void png_to_kitty();
 
 }
 ```
