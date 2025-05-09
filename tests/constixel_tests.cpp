@@ -32,16 +32,31 @@ SOFTWARE.
 #include <string>
 #include <vector>
 
+#define SLOW_TESTS 1
+#define MAINLINE_TESTS 1
+#define JP_TESTS 0
+
 #include "constixel.h"
+#include "fonts/inter_bold_48_aa.h"
+#include "fonts/inter_bold_48_mono.h"
 #include "fonts/interdisplay_bold_32_mono.h"
 #include "fonts/interdisplay_bold_48_mono.h"
 #include "fonts/interdisplay_medium_48_aa.h"
 #include "fonts/interdisplay_medium_48_mono.h"
-#include "fonts/inter_bold_48_aa.h"
-#include "fonts/inter_bold_48_mono.h"
 #include "fonts/jetbrainsmono_bold_48_aa.h"
 #include "fonts/jetbrainsmono_bold_48_mono.h"
 #include "fonts/jetbrainsmono_regular_18_mono.h"
+
+#ifdef JP_TESTS
+#include "fonts/notosansjp_black_jp_24_aa.h"
+#include "fonts/notosansjp_black_jp_24_mono.h"
+#include "fonts/notosansjp_regular_jp_24_aa.h"
+#include "fonts/notosansjp_regular_jp_24_mono.h"
+#include "fonts/notosansjp_regular_jp_48_aa.h"
+#include "fonts/notosansjp_regular_jp_48_mono.h"
+#include "fonts/notosansjp_thin_jp_24_aa.h"
+#include "fonts/notosansjp_thin_jp_24_mono.h"
+#endif  // #ifdef JP_TESTS
 
 #if __GNUC__
 #pragma GCC diagnostic push
@@ -96,9 +111,6 @@ static constexpr void hexdump(const uint8_t* data, std::size_t len) {
     }
 }
 #endif  // #if 0
-
-#define SLOW_TESTS 0
-#define MAINLINE_TESTS 1
 
 #if MAINLINE_TESTS
 static constexpr std::string test0() {
@@ -591,17 +603,37 @@ int main() {
     }
 #endif  // #if 0
 
-#if MAINLINE_TESTS
+#if JP_TESTS
     {
-        constixel::image<constixel::format_1bit, 1024, 256, 1> image;
-        image.draw_string_mono<constixel::inter_bold_48_mono>(
-            0, 0, "日本語の文章には、漢字（常用漢字）、カタカナ、ひらがな、そして句読点が含まれています。", 1);
+        static constixel::image<constixel::format_8bit, 2048, 128, 1> image;
+        image.draw_string_aa<constixel::notosansjp_thin_jp_24_aa>(
+            0, 0, "日本語の文章には、漢字(常用漢字)、カタカナ、ひらがな、そして句読点が含まれています。", 1);
+        image.draw_string_aa<constixel::notosansjp_black_jp_24_aa>(
+            0, 64, "日本語の文章には、漢字(常用漢字)、カタカナ、ひらがな、そして句読点が含まれています。", 1);
         image.sixel_to_cout();
     }
     {
-        constixel::image<constixel::format_8bit, 1024, 256, 1> image;
-        image.draw_string_aa<constixel::inter_bold_48_aa>(
-            0, 0, "日本語の文章には、漢字（常用漢字）、カタカナ、ひらがな、そして句読点が含まれています。", 1);
+        static constixel::image<constixel::format_1bit, 2048, 128, 1> image;
+        image.draw_string_mono<constixel::notosansjp_thin_jp_24_mono>(
+            0, 0, "日本語の文章には、漢字(常用漢字)、カタカナ、ひらがな、そして句読点が含まれています。", 1);
+        image.draw_string_mono<constixel::notosansjp_black_jp_24_mono>(
+            0, 64, "日本語の文章には、漢字(常用漢字)、カタカナ、ひらがな、そして句読点が含まれています。", 1);
+        image.sixel_to_cout();
+    }
+    {
+        static constixel::image<constixel::format_1bit, 2048, 128, 1> image;
+        image.draw_string_mono<constixel::notosansjp_regular_jp_48_mono>(
+            0, 0, "日本語の文章には、漢字(常用漢字)、カタカナ、ひらがな、そして句読点が含まれています。", 1);
+        image.draw_string_mono<constixel::notosansjp_regular_jp_24_mono>(
+            0, 64, "日本語の文章には、漢字(常用漢字)、カタカナ、ひらがな、そして句読点が含まれています。", 1);
+        image.sixel_to_cout();
+    }
+    {
+        static constixel::image<constixel::format_8bit, 2048, 128, 1> image;
+        image.draw_string_aa<constixel::notosansjp_regular_jp_48_aa>(
+            0, 0, "日本語の文章には、漢字(常用漢字)、カタカナ、ひらがな、そして句読点が含まれています。", 1);
+        image.draw_string_aa<constixel::notosansjp_regular_jp_24_aa>(
+            0, 64, "日本語の文章には、漢字(常用漢字)、カタカナ、ひらがな、そして句読点が含まれています。", 1);
         image.sixel_to_cout();
     }
 #endif  // #if 0
@@ -611,7 +643,8 @@ int main() {
         auto image = std::make_unique<constixel::image<constixel::format_8bit, 128, 256, 5>>();
         for (int32_t x = 0; x < 16; x++) {
             image->draw_string_aa<constixel::inter_bold_48_aa>(x * 7, x * 7, "Pack my box with five dozen liquor jugs", static_cast<uint8_t>(x));
-            image->draw_string_aa<constixel::jetbrainsmono_bold_48_aa>(x * 7, x * 7 + 100, "Pack my box with five dozen liquor jugs", static_cast<uint8_t>(15 - x));
+            image->draw_string_aa<constixel::jetbrainsmono_bold_48_aa>(x * 7, x * 7 + 100, "Pack my box with five dozen liquor jugs",
+                                                                       static_cast<uint8_t>(15 - x));
         }
         image->sixel_to_cout();
     }
@@ -683,7 +716,7 @@ int main() {
         auto image = std::make_unique<constixel::image<constixel::format_4bit, 512, 96, 1, true>>();
         image->fill_round_rect_aa(0, 0, 512, 96, 32, 15);
         int32_t sw = image->string_width<constixel::interdisplay_medium_48_aa>("ABCDEFGHIKLMNO");
-        image->draw_string_aa<constixel::interdisplay_medium_48_aa>((512-sw)/2, 16, "ABCDEFGHIKLMNO", 0);
+        image->draw_string_aa<constixel::interdisplay_medium_48_aa>((512 - sw) / 2, 16, "ABCDEFGHIKLMNO", 0);
         image->sixel_to_cout();
     }
 #endif  // #if 0
@@ -693,7 +726,7 @@ int main() {
         auto image = std::make_unique<constixel::image<constixel::format_4bit, 512, 96, 1, false>>();
         image->fill_round_rect_aa(0, 0, 512, 96, 32, 2);
         int32_t sw = image->string_width<constixel::interdisplay_medium_48_aa>("ABCDEFGHIKLMNO");
-        image->draw_string_aa<constixel::interdisplay_medium_48_aa>((512-sw)/2, 16, "ABCDEFGHIKLMNO", 0);
+        image->draw_string_aa<constixel::interdisplay_medium_48_aa>((512 - sw) / 2, 16, "ABCDEFGHIKLMNO", 0);
         image->sixel_to_cout();
     }
 #endif  // #if 0
@@ -703,7 +736,7 @@ int main() {
         auto image = std::make_unique<constixel::image<constixel::format_4bit, 512, 96, 1, false>>();
         image->fill_round_rect_aa(0, 0, 512, 96, 32, constixel::color::GREY_20);
         int32_t sw = image->string_width<constixel::interdisplay_medium_48_aa>("ABCDEFGHIKLMNO");
-        image->draw_string_aa<constixel::interdisplay_medium_48_aa>((512-sw)/2, 16, "ABCDEFGHIKLMNO", 2);
+        image->draw_string_aa<constixel::interdisplay_medium_48_aa>((512 - sw) / 2, 16, "ABCDEFGHIKLMNO", 2);
         image->sixel_to_cout();
     }
 #endif  // #if 0
@@ -713,7 +746,7 @@ int main() {
         auto image = std::make_unique<constixel::image<constixel::format_4bit, 512, 96, 1, true>>();
         image->fill_round_rect_aa(0, 0, 512, 96, 32, 3);
         int32_t sw = image->string_width<constixel::interdisplay_medium_48_aa>("ABCDEFGHIKLMNO");
-        image->draw_string_aa<constixel::interdisplay_medium_48_aa>((512-sw)/2, 16, "ABCDEFGHIKLMNO", 15);
+        image->draw_string_aa<constixel::interdisplay_medium_48_aa>((512 - sw) / 2, 16, "ABCDEFGHIKLMNO", 15);
         image->sixel_to_cout();
     }
 #endif  // #if 0
@@ -737,5 +770,4 @@ int main() {
         image->png_to_kitty();
     }
 #endif  // #if 0
-
 }
