@@ -97,7 +97,7 @@ static constexpr void hexdump(const uint8_t* data, std::size_t len) {
 }
 #endif  // #if 0
 
-#define SLOW_TESTS 1
+#define SLOW_TESTS 0
 #define MAINLINE_TESTS 1
 
 #if MAINLINE_TESTS

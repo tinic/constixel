@@ -232,7 +232,6 @@ class quantize {
 template <size_t N, typename T>
 class hextree {
     static constexpr T bitslices = ((sizeof(T) * 8) / 4) - 1;
-    static constexpr T invalid = std::numeric_limits<T>::max();
 
     struct node {
         T child[16]{};
@@ -244,6 +243,7 @@ class hextree {
     };
 
  public:
+    static constexpr T invalid = std::numeric_limits<T>::max();
     std::array<node, N> nodes{};
 
     [[nodiscard]] size_t byte_size() const {
@@ -301,12 +301,9 @@ class hextree {
             T nib = (key >> ((bitslices - d) * 4)) & 0xF;
             T next = nodes[idx].child[nib];
             if (next == invalid) {
-                return 0;
+                return invalid;
             }
             idx = next;
-        }
-        if (nodes[idx].child[key & 0xF] == invalid) {
-            return 0;
         }
         return nodes[idx].child[key & 0xF];
     }
@@ -1774,7 +1771,17 @@ class image {
             } else {
                 return x;
             }
-            const char_info &ch_info = FONT::char_table.at(FONT::glyph_tree.lookup(static_cast<FONT::lookup_type>(utf32)));
+            auto index = FONT::glyph_tree.lookup(static_cast<FONT::lookup_type>(utf32));
+            if (index == FONT::glyph_tree.invalid) {
+                index = FONT::glyph_tree.lookup(static_cast<FONT::lookup_type>(0xFFFD));
+                if (index == FONT::glyph_tree.invalid) {
+                    index = FONT::glyph_tree.lookup(static_cast<FONT::lookup_type>(0x0000));
+                    if (index == FONT::glyph_tree.invalid) {
+                        continue;
+                    }
+                }
+            }
+            const char_info &ch_info = FONT::char_table.at(index);
             if (*str == 0) {
                 x += ch_info.width;
             } else {
@@ -1813,7 +1820,17 @@ class image {
             } else {
                 return x;
             }
-            const char_info &ch_info = FONT::char_table.at(FONT::glyph_tree.lookup(static_cast<FONT::lookup_type>(utf32)));
+            auto index = FONT::glyph_tree.lookup(static_cast<FONT::lookup_type>(utf32));
+            if (index == FONT::glyph_tree.invalid) {
+                index = FONT::glyph_tree.lookup(static_cast<FONT::lookup_type>(0xFFFD));
+                if (index == FONT::glyph_tree.invalid) {
+                    index = FONT::glyph_tree.lookup(static_cast<FONT::lookup_type>(0x0000));
+                    if (index == FONT::glyph_tree.invalid) {
+                        continue;
+                    }
+                }
+            }
+            const char_info &ch_info = FONT::char_table.at(index);
             draw_char_mono<FONT>(x, y, ch_info, col);
             x += ch_info.xadvance;
         }
@@ -1850,7 +1867,17 @@ class image {
             } else {
                 return x;
             }
-            const char_info &ch_info = FONT::char_table.at(FONT::glyph_tree.lookup(static_cast<FONT::lookup_type>(utf32)));
+            auto index = FONT::glyph_tree.lookup(static_cast<FONT::lookup_type>(utf32));
+            if (index == FONT::glyph_tree.invalid) {
+                index = FONT::glyph_tree.lookup(static_cast<FONT::lookup_type>(0xFFFD));
+                if (index == FONT::glyph_tree.invalid) {
+                    index = FONT::glyph_tree.lookup(static_cast<FONT::lookup_type>(0x0000));
+                    if (index == FONT::glyph_tree.invalid) {
+                        continue;
+                    }
+                }
+            }
+            const char_info &ch_info = FONT::char_table.at(index);
             draw_char_aa<FONT>(x, y, ch_info, col);
             x += ch_info.xadvance;
         }
