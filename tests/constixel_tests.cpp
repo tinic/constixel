@@ -507,7 +507,7 @@ void draw_functions_aa() {
         });
         puts(out.c_str());
         printf("%d-bit %dpx %dpx fill_rect  \n", int(image.bit_depth()), int(image.width()), int(image.height()));
-        //separator();
+        // separator();
     }
     for (int32_t c = 0; c < static_cast<int32_t>(I); c++) {
         image.line_aa(16, 16, 64 + c * 42, 700, static_cast<uint8_t>(c), static_cast<uint8_t>(c));
@@ -519,7 +519,7 @@ void draw_functions_aa() {
         });
         puts(out.c_str());
         printf("%d-bit %dpx %dpx line       \n", int(image.bit_depth()), int(image.width()), int(image.height()));
-        //separator();
+        // separator();
     }
     for (int32_t c = 0; c < static_cast<int32_t>(I); c++) {
         image.fill_circle_aa(600, 384, 256 - c * 16, static_cast<uint8_t>(c));
@@ -531,9 +531,16 @@ void draw_functions_aa() {
         });
         puts(out.c_str());
         printf("%d-bit %dpx %dpx circle     \n", int(image.bit_depth()), int(image.width()), int(image.height()));
-        //separator();
+        // separator();
     }
 }
+
+template <typename FONT>
+void print_sizeof_font() {
+    std::print("{} {} {} ({}): {} bytes\n", FONT::name, FONT::style, FONT::size, FONT::mono ? "monochrome" : "antialiased",
+               sizeof(FONT::glyph_tree) + sizeof(FONT::glyph_bitmap) + sizeof(FONT::char_table));
+}
+
 #endif  // #ifdef MAINLINE_TESTS
 
 int main() {
@@ -578,8 +585,8 @@ int main() {
     puts("\n");
     puts(test9().c_str());
     puts("\n");
-//    puts(test10().c_str());
-//    puts("\n");
+    //    puts(test10().c_str());
+    //    puts("\n");
     puts(test11().c_str());
     puts("\n");
     puts(test12().c_str());
@@ -730,10 +737,10 @@ int main() {
 #if JP_TESTS
     {
         static constixel::image<constixel::format_8bit, 2048, 128, 1> image;
-        image.draw_string_aa<constixel::notosansjp_thin_jp_24_aa>(
-            0, 0, "日本語の文章には、漢字(常用漢字)、カタカナ、ひらがな、そして句読点が含まれています。", 1);
-        image.draw_string_aa<constixel::notosansjp_black_jp_24_aa>(
-            0, 64, "日本語の文章には、漢字(常用漢字)、カタカナ、ひらがな、そして句読点が含まれています。", 1);
+        image.draw_string_aa<constixel::notosansjp_thin_jp_24_aa>(0, 0, "日本語の文章には、漢字(常用漢字)、カタカナ、ひらがな、そして句読点が含まれています。",
+                                                                  1);
+        image.draw_string_aa<constixel::notosansjp_black_jp_24_aa>(0, 64,
+                                                                   "日本語の文章には、漢字(常用漢字)、カタカナ、ひらがな、そして句読点が含まれています。", 1);
         image.sixel_to_cout();
     }
     {
@@ -754,10 +761,10 @@ int main() {
     }
     {
         static constixel::image<constixel::format_8bit, 2048, 128, 1> image;
-        image.draw_string_aa<constixel::notosansjp_regular_jp_48_aa>(
-            0, 0, "日本語の文章には、漢字(常用漢字)、カタカナ、ひらがな、そして句読点が含まれています。", 1);
-        image.draw_string_aa<constixel::notosansjp_regular_jp_24_aa>(
-            0, 64, "日本語の文章には、漢字(常用漢字)、カタカナ、ひらがな、そして句読点が含まれています。", 1);
+        image.draw_string_aa<constixel::notosansjp_regular_jp_48_aa>(0, 0,
+                                                                     "日本語の文章には、漢字(常用漢字)、カタカナ、ひらがな、そして句読点が含まれています。", 1);
+        image.draw_string_aa<constixel::notosansjp_regular_jp_24_aa>(0, 64,
+                                                                     "日本語の文章には、漢字(常用漢字)、カタカナ、ひらがな、そして句読点が含まれています。", 1);
         image.sixel_to_cout();
     }
 #endif  // #if 0
@@ -894,4 +901,15 @@ int main() {
         image->png_to_kitty();
     }
 #endif  // #if 0
+
+#if MAINLINE_TESTS
+    print_sizeof_font<constixel::inter_bold_48_aa>();
+    print_sizeof_font<constixel::interdisplay_bold_32_mono>();
+    print_sizeof_font<constixel::interdisplay_bold_48_mono>();
+    print_sizeof_font<constixel::interdisplay_medium_48_aa>();
+    print_sizeof_font<constixel::interdisplay_medium_48_mono>();
+    print_sizeof_font<constixel::jetbrainsmono_bold_48_aa>();
+    print_sizeof_font<constixel::jetbrainsmono_bold_48_mono>();
+    print_sizeof_font<constixel::jetbrainsmono_regular_18_mono>();
+#endif  // #if MAINLINE_TESTS
 }
