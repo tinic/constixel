@@ -1518,23 +1518,23 @@ class format_8bit : public format {
 /*! Enum class which contains a list of predefined color name and values to use with the drawing API. */
 enum color : uint8_t {
     BLACK_TRANSPARENT = 0, /*!< Black or transparent color */
-    BLACK_OPAQUE = 16, /*!< Black, only valid for format_8bit */
-    WHITE = 1, /*!< White */
-    RED = 2, /*!< Red */
-    GREEN = 3, /*!< Green */
-    BLUE = 4, /*!< Blue */
-    YELLOW = 5, /*!< Yellow */
-    CYAN = 6, /*!< Cyan */
-    MAGENTA = 7, /*!< Magenta */
-    GREY_80 = 8, /*!< Grey 80% */
-    GREY_60 = 9, /*!< Grey 60% */
-    GREY_40 = 10, /*!< Grey 40% */
-    GREY_20 = 11, /*!< Grey 20% */
-    DARK_RED = 12, /*!< Dark Red (50%) */
-    DARK_GREEN = 13,/*!< Dark Green (50%) */
-    DARK_BLUE = 14, /*!< Dark Blue (50%) */
-    DARK_YELLOW = 15, /*!< Dark Yellow (50%) */
- 
+    BLACK_OPAQUE = 16,     /*!< Black, only valid for format_8bit */
+    WHITE = 1,             /*!< White */
+    RED = 2,               /*!< Red */
+    GREEN = 3,             /*!< Green */
+    BLUE = 4,              /*!< Blue */
+    YELLOW = 5,            /*!< Yellow */
+    CYAN = 6,              /*!< Cyan */
+    MAGENTA = 7,           /*!< Magenta */
+    GREY_80 = 8,           /*!< Grey 80% */
+    GREY_60 = 9,           /*!< Grey 60% */
+    GREY_40 = 10,          /*!< Grey 40% */
+    GREY_20 = 11,          /*!< Grey 20% */
+    DARK_RED = 12,         /*!< Dark Red (50%) */
+    DARK_GREEN = 13,       /*!< Dark Green (50%) */
+    DARK_BLUE = 14,        /*!< Dark Blue (50%) */
+    DARK_YELLOW = 15,      /*!< Dark Yellow (50%) */
+
     GREY_RAMP_START = 16,
     GREY_RAMP_COUNT = 16,
     GREY_RAMP_STOP = GREY_RAMP_START + 15,
