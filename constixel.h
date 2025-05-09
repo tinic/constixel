@@ -2191,6 +2191,92 @@ class image {
         std::cout << output << std::endl;
     }
 
+    /*! Data formats for the convert function */
+    enum conversion_format {
+        STRAIGHT_THROUGH,     /*!< Just copy the data as is. */
+        X_LEFT_TO_RIGHT_1BIT, /*!< 1-bit pixel data is stored from left to right, each byte containing 8 pixel values in the x direction. */
+        Y_TOP_TO_BOTTOM_1BIT, /*!< 1-bit pixel data is stored from top to bottom, each byte containing 8 pixel values in the y direction. */
+        RGB565_8BIT_SERIAL,   /*!< RGB565 pixel data is stored from left to right, each two bytes containing 1 pixel value in the x direction.
+                                   Byte encoding: 0xRRRRRGGG 0xGGGBBBBB */
+        RGB666_8BIT_SERIAL_1, /*!< RGB565 pixel data is stored from left to right, each three bytes containing 1 pixel values in the x direction.
+                                   Byte encoding: 0x00RRRRRR 0x00GGGGGG 0x00BBBBBB */
+        RGB666_8BIT_SERIAL_2  /*!< RGB565 pixel data is stored from left to right, each three bytes containing 1 pixel values in the x direction.
+                                   Byte encoding: 0xRRRRRR00 0xGGGGGG00 0xBBBBBB00 */
+    };
+
+    /**
+     * \brief Convert the current instance into a byte stream typically formatted for embedded displays.
+     * \param char_out A lambda function which consumes the data stream one byte at a time.
+     * \param dst_format The desired data format.
+     */
+    template <typename F>
+    void convert(F &&char_out, conversion_format dst_format) {
+        switch (dst_format) {
+            case STRAIGHT_THROUGH: {
+                for (auto c : data) {
+                    char_out(static_cast<char>(c));
+                }
+            } break;
+            case X_LEFT_TO_RIGHT_1BIT: {
+                static_assert(format.bit_depth == 1, "Bit depth must be 1.");
+                for (auto c : data) {
+                    char_out(static_cast<char>(c));
+                }
+                Ç
+            } break;
+            case Y_TOP_TO_BOTTOM_1BIT: {
+                static_assert(format.bit_depth == 1, "Bit depth must be 1.");
+                static_assert(((H % 8) == 0), "Height must be multiple of 8.");
+                for (size_t x = 0; x < W; x++) {
+                    for (size_t y = 0; y < H; y += 8) {
+                        uint8_t b = (data[(y + 0) * format.bytes_per_line + x] << 7) | (data[(y + 1) * format.bytes_per_line + x] << 6) |
+                                    (data[(y + 2) * format.bytes_per_line + x] << 5) | (data[(y + 3) * format.bytes_per_line + x] << 4) |
+                                    (data[(y + 4) * format.bytes_per_line + x] << 3) | (data[(y + 5) * format.bytes_per_line + x] << 2) |
+                                    (data[(y + 6) * format.bytes_per_line + x] << 1) | (data[(y + 7) * format.bytes_per_line + x] << 0);
+                        char_out(static_cast<char>(b));
+                    }
+                }
+            } break;
+            case RGB565_8BIT_SERIAL: {
+                const uint8_t *ptr = data.data();
+                for (size_t y = 0; y < H; y++) {
+                    for (size_t x = 0; x < W; x++) {
+                        uint32_t col = format.get_col(ptr, x);
+                        uint32_t a = ((((col >> 16) & 0xff) >> 3) << 3) | ((((col >> 8) & 0xff) >> 2) >> 3);
+                        uint32_t b = (((((col >> 8) & 0xff) >> 2) & 0x7) << 5) | ((col & 0xff) >> 3);
+                        char_out(static_cast<char>(a));
+                        char_out(static_cast<char>(b));
+                    }
+                    ptr += format.bytes_per_line;
+                }
+            } break;
+            case RGB666_8BIT_SERIAL_1: {
+                const uint8_t *ptr = data.data();
+                for (size_t y = 0; y < H; y++) {
+                    for (size_t x = 0; x < W; x++) {
+                        uint32_t col = format.get_col(ptr, x);
+                        char_out(static_cast<char>(((col >> 16) & 0xff) >> 2));
+                        char_out(static_cast<char>(((col >> 8) & 0xff) >> 2));
+                        char_out(static_cast<char>(((col >> 0) & 0xff) >> 2));
+                    }
+                    ptr += format.bytes_per_line;
+                }
+            } break;
+            case RGB666_8BIT_SERIAL_1: {
+                const uint8_t *ptr = data.data();
+                for (size_t y = 0; y < H; y++) {
+                    for (size_t x = 0; x < W; x++) {
+                        uint32_t col = format.get_col(ptr, x);
+                        char_out(static_cast<char>(((col >> 16) & 0xff) >> 2) << 2);
+                        char_out(static_cast<char>(((col >> 8) & 0xff) >> 2) << 2);
+                        char_out(static_cast<char>(((col >> 0) & 0xff) >> 2) << 2);
+                    }
+                    ptr += format.bytes_per_line;
+                }
+            } break;
+        }
+    }
+
  private:
     template <typename abs_T>
     [[nodiscard]] static constexpr abs_T abs(abs_T v) {
