@@ -33,15 +33,15 @@ SOFTWARE.
 #include <vector>
 
 #include "constixel.h"
-#include "fonts/sf_compact_display_bold_32_mono.h"
-#include "fonts/sf_compact_display_bold_48_mono.h"
-#include "fonts/sf_compact_display_medium_48_aa.h"
-#include "fonts/sf_compact_display_medium_48_mono.h"
-#include "fonts/sf_compact_rounded_black_48_aa.h"
-#include "fonts/sf_compact_rounded_black_48_mono.h"
-#include "fonts/sf_mono_bold_48_aa.h"
-#include "fonts/sf_mono_bold_48_mono.h"
-#include "fonts/sf_mono_regular_18_mono.h"
+#include "fonts/interdisplay_bold_32_mono.h"
+#include "fonts/interdisplay_bold_48_mono.h"
+#include "fonts/interdisplay_medium_48_aa.h"
+#include "fonts/interdisplay_medium_48_mono.h"
+#include "fonts/inter_black_48_aa.h"
+#include "fonts/inter_black_48_mono.h"
+#include "fonts/jetbrainsmono_bold_48_aa.h"
+#include "fonts/jetbrainsmono_bold_48_mono.h"
+#include "fonts/jetbrainsmono_regular_18_mono.h"
 
 #if __GNUC__
 #pragma GCC diagnostic push
@@ -543,10 +543,10 @@ int main() {
 #if MAINLINE_TESTS
     {
         auto image = std::make_unique<constixel::image<constixel::format_8bit, 1024, 1024, 1>>();
-        image->draw_string_mono<constixel::sf_compact_display_bold_48_mono>(0, 0, "Pack my box with five dozen liquor jugs", 2);
-        image->draw_string_mono<constixel::sf_compact_display_bold_32_mono>(0, 50, "Pack my box with five dozen liquor jugs", 3);
-        image->draw_string_mono<constixel::sf_mono_regular_18_mono>(0, 100, "Pack my box with five dozen liquor jugs", 5);
-        image->draw_string_mono<constixel::sf_mono_bold_48_mono>(0, 200, "Pack my box with five dozen liquor jugs", 6);
+        image->draw_string_mono<constixel::interdisplay_bold_48_mono>(0, 0, "Pack my box with five dozen liquor jugs", 2);
+        image->draw_string_mono<constixel::interdisplay_bold_32_mono>(0, 50, "Pack my box with five dozen liquor jugs", 3);
+        image->draw_string_mono<constixel::jetbrainsmono_regular_18_mono>(0, 100, "Pack my box with five dozen liquor jugs", 5);
+        image->draw_string_mono<constixel::jetbrainsmono_bold_48_mono>(0, 200, "Pack my box with five dozen liquor jugs", 6);
         image->sixel_to_cout();
     }
 #endif  // #if 0
@@ -559,7 +559,7 @@ int main() {
                                                              ""};
         for (size_t i = 0; i < strings.size(); i++) {
             uint8_t col = constixel::color::GREY_RAMP_STOP - static_cast<uint8_t>(i * 3);
-            image.draw_string_mono<constixel::sf_compact_display_medium_48_mono>(16, 48 * static_cast<int32_t>(i) + 16, strings.at(i), col);
+            image.draw_string_mono<constixel::inter_black_48_mono>(16, 48 * static_cast<int32_t>(i) + 16, strings.at(i), col);
         }
         std::vector<char> out{};
         out.reserve(1UL << 20);
@@ -577,7 +577,7 @@ int main() {
         for (size_t i = 0; i < strings.size(); i++) {
             uint8_t col = constixel::color::GREY_RAMP_STOP - static_cast<uint8_t>(i * 3);
             image.fill_rect(0, static_cast<int32_t>(i) * 52 + 22, 512, 52, cols.at(i));
-            image.draw_string_aa<constixel::sf_compact_display_medium_48_aa>(16, 52 * static_cast<int32_t>(i) + 16, strings.at(i), col);
+            image.draw_string_aa<constixel::inter_black_48_aa>(16, 52 * static_cast<int32_t>(i) + 16, strings.at(i), col);
         }
         out.clear();
         image.png([&out](char ch) mutable {
@@ -594,13 +594,13 @@ int main() {
 #if MAINLINE_TESTS
     {
         constixel::image<constixel::format_1bit, 1024, 256, 1> image;
-        image.draw_string_mono<constixel::sf_compact_display_medium_48_mono>(
+        image.draw_string_mono<constixel::inter_black_48_mono>(
             0, 0, "日本語の文章には、漢字（常用漢字）、カタカナ、ひらがな、そして句読点が含まれています。", 1);
         image.sixel_to_cout();
     }
     {
         constixel::image<constixel::format_8bit, 1024, 256, 1> image;
-        image.draw_string_aa<constixel::sf_compact_display_medium_48_aa>(
+        image.draw_string_aa<constixel::inter_black_48_aa>(
             0, 0, "日本語の文章には、漢字（常用漢字）、カタカナ、ひらがな、そして句読点が含まれています。", 1);
         image.sixel_to_cout();
     }
@@ -610,8 +610,8 @@ int main() {
     {
         auto image = std::make_unique<constixel::image<constixel::format_8bit, 128, 256, 5>>();
         for (int32_t x = 0; x < 16; x++) {
-            image->draw_string_aa<constixel::sf_compact_rounded_black_48_aa>(x * 7, x * 7, "Pack my box with five dozen liquor jugs", static_cast<uint8_t>(x));
-            image->draw_string_aa<constixel::sf_mono_bold_48_aa>(x * 7, x * 7 + 100, "Pack my box with five dozen liquor jugs", static_cast<uint8_t>(15 - x));
+            image->draw_string_aa<constixel::inter_black_48_aa>(x * 7, x * 7, "Pack my box with five dozen liquor jugs", static_cast<uint8_t>(x));
+            image->draw_string_aa<constixel::jetbrainsmono_bold_48_aa>(x * 7, x * 7 + 100, "Pack my box with five dozen liquor jugs", static_cast<uint8_t>(15 - x));
         }
         image->sixel_to_cout();
     }
@@ -670,7 +670,7 @@ int main() {
         using image_type = constixel::image<constixel::format_8bit, 512, 512, 1, false>;
 
         auto image = std::make_unique<image_type>();
-        image->draw_string_aa<constixel::sf_compact_rounded_black_48_aa>(0, 0, "Pack my box with five dozen liquor jugs", 1);
+        image->draw_string_aa<constixel::inter_black_48_aa>(0, 0, "Pack my box with five dozen liquor jugs", 1);
         auto image_clone = std::make_unique<image_type>(image->clone());
         auto image_copy = std::make_unique<image_type>();
         image_copy->copy(*image_clone);
@@ -682,8 +682,8 @@ int main() {
     {
         auto image = std::make_unique<constixel::image<constixel::format_4bit, 512, 96, 1, true>>();
         image->fill_round_rect_aa(0, 0, 512, 96, 32, 15);
-        int32_t sw = image->string_width<constixel::sf_compact_display_medium_48_aa>("ABCDEFGHIKLMNO");
-        image->draw_string_aa<constixel::sf_compact_display_medium_48_aa>((512-sw)/2, 16, "ABCDEFGHIKLMNO", 0);
+        int32_t sw = image->string_width<constixel::interdisplay_medium_48_aa>("ABCDEFGHIKLMNO");
+        image->draw_string_aa<constixel::interdisplay_medium_48_aa>((512-sw)/2, 16, "ABCDEFGHIKLMNO", 0);
         image->sixel_to_cout();
     }
 #endif  // #if 0
@@ -692,8 +692,8 @@ int main() {
     {
         auto image = std::make_unique<constixel::image<constixel::format_4bit, 512, 96, 1, false>>();
         image->fill_round_rect_aa(0, 0, 512, 96, 32, 2);
-        int32_t sw = image->string_width<constixel::sf_compact_display_medium_48_aa>("ABCDEFGHIKLMNO");
-        image->draw_string_aa<constixel::sf_compact_display_medium_48_aa>((512-sw)/2, 16, "ABCDEFGHIKLMNO", 0);
+        int32_t sw = image->string_width<constixel::interdisplay_medium_48_aa>("ABCDEFGHIKLMNO");
+        image->draw_string_aa<constixel::interdisplay_medium_48_aa>((512-sw)/2, 16, "ABCDEFGHIKLMNO", 0);
         image->sixel_to_cout();
     }
 #endif  // #if 0
@@ -702,8 +702,8 @@ int main() {
     {
         auto image = std::make_unique<constixel::image<constixel::format_4bit, 512, 96, 1, false>>();
         image->fill_round_rect_aa(0, 0, 512, 96, 32, constixel::color::GREY_20);
-        int32_t sw = image->string_width<constixel::sf_compact_display_medium_48_aa>("ABCDEFGHIKLMNO");
-        image->draw_string_aa<constixel::sf_compact_display_medium_48_aa>((512-sw)/2, 16, "ABCDEFGHIKLMNO", 2);
+        int32_t sw = image->string_width<constixel::interdisplay_medium_48_aa>("ABCDEFGHIKLMNO");
+        image->draw_string_aa<constixel::interdisplay_medium_48_aa>((512-sw)/2, 16, "ABCDEFGHIKLMNO", 2);
         image->sixel_to_cout();
     }
 #endif  // #if 0
@@ -712,8 +712,8 @@ int main() {
     {
         auto image = std::make_unique<constixel::image<constixel::format_4bit, 512, 96, 1, true>>();
         image->fill_round_rect_aa(0, 0, 512, 96, 32, 3);
-        int32_t sw = image->string_width<constixel::sf_compact_display_medium_48_aa>("ABCDEFGHIKLMNO");
-        image->draw_string_aa<constixel::sf_compact_display_medium_48_aa>((512-sw)/2, 16, "ABCDEFGHIKLMNO", 15);
+        int32_t sw = image->string_width<constixel::interdisplay_medium_48_aa>("ABCDEFGHIKLMNO");
+        image->draw_string_aa<constixel::interdisplay_medium_48_aa>((512-sw)/2, 16, "ABCDEFGHIKLMNO", 15);
         image->sixel_to_cout();
     }
 #endif  // #if 0
@@ -722,8 +722,8 @@ int main() {
     {
         auto image = std::make_unique<constixel::image<constixel::format_1bit, 512, 96, 1, true>>();
         image->fill_round_rect(0, 0, 512, 96, 32, 1);
-        int32_t sw = image->string_width<constixel::sf_compact_display_medium_48_aa>("ABCDEFGHIKLMNO");
-        image->draw_string_mono<constixel::sf_compact_display_medium_48_mono>((512-sw)/2, 16, "ABCDEFGHIKLMNO", 0);
+        int32_t sw = image->string_width<constixel::interdisplay_medium_48_aa>("ABCDEFGHIKLMNO");
+        image->draw_string_mono<constixel::interdisplay_medium_48_aa>((512-sw)/2, 16, "ABCDEFGHIKLMNO", 0);
         image->png_to_iterm();
     }
 #endif  // #if 0
@@ -732,9 +732,10 @@ int main() {
     {
         auto image = std::make_unique<constixel::image<constixel::format_1bit, 512, 96, 1, true>>();
         image->fill_round_rect(0, 0, 512, 96, 32, 1);
-        int32_t sw = image->string_width<constixel::sf_compact_display_medium_48_aa>("ABCDEFGHIKLMNO");
-        image->draw_string_mono<constixel::sf_compact_display_medium_48_mono>((512-sw)/2, 16, "ABCDEFGHIKLMNO", 0);
+        int32_t sw = image->string_width<constixel::interdisplay_medium_48_aa>("ABCDEFGHIKLMNO");
+        image->draw_string_mono<constixel::interdisplay_medium_48_aa>((512-sw)/2, 16, "ABCDEFGHIKLMNO", 0);
         image->png_to_kitty();
     }
 #endif  // #if 0
+
 }
