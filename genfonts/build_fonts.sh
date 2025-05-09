@@ -10,6 +10,7 @@ set -euo pipefail
 
 FONT_DIR="${1:-./otf}"
 SIZES=(12 18 24 32 48)
+CHARS=(32-127,65535)
 
 git submodule update --init --recursive
 
@@ -30,9 +31,9 @@ for font in "$FONT_DIR"/*.{ttf,otf}; do
   base="${font##*/}"
   base="${base%.*}"
   for size in "${SIZES[@]}"; do
-    ./fontbm/build/fontbm --font-file "$font" --font-size "$size" --output "build/${base}_${size}" --texture-crop-width --texture-crop-height --tabular-numbers
+    ./fontbm/build/fontbm --font-file "$font" --font-size "$size" --chars "${CHARS}" --output "build/${base}_${size}" --texture-crop-width --texture-crop-height --tabular-numbers
     ./build/genfont --font-file "build/${base}_${size}.fnt" --out-dir ../fonts
-    ./fontbm/build/fontbm --font-file "$font" --font-size "$size" --output "build/${base}_${size}" --monochrome --texture-crop-width --texture-crop-height --tabular-numbers
+    ./fontbm/build/fontbm --font-file "$font" --font-size "$size" --chars "${CHARS}" --output "build/${base}_${size}" --monochrome --texture-crop-width --texture-crop-height --tabular-numbers
     ./build/genfont --font-file "build/${base}_${size}.fnt" --out-dir ../fonts
   done
 done
