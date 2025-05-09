@@ -24,14 +24,17 @@ struct Char {
 
 struct Font {
     std::string face;
+    std::string style;
     int size;
     int lineHeight;
     int base;
+    int descent;
     int scaleW, scaleH;
     int pages;
     std::string page_file;
     std::vector<Char> chars;
     int smooth;
+    int totalHeight;
 };
 
 static std::string_view trim(std::string_view sv) {
@@ -90,12 +93,15 @@ static Font parse_fnt(const std::filesystem::path& path) {
             font.face = std::string(kv.at("face"));
             font.size = to_int(kv.at("size"));
             font.smooth = to_int(kv.at("smooth"));
+            font.style = std::string(kv.at("style"));
         } else if (cmd == "common") {
             font.lineHeight = to_int(kv.at("lineHeight"));
             font.base = to_int(kv.at("base"));
             font.scaleW = to_int(kv.at("scaleW"));
             font.scaleH = to_int(kv.at("scaleH"));
             font.pages = to_int(kv.at("pages"));
+            font.totalHeight = to_int(kv.at("totalHeight"));
+            font.descent = to_int(kv.at("descent"));
         } else if (cmd == "page") {
             font.page_file = std::string(kv.at("file"));
         } else if (cmd == "char") {
@@ -163,7 +169,7 @@ int main(int argc, char* argv[]) {
         uint32_t h = 0;
         auto path = std::filesystem::path{config.font_file}.parent_path() / font.page_file;
         if (lodepng::decode(rgbaimage, w, h, path) == 0) {
-            bool is_mono = font.smooth == 1;
+            bool is_mono = font.smooth == 0;
 
             std::stringstream ss;
 
@@ -172,19 +178,27 @@ int main(int argc, char* argv[]) {
             ss << std::format("namespace constixel {{\n\n", slugify(font.face), abs(font.size));
             ss << std::format("struct {} {{\n\n", name);
 
+            ss << std::format("    static constexpr const char *name = \"{}\";\n", font.face);
+            ss << std::format("    static constexpr const char *style = \"{}\";\n", font.style);
+            ss << std::format("    static constexpr int32_t size = {};\n", std::abs(font.size));
+            ss << std::format("    static constexpr int32_t ascent = {};\n", font.base);
+            ss << std::format("    static constexpr int32_t descent = {};\n", font.descent);
+            ss << std::format("    static constexpr int32_t line_height = {};\n", font.lineHeight);
+            ss << std::format("    static constexpr int32_t total_height = {};\n\n", font.totalHeight);
+
             uint32_t max_id = 0;
             for (size_t c = 0; c < font.chars.size(); c++) {
                 max_id = std::max(font.chars[c].id, max_id);
             }
             if (font.chars.size() < 65536 && max_id < 65536) {
-                ss << std::format("    using lookup_type = uint16_t;\n\n", name);
+                ss << std::format("    using lookup_type = uint16_t;\n", name);
                 ss << std::format("    static constexpr std::array<std::pair<uint16_t, uint16_t>, {}> glyph_table{{{{\n", font.chars.size());
                 for (size_t c = 0; c < font.chars.size(); c++) {
                     ss << std::format("        {{ uint16_t{{0x{:06x}}}, uint16_t{{0x{:06x}}} }}{}\n", font.chars[c].id, c,
                                       (c < font.chars.size() - 1) ? "," : "");
                 }
             } else {
-                ss << std::format("    using lookup_type = uint32_t;\n\n", name);
+                ss << std::format("    using lookup_type = uint32_t;\n", name);
                 ss << std::format("    static constexpr std::array<std::pair<uint32_t, uint32_t>, {}> glyph_table{{{{\n", font.chars.size());
                 for (size_t c = 0; c < font.chars.size(); c++) {
                     ss << std::format("        {{ uint32_t{{0x{:06x}}}, uint32_t{{0x{:06x}}} }}{}\n", font.chars[c].id, c,
@@ -210,7 +224,7 @@ int main(int argc, char* argv[]) {
 
             ss << std::format("    }}}};\n\n");
 
-            if (font.smooth == 1) {
+            if (is_mono) {
                 size_t bpr = ((w + 7) / 8);
                 std::vector<uint8_t> bitmap;
                 bitmap.assign(h * bpr, 0);
