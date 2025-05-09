@@ -2049,21 +2049,37 @@ class image {
         T<W, H, S, GR>::blit_RGBA_diffused_linear(data, blitrect, ptr, stride);
     }
 
+    /**
+     * \brief Convert the current instance into a png image.
+     * \param char_out A lambda function which consumes the png image data one byte at a time
+     */
     template <typename F>
     constexpr void png(F &&char_out) const {
         T<W, H, S, GR>::png(data, char_out);
     }
 
+    /**
+     * \brief Convert the current instance into a sixel stream.
+     * \param char_out A lambda function which consumes the sixel stream data one byte at a time
+     */
     template <typename F>
     constexpr void sixel(F &&char_out) const {
         T<W, H, S, GR>::sixel(data, char_out, {0, 0, W, H});
     }
 
+    /**
+     * \brief Convert the current instance into a sixel stream.
+     * \param char_out A lambda function which consumes the sixel stream data one byte at a time
+     * \param rect clipping rectangle to show only a portion of the image
+     */
     template <typename F>
-    constexpr void sixel(F &&char_out, const rect<int32_t> &r) const {
-        T<W, H, S, GR>::sixel(data, char_out, r);
+    constexpr void sixel(F &&char_out, const rect<int32_t> &rect) const {
+        T<W, H, S, GR>::sixel(data, char_out, rect);
     }
 
+    /**
+     * \brief Convert the current instance into a sixel stream and output it to std::cout.
+     */
     void sixel_to_cout() const {
         std::string out;
         T<W, H, S, GR>::sixel(data,
@@ -2074,6 +2090,9 @@ class image {
         std::cout << out << std::endl;
     }
 
+    /**
+     * \brief Convert the current instance into a png and display it in iTerm.
+     */
     void png_to_iterm() const {
         std::string output;
         output.append("\033]1337;File=inline=1:");
@@ -2082,6 +2101,9 @@ class image {
         std::cout << output << std::endl;
     }
 
+    /**
+     * \brief Convert the current instance into a png and display it in a terminal with kitty graphics support.
+     */
     void png_to_kitty() const {
         std::string base64{};
         std::string output{};
