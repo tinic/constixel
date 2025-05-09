@@ -1573,47 +1573,85 @@ class image {
     static_assert(S >= 1 && S <= 256);
 
  public:
+    /**
+     * \brief Is this image greyscale?
+     * \return Is this image greyscale?
+     */
     [[nodiscard]] static constexpr size_t grayscale() {
         return T<W, H, S, GR>::grayscale;
     }
 
+    /**
+     * \brief Bit depth of the image
+     * \return Bit depth of the image
+     */
     [[nodiscard]] static constexpr size_t bit_depth() {
         return T<W, H, S, GR>::bits_per_pixel;
     }
 
+    /**
+     * \brief Size in bytes of the image data
+     * \return Size in bytes of the image data
+     */
     [[nodiscard]] static constexpr size_t size() {
         return T<W, H, S, GR>::image_size;
     }
 
+    /**
+     * \brief Width in pixels of the image
+     * \return Width in pixels of the image
+     */
     [[nodiscard]] static constexpr int32_t width() {
         return static_cast<int32_t>(W);
     }
 
+    /**
+     * \brief Width in pixels of the image
+     * \return Width in pixels of the image
+     */
     [[nodiscard]] static constexpr int32_t height() {
         return static_cast<int32_t>(H);
     }
 
+    /**
+     * \brief Clear the image by setting everything to zero.
+     */
     constexpr void clear() {
         data.fill(0);
     }
 
-    template <typename abs_T>
-    [[nodiscard]] static constexpr abs_T abs(abs_T v) {
-        return v < 0 ? -v : v;
-    }
-
+    /**
+     * \brief Get a reference to the underlying raw data of the image.
+     * \return const reference to the data array which contains the raw image data
+     */
     [[nodiscard]] constexpr std::array<uint8_t, T<W, H, S, GR>::image_size> &data_ref() const {
         return data;
     }
 
+    /**
+     * \brief Create a clone of this image.
+     * \return cloned image instance
+     */
     [[nodiscard]] constexpr image<T, W, H, S, GR> clone() const {
         return *this;
     }
-
+    /**
+     * \brief Copy source image into this instance. No compositing occurs.
+     * \param src source image
+     */
     constexpr void copy(const image<T, W, H, S, GR> &src) {
         data = src.data;
     }
 
+    /**
+     * \brief Draw a line with the specified color and thickness
+     * \param x0 starting x-coordinate in pixels
+     * \param y0 starting x-coordinate in pixels
+     * \param x1 ending x-coordinate in pixels
+     * \param y1 ending x-coordinate in pixels
+     * \param col palette color index to use
+     * \param stroke_width width of the stroke in pixels
+     */
     constexpr void line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, uint32_t stroke_width = 1) {
         int32_t steep = abs(y1 - y0) > abs(x1 - x0);
 
@@ -1676,17 +1714,22 @@ class image {
         }
     }
 
-    constexpr void line(const rect<int32_t> &l, uint8_t col, uint32_t stroke_width = 1) {
-        line(l.x, l.y, l.x + l.w, l.y + l.h, col, stroke_width);
+    /**
+     * \brief Draw a line with the specified color and thickness
+     * \param rect rectangle containing the line coordinates in pixels
+     * \param col palette color index to use
+     * \param stroke_width width of the stroke in pixels
+     */
+    constexpr void line(const rect<int32_t> &rect, uint8_t col, uint32_t stroke_width = 1) {
+        line(rect.x, rect.y, rect.x + rect.w, rect.y + rect.h, col, stroke_width);
     }
 
-    constexpr void compose(int32_t x, int32_t y, float cola, float colr, float colg, float colb) {
-        if (x < 0 || x >= static_cast<int32_t>(W) || y < 0 || y >= static_cast<int32_t>(H)) {
-            return;
-        }
-        T<W, H, S, GR>::compose(data, static_cast<uint32_t>(x), static_cast<uint32_t>(y), cola, colr, colg, colb);
-    }
-
+    /**
+     * \brief Plot a single pixel at the specified coordinates used the supplied color.
+     * \param x x-coordinate in pixels
+     * \param y y-coordinate in pixels
+     * \param col palette color index to use
+     */
     constexpr void plot(int32_t x, int32_t y, uint8_t col) {
         if (x < 0 || x >= static_cast<int32_t>(W) || y < 0 || y >= static_cast<int32_t>(H)) {
             return;
@@ -1694,10 +1737,20 @@ class image {
         T<W, H, S, GR>::plot(data, static_cast<uint32_t>(x), static_cast<uint32_t>(y), col);
     }
 
+    /**
+     * \brief Return closest match in the color palette based on the supplied red, green and blue values.
+     * \param r Red value (0-255)
+     * \param g Green value (0-255)
+     * \param b Blue value (0-255)
+     */
     [[nodiscard]] constexpr uint8_t get_nearest_color(uint8_t r, uint8_t g, uint8_t b) const {
         return format.quant.nearest(r, g, b);
     }
 
+    /**
+     * \brief Return the width of a string using the specified font in the template parameter.
+     * \param str UTF-8 string
+     */
     template <typename FONT>
     [[nodiscard]] constexpr int32_t string_width(const char *str) {
         int32_t x = 0;
@@ -1730,6 +1783,13 @@ class image {
         return x;
     }
 
+    /**
+     * \brief Draw text at the specified coordinate. The template parameter selects which mono font to use. Only format_8bit targets are supported.
+     * \param x starting x-coordinate in pixels
+     * \param y starting y-coordinate in pixels
+     * \param str UTF-8 string
+     * \param col palette color index to use
+     */
     template <typename FONT>
     constexpr int32_t draw_string_mono(int32_t x, int32_t y, const char *str, uint8_t col) {
         static_assert(FONT::mono == true, "Can't use a antialiased font to draw mono/pixelized text.");
@@ -1759,6 +1819,14 @@ class image {
         return x;
     }
 
+    /**
+     * \brief Draw antialiased text at the specified coordinate. The template parameter selects which antialiased font to use. Only format_8bit targets are
+     * supported.
+     * \param x starting x-coordinate in pixels
+     * \param y starting y-coordinate in pixels
+     * \param str UTF-8 string
+     * \param col palette color index to use
+     */
     template <typename FONT>
     constexpr int32_t draw_string_aa(int32_t x, int32_t y, const char *str, uint8_t col) {
         static_assert(FONT::mono == false, "Can't use a mono font to draw antialiased text.");
@@ -1788,6 +1856,14 @@ class image {
         return x;
     }
 
+    /**
+     * \brief Draw a fill rectangle with the specified color.
+     * \param x starting x-coordinate in pixels
+     * \param y starting y-coordinate in pixels
+     * \param w width of the rectangle
+     * \param h height of the rectangle
+     * \param col palette color index to use
+     */
     constexpr void fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col) {
         if (y < 0) {
             h += y;
@@ -1802,10 +1878,24 @@ class image {
         }
     }
 
-    constexpr void fill_rect(const rect<int32_t> &r, uint8_t col) {
-        fill_rect(r.x, r.y, r.w, r.h, col);
+    /**
+     * \brief Draw a fill rectangle with the specified color.
+     * \param rect rectangle containing the line coordinates in pixels
+     * \param col palette color index to use
+     */
+    constexpr void fill_rect(const rect<int32_t> &rect, uint8_t col) {
+        fill_rect(rect.x, rect.y, rect.w, rect.h, col);
     }
 
+    /**
+     * \brief Draw a stroked rectangle with the specified color and stroke width.
+     * \param x starting x-coordinate in pixels
+     * \param y starting y-coordinate in pixels
+     * \param w width of the rectangle
+     * \param h height of the rectangle
+     * \param col palette color index to use
+     * \param stroke_width width of the stroke in pixels
+     */
     constexpr void stroke_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col, uint32_t stroke_width = 1) {
         line(x, y, x + w, y, col, stroke_width);
         line(x + w, y, x + w, y + h, col, stroke_width);
@@ -1813,10 +1903,23 @@ class image {
         line(x, y + h, x, y, col, stroke_width);
     }
 
-    constexpr void stroke_rect(const rect<int32_t> &r, uint8_t col, uint32_t stroke_width = 1) {
-        stroke_rect(r.x, r.y, r.w, r.h, col, stroke_width);
+    /**
+     * \brief Draw a stroked rectangle with the specified color and stroke width.
+     * \param rect rectangle containing the line coordinates in pixels
+     * \param col palette color index to use
+     * \param stroke_width width of the stroke in pixels
+     */
+    constexpr void stroke_rect(const rect<int32_t> &rect, uint8_t col, uint32_t stroke_width = 1) {
+        stroke_rect(rect.x, rect.y, rect.w, rect.h, col, stroke_width);
     }
 
+    /**
+     * \brief Draw a filled circle with the specified radius and color.
+     * \param cx center x-coordinate of the circle in pixels
+     * \param cy center y-coordinate of the circle in pixels
+     * \param radius radius of the circle in pixels
+     * \param col palette color index to use
+     */
     constexpr void fill_circle(int32_t cx, int32_t cy, int32_t radius, uint8_t col) {
         if (radius == 1) {
             fill_rect(cx - 1, cy - 1, 2, 2, col);
@@ -1828,6 +1931,25 @@ class image {
         fill_arc(cx, cy, radius, 2, -1, col);
     }
 
+    /**
+     * \brief Draw a antialiased filled circle with the specified radius and color. Only format_8bit targets are supported.
+     * \param cx center x-coordinate of the circle in pixels
+     * \param cy center y-coordinate of the circle in pixels
+     * \param radius radius of the circle in pixels
+     * \param col palette color index to use
+     */
+    constexpr void fill_circle_aa(int32_t cx, int32_t cy, int32_t radius, uint8_t col) {
+        fill_circle_aa(cx, cy, radius, 0, 0, col);
+    }
+
+    /**
+     * \brief Draw a rounded rectangle with the specified color.
+     * \param x starting x-coordinate in pixels
+     * \param y starting y-coordinate in pixels
+     * \param w width of the rectangle
+     * \param h height of the rectangle
+     * \param col palette color index to use
+     */
     constexpr void fill_round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col) {
         int32_t cr = std::min((w) / 2, std::min((w) / 2, radius));
         int32_t dx = w - cr * 2;
@@ -1841,14 +1963,23 @@ class image {
         fill_rect(x + cr, y, dx, h, col);
     }
 
-    constexpr void fill_round_rect(const rect<int32_t> &r, int32_t radius, uint8_t col) {
-        stroke_rect(r.x, r.y, r.w, r.h, radius, col);
+    /**
+     * \brief Draw a rounded rectangle with the specified color.
+     * \param rect rectangle containing the line coordinates in pixels
+     * \param col palette color index to use
+     */
+    constexpr void fill_round_rect(const rect<int32_t> &rect, int32_t radius, uint8_t col) {
+        stroke_rect(rect.x, rect.y, rect.w, rect.h, radius, col);
     }
 
-    constexpr void fill_circle_aa(int32_t cx, int32_t cy, int32_t radius, uint8_t col) {
-        fill_circle_aa(cx, cy, radius, 0, 0, col);
-    }
-
+    /**
+     * \brief Draw a antialiased rounded rectangle with the specified color. Only format_8bit targets are supported.
+     * \param x starting x-coordinate in pixels
+     * \param y starting y-coordinate in pixels
+     * \param w width of the rectangle
+     * \param h height of the rectangle
+     * \param col palette color index to use
+     */
     constexpr void fill_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t r, uint8_t col) {
         int32_t cr = std::min((w) / 2, std::min((w) / 2, r));
         int32_t dx = w - cr * 2;
@@ -1859,8 +1990,13 @@ class image {
         fill_rect(x + cr, y, dx, h, col);
     }
 
-    constexpr void fill_round_rect_aa(const rect<int32_t> &r, int32_t radius, uint8_t col) {
-        fill_round_rect_aa(r.x, r.y, r.w, r.h, radius, col);
+    /**
+     * \brief Draw a antialiased rounded rectangle with the specified color. Only format_8bit targets are supported.
+     * \param rect rectangle containing the line coordinates in pixels
+     * \param col palette color index to use
+     */
+    constexpr void fill_round_rect_aa(const rect<int32_t> &rect, int32_t radius, uint8_t col) {
+        fill_round_rect_aa(rect.x, rect.y, rect.w, rect.h, radius, col);
     }
 
     [[nodiscard]] constexpr std::array<uint32_t, W * H> RGBA_uint32() const {
@@ -1968,6 +2104,18 @@ class image {
     }
 
  private:
+    template <typename abs_T>
+    [[nodiscard]] static constexpr abs_T abs(abs_T v) {
+        return v < 0 ? -v : v;
+    }
+
+    constexpr void compose(int32_t x, int32_t y, float cola, float colr, float colg, float colb) {
+        if (x < 0 || x >= static_cast<int32_t>(W) || y < 0 || y >= static_cast<int32_t>(H)) {
+            return;
+        }
+        T<W, H, S, GR>::compose(data, static_cast<uint32_t>(x), static_cast<uint32_t>(y), cola, colr, colg, colb);
+    }
+
     void append_png_as_base64(std::string &output) const {
         size_t buffer = 0;
         size_t bits_collected = 0;

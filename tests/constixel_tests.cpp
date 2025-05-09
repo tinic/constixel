@@ -737,5 +737,4 @@ int main() {
         image->png_to_kitty();
     }
 #endif  // #if 0
-
 }
