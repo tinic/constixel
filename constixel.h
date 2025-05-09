@@ -2205,7 +2205,41 @@ class image {
     };
 
     /**
-     * \brief Convert the current instance into a byte stream typically formatted for embedded displays.
+     * \brief Convert the current instance into a byte stream formatted for embedded displays. This function will write chunk_length of data into dst and
+     * update chunk_index on each call. You should pass chunk_index = 0 at the beginnig of the sequence. Returns true of there is more data, or false if there
+     * is no data left. This function is typically used to drive interrupt driven DMA transfers.
+     * \param dst The buffer the data will be written to.
+     * \param chunk_size The requested chunk size in bytes. This value has to be kept the same during a full conversion sequence.
+     * \param chunk_actual The actual amount of bytes which were written into ptr during this call of the function.
+     * \param chunk_index This value will increment after each call of the function. Has to be set to 0 on the first call.
+     * \param dst_format The desired data format.
+     * \return true if there is more data to convert, false if we reached the end.
+     */
+    bool convert_chunk(char *dst, size_t chunk_size, size_t &chunk_actual, size_t &chunk_index, device_format dst_format) {
+        (void)dst;
+        (void)chunk_size;
+        (void)chunk_actual;
+        (void)chunk_index;
+        (void)dst_format;
+        switch (dst_format) {
+            case STRAIGHT_THROUGH: {
+            } break;
+            case X_LEFT_TO_RIGHT_1BIT: {
+            } break;
+            case Y_TOP_TO_BOTTOM_1BIT: {
+            } break;
+            case RGB565_8BIT_SERIAL: {
+            } break;
+            case RGB666_8BIT_SERIAL_1: {
+            } break;
+            case RGB666_8BIT_SERIAL_1: {
+            } break;
+        }
+        return false;
+    }
+
+    /**
+     * \brief Convert the current instance into a byte stream formatted for embedded displays.
      * \param char_out A lambda function which consumes the data stream one byte at a time.
      * \param dst_format The desired data format.
      */
