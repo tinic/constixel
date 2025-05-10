@@ -299,7 +299,7 @@ class image {
     void fill_round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col);
     void fill_round_rect(const rect<int32_t> &r, int32_t radius, uint8_t col);
 
-    // Draw a rounded rectangle with smoothing
+    // Draw a rounded rectangle with antialiasing
     // NOTE: This only works with constixel::format_8bit images
     void fill_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col);
     void fill_round_rect_aa(const rect<int32_t> &r, int32_t radius, uint8_t col);
@@ -311,7 +311,7 @@ class image {
     // Draw a filled circle
     void fill_circle(int32_t x, int32_t y, int32_t radius, uint8_t col);
 
-    // Draw a filled circle with smoothing
+    // Draw a filled circle with antialiasing
     // NOTE 1: This only works with constixel::format_8bit images
     void fill_circle_aa(int32_t x, int32_t y, int32_t radius, uint8_t col);
 
