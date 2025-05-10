@@ -20,11 +20,11 @@ constixel is a single header minimalistic constexpr C++20 2D graphics palette ba
 ## Primary features and goals
 
 - Completely constexpr. All operations, including the sixel output stream can be generated during compilation.
-- No dynamic allocations. The backbuffer and interal data structures can live as global static variables.
+- No dynamic allocations. The backbuffer and the very few internal data structures can live as global static variables.
 - Minimalistic interface and single header implementation so it can be used without fuzz in any modern C++ project.
 - 1, 2, 4 and 8bit palette based back buffers for minimal memory usage. Reasonable standard palettes are provided.
 - Simple fill_rect, fill_round_rect, line and fill_circle drawing functions.
-- Render proportional text with fonts genenerated by fontbm/bmfont. Project includes a set of pre-made fonts which are trivial to use. UTF-8 is supported.
+- Render proportional text, optionally with kerning, using fonts genenerated by a custom version of fontbm. Repository includes a set of pre-made fonts which are trivial to use. UTF-8 is supported.
 - A simplistic uncompressed png encoder is included to reduce dependencies.
 - Blit raw 32-bit RGBA image buffers into the palette backed back buffer (with or without dithering). Also convert into a RGBA buffer when needed.
 - Code is cpplint compliant, passes cppcheck and is of course consteval runnable.
@@ -228,7 +228,7 @@ The most important member function of image:
 ```c++
 // Colors in the fixed internal palette
 enum color : uint8_t {
-    BLACK_TRANSPARENT = 0,
+    BLACK = 0,
     BLACK_OPAQUE = 16,
     WHITE = 1,
     RED = 2,
@@ -260,14 +260,14 @@ class image {
     // Return a reference to the internal pixel buffer
     std::array<uint8_t, T<W, H, S>::image_size> &data_ref();
 
-    // Return a clone of the internal pixel buffer
-    std::array<uint8_t, T<W, H, S>::image_size> clone();
+    // Return a clone of this image, data will be copied.
+    image<T, W, H, S, GR> clone();
 
     // Clear the image, i.e. set everything to color 0
     void clear();
 
     // Copy another image into this instance. Overwrites the contents, no compositing occurs.
-    void copy(const std::array<uint8_t, T<W, H, S>::image_size> &src);
+    void copy(const image<T, W, H, S, GR> &src);
 
     // Draw monochrome utf8 text. #include a monochrome font and specify the included struct as the template parameter.
     // Returns the current x caret position in pixels.
@@ -369,7 +369,7 @@ class image {
     // Convert the current instance into a png and display it in a terminal with kitty graphics support
     void png_to_kitty();
 
-    // Send a escape command to std::cout to home the cursor of a vt100 compatible terminal.
+    // Send a escape command to std::cout to clear the screen of a vt100 compatible terminal.
     void vt100_clear();
     // Send a escape command to std::cout to home the cursor of a vt100 compatible terminal.
     void vt100_home();
