@@ -2469,7 +2469,7 @@ class image {
         } else if ((lead >> 4) == 0x0E && str[1] != 0 && str[2] != 0) {
             *utf32 = ((lead & 0x0F) << 12) | ((static_cast<uint32_t>(str[1]) & 0x3F) << 6) | (static_cast<uint32_t>(str[2]) & 0x3F);
             str += 3;
-        } else if ((lead >> 3) == 0x1E && str[1] != 0 && str[1] != 0 && str[3] != 0) {
+        } else if ((lead >> 3) == 0x1E && str[1] != 0 && str[2] != 0 && str[3] != 0) {
             *utf32 = ((lead & 0x07) << 18) | ((static_cast<uint32_t>(str[1]) & 0x3F) << 12) | ((static_cast<uint32_t>(str[2]) & 0x3F) << 6) |
                      (static_cast<uint32_t>(str[3]) & 0x3F);
             str += 4;
