@@ -1,7 +1,9 @@
 #include "constixel.h"
 
-#include "fonts/interdisplay_semibold_24_aa.h"
-#include "fonts/interdisplay_semibold_18_aa.h"
+#include "fonts/ibmplexsans_semibold_24_aa.h"
+using large_font = constixel::ibmplexsans_semibold_24_aa;
+#include "fonts/ibmplexsans_semibold_18_aa.h"
+using small_font = constixel::ibmplexsans_semibold_18_aa;
 
 #include <iomanip>
 #include <sstream>
@@ -35,14 +37,12 @@ auto generate_plot() {
 
 auto draw_graph(const char *x_label, const char *y_label, float x_min, float x_max, float y_min, float y_max,
                 const std::vector<std::pair<float, float>> &points, uint8_t axis_col, uint8_t plot_col) {
-    using font = constixel::interdisplay_semibold_24_aa;
-    using small_font = constixel::interdisplay_semibold_18_aa;
     constixel::image<constixel::format_8bit, 1024, 1024, 1> img;
 
-    const int32_t left_margin = 40 + img.string_width<font>(y_label);
+    const int32_t left_margin = 40 + img.string_width<large_font>(y_label);
     const int32_t right_margin = 40;
     const int32_t top_margin = 40;
-    const int32_t bottom_margin = 40 + font::size + small_font::size;
+    const int32_t bottom_margin = 40 + large_font::size + small_font::size;
 
     int32_t graph_x0 = left_margin;
     int32_t graph_y0 = top_margin;
@@ -54,8 +54,8 @@ auto draw_graph(const char *x_label, const char *y_label, float x_min, float x_m
     img.draw_line_aa(graph_x0, graph_y0, graph_x0, graph_y0 + graph_h, axis_col);
     img.draw_line_aa(graph_x0, graph_y0 + graph_h, graph_x0 + graph_w, graph_y0 + graph_h, axis_col);
 
-    img.draw_string_aa<font>(graph_x0 + graph_w / 2 - img.string_width<font>(x_label) / 2, graph_y0 + graph_h + 20 + small_font::size, x_label, axis_col);
-    img.draw_string_aa<font>(graph_x0 - img.string_width<font>(y_label) - 10, graph_y0 + graph_h / 2, y_label, axis_col);
+    img.draw_string_aa<large_font>(graph_x0 + graph_w / 2 - img.string_width<large_font>(x_label) / 2, graph_y0 + graph_h + 20 + small_font::size, x_label, axis_col);
+    img.draw_string_aa<large_font>(graph_x0 - img.string_width<large_font>(y_label) - 10, graph_y0 + graph_h / 2, y_label, axis_col);
 
     auto scale_x = [&](float x) {
         return graph_x0 + (x - x_min) / (x_max - x_min) * graph_w;

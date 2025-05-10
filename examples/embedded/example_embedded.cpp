@@ -3,8 +3,8 @@
 #include <string>
 #include <stdio.h>
 
-#include "fonts/interdisplay_bold_18_mono.h"
-using font = constixel::interdisplay_bold_18_mono;
+#include "fonts/ibmplexsans_regular_18_mono.h"
+using font = constixel::ibmplexsans_regular_18_mono;
 
 //
 // This an example which targets a screen like an ERM19264DNS-4
@@ -18,11 +18,11 @@ using font = constixel::interdisplay_bold_18_mono;
 static constixel::image<constixel::format_1bit, 192, 64, 2> screen;
 
 bool in_fault_state = false;
-float refill_ellapsed_time = 500.0;
+float refill_ellapsed_time = 641.0;
 float psi_air = 95;
 float psi_nitrogen = 75;
 bool solenoid_air = true;
-bool solenoid_nitrogen = true;
+bool solenoid_nitrogen = false;
 float duty_cycle_average_air = 0.125;
 float duty_cycle_average_nitrogen = 0.115;
 int32_t system_time = 12356;
