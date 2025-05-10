@@ -1619,7 +1619,7 @@ class image {
      * \return Size in bytes of the image data.
      */
     [[nodiscard]] static constexpr size_t size() {
-        return T<W, H, S, GR>::image_size;
+        return T<W, H, S, GR>::used_image_size;
     }
 
     /**
@@ -1675,7 +1675,7 @@ class image {
      */
     template<size_t BYTE_SIZE>
     constexpr void copy(const uint8_t *src) {
-        static_assert(format.used_image_size == BYTE_SIZE, "Copied length much match the image size");
+        static_assert(size() == BYTE_SIZE, "Copied length much match the image size");
         for (size_t c = 0; c < BYTE_SIZE; c++) {
             data.data()[c] = src[c];
         }
@@ -2431,7 +2431,7 @@ class image {
      * \param dst_format The desired data format.
      */
     template <typename F>
-    void convert(F &&char_out, device_format dst_format) {
+    constexpr void convert(F &&char_out, device_format dst_format) {
         switch (dst_format) {
             case STRAIGHT_THROUGH: {
                 for (auto c : data) {
@@ -2439,14 +2439,13 @@ class image {
                 }
             } break;
             case X_LEFT_TO_RIGHT_1BIT: {
-                static_assert(format.bits_per_pixel == 1, "Bit depth must be 1.");
+                static_assert(std::is_same_v<T<W, H, S, GR>, format_1bit<W, H, S, GR>>, "T must be format_1bit");
                 for (auto c : data) {
                     char_out(static_cast<char>(c));
                 }
             } break;
             case Y_TOP_TO_BOTTOM_1BIT: {
-                static_assert(format.bits_per_pixel == 1, "Bit depth must be 1.");
-                static_assert(((H % 8) == 0), "Height must be multiple of 8.");
+                static_assert(std::is_same_v<T<W, H, S, GR>, format_1bit<W, H, S, GR>>, "T must be format_1bit");
                 for (size_t x = 0; x < W; x++) {
                     for (size_t y = 0; y < H; y += 8) {
                         uint8_t b = (data[(y + 0) * format.bytes_per_line + x] << 7) | (data[(y + 1) * format.bytes_per_line + x] << 6) |
