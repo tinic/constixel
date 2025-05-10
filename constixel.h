@@ -700,6 +700,7 @@ class format_1bit : public format {
     static constexpr size_t bytes_per_line = (W * bits_per_pixel + 7) / 8;
     static constexpr size_t internal_height = ((H + 5) / 6) * 6;
     static constexpr size_t image_size = internal_height * bytes_per_line;
+    static constexpr size_t used_image_size = H * bytes_per_line;
     static constexpr std::array<uint32_t, (1UL << bits_per_pixel)> palette = {0x00000000, 0x00ffffff};
 
     static constexpr void compose(std::array<uint8_t, image_size> &, size_t, size_t, float, float, float, float) {
@@ -883,6 +884,7 @@ class format_2bit : public format {
     static constexpr size_t bytes_per_line = (W * bits_per_pixel + 7) / 8;
     static constexpr size_t internal_height = ((H + 5) / 6) * 6;
     static constexpr size_t image_size = internal_height * bytes_per_line;
+    static constexpr size_t used_image_size = H * bytes_per_line;
     static consteval const std::array<uint32_t, (1UL << bits_per_pixel)> gen_palette() {
         if (GR) {
             return {0x000000, 0x444444, 0x888888, 0xffffff};
@@ -1082,6 +1084,7 @@ class format_4bit : public format {
     static constexpr size_t bits_per_pixel = 4;
     static constexpr size_t bytes_per_line = (W * bits_per_pixel + 7) / 8;
     static constexpr size_t internal_height = ((H + 5) / 6) * 6;
+    static constexpr size_t used_image_size = H * bytes_per_line;
     static constexpr size_t image_size = internal_height * bytes_per_line;
 
     static consteval const std::array<uint32_t, (1UL << bits_per_pixel)> gen_palette() {
@@ -1297,6 +1300,7 @@ class format_8bit : public format {
     static constexpr size_t bits_per_pixel = 8;
     static constexpr size_t bytes_per_line = W;
     static constexpr size_t internal_height = ((H + 5) / 6) * 6;
+    static constexpr size_t used_image_size = H * bytes_per_line;
     static constexpr size_t image_size = internal_height * bytes_per_line;
 
     static consteval const std::array<uint32_t, (1UL << bits_per_pixel)> gen_palette() {
@@ -1662,6 +1666,19 @@ class image {
      */
     constexpr void copy(const image<T, W, H, S, GR> &src) {
         data = src.data;
+    }
+
+    /**
+     * \brief Copy source data into this instance. No compositing occurs.
+     * \tparam Amount data in the source data. Typically a sizeof() of an array.
+     * \param src source data.
+     */
+    template<size_t BYTE_SIZE>
+    constexpr void copy(const uint8_t *src) {
+        static_assert(format.used_image_size == BYTE_SIZE, "Copied length much match the image size");
+        for (size_t c = 0; c < BYTE_SIZE; c++) {
+            data.data()[c] = src[c];
+        }
     }
 
     /**
