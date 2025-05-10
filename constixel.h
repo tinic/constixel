@@ -698,9 +698,7 @@ class format_1bit : public format {
     static constexpr bool grayscale = GR;
     static constexpr size_t bits_per_pixel = 1;
     static constexpr size_t bytes_per_line = (W * bits_per_pixel + 7) / 8;
-    static constexpr size_t internal_height = ((H + 5) / 6) * 6;
-    static constexpr size_t image_size = internal_height * bytes_per_line;
-    static constexpr size_t used_image_size = H * bytes_per_line;
+    static constexpr size_t image_size = H * bytes_per_line;
     static constexpr std::array<uint32_t, (1UL << bits_per_pixel)> palette = {0x00000000, 0x00ffffff};
 
     static constexpr void compose(std::array<uint8_t, image_size> &, size_t, size_t, float, float, float, float) {
@@ -882,9 +880,7 @@ class format_2bit : public format {
     static constexpr bool grayscale = GR;
     static constexpr size_t bits_per_pixel = 2;
     static constexpr size_t bytes_per_line = (W * bits_per_pixel + 7) / 8;
-    static constexpr size_t internal_height = ((H + 5) / 6) * 6;
-    static constexpr size_t image_size = internal_height * bytes_per_line;
-    static constexpr size_t used_image_size = H * bytes_per_line;
+    static constexpr size_t image_size = H * bytes_per_line;
     static consteval const std::array<uint32_t, (1UL << bits_per_pixel)> gen_palette() {
         if (GR) {
             return {0x000000, 0x444444, 0x888888, 0xffffff};
@@ -1083,9 +1079,7 @@ class format_4bit : public format {
     static constexpr bool grayscale = GR;
     static constexpr size_t bits_per_pixel = 4;
     static constexpr size_t bytes_per_line = (W * bits_per_pixel + 7) / 8;
-    static constexpr size_t internal_height = ((H + 5) / 6) * 6;
-    static constexpr size_t used_image_size = H * bytes_per_line;
-    static constexpr size_t image_size = internal_height * bytes_per_line;
+    static constexpr size_t image_size = H * bytes_per_line;
 
     static consteval const std::array<uint32_t, (1UL << bits_per_pixel)> gen_palette() {
         if (GR) {
@@ -1299,9 +1293,7 @@ class format_8bit : public format {
     static constexpr bool grayscale = GR;
     static constexpr size_t bits_per_pixel = 8;
     static constexpr size_t bytes_per_line = W;
-    static constexpr size_t internal_height = ((H + 5) / 6) * 6;
-    static constexpr size_t used_image_size = H * bytes_per_line;
-    static constexpr size_t image_size = internal_height * bytes_per_line;
+    static constexpr size_t image_size = H * bytes_per_line;
 
     static consteval const std::array<uint32_t, (1UL << bits_per_pixel)> gen_palette() {
         std::array<uint32_t, (1UL << bits_per_pixel)> pal{};
@@ -1575,19 +1567,6 @@ enum color : uint8_t {
     MAGENTA_LUMA_RAMP_STOP = MAGENTA_LUMA_RAMP_START + 15
 };
 
-/*! Data formats for the convert function */
-enum device_format {
-    STRAIGHT_THROUGH,     /*!< Just copy the data as is. */
-    X_LEFT_TO_RIGHT_1BIT, /*!< 1-bit pixel data is stored from left to right, each byte containing 8 pixel values in the x direction. */
-    Y_TOP_TO_BOTTOM_1BIT, /*!< 1-bit pixel data is stored from top to bottom, each byte containing 8 pixel values in the y direction. */
-    RGB565_8BIT_SERIAL,   /*!< RGB565 pixel data is stored from left to right, each two bytes containing 1 pixel value in the x direction.
-                               Byte encoding: 0xRRRRRGGG 0xGGGBBBBB */
-    RGB666_8BIT_SERIAL_1, /*!< RGB565 pixel data is stored from left to right, each three bytes containing 1 pixel values in the x direction.
-                               Byte encoding: 0x00RRRRRR 0x00GGGGGG 0x00BBBBBB */
-    RGB666_8BIT_SERIAL_2  /*!< RGB565 pixel data is stored from left to right, each three bytes containing 1 pixel values in the x direction.
-                               Byte encoding: 0xRRRRRR00 0xGGGGGG00 0xBBBBBB00 */
-};
-
 template <template <size_t, size_t, int32_t, bool> class T, size_t W, size_t H, int32_t S = 1, bool GR = false>
 class image {
     static_assert(sizeof(W) >= sizeof(uint32_t));
@@ -1619,7 +1598,7 @@ class image {
      * \return Size in bytes of the image data.
      */
     [[nodiscard]] static constexpr size_t size() {
-        return T<W, H, S, GR>::used_image_size;
+        return T<W, H, S, GR>::image_size;
     }
 
     /**
@@ -1670,10 +1649,10 @@ class image {
 
     /**
      * \brief Copy source data into this instance. No compositing occurs.
-     * \tparam Amount data in the source data. Typically a sizeof() of an array.
+     * \tparam BYTE_SIZE Amount data in the source data. Typically a sizeof() of an array.
      * \param src source data.
      */
-    template<size_t BYTE_SIZE>
+    template <size_t BYTE_SIZE>
     constexpr void copy(const uint8_t *src) {
         static_assert(size() == BYTE_SIZE, "Copied length much match the image size");
         for (size_t c = 0; c < BYTE_SIZE; c++) {
@@ -2391,6 +2370,19 @@ class image {
         std::cout << output << std::endl;
     }
 
+    /*! Data formats for the convert function */
+    enum device_format {
+        STRAIGHT_THROUGH,     /*!< Just copy the data as is. */
+        X_LEFT_TO_RIGHT_1BIT, /*!< 1-bit pixel data is stored from left to right, each byte containing 8 pixel values in the x direction. */
+        Y_TOP_TO_BOTTOM_1BIT, /*!< 1-bit pixel data is stored from top to bottom, each byte containing 8 pixel values in the y direction. */
+        RGB565_8BIT_SERIAL,   /*!< RGB565 pixel data is stored from left to right, each two bytes containing 1 pixel value in the x direction.
+                                   Byte encoding: 0xRRRRRGGG 0xGGGBBBBB */
+        RGB666_8BIT_SERIAL_1, /*!< RGB565 pixel data is stored from left to right, each three bytes containing 1 pixel values in the x direction.
+                                   Byte encoding: 0x00RRRRRR 0x00GGGGGG 0x00BBBBBB */
+        RGB666_8BIT_SERIAL_2  /*!< RGB565 pixel data is stored from left to right, each three bytes containing 1 pixel values in the x direction.
+                                   Byte encoding: 0xRRRRRR00 0xGGGGGG00 0xBBBBBB00 */
+    };
+
     /**
      * \brief Convert the current instance into a byte stream formatted for embedded displays. This function will write chunk_length of data into dst and
      * update chunk_index on each call. You should pass chunk_index = 0 at the beginnig of the sequence. Returns true of there is more data, or false if there
@@ -2409,6 +2401,8 @@ class image {
         (void)chunk_index;
         (void)dst_format;
         switch (dst_format) {
+            default: {
+            } break;
             case STRAIGHT_THROUGH: {
             } break;
             case X_LEFT_TO_RIGHT_1BIT: {
@@ -2433,6 +2427,8 @@ class image {
     template <typename F>
     constexpr void convert(F &&char_out, device_format dst_format) {
         switch (dst_format) {
+            default: {
+            } break;
             case STRAIGHT_THROUGH: {
                 for (auto c : data) {
                     char_out(static_cast<char>(c));
