@@ -80,7 +80,8 @@ Include a text font and pass the struct name as a template parameter to the draw
 
 ```c++
 #include "constixel.h"
-#include "fonts/interdisplay_medium_48_mono.h"
+#include "fonts/ibmplexsans_medium_48_mono.h"
+using large_font = constixel::ibmplexsans_medium_48_mono;
 
 int main() {
     using namespace constixel;
@@ -93,7 +94,7 @@ int main() {
     for (size_t i = 0; i < strings.size(); i++) { 
         uint8_t col = color::GREY_RAMP_STOP - static_cast<uint8_t>(i * 3);
 
-        image.draw_string_mono<interdisplay_medium_48_mono>(16, 48 * static_cast<int32_t>(i) + 16, strings.at(i), col);
+        image.draw_string_mono<large_font>(16, 48 * static_cast<int32_t>(i) + 16, strings.at(i), col);
     }
 
     image.sixel_to_cout();
