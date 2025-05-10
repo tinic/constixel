@@ -22,6 +22,12 @@ struct Char {
     uint8_t chnl;
 };
 
+struct Kerning {
+    uint32_t first;
+    uint32_t second;
+    int32_t amount;
+};
+
 struct Font {
     std::string face;
     std::string style;
@@ -33,6 +39,7 @@ struct Font {
     int pages;
     std::string page_file;
     std::vector<Char> chars;
+    std::vector<Kerning> kernings;
     int smooth;
     int totalHeight;
 };
@@ -117,6 +124,12 @@ static Font parse_fnt(const std::filesystem::path& path) {
             c.page = to_int(kv.at("page"));
             c.chnl = to_int(kv.at("chnl"));
             font.chars.push_back(c);
+        } else if (cmd == "kerning") {
+            Kerning k{};
+            k.first = to_int(kv.at("first"));
+            k.second = to_int(kv.at("second"));
+            k.amount = to_int(kv.at("amount"));
+            font.kernings.push_back(k);
         }
     }
     return font;
@@ -194,14 +207,14 @@ int main(int argc, char* argv[]) {
                 ss << std::format("    using lookup_type = uint16_t;\n", name);
                 ss << std::format("    static constexpr std::array<std::pair<uint16_t, uint16_t>, {}> glyph_table{{{{\n", font.chars.size());
                 for (size_t c = 0; c < font.chars.size(); c++) {
-                    ss << std::format("        {{ uint16_t{{0x{:06x}}}, uint16_t{{0x{:06x}}} }}{}\n", font.chars[c].id, c,
+                    ss << std::format("        {{ uint16_t{{0x{:04x}}}, uint16_t{{0x{:04x}}} }}{}\n", font.chars[c].id, c,
                                       (c < font.chars.size() - 1) ? "," : "");
                 }
             } else {
                 ss << std::format("    using lookup_type = uint32_t;\n", name);
                 ss << std::format("    static constexpr std::array<std::pair<uint32_t, uint32_t>, {}> glyph_table{{{{\n", font.chars.size());
                 for (size_t c = 0; c < font.chars.size(); c++) {
-                    ss << std::format("        {{ uint32_t{{0x{:06x}}}, uint32_t{{0x{:06x}}} }}{}\n", font.chars[c].id, c,
+                    ss << std::format("        {{ uint32_t{{0x{:08x}}}, uint32_t{{0x{:08x}}} }}{}\n", font.chars[c].id, c,
                                       (c < font.chars.size() - 1) ? "," : "");
                 }
             }
@@ -212,6 +225,48 @@ int main(int argc, char* argv[]) {
             } else {
                 ss << std::format("    static constexpr hextree<hextree<0, uint32_t>::size(glyph_table), uint32_t> glyph_tree{{glyph_table}};\n\n",
                                   font.chars.size());
+            }
+
+            uint32_t max_utf32 = 0;
+            for (size_t c = 0; c < font.kernings.size(); c++) {
+                max_utf32 = std::max(font.kernings[c].first, max_utf32);
+                max_utf32 = std::max(font.kernings[c].second, max_utf32);
+            }
+
+            if (font.kernings.size() > 0 && font.kernings.size() < 65536 && max_utf32 < 255) {
+                ss << std::format("    using kerning_lookup_type = uint16_t;\n", name);
+                ss << std::format("    using kerning_amount_type = int16_t;\n", name);
+                ss << std::format("    static constexpr size_t kerning_code_shift = 8;\n", name);
+                ss << std::format("    static constexpr int16_t kerning_amount_offset = 0x4000;\n", name);
+                ss << std::format("    static constexpr std::array<std::pair<uint16_t, uint16_t>, {}> kerning_table{{{{\n", font.kernings.size());
+                for (size_t c = 0; c < font.kernings.size(); c++) {
+                    ss << std::format("        {{ uint16_t{{0x{:04x}}}, uint16_t{{0x{:04x}}} }}{}\n", font.kernings[c].first << 8 | font.kernings[c].second,
+                                      static_cast<uint16_t>(font.kernings[c].amount + 0x4000), (c < font.kernings.size() - 1) ? "," : "");
+                }
+                ss << std::format("    }}}};\n\n");
+
+                ss << std::format("    static constexpr hextree<hextree<0, uint16_t>::size(kerning_table), uint16_t> kerning_tree{{kerning_table}};\n\n");
+
+            } else if (font.kernings.size() > 0 && max_utf32 < 65535) {
+                ss << std::format("    using kerning_lookup_type = uint32_t;\n", name);
+                ss << std::format("    using kerning_amount_type = int32_t;\n", name);
+                ss << std::format("    static constexpr size_t kerning_code_shift = 16;\n", name);
+                ss << std::format("    static constexpr int32_t kerning_amount_offset = 0x40000000;\n", name);
+                ss << std::format("    static constexpr std::array<std::pair<uint32_t, uint32_t>, {}> kerning_table{{{{\n", font.kernings.size());
+                for (size_t c = 0; c < font.kernings.size(); c++) {
+                    ss << std::format("        {{ uint32_t{{0x{:08x}}}, uint32_t{{0x{:08x}}} }}{}\n", font.kernings[c].first << 16 | font.kernings[c].second,
+                                      static_cast<uint16_t>(font.kernings[c].amount + 0x4000), (c < font.kernings.size() - 1) ? "," : "");
+                }
+                ss << std::format("    }}}};\n\n");
+
+                ss << std::format("    static constexpr hextree<hextree<0, uint32_t>::size(kerning_table), uint32_t> kerning_tree{{kerning_table}};\n\n");
+            } else {
+                ss << std::format("    using kerning_lookup_type = uint32_t;\n", name);
+                ss << std::format("    using kerning_amount_type = int32_t;\n", name);
+                ss << std::format("    static constexpr size_t kerning_code_shift = 16;\n", name);
+                ss << std::format("    static constexpr size_t kerning_amount_offset = 0x40000000;\n", name);
+
+                ss << std::format("    static constexpr hextree<0, uint32_t> kerning_tree{{}};\n\n");
             }
 
             ss << std::format("    static constexpr std::array<char_info, {}> char_table{{{{\n", font.chars.size());
@@ -276,7 +331,6 @@ int main(int argc, char* argv[]) {
                     uint8_t* ptr = &bitmap.data()[y * bpr + x / 2];
                     *ptr |= (a >> 4) << ((1 - x % 2) * 4);
                 };
-
 
                 int32_t breakline = 1;
                 for (size_t y = 0; y < h; y++) {
