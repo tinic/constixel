@@ -7,7 +7,7 @@
 using font = constixel::ibmplexsans_regular_18_mono;
 
 //
-// This an example which targets a screen like an ERM19264DNS-4
+// An example which targets a screen like an ERM19264DNS-4
 // We show the status of a nitrogen generator on this screen.
 // In production this runs on a STM32G030F6 (32K Flash, 8K RAM)
 //
