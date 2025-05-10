@@ -80,7 +80,7 @@ Include a text font and pass the struct name as a template parameter to the draw
 
 ```c++
 #include "constixel.h"
-#include "fonts/sf_compact_display_medium_48_mono.h"
+#include "fonts/interdisplay_medium_48_mono.h"
 
 int main() {
     using namespace constixel;
@@ -93,7 +93,7 @@ int main() {
     for (size_t i = 0; i < strings.size(); i++) { 
         uint8_t col = color::GREY_RAMP_STOP - static_cast<uint8_t>(i * 3);
 
-        image.draw_string_mono<sf_compact_display_medium_48_mono>(16, 48 * static_cast<int32_t>(i) + 16, strings.at(i), col);
+        image.draw_string_mono<interdisplay_medium_48_mono>(16, 48 * static_cast<int32_t>(i) + 16, strings.at(i), col);
     }
 
     image.sixel_to_cout();
@@ -283,8 +283,13 @@ class image {
     constexpr int32_t string_width(const char *str);
 
     // Draw a line
-    void line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, uint32_t stroke_width = 1);
-    void line(constixel::rect<int32_t> &l, uint8_t col, uint32_t stroke_width = 1);
+    void draw_line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, uint32_t stroke_width = 1);
+    void draw_line(constixel::rect<int32_t> &l, uint8_t col, uint32_t stroke_width = 1);
+
+    // Draw an 1-pixel wide antialiased line with the specified color and thickness.
+    // NOTE: This only works with constixel::format_8bit images
+    void draw_line_aa(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col);
+    void draw_line_aa(const rect<int32_t> &rect, uint8_t col);
 
     // Draw a filled rectangle
     void fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col);
@@ -294,8 +299,8 @@ class image {
     void fill_round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col);
     void fill_round_rect(const rect<int32_t> &r, int32_t radius, uint8_t col);
 
-    // Draw a rounded rectangle with smoothing
-    // NOTE 1: This only works with constixel::format_8bit images
+    // Draw a rounded rectangle with antialiasing
+    // NOTE: This only works with constixel::format_8bit images
     void fill_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col);
     void fill_round_rect_aa(const rect<int32_t> &r, int32_t radius, uint8_t col);
 
@@ -306,7 +311,7 @@ class image {
     // Draw a filled circle
     void fill_circle(int32_t x, int32_t y, int32_t radius, uint8_t col);
 
-    // Draw a filled circle with smoothing
+    // Draw a filled circle with antialiasing
     // NOTE 1: This only works with constixel::format_8bit images
     void fill_circle_aa(int32_t x, int32_t y, int32_t radius, uint8_t col);
 
@@ -361,6 +366,11 @@ class image {
 
     // Convert the current instance into a png and display it in a terminal with kitty graphics support
     void png_to_kitty();
+
+    // Send a escape command to std::cout to home the cursor of a vt100 compatible terminal.
+    void vt100_clear();
+    // Send a escape command to std::cout to home the cursor of a vt100 compatible terminal.
+    void vt100_home();
 
     /*! Data formats for the convert functions */
     enum device_format {
