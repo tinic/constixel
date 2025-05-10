@@ -671,7 +671,7 @@ class format {
                 for (size_t x = static_cast<size_t>(r.x); x < static_cast<size_t>(r.x + r.w); x++) {
                     PBT bits6 = collect6(data, x, col, y);
                     uint16_t repeat_count = 0;
-                    for (size_t xr = (x + 1); xr < (std::min(x + 255, W * S)); xr++) {
+                    for (size_t xr = (x + 1); xr < (std::min(static_cast<size_t>(x + 255), static_cast<size_t>(W * S))); xr++) {
                         if (bits6 == collect6(data, xr, col, y)) {
                             repeat_count++;
                             continue;
@@ -796,7 +796,7 @@ class format_1bit : public format {
                 int32_t V = (R * 2 + G * 3 + B * 1) + err;
                 uint8_t n = V > 768 ? 1 : 0;
                 plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
-                err = std::clamp(V - (n ? 0xFF * 6 : 0x00), -0xFF * 6, 0xFF * 6);
+                err = std::clamp(static_cast<int32_t>(V - (n ? 0xFF * 6 : 0x00)), int32_t{-0xFF * 6}, int32_t{0xFF * 6});
             }
         }
     }
@@ -995,9 +995,9 @@ class format_2bit : public format {
                 B = B + err_b;
                 uint8_t n = quant.nearest(R, G, B);
                 plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
-                err_r = std::clamp(R - static_cast<int32_t>((palette.at(n) >> 16) & 0xFF), -255, 255);
-                err_g = std::clamp(G - static_cast<int32_t>((palette.at(n) >> 8) & 0xFF), -255, 255);
-                err_b = std::clamp(B - static_cast<int32_t>((palette.at(n) >> 0) & 0xFF), -255, 255);
+                err_r = std::clamp(R - static_cast<int32_t>((palette.at(n) >> 16) & 0xFF), int32_t{-255}, int32_t{255});
+                err_g = std::clamp(G - static_cast<int32_t>((palette.at(n) >> 8) & 0xFF), int32_t{-255}, int32_t{255});
+                err_b = std::clamp(B - static_cast<int32_t>((palette.at(n) >> 0) & 0xFF), int32_t{-255}, int32_t{255});
             }
         }
     }
@@ -1210,9 +1210,9 @@ class format_4bit : public format {
                 B = B + err_b;
                 uint8_t n = quant.nearest(R, G, B);
                 plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
-                err_r = std::clamp(R - static_cast<int32_t>((palette.at(n) >> 16) & 0xFF), -255, 255);
-                err_g = std::clamp(G - static_cast<int32_t>((palette.at(n) >> 8) & 0xFF), -255, 255);
-                err_b = std::clamp(B - static_cast<int32_t>((palette.at(n) >> 0) & 0xFF), -255, 255);
+                err_r = std::clamp(R - static_cast<int32_t>((palette.at(n) >> 16) & 0xFF), int32_t{-255}, int32_t{255});
+                err_g = std::clamp(G - static_cast<int32_t>((palette.at(n) >> 8) & 0xFF), int32_t{-255}, int32_t{255});
+                err_b = std::clamp(B - static_cast<int32_t>((palette.at(n) >> 0) & 0xFF), int32_t{-255}, int32_t{255});
             }
         }
     }
@@ -1440,9 +1440,9 @@ class format_8bit : public format {
                 B = B + err_b;
                 uint8_t n = quant.nearest(R, G, B);
                 data.data()[(y + static_cast<size_t>(r.y)) * bytes_per_line + (x + static_cast<size_t>(r.x))] = n;
-                err_r = std::clamp(R - static_cast<int32_t>((palette.at(n) >> 16) & 0xFF), -255, 255);
-                err_g = std::clamp(G - static_cast<int32_t>((palette.at(n) >> 8) & 0xFF), -255, 255);
-                err_b = std::clamp(B - static_cast<int32_t>((palette.at(n) >> 0) & 0xFF), -255, 255);
+                err_r = std::clamp(R - static_cast<int32_t>((palette.at(n) >> 16) & 0xFF), int32_t{-255}, int32_t{255});
+                err_g = std::clamp(G - static_cast<int32_t>((palette.at(n) >> 8) & 0xFF), int32_t{-255}, int32_t{255});
+                err_b = std::clamp(B - static_cast<int32_t>((palette.at(n) >> 0) & 0xFF), int32_t{-255}, int32_t{255});
             }
         }
     }
@@ -1783,8 +1783,8 @@ class image {
         float xend = static_cast<float>(x0);
         float yend = static_cast<float>(y0) + gradient * (xend - static_cast<float>(x0));
         float xgap = rfpart(static_cast<float>(x0) + 0.5f);
-        int32_t xpxl1 = static_cast<int>(xend);
-        int32_t ypxl1 = static_cast<int>(ipart(yend));
+        int32_t xpxl1 = static_cast<int32_t>(xend);
+        int32_t ypxl1 = static_cast<int32_t>(ipart(yend));
         if (steep) {
             color_compose(ypxl1, xpxl1, rfpart(yend) * xgap);
             color_compose(ypxl1 + 1, xpxl1, fpart(yend) * xgap);
@@ -1798,8 +1798,8 @@ class image {
         xend = static_cast<float>(x1);
         yend = static_cast<float>(y1) + gradient * (xend - static_cast<float>(x1));
         xgap = fpart(static_cast<float>(x1) + 0.5f);
-        int32_t xpxl2 = static_cast<int>(xend);
-        int32_t ypxl2 = static_cast<int>(ipart(yend));
+        int32_t xpxl2 = static_cast<int32_t>(xend);
+        int32_t ypxl2 = static_cast<int32_t>(ipart(yend));
         if (steep) {
             color_compose(ypxl2, xpxl2, rfpart(yend) * xgap);
             color_compose(ypxl2 + 1, xpxl2, fpart(yend) * xgap);
@@ -1810,7 +1810,7 @@ class image {
 
         // main loop
         for (int32_t x = xpxl1 + 1; x < xpxl2; ++x) {
-            int32_t y = static_cast<int>(ipart(intery));
+            int32_t y = static_cast<int32_t>(ipart(intery));
             if (steep) {
                 color_compose(y, x, rfpart(intery));
                 color_compose(y + 1, x, fpart(intery));
