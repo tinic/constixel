@@ -80,7 +80,7 @@ Include a text font and pass the struct name as a template parameter to the draw
 
 ```c++
 #include "constixel.h"
-#include "fonts/sf_compact_display_medium_48_mono.h"
+#include "fonts/interdisplay_medium_48_mono.h"
 
 int main() {
     using namespace constixel;
