@@ -1823,10 +1823,9 @@ class image {
      * \brief Draw an antialiased line with the specified color and thickness.
      * \param rect rectangle containing the line coordinates in pixels.
      * \param col palette color index to use.
-     * \param stroke_width width of the stroke in pixels.
      */
-    constexpr void draw_line_aa(const rect<int32_t> &rect, uint8_t col, uint32_t stroke_width = 1) {
-        draw_line_aa(rect.x, rect.y, rect.x + rect.w, rect.y + rect.h, col, stroke_width);
+    constexpr void draw_line_aa(const rect<int32_t> &rect, uint8_t col) {
+        draw_line_aa(rect.x, rect.y, rect.x + rect.w, rect.y + rect.h, col);
     }
 
     /**
