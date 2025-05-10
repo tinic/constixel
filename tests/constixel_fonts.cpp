@@ -2,6 +2,11 @@
 #include <fstream>
 #include <iostream>
 
+#if __cplusplus >= 202302L
+#include <format>
+#include <print>
+#endif  // #if __cplusplus >= 202302L
+
 #include "constixel.h"
 #include "fontslist.h"
 
@@ -69,6 +74,7 @@ int main() {
 
     fonts.sixel_to_cout();
 
+#if __cplusplus >= 202302L
     for_each_type<AA_HEADERS>([&]<std::size_t, typename T>() {
         std::print("kerning_tree: {:8d} glyph_bitmap: {:8d} char_table: {:8d} glyph_tree: {:8d} total: {:8d} {} {} {} {} \n", sizeof(T::kerning_tree),
                    sizeof(T::glyph_bitmap), sizeof(T::char_table), sizeof(T::glyph_tree),
@@ -82,4 +88,5 @@ int main() {
                    sizeof(T::kerning_tree) + sizeof(T::glyph_bitmap) + sizeof(T::char_table) + sizeof(T::glyph_tree), T::name, T::style, T::size,
                    T::mono ? "mono" : "aa");
     });
+#endif  // #if __cplusplus >= 202302L
 }
