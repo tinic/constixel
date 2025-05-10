@@ -671,7 +671,7 @@ class format {
                 for (size_t x = static_cast<size_t>(r.x); x < static_cast<size_t>(r.x + r.w); x++) {
                     PBT bits6 = collect6(data, x, col, y);
                     uint16_t repeat_count = 0;
-                    for (size_t xr = (x + 1); xr < (std::min(static_cast<size_t>(x + 255), static_cast<size_t>(W * S))); xr++) {
+                    for (size_t xr = (x + 1); xr < (std::min(x + size_t{255}, W * S)); xr++) {
                         if (bits6 == collect6(data, xr, col, y)) {
                             repeat_count++;
                             continue;
@@ -796,7 +796,7 @@ class format_1bit : public format {
                 int32_t V = (R * 2 + G * 3 + B * 1) + err;
                 uint8_t n = V > 768 ? 1 : 0;
                 plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
-                err = std::clamp(static_cast<int32_t>(V - (n ? 0xFF * 6 : 0x00)), int32_t{-0xFF * 6}, int32_t{0xFF * 6});
+                err = std::clamp(V - (n ? int32_t{0xFF * 6} : int32_t{0x00}), int32_t{-0xFF * 6}, int32_t{0xFF * 6});
             }
         }
     }
