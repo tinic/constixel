@@ -188,6 +188,7 @@ int main() {
 ```c++
 #include "constixel.h"
 #include <iostream>
+#include <fstream>
 #include <filesystem>
 
 int main() {
