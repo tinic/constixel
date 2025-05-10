@@ -181,6 +181,9 @@ struct srgb {
     return {oklch.l, oklch.c * cos(oklch.h * m_pi_d / 180.0), oklch.c * sin(oklch.h * m_pi_d / 180.0)};
 }
 
+static constexpr float epsilon_low = srgb_to_linear(0.5f / 255.f);
+static constexpr float epsilon_high = srgb_to_linear(254.5f / 255.f);
+
 template <size_t S>
 class quantize {
     static constexpr size_t palette_size = S;
@@ -1654,7 +1657,7 @@ class image {
      * \param col palette color index to use.
      * \param stroke_width width of the stroke in pixels.
      */
-    constexpr void line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, uint32_t stroke_width = 1) {
+    constexpr void draw_line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, uint32_t stroke_width = 1) {
         int32_t steep = abs(y1 - y0) > abs(x1 - x0);
 
         if (steep) {
@@ -1722,78 +1725,97 @@ class image {
      * \param col palette color index to use.
      * \param stroke_width width of the stroke in pixels.
      */
-    constexpr void line(const rect<int32_t> &rect, uint8_t col, uint32_t stroke_width = 1) {
-        line(rect.x, rect.y, rect.x + rect.w, rect.y + rect.h, col, stroke_width);
+    constexpr void draw_line(const rect<int32_t> &rect, uint8_t col, uint32_t stroke_width = 1) {
+        draw_line(rect.x, rect.y, rect.x + rect.w, rect.y + rect.h, col, stroke_width);
     }
 
     /**
-     * \brief Draw an antialiased line with the specified color and thickness.BLACK_OPAQUE
+     * \brief Draw an 1-pixel wide antialiased line with the specified color and thickness.
      * \param x0 starting x-coordinate in pixels.
      * \param y0 starting x-coordinate in pixels.
      * \param x1 ending x-coordinate in pixels.
      * \param y1 ending x-coordinate in pixels.
      * \param col palette color index to use.
-     * \param stroke_width width of the stroke in pixels.
      */
-    constexpr void line_aa(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, uint32_t stroke_width = 1) {
-        int32_t steep = abs(y1 - y0) > abs(x1 - x0);
+    constexpr void draw_line_aa(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col) {
+        auto ipart = [](float x) {
+            return std::floor(x);
+        };
+        auto fpart = [](float x) {
+            return x - std::floor(x);
+        };
+        auto rfpart = [&](float x) {
+            return 1.0f - fpart(x);
+        };
 
+        bool steep = std::fabs(y1 - y0) > std::fabs(x1 - x0);
         if (steep) {
-            x0 ^= y0;
-            y0 ^= x0;
-            x0 ^= y0;
-            x1 ^= y1;
-            y1 ^= x1;
-            x1 ^= y1;
+            std::swap(x0, y0);
+            std::swap(x1, y1);
         }
-
         if (x0 > x1) {
-            x0 ^= x1;
-            x1 ^= x0;
-            x0 ^= x1;
-            y0 ^= y1;
-            y1 ^= y0;
-            y0 ^= y1;
+            std::swap(x0, x1);
+            std::swap(y0, y1);
         }
 
-        int32_t dx, dy;
-        dx = x1 - x0;
-        dy = abs(y1 - y0);
+        float Rl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 0);
+        float Gl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 1);
+        float Bl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 2);
 
-        int32_t err = dx / 2;
-        int32_t ystep;
-        if (y0 < y1) {
-            ystep = 1;
+        float dx = x1 - x0;
+        float dy = y1 - y0;
+        float gradient = dx == 0.0f ? 1.0f : dy / dx;
+
+        auto color_compose = [&](int32_t x, int32_t y, float a) {
+            if (a < epsilon_low) {
+                return;
+            } else if (a >= epsilon_high) {
+                plot(x, y, col);
+            } else {
+                compose(x, y, a, Rl * a, Gl * a, Bl * a);
+            }
+        };
+
+        // first endpoint
+        float xend = std::roundf(x0);
+        float yend = y0 + gradient * (xend - x0);
+        float xgap = rfpart(x0 + 0.5f);
+        int32_t xpxl1 = static_cast<int>(xend);
+        int32_t ypxl1 = static_cast<int>(ipart(yend));
+        if (steep) {
+            color_compose(ypxl1, xpxl1, rfpart(yend) * xgap);
+            color_compose(ypxl1 + 1, xpxl1, fpart(yend) * xgap);
         } else {
-            ystep = -1;
+            color_compose(xpxl1, ypxl1, rfpart(yend) * xgap);
+            color_compose(xpxl1, ypxl1 + 1, fpart(yend) * xgap);
+        }
+        float intery = yend + gradient;
+
+        // second endpoint
+        xend = std::roundf(x1);
+        yend = y1 + gradient * (xend - x1);
+        xgap = fpart(x1 + 0.5f);
+        int32_t xpxl2 = static_cast<int>(xend);
+        int32_t ypxl2 = static_cast<int>(ipart(yend));
+        if (steep) {
+            color_compose(ypxl2, xpxl2, rfpart(yend) * xgap);
+            color_compose(ypxl2 + 1, xpxl2, fpart(yend) * xgap);
+        } else {
+            color_compose(xpxl2, ypxl2, rfpart(yend) * xgap);
+            color_compose(xpxl2, ypxl2 + 1, fpart(yend) * xgap);
         }
 
-        if (stroke_width == 1) {
-            for (; x0 <= x1; x0++) {
-                if (steep) {
-                    plot(y0, x0, col);
-                } else {
-                    plot(x0, y0, col);
-                }
-                err -= dy;
-                if (err < 0) {
-                    y0 += ystep;
-                    err += dx;
-                }
+        // main loop
+        for (int32_t x = xpxl1 + 1; x < xpxl2; ++x) {
+            int32_t y = static_cast<int>(ipart(intery));
+            if (steep) {
+                color_compose(y, x, rfpart(intery));
+                color_compose(y + 1, x, fpart(intery));
+            } else {
+                color_compose(x, y, rfpart(intery));
+                color_compose(x, y + 1, fpart(intery));
             }
-        } else if (stroke_width > 1) {
-            for (; x0 <= x1; x0++) {
-                if (steep) {
-                    fill_circle_aa(y0, x0, (stroke_width + 1) / 2, col);
-                } else {
-                    fill_circle_aa(x0, y0, (stroke_width + 1) / 2, col);
-                }
-                err -= dy;
-                if (err < 0) {
-                    y0 += ystep;
-                    err += dx;
-                }
-            }
+            intery += gradient;
         }
     }
 
@@ -1803,8 +1825,8 @@ class image {
      * \param col palette color index to use.
      * \param stroke_width width of the stroke in pixels.
      */
-    constexpr void line_aa(const rect<int32_t> &rect, uint8_t col, uint32_t stroke_width = 1) {
-        line_aa(rect.x, rect.y, rect.x + rect.w, rect.y + rect.h, col, stroke_width);
+    constexpr void draw_line_aa(const rect<int32_t> &rect, uint8_t col, uint32_t stroke_width = 1) {
+        draw_line_aa(rect.x, rect.y, rect.x + rect.w, rect.y + rect.h, col, stroke_width);
     }
 
     /**
@@ -1839,7 +1861,8 @@ class image {
         int32_t x = 0;
         while (*str != 0) {
             uint32_t utf32 = 0;
-            uint32_t lead = static_cast<uint32_t>(*str) & 0xFF;;
+            uint32_t lead = static_cast<uint32_t>(*str) & 0xFF;
+            ;
             if (lead < 0x80) {
                 utf32 = lead;
                 str += 1;
@@ -1935,7 +1958,8 @@ class image {
         static_assert(FONT::mono == false, "Can't use a mono font to draw antialiased text.");
         while (*str != 0) {
             uint32_t utf32 = 0;
-            uint32_t lead = static_cast<uint32_t>(*str) & 0xFF;;
+            uint32_t lead = static_cast<uint32_t>(*str) & 0xFF;
+            ;
             if (lead < 0x80) {
                 utf32 = lead;
                 str += 1;
@@ -2010,10 +2034,10 @@ class image {
      * \param stroke_width width of the stroke in pixels.
      */
     constexpr void stroke_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col, uint32_t stroke_width = 1) {
-        line(x, y, x + w, y, col, stroke_width);
-        line(x + w, y, x + w, y + h, col, stroke_width);
-        line(x + w, y + h, x, y + h, col, stroke_width);
-        line(x, y + h, x, y, col, stroke_width);
+        draw_line(x, y, x + w, y, col, stroke_width);
+        draw_line(x + w, y, x + w, y + h, col, stroke_width);
+        draw_line(x + w, y + h, x, y + h, col, stroke_width);
+        draw_line(x, y + h, x, y, col, stroke_width);
     }
 
     /**
@@ -2052,7 +2076,7 @@ class image {
      * \param col palette color index to use.
      */
     constexpr void fill_circle_aa(int32_t cx, int32_t cy, int32_t radius, uint8_t col) {
-        fill_circle_aa(cx, cy, radius, 0, 0, col);
+        fill_circle_aa_int(cx, cy, radius, 0, 0, col);
     }
 
     /**
@@ -2097,7 +2121,7 @@ class image {
         int32_t cr = std::min((w) / 2, std::min((w) / 2, r));
         int32_t dx = w - cr * 2;
         int32_t dy = h - cr * 2;
-        fill_circle_aa(x + cr, y + cr, cr, dx, dy, col);
+        fill_circle_aa_int(x + cr, y + cr, cr, dx, dy, col);
         fill_rect(x, y + cr, cr, dy, col);
         fill_rect(x + w - cr, y + cr, cr, dy, col);
         fill_rect(x + cr, y, dx, h, col);
@@ -2266,6 +2290,20 @@ class image {
                               },
                               {0, 0, W, H});
         std::cout << out << std::endl;
+    }
+
+    /**
+     * \brief Send a escape command to std::cout to clear the screen and scroll buffer of a vt100 compatible terminal.
+     */
+    void vt100_clear() const {
+        std::cout << "\033[2J\033[H" << std::endl;
+    }
+
+    /**
+     * \brief Send a escape command to std::cout to home the cursor of a vt100 compatible terminal.
+     */
+    void vt100_home() const {
+        std::cout << "\033[H" << std::endl;
     }
 
     /**
@@ -2458,12 +2496,12 @@ class image {
         });
     }
 
-    constexpr void fill_circle_aa(int32_t cx, int32_t cy, int32_t r, int32_t ox, int32_t oy, uint8_t col) {
+    constexpr void fill_circle_aa_int(int32_t cx, int32_t cy, int32_t r, int32_t ox, int32_t oy, uint8_t col) {
         int32_t x0 = cx - r - 1;
         int32_t y0 = cy - r - 1;
-        float Rl = format.quant.linearpal.at((col&((1UL<<format.bits_per_pixel)-1)) * 3 + 0);
-        float Gl = format.quant.linearpal.at((col&((1UL<<format.bits_per_pixel)-1)) * 3 + 1);
-        float Bl = format.quant.linearpal.at((col&((1UL<<format.bits_per_pixel)-1)) * 3 + 2);
+        float Rl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 0);
+        float Gl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 1);
+        float Bl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 2);
         for (int32_t y = y0; y <= cy; ++y) {
             for (int32_t x = x0; x <= cx; ++x) {
                 float dx = (static_cast<float>(x) + 0.5f) - static_cast<float>(cx);
@@ -2471,12 +2509,12 @@ class image {
                 float dist_sq = dx * dx + dy * dy;
                 float a = static_cast<float>(r) - fast_sqrtf(dist_sq);
                 a = std::clamp(a + 0.5f, 0.0f, 1.0f);
-                if (a != 0.0f) {
+                if (a >= epsilon_low) {
                     int32_t lx = x;
                     int32_t ly = y;
                     int32_t rx = cx + (x0 - x) + r + ox;
                     int32_t ry = cy + (y0 - y) + r + oy;
-                    if (a >= 1.0f) {
+                    if (a >= epsilon_high) {
                         plot(lx, ly, col);
                         plot(rx, ly, col);
                         plot(rx, ry, col);
@@ -2534,9 +2572,9 @@ class image {
         y += ch.yoffset;
         const int32_t x2 = x + static_cast<int32_t>(ch.width);
         const int32_t y2 = y + static_cast<int32_t>(ch.height);
-        float Rl = format.quant.linearpal.at((col&((1UL<<format.bits_per_pixel)-1)) * 3 + 0);
-        float Gl = format.quant.linearpal.at((col&((1UL<<format.bits_per_pixel)-1)) * 3 + 1);
-        float Bl = format.quant.linearpal.at((col&((1UL<<format.bits_per_pixel)-1)) * 3 + 2);
+        float Rl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 0);
+        float Gl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 1);
+        float Bl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 2);
         for (int32_t yy = y; yy < y2; yy++) {
             for (int32_t xx = x; xx < x2; xx++) {
                 const int32_t x_off = (xx - x) + ch.x % 2;
