@@ -260,14 +260,14 @@ class image {
     // Return a reference to the internal pixel buffer
     std::array<uint8_t, T<W, H, S>::image_size> &data_ref();
 
-    // Return a clone of the internal pixel buffer
-    std::array<uint8_t, T<W, H, S>::image_size> clone();
+    // Return a clone of this image, data will be copied.
+    image<T, W, H, S, GR> clone();
 
     // Clear the image, i.e. set everything to color 0
     void clear();
 
     // Copy another image into this instance. Overwrites the contents, no compositing occurs.
-    void copy(const std::array<uint8_t, T<W, H, S>::image_size> &src);
+    void copy(const image<T, W, H, S, GR> &src);
 
     // Draw monochrome utf8 text. #include a monochrome font and specify the included struct as the template parameter.
     // Returns the current x caret position in pixels.
