@@ -1941,6 +1941,20 @@ class image {
     }
 
     /**
+     * \brief Draw text centered at the specified coordinate. The template parameter selects which mono font to use. Only format_8bit targets are supported.
+     * \tparam FONT The font struct name.
+     * \tparam KERNING Use kerning information if available.
+     * \param cx center x-coordinate in pixels.
+     * \param y starting y-coordinate in pixels.
+     * \param str UTF-8 string.
+     * \param col palette color index to use.
+     */
+    template <typename FONT, bool KERNING = false>
+    constexpr int32_t draw_string_centered_mono(int32_t cx, int32_t y, const char *str, uint8_t col) {
+        draw_string_mono(cx - string_width(str) / 2, y, str, col);
+    }
+
+    /**
      * \brief Draw antialiased text at the specified coordinate. The template parameter selects which antialiased font to use. Only format_8bit targets are
      * supported.
      * \tparam FONT The font struct name.
@@ -1982,6 +1996,21 @@ class image {
             }
         }
         return x;
+    }
+
+    /**
+     * \brief Draw antialiased text centered at the specified coordinate. The template parameter selects which antialiased font to use. Only format_8bit targets
+     * are supported.
+     * \tparam FONT The font struct name.
+     * \tparam KERNING Use kerning information if available.
+     * \param cx center x-coordinate in pixels.
+     * \param y starting y-coordinate in pixels.
+     * \param str UTF-8 string.
+     * \param col palette color index to use.
+     */
+    template <typename FONT, bool KERNING = false>
+    constexpr int32_t draw_string_centered_aa(int32_t cx, int32_t y, const char *str, uint8_t col) {
+        draw_string_aa(cx - string_width(str) / 2, y, str, col);
     }
 
     /**
