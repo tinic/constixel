@@ -252,13 +252,15 @@ class hextree {
     static constexpr T invalid = std::numeric_limits<T>::max();
     std::array<node, N> nodes{};
 
-    [[nodiscard]] size_t byte_size() const {
+    [[nodiscard]] consteval size_t byte_size() const {
         return sizeof(node) * nodes.size();
     }
 
-    hextree() = delete;
     hextree(const hextree &) = delete;
     hextree &operator=(const hextree &) = delete;
+
+    explicit consteval hextree() {
+    }
 
     template <std::size_t NS>
     explicit consteval hextree(const std::array<std::pair<T, T>, NS> &in) {
@@ -1854,31 +1856,16 @@ class image {
 
     /**
      * \brief Return the width of a string using the specified font in the template parameter.
+     * \tparam FONT The font struct name.
+     * \tparam KERNING Use kerning information if available.
      * \param str UTF-8 string.
      */
-    template <typename FONT>
+    template <typename FONT, bool KERNING = false>
     [[nodiscard]] constexpr int32_t string_width(const char *str) {
         int32_t x = 0;
         while (*str != 0) {
             uint32_t utf32 = 0;
-            uint32_t lead = static_cast<uint32_t>(*str) & 0xFF;
-            ;
-            if (lead < 0x80) {
-                utf32 = lead;
-                str += 1;
-            } else if ((lead >> 5) == 0x06 && str[1] != 0) {
-                utf32 = ((lead & 0x1F) << 6) | (static_cast<uint32_t>(str[1]) & 0x3F);
-                str += 2;
-            } else if ((lead >> 4) == 0x0E && str[1] != 0 && str[2] != 0) {
-                utf32 = ((lead & 0x0F) << 12) | ((static_cast<uint32_t>(str[1]) & 0x3F) << 6) | (static_cast<uint32_t>(str[2]) & 0x3F);
-                str += 3;
-            } else if ((lead >> 3) == 0x1E && str[1] != 0 && str[1] != 0 && str[3] != 0) {
-                utf32 = ((lead & 0x07) << 18) | ((static_cast<uint32_t>(str[1]) & 0x3F) << 12) | ((static_cast<uint32_t>(str[2]) & 0x3F) << 6) |
-                        (static_cast<uint32_t>(str[3]) & 0x3F);
-                str += 4;
-            } else {
-                return x;
-            }
+            str = get_next_utf32(str, &utf32);
             auto index = FONT::glyph_tree.lookup(static_cast<FONT::lookup_type>(utf32));
             if (index == FONT::glyph_tree.invalid) {
                 index = FONT::glyph_tree.lookup(static_cast<FONT::lookup_type>(0xFFFD));
@@ -1894,6 +1881,17 @@ class image {
                 x += ch_info.width;
             } else {
                 x += ch_info.xadvance;
+
+                if (KERNING && FONT::kerning_tree.byte_size()) {
+                    uint32_t utf_l = utf32;
+                    uint32_t utf_r = 0;
+                    get_next_utf32(str, &utf_r);
+                    auto amount = FONT::kerning_tree.lookup(static_cast<FONT::kerning_lookup_type>(utf_l << FONT::kerning_code_shift | utf_r));
+                    if (amount != FONT::kerning_tree.invalid) {
+                        x += static_cast<int32_t>(static_cast<FONT::kerning_amount_type>(amount) -
+                                                  static_cast<FONT::kerning_amount_type>(FONT::kerning_amount_offset));
+                    }
+                }
             }
         }
         return x;
@@ -1901,33 +1899,19 @@ class image {
 
     /**
      * \brief Draw text at the specified coordinate. The template parameter selects which mono font to use. Only format_8bit targets are supported.
+     * \tparam FONT The font struct name.
+     * \tparam KERNING Use kerning information if available.
      * \param x starting x-coordinate in pixels.
      * \param y starting y-coordinate in pixels.
      * \param str UTF-8 string.
      * \param col palette color index to use.
      */
-    template <typename FONT>
+    template <typename FONT, bool KERNING = false>
     constexpr int32_t draw_string_mono(int32_t x, int32_t y, const char *str, uint8_t col) {
         static_assert(FONT::mono == true, "Can't use an antialiased font to draw mono/pixelized text.");
         while (*str != 0) {
             uint32_t utf32 = 0;
-            uint32_t lead = static_cast<uint32_t>(*str) & 0xFF;
-            if (lead < 0x80) {
-                utf32 = lead;
-                str += 1;
-            } else if ((lead >> 5) == 0x06 && str[1] != 0) {
-                utf32 = ((lead & 0x1F) << 6) | (static_cast<uint32_t>(str[1]) & 0x3F);
-                str += 2;
-            } else if ((lead >> 4) == 0x0E && str[1] != 0 && str[2] != 0) {
-                utf32 = ((lead & 0x0F) << 12) | ((static_cast<uint32_t>(str[1]) & 0x3F) << 6) | (static_cast<uint32_t>(str[2]) & 0x3F);
-                str += 3;
-            } else if ((lead >> 3) == 0x1E && str[1] != 0 && str[1] != 0 && str[3] != 0) {
-                utf32 = ((lead & 0x07) << 18) | ((static_cast<uint32_t>(str[1]) & 0x3F) << 12) | ((static_cast<uint32_t>(str[2]) & 0x3F) << 6) |
-                        (static_cast<uint32_t>(str[3]) & 0x3F);
-                str += 4;
-            } else {
-                return x;
-            }
+            str = get_next_utf32(str, &utf32);
             auto index = FONT::glyph_tree.lookup(static_cast<FONT::lookup_type>(utf32));
             if (index == FONT::glyph_tree.invalid) {
                 index = FONT::glyph_tree.lookup(static_cast<FONT::lookup_type>(0xFFFD));
@@ -1941,6 +1925,17 @@ class image {
             const char_info &ch_info = FONT::char_table.at(index);
             draw_char_mono<FONT>(x, y, ch_info, col);
             x += ch_info.xadvance;
+
+            if (KERNING && FONT::kerning_tree.byte_size()) {
+                uint32_t utf_l = utf32;
+                uint32_t utf_r = 0;
+                get_next_utf32(str, &utf_r);
+                auto amount = FONT::kerning_tree.lookup(static_cast<FONT::kerning_lookup_type>(utf_l << FONT::kerning_code_shift | utf_r));
+                if (amount != FONT::kerning_tree.invalid) {
+                    x += static_cast<int32_t>(static_cast<FONT::kerning_amount_type>(amount) -
+                                              static_cast<FONT::kerning_amount_type>(FONT::kerning_amount_offset));
+                }
+            }
         }
         return x;
     }
@@ -1948,34 +1943,19 @@ class image {
     /**
      * \brief Draw antialiased text at the specified coordinate. The template parameter selects which antialiased font to use. Only format_8bit targets are
      * supported.
+     * \tparam FONT The font struct name.
+     * \tparam KERNING Use kerning information if available.
      * \param x starting x-coordinate in pixels.
      * \param y starting y-coordinate in pixels.
      * \param str UTF-8 string.
      * \param col palette color index to use.
      */
-    template <typename FONT>
+    template <typename FONT, bool KERNING = false>
     constexpr int32_t draw_string_aa(int32_t x, int32_t y, const char *str, uint8_t col) {
         static_assert(FONT::mono == false, "Can't use a mono font to draw antialiased text.");
         while (*str != 0) {
             uint32_t utf32 = 0;
-            uint32_t lead = static_cast<uint32_t>(*str) & 0xFF;
-            ;
-            if (lead < 0x80) {
-                utf32 = lead;
-                str += 1;
-            } else if ((lead >> 5) == 0x06 && str[1] != 0) {
-                utf32 = ((lead & 0x1F) << 6) | (static_cast<uint32_t>(str[1]) & 0x3F);
-                str += 2;
-            } else if ((lead >> 4) == 0x0E && str[1] != 0 && str[2] != 0) {
-                utf32 = ((lead & 0x0F) << 12) | ((static_cast<uint32_t>(str[1]) & 0x3F) << 6) | (static_cast<uint32_t>(str[2]) & 0x3F);
-                str += 3;
-            } else if ((lead >> 3) == 0x1E && str[1] != 0 && str[1] != 0 && str[3] != 0) {
-                utf32 = ((lead & 0x07) << 18) | ((static_cast<uint32_t>(str[1]) & 0x3F) << 12) | ((static_cast<uint32_t>(str[2]) & 0x3F) << 6) |
-                        (static_cast<uint32_t>(str[3]) & 0x3F);
-                str += 4;
-            } else {
-                return x;
-            }
+            str = get_next_utf32(str, &utf32);
             auto index = FONT::glyph_tree.lookup(static_cast<FONT::lookup_type>(utf32));
             if (index == FONT::glyph_tree.invalid) {
                 index = FONT::glyph_tree.lookup(static_cast<FONT::lookup_type>(0xFFFD));
@@ -1989,6 +1969,17 @@ class image {
             const char_info &ch_info = FONT::char_table.at(index);
             draw_char_aa<FONT>(x, y, ch_info, col);
             x += ch_info.xadvance;
+
+            if (KERNING && FONT::kerning_tree.byte_size()) {
+                uint32_t utf_l = utf32;
+                uint32_t utf_r = 0;
+                get_next_utf32(str, &utf_r);
+                auto amount = FONT::kerning_tree.lookup(static_cast<FONT::kerning_lookup_type>(utf_l << FONT::kerning_code_shift | utf_r));
+                if (amount != FONT::kerning_tree.invalid) {
+                    x += static_cast<int32_t>(static_cast<FONT::kerning_amount_type>(amount) -
+                                              static_cast<FONT::kerning_amount_type>(FONT::kerning_amount_offset));
+                }
+            }
         }
         return x;
     }
@@ -2464,6 +2455,28 @@ class image {
     template <typename abs_T>
     [[nodiscard]] static constexpr abs_T abs(abs_T v) {
         return v < 0 ? -v : v;
+    }
+
+    constexpr const char *get_next_utf32(const char *str, uint32_t *utf32) {
+        *utf32 = 0;
+        uint32_t lead = static_cast<uint32_t>(*str) & 0xFF;
+        if (lead < 0x80) {
+            *utf32 = lead;
+            str += 1;
+        } else if ((lead >> 5) == 0x06 && str[1] != 0) {
+            *utf32 = ((lead & 0x1F) << 6) | (static_cast<uint32_t>(str[1]) & 0x3F);
+            str += 2;
+        } else if ((lead >> 4) == 0x0E && str[1] != 0 && str[2] != 0) {
+            *utf32 = ((lead & 0x0F) << 12) | ((static_cast<uint32_t>(str[1]) & 0x3F) << 6) | (static_cast<uint32_t>(str[2]) & 0x3F);
+            str += 3;
+        } else if ((lead >> 3) == 0x1E && str[1] != 0 && str[1] != 0 && str[3] != 0) {
+            *utf32 = ((lead & 0x07) << 18) | ((static_cast<uint32_t>(str[1]) & 0x3F) << 12) | ((static_cast<uint32_t>(str[2]) & 0x3F) << 6) |
+                     (static_cast<uint32_t>(str[3]) & 0x3F);
+            str += 4;
+        } else {
+            str += 1;
+        }
+        return str;
     }
 
     constexpr void compose(int32_t x, int32_t y, float cola, float colr, float colg, float colb) {

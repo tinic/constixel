@@ -39,7 +39,7 @@ int main() {
         text.append(size);
         text.append(" ");
         text.append("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567890!@#$%^&*()");
-        fonts.draw_string_aa<T>(0, y_pos, text.c_str(), 1);
+        fonts.draw_string_aa<T, true>(0, y_pos, text.c_str(), 1);
         y_pos += T::total_height;
         if (y_pos + 100 > fonts.height()) {
             fonts.sixel_to_cout();
@@ -47,10 +47,6 @@ int main() {
             y_pos = 0;
         }
     });
-
-    fonts.sixel_to_cout();
-    fonts.clear();
-    y_pos = 0;
 
     for_each_type<MONO_HEADERS>([&]<std::size_t, typename T>() {
         std::string text;
@@ -62,7 +58,7 @@ int main() {
         text.append(size);
         text.append(" ");
         text.append("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567890!@#$%^&*()");
-        fonts.draw_string_mono<T>(0, y_pos, text.c_str(), 1);
+        fonts.draw_string_mono<T, true>(0, y_pos, text.c_str(), 1);
         y_pos += T::total_height;
         if (y_pos + 100 > fonts.height()) {
             fonts.sixel_to_cout();
@@ -72,4 +68,18 @@ int main() {
     });
 
     fonts.sixel_to_cout();
+
+    for_each_type<AA_HEADERS>([&]<std::size_t, typename T>() {
+        std::print("kerning_tree: {:8d} glyph_bitmap: {:8d} char_table: {:8d} glyph_tree: {:8d} total: {:8d} {} {} {} {} \n", sizeof(T::kerning_tree),
+                   sizeof(T::glyph_bitmap), sizeof(T::char_table), sizeof(T::glyph_tree),
+                   sizeof(T::kerning_tree) + sizeof(T::glyph_bitmap) + sizeof(T::char_table) + sizeof(T::glyph_tree), T::name, T::style, T::size,
+                   T::mono ? "mono" : "aa");
+    });
+
+    for_each_type<MONO_HEADERS>([&]<std::size_t, typename T>() {
+        std::print("kerning_tree: {:8d} glyph_bitmap: {:8d} char_table: {:8d} glyph_tree: {:8d} total: {:8d} {} {} {} {} \n", sizeof(T::kerning_tree),
+                   sizeof(T::glyph_bitmap), sizeof(T::char_table), sizeof(T::glyph_tree),
+                   sizeof(T::kerning_tree) + sizeof(T::glyph_bitmap) + sizeof(T::char_table) + sizeof(T::glyph_tree), T::name, T::style, T::size,
+                   T::mono ? "mono" : "aa");
+    });
 }
