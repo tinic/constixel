@@ -1763,8 +1763,8 @@ class image {
         float Gl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 1);
         float Bl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 2);
 
-        float dx = x1 - x0;
-        float dy = y1 - y0;
+        float dx = static_cast<float>(x1 - x0);
+        float dy = static_cast<float>(y1 - y0);
         float gradient = dx == 0.0f ? 1.0f : dy / dx;
 
         auto color_compose = [&](int32_t x, int32_t y, float a) {
@@ -1778,9 +1778,9 @@ class image {
         };
 
         // first endpoint
-        float xend = std::roundf(x0);
-        float yend = y0 + gradient * (xend - x0);
-        float xgap = rfpart(x0 + 0.5f);
+        float xend = static_cast<float>(x0);
+        float yend = static_cast<float>(y0) + gradient * (xend - static_cast<float>(x0));
+        float xgap = rfpart(static_cast<float>(x0) + 0.5f);
         int32_t xpxl1 = static_cast<int>(xend);
         int32_t ypxl1 = static_cast<int>(ipart(yend));
         if (steep) {
@@ -1793,9 +1793,9 @@ class image {
         float intery = yend + gradient;
 
         // second endpoint
-        xend = std::roundf(x1);
-        yend = y1 + gradient * (xend - x1);
-        xgap = fpart(x1 + 0.5f);
+        xend = static_cast<float>(x1);
+        yend = static_cast<float>(y1) + gradient * (xend - static_cast<float>(x1));
+        xgap = fpart(static_cast<float>(x1) + 0.5f);
         int32_t xpxl2 = static_cast<int>(xend);
         int32_t ypxl2 = static_cast<int>(ipart(yend));
         if (steep) {
