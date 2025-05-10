@@ -203,7 +203,7 @@ static constexpr std::string test6() {
     constixel::image<constixel::format_1bit, 127, 101> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
-        image.line(16, 16, c * 8, 64, static_cast<uint8_t>(c), static_cast<uint8_t>(c));
+        image.draw_line(16, 16, c * 8, 64, static_cast<uint8_t>(c), static_cast<uint8_t>(c));
     }
     image.sixel([&out](char ch) mutable {
         out.push_back(ch);
@@ -217,7 +217,7 @@ static constexpr std::string test7() {
     constixel::image<constixel::format_2bit, 111, 95> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
-        image.line(-8, -8, c * 8, 64, static_cast<uint8_t>(c), static_cast<uint8_t>(c));
+        image.draw_line(-8, -8, c * 8, 64, static_cast<uint8_t>(c), static_cast<uint8_t>(c));
     }
     image.sixel([&out](char ch) mutable {
         out.push_back(ch);
@@ -231,7 +231,7 @@ static constexpr std::string test8() {
     constixel::image<constixel::format_4bit, 7, 7, 8> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
-        image.line(-8, -8, c * 8, 64, static_cast<uint8_t>(c), static_cast<uint8_t>(c));
+        image.draw_line(-8, -8, c * 8, 64, static_cast<uint8_t>(c), static_cast<uint8_t>(c));
     }
     image.sixel([&out](char ch) mutable {
         out.push_back(ch);
@@ -245,7 +245,7 @@ static constexpr std::string test9() {
     constixel::image<constixel::format_8bit, 64, 64> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
-        image.line(-8, -8, c * 8, 48, static_cast<uint8_t>(c), static_cast<uint8_t>(c));
+        image.draw_line(-8, -8, c * 8, 48, static_cast<uint8_t>(c), static_cast<uint8_t>(c));
     }
     image.sixel([&out](char ch) mutable {
         out.push_back(ch);
@@ -324,7 +324,7 @@ static std::array<char, 8192> gen_separator() {
     size_t count = 0;
     constixel::image<constixel::format_8bit, 1024, 1> image;
     for (int32_t x = 0; x < 16; x++) {
-        image.line(x * 64, 0, x * 64 + 64, 0, static_cast<uint8_t>(constixel::color::GREY_RAMP_STOP - uint32_t(x)));
+        image.draw_line(x * 64, 0, x * 64 + 64, 0, static_cast<uint8_t>(constixel::color::GREY_RAMP_STOP - uint32_t(x)));
     }
     image.sixel([&sixel, &count](char ch) mutable {
         sixel[count++] = ch;
@@ -467,7 +467,7 @@ void draw_functions() {
         separator();
     }
     for (int32_t c = 0; c < static_cast<int32_t>(I); c++) {
-        image.line(16, 16, 64 + c * 42, 700, static_cast<uint8_t>(c), static_cast<uint8_t>(c));
+        image.draw_line(16, 16, 64 + c * 42, 700, static_cast<uint8_t>(c), static_cast<uint8_t>(c));
         puts("\033[H");
         std::string out;
         out.reserve(1UL << 18);
@@ -506,11 +506,11 @@ void draw_functions_aa() {
             out.push_back(ch);
         });
         puts(out.c_str());
-        printf("%d-bit %dpx %dpx fill_rect  \n", int(image.bit_depth()), int(image.width()), int(image.height()));
-        // separator();
+        printf("%d-bit %dpx %dpx fill_rect aa \n", int(image.bit_depth()), int(image.width()), int(image.height()));
+        separator();
     }
     for (int32_t c = 0; c < static_cast<int32_t>(I); c++) {
-        image.line_aa(16, 16, 64 + c * 42, 700, static_cast<uint8_t>(c), static_cast<uint8_t>(c));
+        image.draw_line_aa(16, 16, 64 + c * 42, 700, static_cast<uint8_t>(c));
         puts("\033[H");
         std::string out;
         out.reserve(1UL << 18);
@@ -518,8 +518,8 @@ void draw_functions_aa() {
             out.push_back(ch);
         });
         puts(out.c_str());
-        printf("%d-bit %dpx %dpx line       \n", int(image.bit_depth()), int(image.width()), int(image.height()));
-        // separator();
+        printf("%d-bit %dpx %dpx line aa      \n", int(image.bit_depth()), int(image.width()), int(image.height()));
+        separator();
     }
     for (int32_t c = 0; c < static_cast<int32_t>(I); c++) {
         image.fill_circle_aa(600, 384, 256 - c * 16, static_cast<uint8_t>(c));
@@ -530,15 +530,15 @@ void draw_functions_aa() {
             out.push_back(ch);
         });
         puts(out.c_str());
-        printf("%d-bit %dpx %dpx circle     \n", int(image.bit_depth()), int(image.width()), int(image.height()));
-        // separator();
+        printf("%d-bit %dpx %dpx circle aa    \n", int(image.bit_depth()), int(image.width()), int(image.height()));
+        separator();
     }
 }
 
 template <typename FONT>
 void print_sizeof_font() {
     printf("%s %s %d (%s): %d bytes\n", FONT::name, FONT::style, int(FONT::size), FONT::mono ? "monochrome" : "antialiased",
-               int(sizeof(FONT::glyph_tree) + sizeof(FONT::glyph_bitmap) + sizeof(FONT::char_table)));
+           int(sizeof(FONT::glyph_tree) + sizeof(FONT::glyph_bitmap) + sizeof(FONT::char_table)));
 }
 
 #endif  // #ifdef MAINLINE_TESTS
@@ -903,6 +903,52 @@ int main() {
 #endif  // #if 0
 
 #if MAINLINE_TESTS
+    {
+        auto image = std::make_unique<constixel::image<constixel::format_8bit, 512, 512, 1, false>>();
+        for (int32_t c = 0; c < 64; c++) {
+            image->draw_line_aa(0, 8 * c, 16 * c, 512, static_cast<uint8_t>(c & 0xFF));
+        }
+        image->sixel_to_cout();
+    }
+    {
+        auto image = std::make_unique<constixel::image<constixel::format_8bit, 512, 512, 1, true>>();
+        for (int32_t c = 0; c < 64; c++) {
+            image->draw_line_aa(0, 8 * c, 16 * c, 512, static_cast<uint8_t>((c * 2 + 128) & 0xFF));
+        }
+        image->sixel_to_cout();
+    }
+#endif  // #if 0
+
+#if MAINLINE_TESTS
+    {
+        auto image = std::make_unique<constixel::image<constixel::format_8bit, 1024, 512, 1, false>>();
+
+        for (int32_t c = 0; c < 8; c++) {
+            const int32_t delta = 8;
+            for (int32_t x = 0; x < 1024; x += delta) {
+                float xf0 = float(x) / 1024.0f * 2.0f * 3.141f * float(c + 1) / 2.0f;
+                float xf1 = float(x + delta) / 1024.0f * 2.0f * 3.141f * float(c + 1) / 2.0f;
+                ;
+                image->draw_line(x, int32_t(256.0f + std::sin(xf0) * 192.0f), x + delta, int32_t(256.0f + std::sin(xf1) * 192.0f), static_cast<uint8_t>(c), 1);
+            }
+        }
+        image->sixel_to_cout();
+    }
+    {
+        auto image = std::make_unique<constixel::image<constixel::format_8bit, 1024, 512, 1, false>>();
+        for (int32_t c = 0; c < 8; c++) {
+            const int32_t delta = 8;
+            for (int32_t x = 0; x < 1024; x += delta) {
+                float xf0 = float(x) / 1024.0f * 2.0f * 3.141f * float(c + 1) / 2.0f;
+                float xf1 = float(x + delta) / 1024.0f * 2.0f * 3.141f * float(c + 1) / 2.0f;
+                image->draw_line_aa(x, int32_t(256.0f + std::sin(xf0) * 192.0f), x + delta, int32_t(256.0f + std::sin(xf1) * 192.0f), static_cast<uint8_t>(c));
+            }
+        }
+        image->sixel_to_cout();
+    }
+#endif  // #if MAINLINE_TESTS
+
+#if MAINLINE_TESTS
     print_sizeof_font<constixel::inter_bold_48_aa>();
     print_sizeof_font<constixel::interdisplay_bold_32_mono>();
     print_sizeof_font<constixel::interdisplay_bold_48_mono>();
@@ -912,4 +958,5 @@ int main() {
     print_sizeof_font<constixel::jetbrainsmono_bold_48_mono>();
     print_sizeof_font<constixel::jetbrainsmono_regular_18_mono>();
 #endif  // #if MAINLINE_TESTS
+
 }
