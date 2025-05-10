@@ -93,7 +93,7 @@ int main() {
     for (size_t i = 0; i < strings.size(); i++) { 
         uint8_t col = color::GREY_RAMP_STOP - static_cast<uint8_t>(i * 3);
 
-        image.draw_string_mono<sf_compact_display_medium_48_mono>(16, 48 * static_cast<int32_t>(i) + 16, strings.at(i), col);
+        image.draw_string_mono<interdisplay_medium_48_mono>(16, 48 * static_cast<int32_t>(i) + 16, strings.at(i), col);
     }
 
     image.sixel_to_cout();
