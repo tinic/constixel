@@ -15,7 +15,7 @@ using font = constixel::interdisplay_bold_18_mono;
 static constixel::image<constixel::format_1bit, 192, 64, 2> screen;
 
 bool in_fault_state = false;
-float refill_ellapsed_time = 642.0;
+float refill_ellapsed_time = 500.0;
 float psi_air = 95;
 float psi_nitrogen = 75;
 bool solenoid_air = true;
