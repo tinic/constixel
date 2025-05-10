@@ -11,6 +11,9 @@ using font = constixel::interdisplay_bold_18_mono;
 // We show the status of a nitrogen generator on this screen.
 // In production this runs on a STM32G030F6 (32K Flash, 8K RAM)
 //
+// RAM use: 1585 bytes, (192*64/8) bytes pixel data + 49 bytes instance data
+// Flash use: 3269 bytes, all of it the interdisplay_bold_18_mono data
+//
 
 static constixel::image<constixel::format_1bit, 192, 64, 2> screen;
 
