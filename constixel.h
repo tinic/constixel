@@ -671,7 +671,7 @@ class format {
                 for (size_t x = static_cast<size_t>(r.x); x < static_cast<size_t>(r.x + r.w); x++) {
                     PBT bits6 = collect6(data, x, col, y);
                     uint16_t repeat_count = 0;
-                    for (size_t xr = (x + 1); xr < (std::min(x + size_t{255}, W * S)); xr++) {
+                    for (size_t xr = (x + 1); xr < (std::min(x + size_t{255}, W * size_t{S})); xr++) {
                         if (bits6 == collect6(data, xr, col, y)) {
                             repeat_count++;
                             continue;
@@ -1571,6 +1571,19 @@ enum color : uint8_t {
     MAGENTA_LUMA_RAMP_STOP = MAGENTA_LUMA_RAMP_START + 15
 };
 
+/*! Data formats for the convert function */
+enum device_format {
+    STRAIGHT_THROUGH,     /*!< Just copy the data as is. */
+    X_LEFT_TO_RIGHT_1BIT, /*!< 1-bit pixel data is stored from left to right, each byte containing 8 pixel values in the x direction. */
+    Y_TOP_TO_BOTTOM_1BIT, /*!< 1-bit pixel data is stored from top to bottom, each byte containing 8 pixel values in the y direction. */
+    RGB565_8BIT_SERIAL,   /*!< RGB565 pixel data is stored from left to right, each two bytes containing 1 pixel value in the x direction.
+                               Byte encoding: 0xRRRRRGGG 0xGGGBBBBB */
+    RGB666_8BIT_SERIAL_1, /*!< RGB565 pixel data is stored from left to right, each three bytes containing 1 pixel values in the x direction.
+                               Byte encoding: 0x00RRRRRR 0x00GGGGGG 0x00BBBBBB */
+    RGB666_8BIT_SERIAL_2  /*!< RGB565 pixel data is stored from left to right, each three bytes containing 1 pixel values in the x direction.
+                               Byte encoding: 0xRRRRRR00 0xGGGGGG00 0xBBBBBB00 */
+};
+
 template <template <size_t, size_t, int32_t, bool> class T, size_t W, size_t H, int32_t S = 1, bool GR = false>
 class image {
     static_assert(sizeof(W) >= sizeof(uint32_t));
@@ -1951,7 +1964,7 @@ class image {
      */
     template <typename FONT, bool KERNING = false>
     constexpr int32_t draw_string_centered_mono(int32_t cx, int32_t y, const char *str, uint8_t col) {
-        draw_string_mono(cx - string_width(str) / 2, y, str, col);
+        return draw_string_mono<FONT, KERNING>(cx - string_width<FONT, KERNING>(str) / 2, y, str, col);
     }
 
     /**
@@ -2010,7 +2023,7 @@ class image {
      */
     template <typename FONT, bool KERNING = false>
     constexpr int32_t draw_string_centered_aa(int32_t cx, int32_t y, const char *str, uint8_t col) {
-        draw_string_aa(cx - string_width(str) / 2, y, str, col);
+        return draw_string_aa<FONT, KERNING>(cx - string_width<FONT, KERNING>(str) / 2, y, str, col);
     }
 
     /**
@@ -2361,19 +2374,6 @@ class image {
         std::cout << output << std::endl;
     }
 
-    /*! Data formats for the convert function */
-    enum device_format {
-        STRAIGHT_THROUGH,     /*!< Just copy the data as is. */
-        X_LEFT_TO_RIGHT_1BIT, /*!< 1-bit pixel data is stored from left to right, each byte containing 8 pixel values in the x direction. */
-        Y_TOP_TO_BOTTOM_1BIT, /*!< 1-bit pixel data is stored from top to bottom, each byte containing 8 pixel values in the y direction. */
-        RGB565_8BIT_SERIAL,   /*!< RGB565 pixel data is stored from left to right, each two bytes containing 1 pixel value in the x direction.
-                                   Byte encoding: 0xRRRRRGGG 0xGGGBBBBB */
-        RGB666_8BIT_SERIAL_1, /*!< RGB565 pixel data is stored from left to right, each three bytes containing 1 pixel values in the x direction.
-                                   Byte encoding: 0x00RRRRRR 0x00GGGGGG 0x00BBBBBB */
-        RGB666_8BIT_SERIAL_2  /*!< RGB565 pixel data is stored from left to right, each three bytes containing 1 pixel values in the x direction.
-                                   Byte encoding: 0xRRRRRR00 0xGGGGGG00 0xBBBBBB00 */
-    };
-
     /**
      * \brief Convert the current instance into a byte stream formatted for embedded displays. This function will write chunk_length of data into dst and
      * update chunk_index on each call. You should pass chunk_index = 0 at the beginnig of the sequence. Returns true of there is more data, or false if there
@@ -2402,7 +2402,7 @@ class image {
             } break;
             case RGB666_8BIT_SERIAL_1: {
             } break;
-            case RGB666_8BIT_SERIAL_1: {
+            case RGB666_8BIT_SERIAL_2: {
             } break;
         }
         return false;
@@ -2422,13 +2422,13 @@ class image {
                 }
             } break;
             case X_LEFT_TO_RIGHT_1BIT: {
-                static_assert(format.bit_depth == 1, "Bit depth must be 1.");
+                static_assert(format.bits_per_pixel == 1, "Bit depth must be 1.");
                 for (auto c : data) {
                     char_out(static_cast<char>(c));
                 }
             } break;
             case Y_TOP_TO_BOTTOM_1BIT: {
-                static_assert(format.bit_depth == 1, "Bit depth must be 1.");
+                static_assert(format.bits_per_pixel == 1, "Bit depth must be 1.");
                 static_assert(((H % 8) == 0), "Height must be multiple of 8.");
                 for (size_t x = 0; x < W; x++) {
                     for (size_t y = 0; y < H; y += 8) {
@@ -2465,7 +2465,7 @@ class image {
                     ptr += format.bytes_per_line;
                 }
             } break;
-            case RGB666_8BIT_SERIAL_1: {
+            case RGB666_8BIT_SERIAL_2: {
                 const uint8_t *ptr = data.data();
                 for (size_t y = 0; y < H; y++) {
                     for (size_t x = 0; x < W; x++) {
