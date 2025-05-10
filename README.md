@@ -20,7 +20,7 @@ constixel is a single header minimalistic constexpr C++20 2D graphics palette ba
 ## Primary features and goals
 
 - Completely constexpr. All operations, including the sixel output stream can be generated during compilation.
-- No dynamic allocations. The backbuffer and interal data structures can live as global static variables.
+- No dynamic allocations. The backbuffer and internal data structures can live as global static variables.
 - Minimalistic interface and single header implementation so it can be used without fuzz in any modern C++ project.
 - 1, 2, 4 and 8bit palette based back buffers for minimal memory usage. Reasonable standard palettes are provided.
 - Simple fill_rect, fill_round_rect, line and fill_circle drawing functions.
