@@ -96,6 +96,6 @@ auto draw_graph(const char *x_label, const char *y_label, float x_min, float x_m
 }
 
 int main() {
-    auto plot_image = draw_graph(x_label, y_label, axis_xmin, axis_xmax, axis_ymin, axis_ymax, generate_plot(), axis_color, graph_color);
+    static auto plot_image = draw_graph(x_label, y_label, axis_xmin, axis_xmax, axis_ymin, axis_ymax, generate_plot(), axis_color, graph_color);
     plot_image.sixel_to_cout();
 }
