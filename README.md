@@ -369,7 +369,7 @@ class image {
     // Convert the current instance into a png and display it in a terminal with kitty graphics support
     void png_to_kitty();
 
-    // Send a escape command to std::cout to home the cursor of a vt100 compatible terminal.
+    // Send a escape command to std::cout to clear the screen of a vt100 compatible terminal.
     void vt100_clear();
     // Send a escape command to std::cout to home the cursor of a vt100 compatible terminal.
     void vt100_home();
