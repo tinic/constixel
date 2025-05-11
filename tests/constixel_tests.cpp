@@ -39,14 +39,16 @@ SOFTWARE.
 #include "constixel.h"
 
 #if MAINLINE_TESTS
-#include "fonts/ibmplexsans_bold_48_aa.h"
-#include "fonts/ibmplexsans_bold_32_mono.h"
-#include "fonts/ibmplexsans_bold_48_mono.h"
-#include "fonts/ibmplexsans_medium_48_aa.h"
-#include "fonts/ibmplexsans_medium_48_mono.h"
 #include "fonts/ibmplexmono_bold_48_aa.h"
 #include "fonts/ibmplexmono_bold_48_mono.h"
 #include "fonts/ibmplexmono_regular_18_mono.h"
+#include "fonts/ibmplexsans_bold_12_aa.h"
+#include "fonts/ibmplexsans_bold_12_mono.h"
+#include "fonts/ibmplexsans_bold_32_mono.h"
+#include "fonts/ibmplexsans_bold_48_aa.h"
+#include "fonts/ibmplexsans_bold_48_mono.h"
+#include "fonts/ibmplexsans_medium_48_aa.h"
+#include "fonts/ibmplexsans_medium_48_mono.h"
 #endif  // #if MAINLINE_TESTS
 
 #if JP_TESTS
@@ -777,7 +779,7 @@ int main() {
         for (int32_t x = 0; x < 16; x++) {
             image->draw_string_aa<constixel::ibmplexsans_bold_48_aa>(x * 7, x * 7, "Pack my box with five dozen liquor jugs", static_cast<uint8_t>(x));
             image->draw_string_aa<constixel::ibmplexmono_bold_48_aa>(x * 7, x * 7 + 100, "Pack my box with five dozen liquor jugs",
-                                                                       static_cast<uint8_t>(15 - x));
+                                                                     static_cast<uint8_t>(15 - x));
         }
         image->sixel_to_cout();
     }
@@ -951,6 +953,55 @@ int main() {
 #endif  // #if MAINLINE_TESTS
 
 #if MAINLINE_TESTS
+    {
+        using font_mono = constixel::ibmplexsans_bold_12_mono;
+        using font_aa = constixel::ibmplexsans_bold_12_aa;
+        using namespace constixel;
+
+        static image<format_8bit, 192, 300, 5> i;
+
+        auto draw_bg_for_rotate_test = [=]<typename FONT>(const char *str, int32_t x_pos, int32_t y_pos) mutable {
+            int32_t s_wdh = i.string_width<FONT>(str);
+
+            i.fill_rect(x_pos, y_pos, s_wdh, FONT::line_height, 2);
+            i.fill_rect(x_pos - s_wdh, y_pos - FONT::line_height, s_wdh, FONT::line_height, 4);
+            i.fill_rect(x_pos - FONT::line_height, y_pos, FONT::line_height, s_wdh, 9);
+            i.fill_rect(x_pos, y_pos - s_wdh, FONT::line_height, s_wdh, 7);
+
+            i.fill_rect(x_pos, y_pos + FONT::ascent, s_wdh, 1, 12);
+            i.fill_rect(x_pos - s_wdh, y_pos - FONT::ascent - 1, s_wdh, 1, 12);
+            i.fill_rect(x_pos - FONT::ascent - 1, y_pos, 1, s_wdh, 12);
+            i.fill_rect(x_pos + FONT::ascent, y_pos - s_wdh, 1, s_wdh, 12);
+        };
+
+        auto str = std::string("Garfunkel");  // random_ascii_string();
+
+        i.clear();
+
+        int32_t y_pos = 96;
+        int32_t x_pos = i.width() / 2;
+        i.fill_rect(x_pos - 1, 0, 2, i.height(), 1);
+        draw_bg_for_rotate_test.template operator()<font_mono>(str.c_str(), x_pos, y_pos);
+        y_pos = 224;
+        draw_bg_for_rotate_test.template operator()<font_aa>(str.c_str(), x_pos, y_pos);
+
+        y_pos = 96;
+        i.draw_string_mono<font_mono, false, text_rotation::DEGREE_0>(x_pos, y_pos, str.c_str(), color::WHITE);
+        i.draw_string_mono<font_mono, false, text_rotation::DEGREE_180>(x_pos, y_pos, str.c_str(), color::WHITE);
+        i.draw_string_mono<font_mono, false, text_rotation::DEGREE_90>(x_pos, y_pos, str.c_str(), color::WHITE);
+        i.draw_string_mono<font_mono, false, text_rotation::DEGREE_270>(x_pos, y_pos, str.c_str(), color::WHITE);
+
+        y_pos = 224;
+        i.draw_string_aa<font_aa, false, text_rotation::DEGREE_0>(x_pos, y_pos, str.c_str(), color::WHITE);
+        i.draw_string_aa<font_aa, false, text_rotation::DEGREE_180>(x_pos, y_pos, str.c_str(), color::WHITE);
+        i.draw_string_aa<font_aa, false, text_rotation::DEGREE_90>(x_pos, y_pos, str.c_str(), color::WHITE);
+        i.draw_string_aa<font_aa, false, text_rotation::DEGREE_270>(x_pos, y_pos, str.c_str(), color::WHITE);
+
+        i.sixel_to_cout();
+    }
+#endif  // #if MAINLINE_TESTS
+
+#if MAINLINE_TESTS
     print_sizeof_font<constixel::ibmplexsans_bold_48_aa>();
     print_sizeof_font<constixel::ibmplexsans_bold_32_mono>();
     print_sizeof_font<constixel::ibmplexsans_bold_48_mono>();
@@ -960,5 +1011,4 @@ int main() {
     print_sizeof_font<constixel::ibmplexmono_bold_48_mono>();
     print_sizeof_font<constixel::ibmplexmono_regular_18_mono>();
 #endif  // #if MAINLINE_TESTS
-
 }
