@@ -328,6 +328,15 @@ class image {
     std::array<uint32_t, W * H> RGBA_uint32();
     std::array<uint8_t, W * H * 4> RGBA_uint8();
 
+    // Flip the contents of this image horizontally
+    constexpr void flip_h();
+
+    // Flip the contents of this image vertically
+    constexpr void flip_v();
+
+    // Flip the contents of this image horizontally&vertically
+    constexpr void flip_hv();
+
     // Blit an RGBA (little endian) buffer into this instance. Colors are quantizied to the internal palette. 
     // NOTE: This is a slow operation due to the brute force color quantization and will likely not consteval.
     void blit_RGBA(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
