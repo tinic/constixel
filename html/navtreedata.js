@@ -24,7 +24,7 @@
 */
 var NAVTREE =
 [
-  [ "My Project", "index.html", [
+  [ "constixel", "index.html", [
     [ "constixel", "md__r_e_a_d_m_e.html", [
       [ "Primary features and goals", "md__r_e_a_d_m_e.html#autotoc_md2", null ],
       [ "Applications", "md__r_e_a_d_m_e.html#autotoc_md3", null ],
