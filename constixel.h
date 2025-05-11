@@ -1883,16 +1883,8 @@ class image {
                 x += ch_info.width;
             } else {
                 x += ch_info.xadvance;
-
-                if (KERNING && FONT::kerning_tree.byte_size()) {
-                    uint32_t utf_l = utf32;
-                    uint32_t utf_r = 0;
-                    get_next_utf32(str, &utf_r);
-                    auto amount = FONT::kerning_tree.lookup(static_cast<FONT::kerning_lookup_type>(utf_l << FONT::kerning_code_shift | utf_r));
-                    if (amount != FONT::kerning_tree.invalid) {
-                        x += static_cast<int32_t>(static_cast<FONT::kerning_amount_type>(amount) -
-                                                  static_cast<FONT::kerning_amount_type>(FONT::kerning_amount_offset));
-                    }
+                if (KERNING) {
+                    x += get_kerning<FONT>(utf32, str);
                 }
             }
         }
@@ -1927,16 +1919,8 @@ class image {
             const char_info &ch_info = FONT::char_table.at(index);
             draw_char_mono<FONT>(x, y, ch_info, col);
             x += ch_info.xadvance;
-
-            if (KERNING && FONT::kerning_tree.byte_size()) {
-                uint32_t utf_l = utf32;
-                uint32_t utf_r = 0;
-                get_next_utf32(str, &utf_r);
-                auto amount = FONT::kerning_tree.lookup(static_cast<FONT::kerning_lookup_type>(utf_l << FONT::kerning_code_shift | utf_r));
-                if (amount != FONT::kerning_tree.invalid) {
-                    x += static_cast<int32_t>(static_cast<FONT::kerning_amount_type>(amount) -
-                                              static_cast<FONT::kerning_amount_type>(FONT::kerning_amount_offset));
-                }
+            if (KERNING) {
+                x += get_kerning<FONT>(utf32, str);
             }
         }
         return x;
@@ -1985,16 +1969,8 @@ class image {
             const char_info &ch_info = FONT::char_table.at(index);
             draw_char_aa<FONT>(x, y, ch_info, col);
             x += ch_info.xadvance;
-
-            if (KERNING && FONT::kerning_tree.byte_size()) {
-                uint32_t utf_l = utf32;
-                uint32_t utf_r = 0;
-                get_next_utf32(str, &utf_r);
-                auto amount = FONT::kerning_tree.lookup(static_cast<FONT::kerning_lookup_type>(utf_l << FONT::kerning_code_shift | utf_r));
-                if (amount != FONT::kerning_tree.invalid) {
-                    x += static_cast<int32_t>(static_cast<FONT::kerning_amount_type>(amount) -
-                                              static_cast<FONT::kerning_amount_type>(FONT::kerning_amount_offset));
-                }
+            if (KERNING) {
+                x += get_kerning<FONT>(utf32, str);
             }
         }
         return x;
@@ -2491,7 +2467,22 @@ class image {
         return v < 0 ? -v : v;
     }
 
-    constexpr const char *get_next_utf32(const char *str, uint32_t *utf32) {
+    template <typename FONT>
+    constexpr int32_t get_kerning(uint32_t utf32, const char *str) const {
+        if (FONT::kerning_tree.byte_size()) {
+            uint32_t utf_l = utf32;
+            uint32_t utf_r = 0;
+            get_next_utf32(str, &utf_r);
+            auto amount = FONT::kerning_tree.lookup(static_cast<FONT::kerning_lookup_type>(utf_l << FONT::kerning_code_shift | utf_r));
+            if (amount != FONT::kerning_tree.invalid) {
+                return static_cast<int32_t>(static_cast<FONT::kerning_amount_type>(amount) -
+                                            static_cast<FONT::kerning_amount_type>(FONT::kerning_amount_offset));
+            }
+        }
+        return 0;
+    }
+
+    constexpr const char *get_next_utf32(const char *str, uint32_t *utf32) const {
         *utf32 = 0;
         uint32_t lead = static_cast<uint32_t>(*str) & 0xFF;
         if (lead < 0x80) {
