@@ -1895,6 +1895,8 @@ class image {
      * \brief Draw text at the specified coordinate. The template parameter selects which mono font to use. Only format_8bit targets are supported.
      * \tparam FONT The font struct name.
      * \tparam KERNING Use kerning information if available.
+     * \tparam ROTATION Rotation around the x/y coordinate. Can be text_rotation::DEGREE_0, text_rotation::DEGREE_90, text_rotation::DEGREE_180 or
+     * text_rotation::DEGREE_270
      * \param x starting x-coordinate in pixels.
      * \param y starting y-coordinate in pixels.
      * \param str UTF-8 string.
@@ -1943,6 +1945,8 @@ class image {
      * \brief Draw text centered at the specified coordinate. The template parameter selects which mono font to use. Only format_8bit targets are supported.
      * \tparam FONT The font struct name.
      * \tparam KERNING Use kerning information if available.
+     * \tparam ROTATION Rotation around the x/y coordinate. Can be text_rotation::DEGREE_0, text_rotation::DEGREE_90, text_rotation::DEGREE_180 or
+     * text_rotation::DEGREE_270
      * \param cx center x-coordinate in pixels.
      * \param y starting y-coordinate in pixels.
      * \param str UTF-8 string.
@@ -1962,6 +1966,8 @@ class image {
      * supported.
      * \tparam FONT The font struct name.
      * \tparam KERNING Use kerning information if available.
+     * \tparam ROTATION Rotation around the x/y coordinate. Can be text_rotation::DEGREE_0, text_rotation::DEGREE_90, text_rotation::DEGREE_180 or
+     * text_rotation::DEGREE_270
      * \param x starting x-coordinate in pixels.
      * \param y starting y-coordinate in pixels.
      * \param str UTF-8 string.
@@ -2011,6 +2017,8 @@ class image {
      * are supported.
      * \tparam FONT The font struct name.
      * \tparam KERNING Use kerning information if available.
+     * \tparam ROTATION Rotation around the x/y coordinate. Can be text_rotation::DEGREE_0, text_rotation::DEGREE_90, text_rotation::DEGREE_180 or
+     * text_rotation::DEGREE_270
      * \param cx center x-coordinate in pixels.
      * \param y starting y-coordinate in pixels.
      * \param str UTF-8 string.
@@ -2680,6 +2688,25 @@ class image {
                 }
                 ch_data_off += FONT::glyph_bitmap_stride;
             }
+        } else if (ROTATION == DEGREE_270) {
+            x += ch.yoffset;
+            y -= ch.xoffset;
+            const int32_t x2 = x + static_cast<int32_t>(ch.height);
+            const int32_t y2 = y - static_cast<int32_t>(ch.width);
+            for (int32_t xx = x; xx < x2; xx++) {
+                for (int32_t yy = y2; yy < y; yy++) {
+                    const int32_t x_off = (ch.width - (yy - y2) - 1) + ch.x % 8;
+                    const int32_t bit_index = 7 - (x_off % 8);
+                    const size_t byte_index = static_cast<size_t>(ch_data_off + x_off / 8);
+                    if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
+                        const uint8_t a = (FONT::glyph_bitmap[byte_index] >> bit_index) & 1;
+                        if (a) {
+                            plot(xx, yy, col);
+                        }
+                    }
+                }
+                ch_data_off += FONT::glyph_bitmap_stride;
+            }
         }
     }
 
@@ -2697,14 +2724,14 @@ class image {
     constexpr void draw_char_aa(int32_t x, int32_t y, const char_info &ch, uint8_t col) {
         static_assert(FONT::mono == false, "Can't use a mono font to draw antialiased text.");
         int32_t ch_data_off = static_cast<int32_t>(ch.y) * static_cast<int32_t>(FONT::glyph_bitmap_stride) + static_cast<int32_t>(ch.x) / 2;
+        float Rl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 0);
+        float Gl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 1);
+        float Bl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 2);
         if (ROTATION == DEGREE_0) {
             x += ch.xoffset;
             y += ch.yoffset;
             const int32_t x2 = x + static_cast<int32_t>(ch.width);
             const int32_t y2 = y + static_cast<int32_t>(ch.height);
-            float Rl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 0);
-            float Gl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 1);
-            float Bl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 2);
             for (int32_t yy = y; yy < y2; yy++) {
                 for (int32_t xx = x; xx < x2; xx++) {
                     const int32_t x_off = (xx - x) + ch.x % 2;
@@ -2729,9 +2756,6 @@ class image {
             y -= FONT::ascent;
             const int32_t x2 = x - static_cast<int32_t>(ch.width);
             const int32_t y2 = y + static_cast<int32_t>(ch.height);
-            float Rl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 0);
-            float Gl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 1);
-            float Bl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 2);
             for (int32_t yy = y2 - 1; yy >= y; yy--) {
                 for (int32_t xx = x2; xx < x; xx++) {
                     const int32_t x_off = (ch.width - (xx - x2) - 1) + ch.x % 2;
@@ -2756,12 +2780,33 @@ class image {
             y += ch.xoffset;
             const int32_t x2 = x + static_cast<int32_t>(ch.height);
             const int32_t y2 = y + static_cast<int32_t>(ch.width);
-            float Rl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 0);
-            float Gl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 1);
-            float Bl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 2);
             for (int32_t xx = x2 - 1; xx >= x; xx--) {
                 for (int32_t yy = y; yy < y2; yy++) {
                     const int32_t x_off = (yy - y) + ch.x % 2;
+                    const int32_t bit_index = (1 - (x_off % 2)) * 4;
+                    const size_t byte_index = static_cast<size_t>(ch_data_off + x_off / 2);
+                    if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
+                        const uint8_t a = (FONT::glyph_bitmap[byte_index] >> bit_index) & 0xF;
+                        if (a != 0) {
+                            if (a == 0xF) {
+                                plot(xx, yy, col);
+                            } else {
+                                float Al = a2al[a];
+                                compose(xx, yy, Al, Rl * Al, Gl * Al, Bl * Al);
+                            }
+                        }
+                    }
+                }
+                ch_data_off += FONT::glyph_bitmap_stride;
+            }
+        } else if (ROTATION == DEGREE_270) {
+            x += ch.yoffset;
+            y -= ch.xoffset;
+            const int32_t x2 = x + static_cast<int32_t>(ch.height);
+            const int32_t y2 = y - static_cast<int32_t>(ch.width);
+            for (int32_t xx = x; xx < x2; xx++) {
+                for (int32_t yy = y2; yy < y; yy++) {
+                    const int32_t x_off = (ch.width - (yy - y2) - 1) + ch.x % 2;
                     const int32_t bit_index = (1 - (x_off % 2)) * 4;
                     const size_t byte_index = static_cast<size_t>(ch_data_off + x_off / 2);
                     if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
