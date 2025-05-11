@@ -1568,6 +1568,13 @@ enum color : uint8_t {
     MAGENTA_LUMA_RAMP_STOP = MAGENTA_LUMA_RAMP_START + 15
 };
 
+enum text_rotation {
+    DEGREE_0,
+    DEGREE_90,
+    DEGREE_180,
+    DEGREE_270
+};
+
 template <template <size_t, size_t, int32_t, bool> class T, size_t W, size_t H, int32_t S = 1, bool GR = false>
 class image {
     static_assert(sizeof(W) >= sizeof(uint32_t));
@@ -1893,7 +1900,7 @@ class image {
      * \param str UTF-8 string.
      * \param col palette color index to use.
      */
-    template <typename FONT, bool KERNING = false>
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
     constexpr int32_t draw_string_mono(int32_t x, int32_t y, const char *str, uint8_t col) {
         static_assert(FONT::mono == true, "Can't use an antialiased font to draw mono/pixelized text.");
         while (*str != 0) {
@@ -1902,7 +1909,7 @@ class image {
             uint32_t index = 0;
             if (lookup_glyph<FONT>(utf32, &index)) {
                 const char_info &ch_info = FONT::char_table.at(index);
-                draw_char_mono<FONT>(x, y, ch_info, col);
+                draw_char_mono<FONT, ROTATION>(x, y, ch_info, col);
                 x += ch_info.xadvance;
                 if (KERNING) {
                     x += get_kerning<FONT>(utf32, str);
@@ -1921,9 +1928,9 @@ class image {
      * \param str UTF-8 string.
      * \param col palette color index to use.
      */
-    template <typename FONT, bool KERNING = false>
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
     constexpr int32_t draw_string_centered_mono(int32_t cx, int32_t y, const char *str, uint8_t col) {
-        return draw_string_mono<FONT, KERNING>(cx - string_width<FONT, KERNING>(str) / 2, y, str, col);
+        return draw_string_mono<FONT, KERNING, ROTATION>(cx - string_width<FONT, KERNING>(str) / 2, y, str, col);
     }
 
     /**
@@ -1936,7 +1943,7 @@ class image {
      * \param str UTF-8 string.
      * \param col palette color index to use.
      */
-    template <typename FONT, bool KERNING = false>
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
     constexpr int32_t draw_string_aa(int32_t x, int32_t y, const char *str, uint8_t col) {
         static_assert(FONT::mono == false, "Can't use a mono font to draw antialiased text.");
         while (*str != 0) {
@@ -1945,7 +1952,7 @@ class image {
             uint32_t index = 0;
             if (lookup_glyph<FONT>(utf32, &index)) {
                 const char_info &ch_info = FONT::char_table.at(index);
-                draw_char_aa<FONT>(x, y, ch_info, col);
+                draw_char_aa<FONT, ROTATION>(x, y, ch_info, col);
                 x += ch_info.xadvance;
                 if (KERNING) {
                     x += get_kerning<FONT>(utf32, str);
@@ -1965,9 +1972,9 @@ class image {
      * \param str UTF-8 string.
      * \param col palette color index to use.
      */
-    template <typename FONT, bool KERNING = false>
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
     constexpr int32_t draw_string_centered_aa(int32_t cx, int32_t y, const char *str, uint8_t col) {
-        return draw_string_aa<FONT, KERNING>(cx - string_width<FONT, KERNING>(str) / 2, y, str, col);
+        return draw_string_aa<FONT, KERNING, ROTATION>(cx - string_width<FONT, KERNING>(str) / 2, y, str, col);
     }
 
     /**
@@ -2335,14 +2342,15 @@ class image {
      * \brief Convert the current instance into a byte stream formatted for embedded displays. This function will write chunk_length of data into dst and
      * update chunk_index on each call. You should pass chunk_index = 0 at the beginnig of the sequence. Returns true of there is more data, or false if there
      * is no data left. This function is typically used to drive interrupt driven DMA transfers.
+     * \tparam dst_format The desired data format.
      * \param dst The buffer the data will be written to.
      * \param chunk_size The requested chunk size in bytes. This value has to be kept the same during a full conversion sequence.
      * \param chunk_actual The actual amount of bytes which were written into ptr during this call of the function.
      * \param chunk_index This value will increment after each call of the function. Has to be set to 0 on the first call.
-     * \param dst_format The desired data format.
      * \return true if there is more data to convert, false if we reached the end.
      */
-    bool convert_chunk(char *dst, size_t chunk_size, size_t &chunk_actual, size_t &chunk_index, device_format dst_format) {
+    template <device_format dst_format>
+    bool convert_chunk(char *dst, size_t chunk_size, size_t &chunk_actual, size_t &chunk_index) {
         (void)dst;
         (void)chunk_size;
         (void)chunk_actual;
@@ -2369,11 +2377,11 @@ class image {
 
     /**
      * \brief Convert the current instance into a byte stream formatted for embedded displays.
+     * \tparam dst_format The desired data format.
      * \param char_out A lambda function which consumes the data stream one byte at a time.
-     * \param dst_format The desired data format.
      */
-    template <typename F>
-    constexpr void convert(F &&char_out, device_format dst_format) {
+    template <typename F, device_format dst_format>
+    constexpr void convert(F &&char_out) {
         switch (dst_format) {
             default: {
             } break;
@@ -2446,7 +2454,7 @@ class image {
         return v < 0 ? -v : v;
     }
 
-    template<typename FONT>
+    template <typename FONT>
     constexpr bool lookup_glyph(uint32_t utf32, uint32_t *glyph_index) {
         auto index = FONT::glyph_tree.lookup(static_cast<FONT::lookup_type>(utf32));
         if (index == FONT::glyph_tree.invalid) {
@@ -2563,7 +2571,7 @@ class image {
         }
     }
 
-    template <typename FONT>
+    template <typename FONT, text_rotation ROTATION>
     constexpr void draw_char_mono(int32_t x, int32_t y, const char_info &ch, uint8_t col) {
         static_assert(FONT::mono == true, "Can't use an antialiased font to draw mono/pixelized text.");
         int32_t ch_data_off = static_cast<int32_t>(ch.y) * static_cast<int32_t>(FONT::glyph_bitmap_stride) + static_cast<int32_t>(ch.x) / 8;
@@ -2597,7 +2605,7 @@ class image {
 
     static constexpr std::array<float, 16> a2al = gen_a2al();
 
-    template <typename FONT>
+    template <typename FONT, text_rotation ROTATION>
     constexpr void draw_char_aa(int32_t x, int32_t y, const char_info &ch, uint8_t col) {
         static_assert(FONT::mono == false, "Can't use a mono font to draw antialiased text.");
         int32_t ch_data_off = static_cast<int32_t>(ch.y) * static_cast<int32_t>(FONT::glyph_bitmap_stride) + static_cast<int32_t>(ch.x) / 2;
