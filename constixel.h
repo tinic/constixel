@@ -702,6 +702,13 @@ class format_1bit : public format {
     static constexpr size_t image_size = H * bytes_per_line;
     static constexpr std::array<uint32_t, (1UL << bits_per_pixel)> palette = {0x00000000, 0x00ffffff};
 
+    static constexpr uint8_t reverse(uint8_t b) {
+        b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
+        b = (b & 0xCC) >> 2 | (b & 0x33) << 2;
+        b = (b & 0xAA) >> 1 | (b & 0x55) << 1;
+        return b;
+    }
+
     static constexpr void compose(std::array<uint8_t, image_size> &, size_t, size_t, float, float, float, float) {
         static_assert(false, "composing not supported on 1-bit format, use a mono font.");
     }
@@ -896,6 +903,12 @@ class format_2bit : public format {
     }
 
     static constexpr const constixel::quantize<1UL << bits_per_pixel> quant = gen_quant();
+
+    static constexpr uint8_t reverse(uint8_t b) {
+        b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
+        b = (b & 0xCC) >> 2 | (b & 0x33) << 2;
+        return b;
+    }
 
     static constexpr void compose(std::array<uint8_t, image_size> &, size_t, size_t, float, float, float, float) {
         static_assert(false, "composing not supported on 2-bit format, use a mono font.");
@@ -1099,6 +1112,11 @@ class format_4bit : public format {
     }
 
     static constexpr const constixel::quantize<1UL << bits_per_pixel> quant = gen_quant();
+
+    static constexpr uint8_t reverse(uint8_t b) {
+        b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
+        return b;
+    }
 
     static constexpr void compose(std::array<uint8_t, image_size> &data, size_t x, size_t y, float cola, float colr, float colg, float colb) {
         size_t bg = static_cast<size_t>(get_col(data, x, y));
@@ -1364,6 +1382,10 @@ class format_8bit : public format {
     }
 
     static constexpr const constixel::quantize<1UL << bits_per_pixel> quant = gen_quant();
+
+    static constexpr uint8_t reverse(uint8_t b) {
+        return b;
+    }
 
     static constexpr void plot(std::array<uint8_t, image_size> &data, size_t x, size_t y, uint8_t col) {
         data.data()[y * bytes_per_line + x] = static_cast<uint8_t>(col);
@@ -2190,6 +2212,56 @@ class image {
      */
     [[nodiscard]] constexpr std::array<uint8_t, W * H * 4> RGBA_uint8() const {
         return T<W, H, S, GR>::RGBA_uint8(data);
+    }
+
+    /**
+     * /brief Flip the contents of this image horizontally
+     */
+    constexpr void flip_h() {
+        uint8_t *ptr = data.data();
+        for (size_t y = 0; y < H; y++) {
+            for (size_t x = 0; x < T<W, H, S, GR>::bytes_per_line / 2; x++) {
+                uint8_t a = T<W, H, S, GR>::reverse(ptr[x]);
+                uint8_t b = T<W, H, S, GR>::reverse(ptr[T<W, H, S, GR>::bytes_per_line - x - 1]);
+                ptr[x] = b;
+                ptr[T<W, H, S, GR>::bytes_per_line - x - 1] = a;
+            }
+            ptr += T<W, H, S, GR>::bytes_per_line;
+        }
+    }
+
+    /**
+     * /brief Flip the contents of this image vertically
+     */
+    constexpr void flip_v() {
+        uint8_t *ptr = data.data();
+        for (size_t x = 0; x < T<W, H, S, GR>::bytes_per_line; x++) {
+            for (size_t y = 0; y < H / 2; y++) {
+                uint8_t *ptr_a = ptr + y * T<W, H, S, GR>::bytes_per_line;
+                uint8_t *ptr_b = ptr + (H - y - 1) * T<W, H, S, GR>::bytes_per_line;
+                uint8_t a = ptr_a[x];
+                uint8_t b = ptr_b[x];
+                ptr_a[x] = b;
+                ptr_b[x] = a;
+            }
+        }
+    }
+
+    /**
+     * /brief Flip the contents of this image horizontally&vertically
+     */
+    constexpr void flip_hv() {
+        uint8_t *ptr = data.data();
+        for (size_t x = 0; x < T<W, H, S, GR>::bytes_per_line; x++) {
+            for (size_t y = 0; y < H / 2; y++) {
+                uint8_t *ptr_a = ptr + y * T<W, H, S, GR>::bytes_per_line;
+                uint8_t *ptr_b = ptr + (H - y - 1) * T<W, H, S, GR>::bytes_per_line;
+                uint8_t a = T<W, H, S, GR>::reverse(ptr_a[x]);
+                uint8_t b = T<W, H, S, GR>::reverse(ptr_b[T<W, H, S, GR>::bytes_per_line - x - 1]);
+                ptr_a[x] = b;
+                ptr_b[T<W, H, S, GR>::bytes_per_line - x - 1] = a;
+            }
+        }
     }
 
     /**
