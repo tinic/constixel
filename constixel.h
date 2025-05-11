@@ -2644,7 +2644,7 @@ class image {
             }
         } else if (ROTATION == DEGREE_180) {
             x -= ch.xoffset;
-            y += ch.yoffset - FONT::ascent + FONT::descent - 1;
+            y -= FONT::ascent;
             const int32_t x2 = x - static_cast<int32_t>(ch.width);
             const int32_t y2 = y + static_cast<int32_t>(ch.height);
             for (int32_t yy = y2 - 1; yy >= y; yy--) {
@@ -2662,7 +2662,7 @@ class image {
                 ch_data_off += FONT::glyph_bitmap_stride;
             }
         } else if (ROTATION == DEGREE_90) {
-            x += ch.yoffset - FONT::ascent + FONT::descent - 1;
+            x -= FONT::ascent;
             y += ch.xoffset;
             const int32_t x2 = x + static_cast<int32_t>(ch.height);
             const int32_t y2 = y + static_cast<int32_t>(ch.width);
@@ -2726,7 +2726,7 @@ class image {
             }
         } else if (ROTATION == DEGREE_180) {
             x -= ch.xoffset;
-            y += ch.yoffset - FONT::ascent + FONT::descent - 1;
+            y -= FONT::ascent;
             const int32_t x2 = x - static_cast<int32_t>(ch.width);
             const int32_t y2 = y + static_cast<int32_t>(ch.height);
             float Rl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 0);
@@ -2752,7 +2752,7 @@ class image {
                 ch_data_off += FONT::glyph_bitmap_stride;
             }
         } else if (ROTATION == DEGREE_90) {
-            x += ch.yoffset - FONT::ascent + FONT::descent - 1;
+            x -= FONT::ascent;
             y += ch.xoffset;
             const int32_t x2 = x + static_cast<int32_t>(ch.height);
             const int32_t y2 = y + static_cast<int32_t>(ch.width);
