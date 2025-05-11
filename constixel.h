@@ -1910,11 +1910,31 @@ class image {
             if (lookup_glyph<FONT>(utf32, &index)) {
                 const char_info &ch_info = FONT::char_table.at(index);
                 draw_char_mono<FONT, ROTATION>(x, y, ch_info, col);
-                x += ch_info.xadvance;
-                if (KERNING) {
-                    x += get_kerning<FONT>(utf32, str);
+                if (ROTATION == DEGREE_0) {
+                    x += ch_info.xadvance;
+                    if (KERNING) {
+                        x += get_kerning<FONT>(utf32, str);
+                    }
+                } else if (ROTATION == DEGREE_90) {
+                    y += ch_info.xadvance;
+                    if (KERNING) {
+                        y += get_kerning<FONT>(utf32, str);
+                    }
+                } else if (ROTATION == DEGREE_180) {
+                    x -= ch_info.xadvance;
+                    if (KERNING) {
+                        x -= get_kerning<FONT>(utf32, str);
+                    }
+                } else if (ROTATION == DEGREE_270) {
+                    y -= ch_info.xadvance;
+                    if (KERNING) {
+                        y -= get_kerning<FONT>(utf32, str);
+                    }
                 }
             }
+        }
+        if (ROTATION == DEGREE_90 || ROTATION == DEGREE_270) {
+            return y;
         }
         return x;
     }
@@ -1930,7 +1950,11 @@ class image {
      */
     template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
     constexpr int32_t draw_string_centered_mono(int32_t cx, int32_t y, const char *str, uint8_t col) {
-        return draw_string_mono<FONT, KERNING, ROTATION>(cx - string_width<FONT, KERNING>(str) / 2, y, str, col);
+        if (ROTATION == DEGREE_0) {
+            return draw_string_mono<FONT, KERNING, ROTATION>(cx - string_width<FONT, KERNING>(str) / 2, y, str, col);
+        } else if (ROTATION == DEGREE_180) {
+            return draw_string_mono<FONT, KERNING, ROTATION>(cx + string_width<FONT, KERNING>(str) / 2, y, str, col);
+        }
     }
 
     /**
@@ -1953,11 +1977,31 @@ class image {
             if (lookup_glyph<FONT>(utf32, &index)) {
                 const char_info &ch_info = FONT::char_table.at(index);
                 draw_char_aa<FONT, ROTATION>(x, y, ch_info, col);
-                x += ch_info.xadvance;
-                if (KERNING) {
-                    x += get_kerning<FONT>(utf32, str);
+                if (ROTATION == DEGREE_0) {
+                    x += ch_info.xadvance;
+                    if (KERNING) {
+                        x += get_kerning<FONT>(utf32, str);
+                    }
+                } else if (ROTATION == DEGREE_90) {
+                    y += ch_info.xadvance;
+                    if (KERNING) {
+                        y += get_kerning<FONT>(utf32, str);
+                    }
+                } else if (ROTATION == DEGREE_180) {
+                    x -= ch_info.xadvance;
+                    if (KERNING) {
+                        x -= get_kerning<FONT>(utf32, str);
+                    }
+                } else if (ROTATION == DEGREE_270) {
+                    y -= ch_info.xadvance;
+                    if (KERNING) {
+                        y -= get_kerning<FONT>(utf32, str);
+                    }
                 }
             }
+        }
+        if (ROTATION == DEGREE_90 || ROTATION == DEGREE_270) {
+            return y;
         }
         return x;
     }
@@ -1974,7 +2018,11 @@ class image {
      */
     template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
     constexpr int32_t draw_string_centered_aa(int32_t cx, int32_t y, const char *str, uint8_t col) {
-        return draw_string_aa<FONT, KERNING, ROTATION>(cx - string_width<FONT, KERNING>(str) / 2, y, str, col);
+        if (ROTATION == DEGREE_0) {
+            return draw_string_aa<FONT, KERNING, ROTATION>(cx - string_width<FONT, KERNING>(str) / 2, y, str, col);
+        } else if (ROTATION == DEGREE_180) {
+            return draw_string_aa<FONT, KERNING, ROTATION>(cx + string_width<FONT, KERNING>(str) / 2, y, str, col);
+        }
     }
 
     /**
@@ -2575,23 +2623,44 @@ class image {
     constexpr void draw_char_mono(int32_t x, int32_t y, const char_info &ch, uint8_t col) {
         static_assert(FONT::mono == true, "Can't use an antialiased font to draw mono/pixelized text.");
         int32_t ch_data_off = static_cast<int32_t>(ch.y) * static_cast<int32_t>(FONT::glyph_bitmap_stride) + static_cast<int32_t>(ch.x) / 8;
-        x += ch.xoffset;
-        y += ch.yoffset;
-        const int32_t x2 = x + static_cast<int32_t>(ch.width);
-        const int32_t y2 = y + static_cast<int32_t>(ch.height);
-        for (int32_t yy = y; yy < y2; yy++) {
-            for (int32_t xx = x; xx < x2; xx++) {
-                const int32_t x_off = (xx - x) + ch.x % 8;
-                const int32_t bit_index = 7 - (x_off % 8);
-                const size_t byte_index = static_cast<size_t>(ch_data_off + x_off / 8);
-                if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
-                    const uint8_t a = (FONT::glyph_bitmap[byte_index] >> bit_index) & 1;
-                    if (a) {
-                        plot(xx, yy, col);
+        if (ROTATION == DEGREE_0) {
+            x += ch.xoffset;
+            y += ch.yoffset;
+            const int32_t x2 = x + static_cast<int32_t>(ch.width);
+            const int32_t y2 = y + static_cast<int32_t>(ch.height);
+            for (int32_t yy = y; yy < y2; yy++) {
+                for (int32_t xx = x; xx < x2; xx++) {
+                    const int32_t x_off = (xx - x) + ch.x % 8;
+                    const int32_t bit_index = 7 - (x_off % 8);
+                    const size_t byte_index = static_cast<size_t>(ch_data_off + x_off / 8);
+                    if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
+                        const uint8_t a = (FONT::glyph_bitmap[byte_index] >> bit_index) & 1;
+                        if (a) {
+                            plot(xx, yy, col);
+                        }
                     }
                 }
+                ch_data_off += FONT::glyph_bitmap_stride;
             }
-            ch_data_off += FONT::glyph_bitmap_stride;
+        } else if (ROTATION == DEGREE_180) {
+            x -= ch.xoffset;
+            y += ch.yoffset - FONT::ascent + FONT::descent;
+            const int32_t x2 = x - static_cast<int32_t>(ch.width);
+            const int32_t y2 = y + static_cast<int32_t>(ch.height);
+            for (int32_t yy = y2 - 1; yy >= y; yy--) {
+                for (int32_t xx = x2; xx < x; xx++) {
+                    const int32_t x_off = (ch.width - (xx - x2) - 1) + ch.x % 8;
+                    const int32_t bit_index = 7 - (x_off % 8);
+                    const size_t byte_index = static_cast<size_t>(ch_data_off + x_off / 8);
+                    if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
+                        const uint8_t a = (FONT::glyph_bitmap[byte_index] >> bit_index) & 1;
+                        if (a) {
+                            plot(xx, yy, col);
+                        }
+                    }
+                }
+                ch_data_off += FONT::glyph_bitmap_stride;
+            }
         }
     }
 
@@ -2609,31 +2678,60 @@ class image {
     constexpr void draw_char_aa(int32_t x, int32_t y, const char_info &ch, uint8_t col) {
         static_assert(FONT::mono == false, "Can't use a mono font to draw antialiased text.");
         int32_t ch_data_off = static_cast<int32_t>(ch.y) * static_cast<int32_t>(FONT::glyph_bitmap_stride) + static_cast<int32_t>(ch.x) / 2;
-        x += ch.xoffset;
-        y += ch.yoffset;
-        const int32_t x2 = x + static_cast<int32_t>(ch.width);
-        const int32_t y2 = y + static_cast<int32_t>(ch.height);
-        float Rl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 0);
-        float Gl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 1);
-        float Bl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 2);
-        for (int32_t yy = y; yy < y2; yy++) {
-            for (int32_t xx = x; xx < x2; xx++) {
-                const int32_t x_off = (xx - x) + ch.x % 2;
-                const int32_t bit_index = (1 - (x_off % 2)) * 4;
-                const size_t byte_index = static_cast<size_t>(ch_data_off + x_off / 2);
-                if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
-                    const uint8_t a = (FONT::glyph_bitmap[byte_index] >> bit_index) & 0xF;
-                    if (a != 0) {
-                        if (a == 0xF) {
-                            plot(xx, yy, col);
-                        } else {
-                            float Al = a2al[a];
-                            compose(xx, yy, Al, Rl * Al, Gl * Al, Bl * Al);
+        if (ROTATION == DEGREE_0) {
+            x += ch.xoffset;
+            y += ch.yoffset;
+            const int32_t x2 = x + static_cast<int32_t>(ch.width);
+            const int32_t y2 = y + static_cast<int32_t>(ch.height);
+            float Rl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 0);
+            float Gl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 1);
+            float Bl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 2);
+            for (int32_t yy = y; yy < y2; yy++) {
+                for (int32_t xx = x; xx < x2; xx++) {
+                    const int32_t x_off = (xx - x) + ch.x % 2;
+                    const int32_t bit_index = (1 - (x_off % 2)) * 4;
+                    const size_t byte_index = static_cast<size_t>(ch_data_off + x_off / 2);
+                    if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
+                        const uint8_t a = (FONT::glyph_bitmap[byte_index] >> bit_index) & 0xF;
+                        if (a != 0) {
+                            if (a == 0xF) {
+                                plot(xx, yy, col);
+                            } else {
+                                float Al = a2al[a];
+                                compose(xx, yy, Al, Rl * Al, Gl * Al, Bl * Al);
+                            }
                         }
                     }
                 }
+                ch_data_off += FONT::glyph_bitmap_stride;
             }
-            ch_data_off += FONT::glyph_bitmap_stride;
+        } else if (ROTATION == DEGREE_180) {
+            x -= ch.xoffset;
+            y += ch.yoffset - FONT::ascent + FONT::descent;
+            const int32_t x2 = x - static_cast<int32_t>(ch.width);
+            const int32_t y2 = y + static_cast<int32_t>(ch.height);
+            float Rl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 0);
+            float Gl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 1);
+            float Bl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 2);
+            for (int32_t yy = y2 - 1; yy >= y; yy--) {
+                for (int32_t xx = x2; xx < x; xx++) {
+                    const int32_t x_off = (ch.width - (xx - x2) - 1) + ch.x % 2;
+                    const int32_t bit_index = (1 - (x_off % 2)) * 4;
+                    const size_t byte_index = static_cast<size_t>(ch_data_off + x_off / 2);
+                    if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
+                        const uint8_t a = (FONT::glyph_bitmap[byte_index] >> bit_index) & 0xF;
+                        if (a != 0) {
+                            if (a == 0xF) {
+                                plot(xx, yy, col);
+                            } else {
+                                float Al = a2al[a];
+                                compose(xx, yy, Al, Rl * Al, Gl * Al, Bl * Al);
+                            }
+                        }
+                    }
+                }
+                ch_data_off += FONT::glyph_bitmap_stride;
+            }
         }
     }
 
