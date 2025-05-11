@@ -39,6 +39,7 @@ SOFTWARE.
 
 namespace constixel {
 
+/// @cond DOXYGEN_EXCLUDE
 [[nodiscard]] static constexpr float fast_exp2(const float p) {
     const float offset = (p < 0) ? 1.0f : 0.0f;
     const float clipp = (p < -126) ? -126.0f : p;
@@ -184,7 +185,9 @@ struct srgb {
 
 static constexpr float epsilon_low = srgb_to_linear(0.5f / 255.f);
 static constexpr float epsilon_high = srgb_to_linear(254.5f / 255.f);
+/// @endcond
 
+/// @cond PRIVATE_CLASS
 template <size_t S>
 class quantize {
     static constexpr size_t palette_size = S;
@@ -232,7 +235,9 @@ class quantize {
         return static_cast<uint8_t>(best);
     }
 };
+/// @endcond
 
+/// @cond PRIVATE_CLASS
 template <size_t N, typename T>
 class hextree {
     static constexpr T bitslices = ((sizeof(T) * 8) / 4) - 1;
@@ -317,7 +322,9 @@ class hextree {
         return nodes.at(idx).child[key & child_nodes_n_mask];
     }
 };
+/// @endcond
 
+/// @cond PRIVATE_CLASS
 struct char_info {
     int16_t x;
     int16_t y;
@@ -327,14 +334,20 @@ struct char_info {
     int16_t xoffset;
     int16_t yoffset;
 };
+/// @endcond
 
+/// @brief basic rectangle structure 
+/// @tparam T coordinate number type
 template <typename T>
 struct rect {
-    T x = 0;
-    T y = 0;
-    T w = 0;
-    T h = 0;
+    T x = 0; ///< x coordinate
+    T y = 0; ///< y coordinate
+    T w = 0; ///< width
+    T h = 0; ///< height
 
+    /// @brief intersects one rect with another
+    /// @param other 
+    /// @return 
     constexpr rect operator&(const rect &other) const {
         T nax = std::max(x, other.x);
         T nay = std::max(y, other.y);
@@ -343,6 +356,9 @@ struct rect {
         return {nax, nay, nix - nax, niy - nay};
     }
 
+    /// @brief intersects one rect with another
+    /// @param other 
+    /// @return 
     constexpr rect &operator&=(const rect &other) {
         T nax = std::max(x, other.x);
         T nay = std::max(y, other.y);
@@ -356,6 +372,7 @@ struct rect {
     }
 };
 
+/// @cond PRIVATE_CLASS
 class format {
  public:
     [[nodiscard]] static constexpr uint32_t adler32(const uint8_t *data, std::size_t len, uint32_t adler32_sum) {
@@ -368,6 +385,7 @@ class format {
         return ((adler32_s2 << 16) | adler32_s1);
     }
 
+    //@private
     template <typename F>
     static constexpr void png_write_be(F &&char_out, uint32_t value) {
         char_out(static_cast<char>((value >> 24) & 0xFF));
@@ -692,10 +710,17 @@ class format {
         sixel_end(char_out);
     }
 };
+/// @endcond
 
+/// @brief 1-bit format, just b/w. Use as template parameter for image.
+/// @tparam W 
+/// @tparam H 
+/// @tparam S 
+/// @tparam GR 
 template <size_t W, size_t H, int32_t S, bool GR>
 class format_1bit : public format {
  public:
+    /// @cond DOXYGEN_EXCLUDE
     static constexpr bool grayscale = GR;
     static constexpr size_t bits_per_pixel = 1;
     static constexpr size_t bytes_per_line = (W * bits_per_pixel + 7) / 8;
@@ -873,11 +898,18 @@ class format_1bit : public format {
                 }
             });
     }
+    /// @endcond
 };
 
+/// @brief 2-bit color format, 4 colors total. Use as template parameter for image.
+/// @tparam W 
+/// @tparam H 
+/// @tparam S 
+/// @tparam GR 
 template <size_t W, size_t H, int32_t S, bool GR>
 class format_2bit : public format {
  public:
+    /// @cond DOXYGEN_EXCLUDE
     static constexpr bool grayscale = GR;
     static constexpr size_t bits_per_pixel = 2;
     static constexpr size_t bytes_per_line = (W * bits_per_pixel + 7) / 8;
@@ -1072,11 +1104,18 @@ class format_2bit : public format {
                 }
             });
     }
+    /// @endcond
 };
 
+/// @brief 4-bit color format, 16 colors total. Use as template parameter for image.
+/// @tparam W 
+/// @tparam H 
+/// @tparam S 
+/// @tparam GR 
 template <size_t W, size_t H, int32_t S, bool GR>
 class format_4bit : public format {
  public:
+    /// @cond DOXYGEN_EXCLUDE
     static constexpr bool grayscale = GR;
     static constexpr size_t bits_per_pixel = 4;
     static constexpr size_t bytes_per_line = (W * bits_per_pixel + 7) / 8;
@@ -1286,11 +1325,18 @@ class format_4bit : public format {
                 }
             });
     }
+    /// @endcond
 };
 
+/// @brief 8-bit format, 256 colors total. Use as template parameter for image.
+/// @tparam W 
+/// @tparam H 
+/// @tparam S 
+/// @tparam GR 
 template <size_t W, size_t H, int32_t S, bool GR>
 class format_8bit : public format {
  public:
+    /// @cond DOXYGEN_EXCLUDE
     static constexpr bool grayscale = GR;
     static constexpr size_t bits_per_pixel = 8;
     static constexpr size_t bytes_per_line = W;
@@ -1516,6 +1562,7 @@ class format_8bit : public format {
                 }
             });
     }
+    /// @endcond
 };
 
 /*! Enum class which contains a list of predefined color name and values to use with the drawing API. */
@@ -1568,6 +1615,7 @@ enum color : uint8_t {
     MAGENTA_LUMA_RAMP_STOP = MAGENTA_LUMA_RAMP_START + 15
 };
 
+/// @brief Text rotation
 enum text_rotation {
     DEGREE_0,
     DEGREE_90,
@@ -1575,6 +1623,12 @@ enum text_rotation {
     DEGREE_270
 };
 
+/// @brief Core class of constixel, holds a buffer of an image of a certain size and format.
+/// @tparam T Type of the image buffer. One of format_1bit, format_2bit, format_4bit or format_8bit
+/// @tparam W Width in pixels
+/// @tparam H Height in pixels
+/// @tparam S Scale factor for sixel output
+/// @tparam GR boolean to indicate if palette should be grayscale
 template <template <size_t, size_t, int32_t, bool> class T, size_t W, size_t H, int32_t S = 1, bool GR = false>
 class image {
     static_assert(sizeof(W) >= sizeof(uint32_t));
@@ -2136,6 +2190,7 @@ class image {
      * \param y starting y-coordinate in pixels.
      * \param w width of the rectangle.
      * \param h height of the rectangle.
+     * \param radius radius of the rounded corners.
      * \param col palette color index to use.
      */
     constexpr void fill_round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col) {
@@ -2154,6 +2209,7 @@ class image {
     /**
      * \brief Draw a rounded rectangle with the specified color.
      * \param rect rectangle containing the line coordinates in pixels
+     * \param radius radius of the rounded corners.
      * \param col palette color index to use.
      */
     constexpr void fill_round_rect(const rect<int32_t> &rect, int32_t radius, uint8_t col) {
@@ -2166,10 +2222,11 @@ class image {
      * \param y starting y-coordinate in pixels.
      * \param w width of the rectangle.
      * \param h height of the rectangle.
+     * \param radius radius of the rounded corners.
      * \param col palette color index to use.
      */
-    constexpr void fill_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t r, uint8_t col) {
-        int32_t cr = std::min((w) / 2, std::min((w) / 2, r));
+    constexpr void fill_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col) {
+        int32_t cr = std::min((w) / 2, std::min((w) / 2, radius));
         int32_t dx = w - cr * 2;
         int32_t dy = h - cr * 2;
         fill_circle_aa_int(x + cr, y + cr, cr, dx, dy, col);
@@ -2181,6 +2238,7 @@ class image {
     /**
      * \brief Draw an antialiased rounded rectangle with the specified color. Only format_8bit targets are supported.
      * \param rect rectangle containing the line coordinates in pixels.
+     * \param radius radius of the rounded corners.
      * \param col palette color index to use.
      */
     constexpr void fill_round_rect_aa(const rect<int32_t> &rect, int32_t radius, uint8_t col) {
