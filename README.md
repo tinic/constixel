@@ -270,14 +270,16 @@ class image {
     void copy(const image<T, W, H, S, GR> &src);
 
     // Draw monochrome utf8 text. #include a monochrome font and specify the included struct as the template parameter.
+    // Rotation can be 0, 90, 180 or 270 degrees
     // Returns the current x caret position in pixels.
-    template <typename FONT, bool KERNING = false>
+    template <typename FONT, bool KERNING = false, ROTATION = DEGREE_0>
     constexpr int32_t draw_string_mono(int32_t x, int32_t y, const char *str, uint8_t col);
 
     // Draw smoothed utf8 text. #include a antialiased font and specify the included struct as the template parameter.
+    // Rotation can be 0, 90, 180 or 270 degrees
     // Returns the current x caret position in pixels.
     // NOTE 1: This only works with constixel::format_8bit images
-    template <typename FONT, bool KERNING = false>
+    template <typename FONT, bool KERNING = false, ROTATION = DEGREE_0>
     constexpr int32_t draw_string_aa(int32_t x, int32_t y, const char *str, uint8_t col);
 
     // Get the width of a utf8 string in pixels. #include a monochrome or grey font and specify the included struct as the template parameter
