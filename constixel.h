@@ -1868,6 +1868,7 @@ class image {
      * \tparam FONT The font struct name.
      * \tparam KERNING Use kerning information if available.
      * \param str UTF-8 string.
+     * \return width of the string in pixels
      */
     template <typename FONT, bool KERNING = false>
     [[nodiscard]] constexpr int32_t string_width(const char *str) {
@@ -1901,6 +1902,7 @@ class image {
      * \param y starting y-coordinate in pixels.
      * \param str UTF-8 string.
      * \param col palette color index to use.
+     * \return Returns the new caret position
      */
     template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
     constexpr int32_t draw_string_mono(int32_t x, int32_t y, const char *str, uint8_t col) {
@@ -1953,11 +1955,15 @@ class image {
      * \param col palette color index to use.
      */
     template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr int32_t draw_string_centered_mono(int32_t cx, int32_t y, const char *str, uint8_t col) {
+    constexpr void draw_string_centered_mono(int32_t cx, int32_t y, const char *str, uint8_t col) {
         if (ROTATION == DEGREE_0) {
-            return draw_string_mono<FONT, KERNING, ROTATION>(cx - string_width<FONT, KERNING>(str) / 2, y, str, col);
+            draw_string_mono<FONT, KERNING, ROTATION>(cx - string_width<FONT, KERNING>(str) / 2, y, str, col);
         } else if (ROTATION == DEGREE_180) {
-            return draw_string_mono<FONT, KERNING, ROTATION>(cx + string_width<FONT, KERNING>(str) / 2, y, str, col);
+            draw_string_mono<FONT, KERNING, ROTATION>(cx + string_width<FONT, KERNING>(str) / 2, y, str, col);
+        } else if (ROTATION == DEGREE_90) {
+            draw_string_mono<FONT, KERNING, ROTATION>(cx, y + string_width<FONT, KERNING>(str) / 2, str, col);
+        } else if (ROTATION == DEGREE_270) {
+            draw_string_mono<FONT, KERNING, ROTATION>(cx, y - string_width<FONT, KERNING>(str) / 2, str, col);
         }
     }
 
@@ -1972,6 +1978,7 @@ class image {
      * \param y starting y-coordinate in pixels.
      * \param str UTF-8 string.
      * \param col palette color index to use.
+     * \return Returns the new caret position
      */
     template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
     constexpr int32_t draw_string_aa(int32_t x, int32_t y, const char *str, uint8_t col) {
@@ -2025,11 +2032,15 @@ class image {
      * \param col palette color index to use.
      */
     template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr int32_t draw_string_centered_aa(int32_t cx, int32_t y, const char *str, uint8_t col) {
+    constexpr void draw_string_centered_aa(int32_t cx, int32_t y, const char *str, uint8_t col) {
         if (ROTATION == DEGREE_0) {
-            return draw_string_aa<FONT, KERNING, ROTATION>(cx - string_width<FONT, KERNING>(str) / 2, y, str, col);
+            draw_string_aa<FONT, KERNING, ROTATION>(cx - string_width<FONT, KERNING>(str) / 2, y, str, col);
         } else if (ROTATION == DEGREE_180) {
-            return draw_string_aa<FONT, KERNING, ROTATION>(cx + string_width<FONT, KERNING>(str) / 2, y, str, col);
+            draw_string_aa<FONT, KERNING, ROTATION>(cx + string_width<FONT, KERNING>(str) / 2, y, str, col);
+        } else if (ROTATION == DEGREE_90) {
+            draw_string_aa<FONT, KERNING, ROTATION>(cx, y + string_width<FONT, KERNING>(str) / 2, str, col);
+        } else if (ROTATION == DEGREE_270) {
+            draw_string_aa<FONT, KERNING, ROTATION>(cx, y - string_width<FONT, KERNING>(str) / 2, str, col);
         }
     }
 
