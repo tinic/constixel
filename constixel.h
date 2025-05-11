@@ -1868,23 +1868,16 @@ class image {
         while (*str != 0) {
             uint32_t utf32 = 0;
             str = get_next_utf32(str, &utf32);
-            auto index = FONT::glyph_tree.lookup(static_cast<FONT::lookup_type>(utf32));
-            if (index == FONT::glyph_tree.invalid) {
-                index = FONT::glyph_tree.lookup(static_cast<FONT::lookup_type>(0xFFFD));
-                if (index == FONT::glyph_tree.invalid) {
-                    index = FONT::glyph_tree.lookup(static_cast<FONT::lookup_type>(0x0000));
-                    if (index == FONT::glyph_tree.invalid) {
-                        continue;
+            uint32_t index = 0;
+            if (lookup_glyph<FONT>(utf32, &index)) {
+                const char_info &ch_info = FONT::char_table.at(index);
+                if (*str == 0) {
+                    x += ch_info.width;
+                } else {
+                    x += ch_info.xadvance;
+                    if (KERNING) {
+                        x += get_kerning<FONT>(utf32, str);
                     }
-                }
-            }
-            const char_info &ch_info = FONT::char_table.at(index);
-            if (*str == 0) {
-                x += ch_info.width;
-            } else {
-                x += ch_info.xadvance;
-                if (KERNING) {
-                    x += get_kerning<FONT>(utf32, str);
                 }
             }
         }
@@ -1906,21 +1899,14 @@ class image {
         while (*str != 0) {
             uint32_t utf32 = 0;
             str = get_next_utf32(str, &utf32);
-            auto index = FONT::glyph_tree.lookup(static_cast<FONT::lookup_type>(utf32));
-            if (index == FONT::glyph_tree.invalid) {
-                index = FONT::glyph_tree.lookup(static_cast<FONT::lookup_type>(0xFFFD));
-                if (index == FONT::glyph_tree.invalid) {
-                    index = FONT::glyph_tree.lookup(static_cast<FONT::lookup_type>(0x0000));
-                    if (index == FONT::glyph_tree.invalid) {
-                        continue;
-                    }
+            uint32_t index = 0;
+            if (lookup_glyph<FONT>(utf32, &index)) {
+                const char_info &ch_info = FONT::char_table.at(index);
+                draw_char_mono<FONT>(x, y, ch_info, col);
+                x += ch_info.xadvance;
+                if (KERNING) {
+                    x += get_kerning<FONT>(utf32, str);
                 }
-            }
-            const char_info &ch_info = FONT::char_table.at(index);
-            draw_char_mono<FONT>(x, y, ch_info, col);
-            x += ch_info.xadvance;
-            if (KERNING) {
-                x += get_kerning<FONT>(utf32, str);
             }
         }
         return x;
@@ -1956,21 +1942,14 @@ class image {
         while (*str != 0) {
             uint32_t utf32 = 0;
             str = get_next_utf32(str, &utf32);
-            auto index = FONT::glyph_tree.lookup(static_cast<FONT::lookup_type>(utf32));
-            if (index == FONT::glyph_tree.invalid) {
-                index = FONT::glyph_tree.lookup(static_cast<FONT::lookup_type>(0xFFFD));
-                if (index == FONT::glyph_tree.invalid) {
-                    index = FONT::glyph_tree.lookup(static_cast<FONT::lookup_type>(0x0000));
-                    if (index == FONT::glyph_tree.invalid) {
-                        continue;
-                    }
+            uint32_t index = 0;
+            if (lookup_glyph<FONT>(utf32, &index)) {
+                const char_info &ch_info = FONT::char_table.at(index);
+                draw_char_aa<FONT>(x, y, ch_info, col);
+                x += ch_info.xadvance;
+                if (KERNING) {
+                    x += get_kerning<FONT>(utf32, str);
                 }
-            }
-            const char_info &ch_info = FONT::char_table.at(index);
-            draw_char_aa<FONT>(x, y, ch_info, col);
-            x += ch_info.xadvance;
-            if (KERNING) {
-                x += get_kerning<FONT>(utf32, str);
             }
         }
         return x;
@@ -2465,6 +2444,22 @@ class image {
     template <typename abs_T>
     [[nodiscard]] static constexpr abs_T abs(abs_T v) {
         return v < 0 ? -v : v;
+    }
+
+    template<typename FONT>
+    constexpr bool lookup_glyph(uint32_t utf32, uint32_t *glyph_index) {
+        auto index = FONT::glyph_tree.lookup(static_cast<FONT::lookup_type>(utf32));
+        if (index == FONT::glyph_tree.invalid) {
+            index = FONT::glyph_tree.lookup(static_cast<FONT::lookup_type>(0xFFFD));
+            if (index == FONT::glyph_tree.invalid) {
+                index = FONT::glyph_tree.lookup(static_cast<FONT::lookup_type>(0x0000));
+                if (index == FONT::glyph_tree.invalid) {
+                    return false;
+                }
+            }
+        }
+        *glyph_index = index;
+        return true;
     }
 
     template <typename FONT>
