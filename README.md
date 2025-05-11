@@ -390,8 +390,8 @@ class image {
     };
 
     // Convert the current instance into a byte stream formatted for embedded displays.
-    void convert(F &&char_out, device_format dst_format);
-    bool convert_chunk(char *dst, size_t chunk_size, size_t &chunk_actual, size_t &chunk_index, device_format dst_format);
+    void convert<device_format>(F &&char_out);
+    bool convert_chunk<device_format>(char *dst, size_t chunk_size, size_t &chunk_actual, size_t &chunk_index);
 
 }
 ```
