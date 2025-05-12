@@ -10,7 +10,7 @@ set -euo pipefail
 
 FONT_DIR="${1:-./otf}"
 SIZES=(12 18 24 32 48)
-CHARS=(32-127,65535)
+CHARS=(32-126)
 
 git submodule update --init --recursive
 
