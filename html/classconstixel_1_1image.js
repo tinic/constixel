@@ -20,7 +20,7 @@ var classconstixel_1_1image =
     [ "convert_chunk", "classconstixel_1_1image.html#a7424b858c178f46521c0bca428a5f6b1", null ],
     [ "copy", "classconstixel_1_1image.html#aed64080c885628e7f221eb4295e5b432", null ],
     [ "copy", "classconstixel_1_1image.html#a66a8fe200b643647dbd7d3174674ffc2", null ],
-    [ "data_ref", "classconstixel_1_1image.html#a8910a57707bdf33589fedd3d8407a9c3", null ],
+    [ "data_ref", "classconstixel_1_1image.html#a2bd61322a96d761ed0b668711d63f20c", null ],
     [ "draw_line", "classconstixel_1_1image.html#a3e6cd47965d1b5f38909ed099e70c958", null ],
     [ "draw_line", "classconstixel_1_1image.html#a5f0597345ba7082ff66f6db1c32b3aba", null ],
     [ "draw_line_aa", "classconstixel_1_1image.html#af7bf536fac21f655b0fb98a185a6add8", null ],
@@ -37,6 +37,9 @@ var classconstixel_1_1image =
     [ "fill_round_rect", "classconstixel_1_1image.html#a7d89edf5750efce84aa9c30843ca552d", null ],
     [ "fill_round_rect_aa", "classconstixel_1_1image.html#a43282bf395d9832dc8c3c2828dad0cd6", null ],
     [ "fill_round_rect_aa", "classconstixel_1_1image.html#a735fbf51e23e5ed5e4d36122a89bf5e8", null ],
+    [ "flip_h", "classconstixel_1_1image.html#acb17751e0123835e7875034607af1814", null ],
+    [ "flip_hv", "classconstixel_1_1image.html#a96483e4fca8f5815b01551a7524bab31", null ],
+    [ "flip_v", "classconstixel_1_1image.html#aa937178a81d142a9f9c9bbe04eccaded", null ],
     [ "get_nearest_color", "classconstixel_1_1image.html#a8486c4dd4020fb944d08c7cd55f3936a", null ],
     [ "plot", "classconstixel_1_1image.html#a58185a21ab5141f7d3cfce321302c9ba", null ],
     [ "png", "classconstixel_1_1image.html#a8f373503c532f2a1be2f18f5c4f38ef2", null ],
@@ -50,6 +53,8 @@ var classconstixel_1_1image =
     [ "string_width", "classconstixel_1_1image.html#af38f584f0951184975b11661d7c56bca", null ],
     [ "stroke_rect", "classconstixel_1_1image.html#a4607e44527eae7dfb1ee777804f0431c", null ],
     [ "stroke_rect", "classconstixel_1_1image.html#aab15faf9f8a284d055a1809af8149316", null ],
+    [ "transpose", "classconstixel_1_1image.html#a34dc8962232159595b0f717b1849ebd9", null ],
+    [ "transpose", "classconstixel_1_1image.html#a124a4e4a3d4b264fc00c86f1ce52f81f", null ],
     [ "vt100_clear", "classconstixel_1_1image.html#af4c52bfbffd16aad0972865c71220fe6", null ],
     [ "vt100_home", "classconstixel_1_1image.html#aa67e65f18149a99bc4203d02bbbcea92", null ]
 ];
