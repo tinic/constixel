@@ -136,9 +136,9 @@ Public Member Functions</h2></td></tr>
 constexpr void&#160;</td><td class="memItemRight" valign="bottom"><b>clear</b> ()</td></tr>
 <tr class="memdesc:afdb4f730dea748906d1c70105352e4c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Clear the image by setting everything to zero. <br /></td></tr>
 <tr class="separator:afdb4f730dea748906d1c70105352e4c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8910a57707bdf33589fedd3d8407a9c3" id="r_a8910a57707bdf33589fedd3d8407a9c3"><td class="memItemLeft" align="right" valign="top">constexpr std::array&lt; uint8_t, T&lt; W, H, S, GR &gt;::image_size &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8910a57707bdf33589fedd3d8407a9c3">data_ref</a> () const</td></tr>
-<tr class="memdesc:a8910a57707bdf33589fedd3d8407a9c3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a reference to the underlying raw data of the image.  <br /></td></tr>
-<tr class="separator:a8910a57707bdf33589fedd3d8407a9c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2bd61322a96d761ed0b668711d63f20c" id="r_a2bd61322a96d761ed0b668711d63f20c"><td class="memItemLeft" align="right" valign="top">constexpr std::array&lt; uint8_t, T&lt; W, H, S, GR &gt;::image_size &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2bd61322a96d761ed0b668711d63f20c">data_ref</a> ()</td></tr>
+<tr class="memdesc:a2bd61322a96d761ed0b668711d63f20c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a reference to the underlying raw data of the image.  <br /></td></tr>
+<tr class="separator:a2bd61322a96d761ed0b668711d63f20c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a776de5f9e8258d3575618e1a827ab125" id="r_a776de5f9e8258d3575618e1a827ab125"><td class="memItemLeft" align="right" valign="top">constexpr <a class="el" href="classconstixel_1_1image.html">image</a>&lt; T, W, H, S, GR &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a776de5f9e8258d3575618e1a827ab125">clone</a> () const</td></tr>
 <tr class="memdesc:a776de5f9e8258d3575618e1a827ab125"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a clone of this image.  <br /></td></tr>
 <tr class="separator:a776de5f9e8258d3575618e1a827ab125"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -223,6 +223,16 @@ constexpr void&#160;</td><td class="memItemRight" valign="bottom"><b>clear</b> (
 <tr class="memitem:a348a4a053e9e88d9b0a02c69a309d608" id="r_a348a4a053e9e88d9b0a02c69a309d608"><td class="memItemLeft" align="right" valign="top">constexpr std::array&lt; uint8_t, W *H *4 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a348a4a053e9e88d9b0a02c69a309d608">RGBA_uint8</a> () const</td></tr>
 <tr class="memdesc:a348a4a053e9e88d9b0a02c69a309d608"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert this instance to an equivalent RGBA8 data array.  <br /></td></tr>
 <tr class="separator:a348a4a053e9e88d9b0a02c69a309d608"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acb17751e0123835e7875034607af1814" id="r_acb17751e0123835e7875034607af1814"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acb17751e0123835e7875034607af1814">flip_h</a> ()</td></tr>
+<tr class="separator:acb17751e0123835e7875034607af1814"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa937178a81d142a9f9c9bbe04eccaded" id="r_aa937178a81d142a9f9c9bbe04eccaded"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa937178a81d142a9f9c9bbe04eccaded">flip_v</a> ()</td></tr>
+<tr class="separator:aa937178a81d142a9f9c9bbe04eccaded"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a96483e4fca8f5815b01551a7524bab31" id="r_a96483e4fca8f5815b01551a7524bab31"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a96483e4fca8f5815b01551a7524bab31">flip_hv</a> ()</td></tr>
+<tr class="separator:a96483e4fca8f5815b01551a7524bab31"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a34dc8962232159595b0f717b1849ebd9" id="r_a34dc8962232159595b0f717b1849ebd9"><td class="memItemLeft" align="right" valign="top">constexpr <a class="el" href="classconstixel_1_1image.html">image</a>&lt; T, H, W, S, GR &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a34dc8962232159595b0f717b1849ebd9">transpose</a> () const</td></tr>
+<tr class="separator:a34dc8962232159595b0f717b1849ebd9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a124a4e4a3d4b264fc00c86f1ce52f81f" id="r_a124a4e4a3d4b264fc00c86f1ce52f81f"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a124a4e4a3d4b264fc00c86f1ce52f81f">transpose</a> (<a class="el" href="classconstixel_1_1image.html">image</a>&lt; T, H, W, S, GR &gt; &amp;dst) const</td></tr>
+<tr class="separator:a124a4e4a3d4b264fc00c86f1ce52f81f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a73782d16aa62dc418c1affb5a5bd5566" id="r_a73782d16aa62dc418c1affb5a5bd5566"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a73782d16aa62dc418c1affb5a5bd5566">blit_RGBA</a> (int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride)</td></tr>
 <tr class="memdesc:a73782d16aa62dc418c1affb5a5bd5566"><td class="mdescLeft">&#160;</td><td class="mdescRight">Blit an RGBA8 buffer into this instance using brute force color mapping.  <br /></td></tr>
 <tr class="separator:a73782d16aa62dc418c1affb5a5bd5566"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -293,6 +303,9 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:acc40a104ba00188baea60815963c8252" id="r_acc40a104ba00188baea60815963c8252"><td class="memItemLeft" align="right" valign="top">static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acc40a104ba00188baea60815963c8252">size</a> ()</td></tr>
 <tr class="memdesc:acc40a104ba00188baea60815963c8252"><td class="mdescLeft">&#160;</td><td class="mdescRight">Size in bytes of the image data.  <br /></td></tr>
 <tr class="separator:acc40a104ba00188baea60815963c8252"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a62828d95332e2cdb565f6079ce7c8db7" id="r_a62828d95332e2cdb565f6079ce7c8db7"><td class="memItemLeft" align="right" valign="top">static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a62828d95332e2cdb565f6079ce7c8db7">bytes_per_line</a> ()</td></tr>
+<tr class="memdesc:a62828d95332e2cdb565f6079ce7c8db7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bytes per line in the image data.  <br /></td></tr>
+<tr class="separator:a62828d95332e2cdb565f6079ce7c8db7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3d2743ef8455345427de36dcf37a5ea4" id="r_a3d2743ef8455345427de36dcf37a5ea4"><td class="memItemLeft" align="right" valign="top">static constexpr int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3d2743ef8455345427de36dcf37a5ea4">width</a> ()</td></tr>
 <tr class="memdesc:a3d2743ef8455345427de36dcf37a5ea4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Width in pixels of the image.  <br /></td></tr>
 <tr class="separator:a3d2743ef8455345427de36dcf37a5ea4"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -778,6 +791,36 @@ template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, s
 
 </div>
 </div>
+<a id="a62828d95332e2cdb565f6079ce7c8db7" name="a62828d95332e2cdb565f6079ce7c8db7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a62828d95332e2cdb565f6079ce7c8db7">&#9670;&#160;</a></span>bytes_per_line()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, size_t H, int32_t S = 1, bool GR = false&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static constexpr size_t <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, S, GR &gt;::bytes_per_line </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel static">static</span><span class="mlabel nodiscard">nodiscard</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Bytes per line in the image data. </p>
+<dl class="section return"><dt>Returns</dt><dd>Bytes per line in the image data. </dd></dl>
+
+</div>
+</div>
 <a id="a776de5f9e8258d3575618e1a827ab125" name="a776de5f9e8258d3575618e1a827ab125"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a776de5f9e8258d3575618e1a827ab125">&#9670;&#160;</a></span>clone()</h2>
 
@@ -990,8 +1033,8 @@ template&lt;size_t BYTE_SIZE&gt; </div>
 
 </div>
 </div>
-<a id="a8910a57707bdf33589fedd3d8407a9c3" name="a8910a57707bdf33589fedd3d8407a9c3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8910a57707bdf33589fedd3d8407a9c3">&#9670;&#160;</a></span>data_ref()</h2>
+<a id="a2bd61322a96d761ed0b668711d63f20c" name="a2bd61322a96d761ed0b668711d63f20c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2bd61322a96d761ed0b668711d63f20c">&#9670;&#160;</a></span>data_ref()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1005,7 +1048,7 @@ template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, s
           <td class="memname">std::array&lt; uint8_t, T&lt; W, H, S, GR &gt;::image_size &gt; &amp; <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, S, GR &gt;::data_ref </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
-          <td> const</td>
+          <td></td>
         </tr>
       </table>
   </td>
@@ -1016,7 +1059,7 @@ template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, s
 </div><div class="memdoc">
 
 <p>Get a reference to the underlying raw data of the image. </p>
-<dl class="section return"><dt>Returns</dt><dd>const reference to the data array which contains the raw image data. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>reference to the data array which contains the raw image data. </dd></dl>
 
 </div>
 </div>
@@ -1900,6 +1943,90 @@ template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, s
 
 </div>
 </div>
+<a id="acb17751e0123835e7875034607af1814" name="acb17751e0123835e7875034607af1814"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acb17751e0123835e7875034607af1814">&#9670;&#160;</a></span>flip_h()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, size_t H, int32_t S = 1, bool GR = false&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, S, GR &gt;::flip_h </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>/brief Flip the contents of this image horizontally </p>
+
+</div>
+</div>
+<a id="a96483e4fca8f5815b01551a7524bab31" name="a96483e4fca8f5815b01551a7524bab31"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a96483e4fca8f5815b01551a7524bab31">&#9670;&#160;</a></span>flip_hv()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, size_t H, int32_t S = 1, bool GR = false&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, S, GR &gt;::flip_hv </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>/brief Flip the contents of this image horizontally&amp;vertically </p>
+
+</div>
+</div>
+<a id="aa937178a81d142a9f9c9bbe04eccaded" name="aa937178a81d142a9f9c9bbe04eccaded"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa937178a81d142a9f9c9bbe04eccaded">&#9670;&#160;</a></span>flip_v()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, size_t H, int32_t S = 1, bool GR = false&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, S, GR &gt;::flip_v </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>/brief Flip the contents of this image vertically </p>
+
+</div>
+</div>
 <a id="a8486c4dd4020fb944d08c7cd55f3936a" name="a8486c4dd4020fb944d08c7cd55f3936a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a8486c4dd4020fb944d08c7cd55f3936a">&#9670;&#160;</a></span>get_nearest_color()</h2>
 
@@ -2410,6 +2537,62 @@ template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, s
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="a34dc8962232159595b0f717b1849ebd9" name="a34dc8962232159595b0f717b1849ebd9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a34dc8962232159595b0f717b1849ebd9">&#9670;&#160;</a></span>transpose() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, size_t H, int32_t S = 1, bool GR = false&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classconstixel_1_1image.html">image</a>&lt; T, H, W, S, GR &gt; <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, S, GR &gt;::transpose </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>/brief Return a transposed version of this image </p>
+
+</div>
+</div>
+<a id="a124a4e4a3d4b264fc00c86f1ce52f81f" name="a124a4e4a3d4b264fc00c86f1ce52f81f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a124a4e4a3d4b264fc00c86f1ce52f81f">&#9670;&#160;</a></span>transpose() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, size_t H, int32_t S = 1, bool GR = false&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, S, GR &gt;::transpose </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classconstixel_1_1image.html">image</a>&lt; T, H, W, S, GR &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>dst</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>/brief transpose this image into another </p>
 
 </div>
 </div>

@@ -6,8 +6,11 @@ var searchData=
   ['fill_5frect_3',['fill_rect',['../classconstixel_1_1image.html#abd5c930c3645cb7b5ead82bad22dc7cb',1,'constixel::image::fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col)'],['../classconstixel_1_1image.html#a2b1517b723d194941075a50b98b85c9e',1,'constixel::image::fill_rect(const rect&lt; int32_t &gt; &amp;rect, uint8_t col)']]],
   ['fill_5fround_5frect_4',['fill_round_rect',['../classconstixel_1_1image.html#a7d89edf5750efce84aa9c30843ca552d',1,'constixel::image::fill_round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col)'],['../classconstixel_1_1image.html#adbb21f16bcf246309e3cab3f56b263fc',1,'constixel::image::fill_round_rect(const rect&lt; int32_t &gt; &amp;rect, int32_t radius, uint8_t col)']]],
   ['fill_5fround_5frect_5faa_5',['fill_round_rect_aa',['../classconstixel_1_1image.html#a735fbf51e23e5ed5e4d36122a89bf5e8',1,'constixel::image::fill_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col)'],['../classconstixel_1_1image.html#a43282bf395d9832dc8c3c2828dad0cd6',1,'constixel::image::fill_round_rect_aa(const rect&lt; int32_t &gt; &amp;rect, int32_t radius, uint8_t col)']]],
-  ['format_5f1bit_6',['format_1bit',['../classconstixel_1_1format__1bit.html',1,'constixel']]],
-  ['format_5f2bit_7',['format_2bit',['../classconstixel_1_1format__2bit.html',1,'constixel']]],
-  ['format_5f4bit_8',['format_4bit',['../classconstixel_1_1format__4bit.html',1,'constixel']]],
-  ['format_5f8bit_9',['format_8bit',['../classconstixel_1_1format__8bit.html',1,'constixel']]]
+  ['flip_5fh_6',['flip_h',['../classconstixel_1_1image.html#acb17751e0123835e7875034607af1814',1,'constixel::image']]],
+  ['flip_5fhv_7',['flip_hv',['../classconstixel_1_1image.html#a96483e4fca8f5815b01551a7524bab31',1,'constixel::image']]],
+  ['flip_5fv_8',['flip_v',['../classconstixel_1_1image.html#aa937178a81d142a9f9c9bbe04eccaded',1,'constixel::image']]],
+  ['format_5f1bit_9',['format_1bit',['../classconstixel_1_1format__1bit.html',1,'constixel']]],
+  ['format_5f2bit_10',['format_2bit',['../classconstixel_1_1format__2bit.html',1,'constixel']]],
+  ['format_5f4bit_11',['format_4bit',['../classconstixel_1_1format__4bit.html',1,'constixel']]],
+  ['format_5f8bit_12',['format_8bit',['../classconstixel_1_1format__8bit.html',1,'constixel']]]
 ];
