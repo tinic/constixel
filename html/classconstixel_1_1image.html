@@ -140,23 +140,23 @@ constexpr void&#160;</td><td class="memItemRight" valign="bottom"><b>clear</b> (
 <tr class="memdesc:a2bd61322a96d761ed0b668711d63f20c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a reference to the underlying raw data of the image.  <br /></td></tr>
 <tr class="separator:a2bd61322a96d761ed0b668711d63f20c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a776de5f9e8258d3575618e1a827ab125" id="r_a776de5f9e8258d3575618e1a827ab125"><td class="memItemLeft" align="right" valign="top">constexpr <a class="el" href="classconstixel_1_1image.html">image</a>&lt; T, W, H, S, GR &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a776de5f9e8258d3575618e1a827ab125">clone</a> () const</td></tr>
-<tr class="memdesc:a776de5f9e8258d3575618e1a827ab125"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a clone of this image.  <br /></td></tr>
+<tr class="memdesc:a776de5f9e8258d3575618e1a827ab125"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a clone of this image. Data is copied.  <br /></td></tr>
 <tr class="separator:a776de5f9e8258d3575618e1a827ab125"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aed64080c885628e7f221eb4295e5b432" id="r_aed64080c885628e7f221eb4295e5b432"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aed64080c885628e7f221eb4295e5b432">copy</a> (const <a class="el" href="classconstixel_1_1image.html">image</a>&lt; T, W, H, S, GR &gt; &amp;src)</td></tr>
 <tr class="memdesc:aed64080c885628e7f221eb4295e5b432"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy source image into this instance. No compositing occurs.  <br /></td></tr>
 <tr class="separator:aed64080c885628e7f221eb4295e5b432"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a66a8fe200b643647dbd7d3174674ffc2" id="r_a66a8fe200b643647dbd7d3174674ffc2"><td class="memTemplParams" colspan="2">template&lt;size_t BYTE_SIZE&gt; </td></tr>
 <tr class="memitem:a66a8fe200b643647dbd7d3174674ffc2"><td class="memTemplItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a66a8fe200b643647dbd7d3174674ffc2">copy</a> (const uint8_t *src)</td></tr>
-<tr class="memdesc:a66a8fe200b643647dbd7d3174674ffc2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy source data into this instance. No compositing occurs.  <br /></td></tr>
+<tr class="memdesc:a66a8fe200b643647dbd7d3174674ffc2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy raw source data into this instance. No compositing occurs.  <br /></td></tr>
 <tr class="separator:a66a8fe200b643647dbd7d3174674ffc2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5f0597345ba7082ff66f6db1c32b3aba" id="r_a5f0597345ba7082ff66f6db1c32b3aba"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5f0597345ba7082ff66f6db1c32b3aba">draw_line</a> (int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, uint32_t stroke_width=1)</td></tr>
-<tr class="memdesc:a5f0597345ba7082ff66f6db1c32b3aba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw a line with the specified color and thickness.BLACK_OPAQUE.  <br /></td></tr>
+<tr class="memdesc:a5f0597345ba7082ff66f6db1c32b3aba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw a line with the specified color and thickness.  <br /></td></tr>
 <tr class="separator:a5f0597345ba7082ff66f6db1c32b3aba"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3e6cd47965d1b5f38909ed099e70c958" id="r_a3e6cd47965d1b5f38909ed099e70c958"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3e6cd47965d1b5f38909ed099e70c958">draw_line</a> (const <a class="el" href="structconstixel_1_1rect.html">rect</a>&lt; int32_t &gt; &amp;<a class="el" href="structconstixel_1_1rect.html">rect</a>, uint8_t col, uint32_t stroke_width=1)</td></tr>
 <tr class="memdesc:a3e6cd47965d1b5f38909ed099e70c958"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw a line with the specified color and thickness.  <br /></td></tr>
 <tr class="separator:a3e6cd47965d1b5f38909ed099e70c958"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6e3f2f33a33bf1b763d611083c414698" id="r_a6e3f2f33a33bf1b763d611083c414698"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6e3f2f33a33bf1b763d611083c414698">draw_line_aa</a> (int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col)</td></tr>
-<tr class="memdesc:a6e3f2f33a33bf1b763d611083c414698"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw an 1-pixel wide antialiased line with the specified color and thickness.  <br /></td></tr>
+<tr class="memdesc:a6e3f2f33a33bf1b763d611083c414698"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw a 1-pixel wide antialiased line with the specified color and thickness.  <br /></td></tr>
 <tr class="separator:a6e3f2f33a33bf1b763d611083c414698"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af7bf536fac21f655b0fb98a185a6add8" id="r_af7bf536fac21f655b0fb98a185a6add8"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af7bf536fac21f655b0fb98a185a6add8">draw_line_aa</a> (const <a class="el" href="structconstixel_1_1rect.html">rect</a>&lt; int32_t &gt; &amp;<a class="el" href="structconstixel_1_1rect.html">rect</a>, uint8_t col)</td></tr>
 <tr class="memdesc:af7bf536fac21f655b0fb98a185a6add8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw an antialiased line with the specified color and thickness.  <br /></td></tr>
@@ -188,10 +188,10 @@ constexpr void&#160;</td><td class="memItemRight" valign="bottom"><b>clear</b> (
 <tr class="memdesc:a6ac203bcc173ae581a683c68037db928"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw antialiased text centered at the specified coordinate. The template parameter selects which antialiased font to use. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image.">format_8bit</a> targets are supported.  <br /></td></tr>
 <tr class="separator:a6ac203bcc173ae581a683c68037db928"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abd5c930c3645cb7b5ead82bad22dc7cb" id="r_abd5c930c3645cb7b5ead82bad22dc7cb"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abd5c930c3645cb7b5ead82bad22dc7cb">fill_rect</a> (int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col)</td></tr>
-<tr class="memdesc:abd5c930c3645cb7b5ead82bad22dc7cb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw a fill rectangle with the specified color.  <br /></td></tr>
+<tr class="memdesc:abd5c930c3645cb7b5ead82bad22dc7cb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill a rectangle with the specified color.  <br /></td></tr>
 <tr class="separator:abd5c930c3645cb7b5ead82bad22dc7cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2b1517b723d194941075a50b98b85c9e" id="r_a2b1517b723d194941075a50b98b85c9e"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2b1517b723d194941075a50b98b85c9e">fill_rect</a> (const <a class="el" href="structconstixel_1_1rect.html">rect</a>&lt; int32_t &gt; &amp;<a class="el" href="structconstixel_1_1rect.html">rect</a>, uint8_t col)</td></tr>
-<tr class="memdesc:a2b1517b723d194941075a50b98b85c9e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw a fill rectangle with the specified color.  <br /></td></tr>
+<tr class="memdesc:a2b1517b723d194941075a50b98b85c9e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill a rectangle with the specified color.  <br /></td></tr>
 <tr class="separator:a2b1517b723d194941075a50b98b85c9e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aab15faf9f8a284d055a1809af8149316" id="r_aab15faf9f8a284d055a1809af8149316"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aab15faf9f8a284d055a1809af8149316">stroke_rect</a> (int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col, uint32_t stroke_width=1)</td></tr>
 <tr class="memdesc:aab15faf9f8a284d055a1809af8149316"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw a stroked rectangle with the specified color and stroke width.  <br /></td></tr>
@@ -200,22 +200,22 @@ constexpr void&#160;</td><td class="memItemRight" valign="bottom"><b>clear</b> (
 <tr class="memdesc:a4607e44527eae7dfb1ee777804f0431c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw a stroked rectangle with the specified color and stroke width.  <br /></td></tr>
 <tr class="separator:a4607e44527eae7dfb1ee777804f0431c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0e0489e815f4b3ffb96ba38f2f3f70da" id="r_a0e0489e815f4b3ffb96ba38f2f3f70da"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0e0489e815f4b3ffb96ba38f2f3f70da">fill_circle</a> (int32_t cx, int32_t cy, int32_t radius, uint8_t col)</td></tr>
-<tr class="memdesc:a0e0489e815f4b3ffb96ba38f2f3f70da"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw a filled circle with the specified radius and color.  <br /></td></tr>
+<tr class="memdesc:a0e0489e815f4b3ffb96ba38f2f3f70da"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill a circle with the specified radius and color.  <br /></td></tr>
 <tr class="separator:a0e0489e815f4b3ffb96ba38f2f3f70da"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a94d00139c4a481a874ebb560594e1b55" id="r_a94d00139c4a481a874ebb560594e1b55"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a94d00139c4a481a874ebb560594e1b55">fill_circle_aa</a> (int32_t cx, int32_t cy, int32_t radius, uint8_t col)</td></tr>
-<tr class="memdesc:a94d00139c4a481a874ebb560594e1b55"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw an antialiased filled circle with the specified radius and color. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image.">format_8bit</a> targets are supported.  <br /></td></tr>
+<tr class="memdesc:a94d00139c4a481a874ebb560594e1b55"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill a circle using antialiasing with with the specified radius and color. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image.">format_8bit</a> targets are supported.  <br /></td></tr>
 <tr class="separator:a94d00139c4a481a874ebb560594e1b55"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7d89edf5750efce84aa9c30843ca552d" id="r_a7d89edf5750efce84aa9c30843ca552d"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7d89edf5750efce84aa9c30843ca552d">fill_round_rect</a> (int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col)</td></tr>
-<tr class="memdesc:a7d89edf5750efce84aa9c30843ca552d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw a rounded rectangle with the specified color.  <br /></td></tr>
+<tr class="memdesc:a7d89edf5750efce84aa9c30843ca552d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill a rounded rectangle with the specified color.  <br /></td></tr>
 <tr class="separator:a7d89edf5750efce84aa9c30843ca552d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adbb21f16bcf246309e3cab3f56b263fc" id="r_adbb21f16bcf246309e3cab3f56b263fc"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adbb21f16bcf246309e3cab3f56b263fc">fill_round_rect</a> (const <a class="el" href="structconstixel_1_1rect.html">rect</a>&lt; int32_t &gt; &amp;<a class="el" href="structconstixel_1_1rect.html">rect</a>, int32_t radius, uint8_t col)</td></tr>
-<tr class="memdesc:adbb21f16bcf246309e3cab3f56b263fc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw a rounded rectangle with the specified color.  <br /></td></tr>
+<tr class="memdesc:adbb21f16bcf246309e3cab3f56b263fc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill a rounded rectangle with the specified color.  <br /></td></tr>
 <tr class="separator:adbb21f16bcf246309e3cab3f56b263fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a735fbf51e23e5ed5e4d36122a89bf5e8" id="r_a735fbf51e23e5ed5e4d36122a89bf5e8"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a735fbf51e23e5ed5e4d36122a89bf5e8">fill_round_rect_aa</a> (int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col)</td></tr>
-<tr class="memdesc:a735fbf51e23e5ed5e4d36122a89bf5e8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw an antialiased rounded rectangle with the specified color. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image.">format_8bit</a> targets are supported.  <br /></td></tr>
+<tr class="memdesc:a735fbf51e23e5ed5e4d36122a89bf5e8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill a rounded rectangle using antialiasing with the specified color. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image.">format_8bit</a> targets are supported.  <br /></td></tr>
 <tr class="separator:a735fbf51e23e5ed5e4d36122a89bf5e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a43282bf395d9832dc8c3c2828dad0cd6" id="r_a43282bf395d9832dc8c3c2828dad0cd6"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a43282bf395d9832dc8c3c2828dad0cd6">fill_round_rect_aa</a> (const <a class="el" href="structconstixel_1_1rect.html">rect</a>&lt; int32_t &gt; &amp;<a class="el" href="structconstixel_1_1rect.html">rect</a>, int32_t radius, uint8_t col)</td></tr>
-<tr class="memdesc:a43282bf395d9832dc8c3c2828dad0cd6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw an antialiased rounded rectangle with the specified color. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image.">format_8bit</a> targets are supported.  <br /></td></tr>
+<tr class="memdesc:a43282bf395d9832dc8c3c2828dad0cd6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill a rounded rectangle using antialiasing with the specified color. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image.">format_8bit</a> targets are supported.  <br /></td></tr>
 <tr class="separator:a43282bf395d9832dc8c3c2828dad0cd6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a507a79c1ca6424e28f6ce571fadf949e" id="r_a507a79c1ca6424e28f6ce571fadf949e"><td class="memItemLeft" align="right" valign="top">constexpr std::array&lt; uint32_t, W *H &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a507a79c1ca6424e28f6ce571fadf949e">RGBA_uint32</a> () const</td></tr>
 <tr class="memdesc:a507a79c1ca6424e28f6ce571fadf949e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert this instance to an equivalent RGBA8 data array.  <br /></td></tr>
@@ -223,15 +223,25 @@ constexpr void&#160;</td><td class="memItemRight" valign="bottom"><b>clear</b> (
 <tr class="memitem:a348a4a053e9e88d9b0a02c69a309d608" id="r_a348a4a053e9e88d9b0a02c69a309d608"><td class="memItemLeft" align="right" valign="top">constexpr std::array&lt; uint8_t, W *H *4 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a348a4a053e9e88d9b0a02c69a309d608">RGBA_uint8</a> () const</td></tr>
 <tr class="memdesc:a348a4a053e9e88d9b0a02c69a309d608"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert this instance to an equivalent RGBA8 data array.  <br /></td></tr>
 <tr class="separator:a348a4a053e9e88d9b0a02c69a309d608"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acb17751e0123835e7875034607af1814" id="r_acb17751e0123835e7875034607af1814"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acb17751e0123835e7875034607af1814">flip_h</a> ()</td></tr>
+<tr class="memitem:acb17751e0123835e7875034607af1814" id="r_acb17751e0123835e7875034607af1814"><td class="memItemLeft" align="right" valign="top"><a id="acb17751e0123835e7875034607af1814" name="acb17751e0123835e7875034607af1814"></a>
+constexpr void&#160;</td><td class="memItemRight" valign="bottom"><b>flip_h</b> ()</td></tr>
+<tr class="memdesc:acb17751e0123835e7875034607af1814"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flip the contents of this image horizontally. <br /></td></tr>
 <tr class="separator:acb17751e0123835e7875034607af1814"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa937178a81d142a9f9c9bbe04eccaded" id="r_aa937178a81d142a9f9c9bbe04eccaded"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa937178a81d142a9f9c9bbe04eccaded">flip_v</a> ()</td></tr>
+<tr class="memitem:aa937178a81d142a9f9c9bbe04eccaded" id="r_aa937178a81d142a9f9c9bbe04eccaded"><td class="memItemLeft" align="right" valign="top"><a id="aa937178a81d142a9f9c9bbe04eccaded" name="aa937178a81d142a9f9c9bbe04eccaded"></a>
+constexpr void&#160;</td><td class="memItemRight" valign="bottom"><b>flip_v</b> ()</td></tr>
+<tr class="memdesc:aa937178a81d142a9f9c9bbe04eccaded"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flip the contents of this image vertically. <br /></td></tr>
 <tr class="separator:aa937178a81d142a9f9c9bbe04eccaded"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a96483e4fca8f5815b01551a7524bab31" id="r_a96483e4fca8f5815b01551a7524bab31"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a96483e4fca8f5815b01551a7524bab31">flip_hv</a> ()</td></tr>
+<tr class="memitem:a96483e4fca8f5815b01551a7524bab31" id="r_a96483e4fca8f5815b01551a7524bab31"><td class="memItemLeft" align="right" valign="top"><a id="a96483e4fca8f5815b01551a7524bab31" name="a96483e4fca8f5815b01551a7524bab31"></a>
+constexpr void&#160;</td><td class="memItemRight" valign="bottom"><b>flip_hv</b> ()</td></tr>
+<tr class="memdesc:a96483e4fca8f5815b01551a7524bab31"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flip the contents of this image horizontally &amp; vertically. <br /></td></tr>
 <tr class="separator:a96483e4fca8f5815b01551a7524bab31"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a34dc8962232159595b0f717b1849ebd9" id="r_a34dc8962232159595b0f717b1849ebd9"><td class="memItemLeft" align="right" valign="top">constexpr <a class="el" href="classconstixel_1_1image.html">image</a>&lt; T, H, W, S, GR &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a34dc8962232159595b0f717b1849ebd9">transpose</a> () const</td></tr>
+<tr class="memitem:a34dc8962232159595b0f717b1849ebd9" id="r_a34dc8962232159595b0f717b1849ebd9"><td class="memItemLeft" align="right" valign="top"><a id="a34dc8962232159595b0f717b1849ebd9" name="a34dc8962232159595b0f717b1849ebd9"></a>
+constexpr <a class="el" href="classconstixel_1_1image.html">image</a>&lt; T, H, W, S, GR &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>transpose</b> () const</td></tr>
+<tr class="memdesc:a34dc8962232159595b0f717b1849ebd9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return a transposed version of this image. <br /></td></tr>
 <tr class="separator:a34dc8962232159595b0f717b1849ebd9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a124a4e4a3d4b264fc00c86f1ce52f81f" id="r_a124a4e4a3d4b264fc00c86f1ce52f81f"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a124a4e4a3d4b264fc00c86f1ce52f81f">transpose</a> (<a class="el" href="classconstixel_1_1image.html">image</a>&lt; T, H, W, S, GR &gt; &amp;dst) const</td></tr>
+<tr class="memitem:a124a4e4a3d4b264fc00c86f1ce52f81f" id="r_a124a4e4a3d4b264fc00c86f1ce52f81f"><td class="memItemLeft" align="right" valign="top"><a id="a124a4e4a3d4b264fc00c86f1ce52f81f" name="a124a4e4a3d4b264fc00c86f1ce52f81f"></a>
+constexpr void&#160;</td><td class="memItemRight" valign="bottom"><b>transpose</b> (<a class="el" href="classconstixel_1_1image.html">image</a>&lt; T, H, W, S, GR &gt; &amp;dst) const</td></tr>
+<tr class="memdesc:a124a4e4a3d4b264fc00c86f1ce52f81f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transpose this image into another. <br /></td></tr>
 <tr class="separator:a124a4e4a3d4b264fc00c86f1ce52f81f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a73782d16aa62dc418c1affb5a5bd5566" id="r_a73782d16aa62dc418c1affb5a5bd5566"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a73782d16aa62dc418c1affb5a5bd5566">blit_RGBA</a> (int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride)</td></tr>
 <tr class="memdesc:a73782d16aa62dc418c1affb5a5bd5566"><td class="mdescLeft">&#160;</td><td class="mdescRight">Blit an RGBA8 buffer into this instance using brute force color mapping.  <br /></td></tr>
@@ -310,7 +320,7 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memdesc:a3d2743ef8455345427de36dcf37a5ea4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Width in pixels of the image.  <br /></td></tr>
 <tr class="separator:a3d2743ef8455345427de36dcf37a5ea4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac869cc1a03c0095a9cf65a8fe08ba63b" id="r_ac869cc1a03c0095a9cf65a8fe08ba63b"><td class="memItemLeft" align="right" valign="top">static constexpr int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac869cc1a03c0095a9cf65a8fe08ba63b">height</a> ()</td></tr>
-<tr class="memdesc:ac869cc1a03c0095a9cf65a8fe08ba63b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Width in pixels of the image.  <br /></td></tr>
+<tr class="memdesc:ac869cc1a03c0095a9cf65a8fe08ba63b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Height in pixels of the image.  <br /></td></tr>
 <tr class="separator:ac869cc1a03c0095a9cf65a8fe08ba63b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -436,11 +446,11 @@ template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, s
 <p>Blit an RGBA8 buffer into this instance using brute force color mapping. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">dstrect</td><td>rectangular area in the target buffer to blit into. If the rectangle is smaller than the RGBA8 buffer, clipping occurs. </td></tr>
-    <tr><td class="paramname">ptr</td><td>pointer to the RGBA8 buffer. </td></tr>
-    <tr><td class="paramname">iw</td><td>width in pixels of the RGBA8 buffer. </td></tr>
-    <tr><td class="paramname">ih</td><td>height in pixels of the RGBA8 buffer. </td></tr>
-    <tr><td class="paramname">stride</td><td>bytes per line of pixels of the RGBA8 buffer. </td></tr>
+    <tr><td class="paramname">dstrect</td><td>Rectangular area in the target buffer to blit into. If the rectangle is smaller than the RGBA8 buffer, clipping occurs. </td></tr>
+    <tr><td class="paramname">ptr</td><td>Pointer to the RGBA8 buffer. </td></tr>
+    <tr><td class="paramname">iw</td><td>Width in pixels of the RGBA8 buffer. </td></tr>
+    <tr><td class="paramname">ih</td><td>Weight in pixels of the RGBA8 buffer. </td></tr>
+    <tr><td class="paramname">stride</td><td>Bytes per line of pixels of the RGBA8 buffer. </td></tr>
   </table>
   </dd>
 </dl>
@@ -509,14 +519,14 @@ template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, s
 <p>Blit an RGBA8 buffer into this instance using brute force color mapping. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">x</td><td>starting x-coordinate position in the target instance in pixels </td></tr>
-    <tr><td class="paramname">y</td><td>starting y-coordinate position in the target instance in pixels </td></tr>
-    <tr><td class="paramname">w</td><td>width of the rectangle. If the width is smaller than the RGBA8 buffer content will be clipped. </td></tr>
-    <tr><td class="paramname">h</td><td>height of the rectangle. If the height is smaller than the RGBA8 buffer content will be clipped. </td></tr>
-    <tr><td class="paramname">ptr</td><td>pointer to the RGBA8 buffer. </td></tr>
-    <tr><td class="paramname">iw</td><td>width in pixels of the RGBA8 buffer. </td></tr>
-    <tr><td class="paramname">ih</td><td>height in pixels of the RGBA8 buffer. </td></tr>
-    <tr><td class="paramname">stride</td><td>bytes per line of pixels of the RGBA8 buffer. </td></tr>
+    <tr><td class="paramname">x</td><td>Starting x-coordinate position in the target instance in pixels </td></tr>
+    <tr><td class="paramname">y</td><td>Starting y-coordinate position in the target instance in pixels </td></tr>
+    <tr><td class="paramname">w</td><td>Width of the rectangle. If the width is smaller than the RGBA8 buffer content will be clipped. </td></tr>
+    <tr><td class="paramname">h</td><td>Weight of the rectangle. If the height is smaller than the RGBA8 buffer content will be clipped. </td></tr>
+    <tr><td class="paramname">ptr</td><td>Pointer to the RGBA8 buffer. </td></tr>
+    <tr><td class="paramname">iw</td><td>Width in pixels of the RGBA8 buffer. </td></tr>
+    <tr><td class="paramname">ih</td><td>Height in pixels of the RGBA8 buffer. </td></tr>
+    <tr><td class="paramname">stride</td><td>Bytes per line of pixels of the RGBA8 buffer. </td></tr>
   </table>
   </dd>
 </dl>
@@ -570,11 +580,11 @@ template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, s
 <p>Blit an RGBA8 buffer into this instance using brute force color mapping. Simple integer based diffusion is applied. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">dstrect</td><td>rectangular area in the target buffer to blit into. If the rectangle is smaller than the RGBA8 buffer, clipping occurs. </td></tr>
-    <tr><td class="paramname">ptr</td><td>pointer to the RGBA8 buffer. </td></tr>
-    <tr><td class="paramname">iw</td><td>width in pixels of the RGBA8 buffer. </td></tr>
-    <tr><td class="paramname">ih</td><td>height in pixels of the RGBA8 buffer. </td></tr>
-    <tr><td class="paramname">stride</td><td>bytes per line of pixels of the RGBA8 buffer. </td></tr>
+    <tr><td class="paramname">dstrect</td><td>Rectangular area in the target buffer to blit into. If the rectangle is smaller than the RGBA8 buffer, clipping occurs. </td></tr>
+    <tr><td class="paramname">ptr</td><td>Pointer to the RGBA8 buffer. </td></tr>
+    <tr><td class="paramname">iw</td><td>Width in pixels of the RGBA8 buffer. </td></tr>
+    <tr><td class="paramname">ih</td><td>Weight in pixels of the RGBA8 buffer. </td></tr>
+    <tr><td class="paramname">stride</td><td>Bytes per line of pixels of the RGBA8 buffer. </td></tr>
   </table>
   </dd>
 </dl>
@@ -643,14 +653,14 @@ template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, s
 <p>Blit an RGBA8 buffer into this instance using brute force color mapping. Simple integer based diffusion is applied. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">x</td><td>starting x-coordinate position in the target instance in pixels </td></tr>
-    <tr><td class="paramname">y</td><td>starting y-coordinate position in the target instance in pixels </td></tr>
-    <tr><td class="paramname">w</td><td>width of the rectangle. If the width is smaller than the RGBA8 buffer content will be clipped. </td></tr>
-    <tr><td class="paramname">h</td><td>height of the rectangle. If the height is smaller than the RGBA8 buffer content will be clipped. </td></tr>
-    <tr><td class="paramname">ptr</td><td>pointer to the RGBA8 buffer. </td></tr>
-    <tr><td class="paramname">iw</td><td>width in pixels of the RGBA8 buffer. </td></tr>
-    <tr><td class="paramname">ih</td><td>height in pixels of the RGBA8 buffer. </td></tr>
-    <tr><td class="paramname">stride</td><td>bytes per line of pixels of the RGBA8 buffer. </td></tr>
+    <tr><td class="paramname">x</td><td>Starting x-coordinate position in the target instance in pixels </td></tr>
+    <tr><td class="paramname">y</td><td>Starting y-coordinate position in the target instance in pixels </td></tr>
+    <tr><td class="paramname">w</td><td>Width of the rectangle. If the width is smaller than the RGBA8 buffer content will be clipped. </td></tr>
+    <tr><td class="paramname">h</td><td>Weight of the rectangle. If the height is smaller than the RGBA8 buffer content will be clipped. </td></tr>
+    <tr><td class="paramname">ptr</td><td>Pointer to the RGBA8 buffer. </td></tr>
+    <tr><td class="paramname">iw</td><td>Width in pixels of the RGBA8 buffer. </td></tr>
+    <tr><td class="paramname">ih</td><td>Height in pixels of the RGBA8 buffer. </td></tr>
+    <tr><td class="paramname">stride</td><td>Bytes per line of pixels of the RGBA8 buffer. </td></tr>
   </table>
   </dd>
 </dl>
@@ -704,11 +714,11 @@ template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, s
 <p>Blit an RGBA8 buffer into this instance using brute force color mapping. Diffusion in linear color space is applied. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">dstrect</td><td>rectangular area in the target buffer to blit into. If the rectangle is smaller than the RGBA8 buffer, clipping occurs. </td></tr>
-    <tr><td class="paramname">ptr</td><td>pointer to the RGBA8 buffer. </td></tr>
-    <tr><td class="paramname">iw</td><td>width in pixels of the RGBA8 buffer. </td></tr>
-    <tr><td class="paramname">ih</td><td>height in pixels of the RGBA8 buffer. </td></tr>
-    <tr><td class="paramname">stride</td><td>bytes per line of pixels of the RGBA8 buffer. </td></tr>
+    <tr><td class="paramname">dstrect</td><td>Rectangular area in the target buffer to blit into. If the rectangle is smaller than the RGBA8 buffer, clipping occurs. </td></tr>
+    <tr><td class="paramname">ptr</td><td>Pointer to the RGBA8 buffer. </td></tr>
+    <tr><td class="paramname">iw</td><td>Width in pixels of the RGBA8 buffer. </td></tr>
+    <tr><td class="paramname">ih</td><td>Weight in pixels of the RGBA8 buffer. </td></tr>
+    <tr><td class="paramname">stride</td><td>Bytes per line of pixels of the RGBA8 buffer. </td></tr>
   </table>
   </dd>
 </dl>
@@ -777,14 +787,14 @@ template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, s
 <p>Blit an RGBA8 buffer into this instance using brute force color mapping. Diffusion in linear color space is applied. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">x</td><td>starting x-coordinate position in the target instance in pixels </td></tr>
-    <tr><td class="paramname">y</td><td>starting y-coordinate position in the target instance in pixels </td></tr>
-    <tr><td class="paramname">w</td><td>width of the rectangle. If the width is smaller than the RGBA8 buffer content will be clipped. </td></tr>
-    <tr><td class="paramname">h</td><td>height of the rectangle. If the height is smaller than the RGBA8 buffer content will be clipped. </td></tr>
-    <tr><td class="paramname">ptr</td><td>pointer to the RGBA8 buffer. </td></tr>
-    <tr><td class="paramname">iw</td><td>width in pixels of the RGBA8 buffer. </td></tr>
-    <tr><td class="paramname">ih</td><td>height in pixels of the RGBA8 buffer. </td></tr>
-    <tr><td class="paramname">stride</td><td>bytes per line of pixels of the RGBA8 buffer. </td></tr>
+    <tr><td class="paramname">x</td><td>Starting x-coordinate position in the target instance in pixels </td></tr>
+    <tr><td class="paramname">y</td><td>Starting y-coordinate position in the target instance in pixels </td></tr>
+    <tr><td class="paramname">w</td><td>Width of the rectangle. If the width is smaller than the RGBA8 buffer content will be clipped. </td></tr>
+    <tr><td class="paramname">h</td><td>Weight of the rectangle. If the height is smaller than the RGBA8 buffer content will be clipped. </td></tr>
+    <tr><td class="paramname">ptr</td><td>Pointer to the RGBA8 buffer. </td></tr>
+    <tr><td class="paramname">iw</td><td>Width in pixels of the RGBA8 buffer. </td></tr>
+    <tr><td class="paramname">ih</td><td>Height in pixels of the RGBA8 buffer. </td></tr>
+    <tr><td class="paramname">stride</td><td>Bytes per line of pixels of the RGBA8 buffer. </td></tr>
   </table>
   </dd>
 </dl>
@@ -846,7 +856,7 @@ template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, s
 </table>
 </div><div class="memdoc">
 
-<p>Create a clone of this image. </p>
+<p>Returns a clone of this image. Data is copied. </p>
 <dl class="section return"><dt>Returns</dt><dd>cloned image instance. </dd></dl>
 
 </div>
@@ -1017,10 +1027,10 @@ template&lt;size_t BYTE_SIZE&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Copy source data into this instance. No compositing occurs. </p>
+<p>Copy raw source data into this instance. No compositing occurs. </p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
-    <tr><td class="paramname">BYTE_SIZE</td><td>Amount data in the source data. Typically a sizeof() of an array. </td></tr>
+    <tr><td class="paramname">BYTE_SIZE</td><td>Amount data in the source data. Typically a sizeof() of an array. Must match <a class="el" href="#acc40a104ba00188baea60815963c8252" title="Size in bytes of the image data.">size()</a> </td></tr>
   </table>
   </dd>
 </dl>
@@ -1059,7 +1069,7 @@ template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, s
 </div><div class="memdoc">
 
 <p>Get a reference to the underlying raw data of the image. </p>
-<dl class="section return"><dt>Returns</dt><dd>reference to the data array which contains the raw image data. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Reference to the data array which contains the raw image data. </dd></dl>
 
 </div>
 </div>
@@ -1101,7 +1111,7 @@ template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, s
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">rect</td><td>rectangle containing the line coordinates in pixels. </td></tr>
-    <tr><td class="paramname">col</td><td>palette color index to use. </td></tr>
+    <tr><td class="paramname">col</td><td>Color palette index to use. </td></tr>
     <tr><td class="paramname">stroke_width</td><td>width of the stroke in pixels. </td></tr>
   </table>
   </dd>
@@ -1158,14 +1168,14 @@ template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, s
 </table>
 </div><div class="memdoc">
 
-<p>Draw a line with the specified color and thickness.BLACK_OPAQUE. </p>
+<p>Draw a line with the specified color and thickness. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">x0</td><td>starting x-coordinate in pixels. </td></tr>
     <tr><td class="paramname">y0</td><td>starting x-coordinate in pixels. </td></tr>
     <tr><td class="paramname">x1</td><td>ending x-coordinate in pixels. </td></tr>
     <tr><td class="paramname">y1</td><td>ending x-coordinate in pixels. </td></tr>
-    <tr><td class="paramname">col</td><td>palette color index to use. </td></tr>
+    <tr><td class="paramname">col</td><td>Color palette index to use. </td></tr>
     <tr><td class="paramname">stroke_width</td><td>width of the stroke in pixels. </td></tr>
   </table>
   </dd>
@@ -1206,7 +1216,7 @@ template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, s
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">rect</td><td>rectangle containing the line coordinates in pixels. </td></tr>
-    <tr><td class="paramname">col</td><td>palette color index to use. </td></tr>
+    <tr><td class="paramname">col</td><td>Color palette index to use. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1257,14 +1267,14 @@ template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, s
 </table>
 </div><div class="memdoc">
 
-<p>Draw an 1-pixel wide antialiased line with the specified color and thickness. </p>
+<p>Draw a 1-pixel wide antialiased line with the specified color and thickness. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">x0</td><td>starting x-coordinate in pixels. </td></tr>
     <tr><td class="paramname">y0</td><td>starting x-coordinate in pixels. </td></tr>
     <tr><td class="paramname">x1</td><td>ending x-coordinate in pixels. </td></tr>
     <tr><td class="paramname">y1</td><td>ending x-coordinate in pixels. </td></tr>
-    <tr><td class="paramname">col</td><td>palette color index to use. </td></tr>
+    <tr><td class="paramname">col</td><td>Color palette index to use. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1316,17 +1326,17 @@ template&lt;typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">FONT</td><td>The font struct name. </td></tr>
-    <tr><td class="paramname">KERNING</td><td>Use kerning information if available. </td></tr>
+    <tr><td class="paramname">KERNING</td><td>Boolean, use kerning information if available. </td></tr>
     <tr><td class="paramname">ROTATION</td><td>Rotation around the x/y coordinate. Can be text_rotation::DEGREE_0, text_rotation::DEGREE_90, text_rotation::DEGREE_180 or text_rotation::DEGREE_270 </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">x</td><td>starting x-coordinate in pixels. </td></tr>
-    <tr><td class="paramname">y</td><td>starting y-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">x</td><td>Starting x-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">y</td><td>Starting y-coordinate in pixels. </td></tr>
     <tr><td class="paramname">str</td><td>UTF-8 string. </td></tr>
-    <tr><td class="paramname">col</td><td>palette color index to use. </td></tr>
+    <tr><td class="paramname">col</td><td>Color palette index to use. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1379,17 +1389,17 @@ template&lt;typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">FONT</td><td>The font struct name. </td></tr>
-    <tr><td class="paramname">KERNING</td><td>Use kerning information if available. </td></tr>
+    <tr><td class="paramname">KERNING</td><td>Boolean, use kerning information if available. </td></tr>
     <tr><td class="paramname">ROTATION</td><td>Rotation around the x/y coordinate. Can be text_rotation::DEGREE_0, text_rotation::DEGREE_90, text_rotation::DEGREE_180 or text_rotation::DEGREE_270 </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">cx</td><td>center x-coordinate in pixels. </td></tr>
-    <tr><td class="paramname">y</td><td>starting y-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">cx</td><td>Senter x-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">y</td><td>Starting y-coordinate in pixels. </td></tr>
     <tr><td class="paramname">str</td><td>UTF-8 string. </td></tr>
-    <tr><td class="paramname">col</td><td>palette color index to use. </td></tr>
+    <tr><td class="paramname">col</td><td>Color palette index to use. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1441,17 +1451,17 @@ template&lt;typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">FONT</td><td>The font struct name. </td></tr>
-    <tr><td class="paramname">KERNING</td><td>Use kerning information if available. </td></tr>
+    <tr><td class="paramname">KERNING</td><td>Boolean, use kerning information if available. </td></tr>
     <tr><td class="paramname">ROTATION</td><td>Rotation around the x/y coordinate. Can be text_rotation::DEGREE_0, text_rotation::DEGREE_90, text_rotation::DEGREE_180 or text_rotation::DEGREE_270 </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">cx</td><td>center x-coordinate in pixels. </td></tr>
-    <tr><td class="paramname">y</td><td>starting y-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">cx</td><td>Center x-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">y</td><td>Starting y-coordinate in pixels. </td></tr>
     <tr><td class="paramname">str</td><td>UTF-8 string. </td></tr>
-    <tr><td class="paramname">col</td><td>palette color index to use. </td></tr>
+    <tr><td class="paramname">col</td><td>Color palette index to use. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1503,21 +1513,21 @@ template&lt;typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">FONT</td><td>The font struct name. </td></tr>
-    <tr><td class="paramname">KERNING</td><td>Use kerning information if available. </td></tr>
+    <tr><td class="paramname">KERNING</td><td>Boolean, use kerning information if available. </td></tr>
     <tr><td class="paramname">ROTATION</td><td>Rotation around the x/y coordinate. Can be text_rotation::DEGREE_0, text_rotation::DEGREE_90, text_rotation::DEGREE_180 or text_rotation::DEGREE_270 </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">x</td><td>starting x-coordinate in pixels. </td></tr>
-    <tr><td class="paramname">y</td><td>starting y-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">x</td><td>Starting x-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">y</td><td>Starting y-coordinate in pixels. </td></tr>
     <tr><td class="paramname">str</td><td>UTF-8 string. </td></tr>
-    <tr><td class="paramname">col</td><td>palette color index to use. </td></tr>
+    <tr><td class="paramname">col</td><td>Color palette index to use. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Returns the new caret position </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns the new caret position. </dd></dl>
 
 </div>
 </div>
@@ -1560,13 +1570,13 @@ template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, s
 </table>
 </div><div class="memdoc">
 
-<p>Draw a filled circle with the specified radius and color. </p>
+<p>Fill a circle with the specified radius and color. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">cx</td><td>center x-coordinate of the circle in pixels. </td></tr>
-    <tr><td class="paramname">cy</td><td>center y-coordinate of the circle in pixels. </td></tr>
+    <tr><td class="paramname">cx</td><td>Center x-coordinate of the circle in pixels. </td></tr>
+    <tr><td class="paramname">cy</td><td>Center y-coordinate of the circle in pixels. </td></tr>
     <tr><td class="paramname">radius</td><td>radius of the circle in pixels. </td></tr>
-    <tr><td class="paramname">col</td><td>palette color index to use. </td></tr>
+    <tr><td class="paramname">col</td><td>Color palette index to use. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1612,13 +1622,13 @@ template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, s
 </table>
 </div><div class="memdoc">
 
-<p>Draw an antialiased filled circle with the specified radius and color. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image.">format_8bit</a> targets are supported. </p>
+<p>Fill a circle using antialiasing with with the specified radius and color. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image.">format_8bit</a> targets are supported. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">cx</td><td>center x-coordinate of the circle in pixels. </td></tr>
-    <tr><td class="paramname">cy</td><td>center y-coordinate of the circle in pixels. </td></tr>
-    <tr><td class="paramname">radius</td><td>radius of the circle in pixels. </td></tr>
-    <tr><td class="paramname">col</td><td>palette color index to use. </td></tr>
+    <tr><td class="paramname">cx</td><td>Center x-coordinate of the circle in pixels. </td></tr>
+    <tr><td class="paramname">cy</td><td>Center y-coordinate of the circle in pixels. </td></tr>
+    <tr><td class="paramname">radius</td><td>Radius of the circle in pixels. </td></tr>
+    <tr><td class="paramname">col</td><td>Color palette index to use. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1654,11 +1664,11 @@ template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, s
 </table>
 </div><div class="memdoc">
 
-<p>Draw a fill rectangle with the specified color. </p>
+<p>Fill a rectangle with the specified color. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">rect</td><td>rectangle containing the line coordinates in pixels. </td></tr>
-    <tr><td class="paramname">col</td><td>palette color index to use. </td></tr>
+    <tr><td class="paramname">rect</td><td>Rectangle containing the line coordinates in pixels. </td></tr>
+    <tr><td class="paramname">col</td><td>Color palette index to use. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1709,14 +1719,14 @@ template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, s
 </table>
 </div><div class="memdoc">
 
-<p>Draw a fill rectangle with the specified color. </p>
+<p>Fill a rectangle with the specified color. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">x</td><td>starting x-coordinate in pixels. </td></tr>
-    <tr><td class="paramname">y</td><td>starting y-coordinate in pixels. </td></tr>
-    <tr><td class="paramname">w</td><td>width of the rectangle. </td></tr>
-    <tr><td class="paramname">h</td><td>height of the rectangle. </td></tr>
-    <tr><td class="paramname">col</td><td>palette color index to use. </td></tr>
+    <tr><td class="paramname">x</td><td>Starting x-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">y</td><td>Starting y-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">w</td><td>Sidth of the rectangle. </td></tr>
+    <tr><td class="paramname">h</td><td>Seight of the rectangle. </td></tr>
+    <tr><td class="paramname">col</td><td>Color palette index to use. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1757,12 +1767,12 @@ template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, s
 </table>
 </div><div class="memdoc">
 
-<p>Draw a rounded rectangle with the specified color. </p>
+<p>Fill a rounded rectangle with the specified color. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">rect</td><td>rectangle containing the line coordinates in pixels </td></tr>
-    <tr><td class="paramname">radius</td><td>radius of the rounded corners. </td></tr>
-    <tr><td class="paramname">col</td><td>palette color index to use. </td></tr>
+    <tr><td class="paramname">rect</td><td>Rectangle containing the line coordinates in pixels </td></tr>
+    <tr><td class="paramname">radius</td><td>Radius of the rounded corners. </td></tr>
+    <tr><td class="paramname">col</td><td>Color palette index to use. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1818,15 +1828,15 @@ template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, s
 </table>
 </div><div class="memdoc">
 
-<p>Draw a rounded rectangle with the specified color. </p>
+<p>Fill a rounded rectangle with the specified color. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">x</td><td>starting x-coordinate in pixels. </td></tr>
-    <tr><td class="paramname">y</td><td>starting y-coordinate in pixels. </td></tr>
-    <tr><td class="paramname">w</td><td>width of the rectangle. </td></tr>
-    <tr><td class="paramname">h</td><td>height of the rectangle. </td></tr>
-    <tr><td class="paramname">radius</td><td>radius of the rounded corners. </td></tr>
-    <tr><td class="paramname">col</td><td>palette color index to use. </td></tr>
+    <tr><td class="paramname">x</td><td>Starting x-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">y</td><td>Starting y-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">w</td><td>Width of the rectangle. </td></tr>
+    <tr><td class="paramname">h</td><td>Height of the rectangle. </td></tr>
+    <tr><td class="paramname">radius</td><td>Radius of the rounded corners. </td></tr>
+    <tr><td class="paramname">col</td><td>Color palette index to use. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1867,12 +1877,12 @@ template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, s
 </table>
 </div><div class="memdoc">
 
-<p>Draw an antialiased rounded rectangle with the specified color. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image.">format_8bit</a> targets are supported. </p>
+<p>Fill a rounded rectangle using antialiasing with the specified color. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image.">format_8bit</a> targets are supported. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">rect</td><td>rectangle containing the line coordinates in pixels. </td></tr>
-    <tr><td class="paramname">radius</td><td>radius of the rounded corners. </td></tr>
-    <tr><td class="paramname">col</td><td>palette color index to use. </td></tr>
+    <tr><td class="paramname">rect</td><td>Rectangle containing the line coordinates in pixels. </td></tr>
+    <tr><td class="paramname">radius</td><td>Radius of the rounded corners. </td></tr>
+    <tr><td class="paramname">col</td><td>Color palette index to use. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1928,102 +1938,18 @@ template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, s
 </table>
 </div><div class="memdoc">
 
-<p>Draw an antialiased rounded rectangle with the specified color. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image.">format_8bit</a> targets are supported. </p>
+<p>Fill a rounded rectangle using antialiasing with the specified color. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image.">format_8bit</a> targets are supported. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">x</td><td>starting x-coordinate in pixels. </td></tr>
-    <tr><td class="paramname">y</td><td>starting y-coordinate in pixels. </td></tr>
-    <tr><td class="paramname">w</td><td>width of the rectangle. </td></tr>
-    <tr><td class="paramname">h</td><td>height of the rectangle. </td></tr>
-    <tr><td class="paramname">radius</td><td>radius of the rounded corners. </td></tr>
-    <tr><td class="paramname">col</td><td>palette color index to use. </td></tr>
+    <tr><td class="paramname">x</td><td>Starting x-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">y</td><td>Starting y-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">w</td><td>Width of the rectangle. </td></tr>
+    <tr><td class="paramname">h</td><td>Height of the rectangle. </td></tr>
+    <tr><td class="paramname">radius</td><td>Radius of the rounded corners. </td></tr>
+    <tr><td class="paramname">col</td><td>Color palette index to use. </td></tr>
   </table>
   </dd>
 </dl>
-
-</div>
-</div>
-<a id="acb17751e0123835e7875034607af1814" name="acb17751e0123835e7875034607af1814"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acb17751e0123835e7875034607af1814">&#9670;&#160;</a></span>flip_h()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, size_t H, int32_t S = 1, bool GR = false&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, S, GR &gt;::flip_h </td>
-          <td>(</td>
-          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p>/brief Flip the contents of this image horizontally </p>
-
-</div>
-</div>
-<a id="a96483e4fca8f5815b01551a7524bab31" name="a96483e4fca8f5815b01551a7524bab31"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a96483e4fca8f5815b01551a7524bab31">&#9670;&#160;</a></span>flip_hv()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, size_t H, int32_t S = 1, bool GR = false&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, S, GR &gt;::flip_hv </td>
-          <td>(</td>
-          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p>/brief Flip the contents of this image horizontally&amp;vertically </p>
-
-</div>
-</div>
-<a id="aa937178a81d142a9f9c9bbe04eccaded" name="aa937178a81d142a9f9c9bbe04eccaded"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa937178a81d142a9f9c9bbe04eccaded">&#9670;&#160;</a></span>flip_v()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, size_t H, int32_t S = 1, bool GR = false&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, S, GR &gt;::flip_v </td>
-          <td>(</td>
-          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p>/brief Flip the contents of this image vertically </p>
 
 </div>
 </div>
@@ -2070,6 +1996,7 @@ template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, s
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>The closest matching color palette index. </dd></dl>
 
 </div>
 </div>
@@ -2128,8 +2055,8 @@ template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, s
 </table>
 </div><div class="memdoc">
 
-<p>Width in pixels of the image. </p>
-<dl class="section return"><dt>Returns</dt><dd>Width in pixels of the image. </dd></dl>
+<p>Height in pixels of the image. </p>
+<dl class="section return"><dt>Returns</dt><dd>Height in pixels of the image. </dd></dl>
 
 </div>
 </div>
@@ -2172,7 +2099,7 @@ template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, s
   <table class="params">
     <tr><td class="paramname">x</td><td>x-coordinate in pixels. </td></tr>
     <tr><td class="paramname">y</td><td>y-coordinate in pixels. </td></tr>
-    <tr><td class="paramname">col</td><td>palette color index to use. </td></tr>
+    <tr><td class="paramname">col</td><td>Color palette index to use. </td></tr>
   </table>
   </dd>
 </dl>
@@ -2209,7 +2136,7 @@ template&lt;typename F&gt; </div>
 <p>Convert the current instance into a png image. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">char_out</td><td>A lambda function which consumes the png image data one byte at a time </td></tr>
+    <tr><td class="paramname">char_out</td><td>A lambda function which consumes the png image data one byte at a time. </td></tr>
   </table>
   </dd>
 </dl>
@@ -2306,7 +2233,7 @@ template&lt;typename F&gt; </div>
 <p>Convert the current instance into a sixel stream. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">char_out</td><td>A lambda function which consumes the sixel stream data one byte at a time </td></tr>
+    <tr><td class="paramname">char_out</td><td>A lambda function which consumes the sixel stream data one byte at a time. </td></tr>
   </table>
   </dd>
 </dl>
@@ -2348,7 +2275,7 @@ template&lt;typename F&gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">char_out</td><td>A lambda function which consumes the sixel stream data one byte at a time </td></tr>
-    <tr><td class="paramname">rect</td><td>clipping rectangle; to only show a portion of the image. </td></tr>
+    <tr><td class="paramname">rect</td><td>Clipping rectangle; to only show a portion of the image. </td></tr>
   </table>
   </dd>
 </dl>
@@ -2416,7 +2343,7 @@ template&lt;typename FONT, bool KERNING = false&gt; </div>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">FONT</td><td>The font struct name. </td></tr>
-    <tr><td class="paramname">KERNING</td><td>Use kerning information if available. </td></tr>
+    <tr><td class="paramname">KERNING</td><td>Boolean, use kerning information if available. </td></tr>
   </table>
   </dd>
 </dl>
@@ -2467,9 +2394,9 @@ template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, s
 <p>Draw a stroked rectangle with the specified color and stroke width. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">rect</td><td>rectangle containing the line coordinates in pixels. </td></tr>
-    <tr><td class="paramname">col</td><td>palette color index to use. </td></tr>
-    <tr><td class="paramname">stroke_width</td><td>width of the stroke in pixels. </td></tr>
+    <tr><td class="paramname">rect</td><td>Rectangle containing the line coordinates in pixels. </td></tr>
+    <tr><td class="paramname">col</td><td>Color palette index to use. </td></tr>
+    <tr><td class="paramname">stroke_width</td><td>Width of the stroke in pixels. </td></tr>
   </table>
   </dd>
 </dl>
@@ -2528,71 +2455,15 @@ template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, s
 <p>Draw a stroked rectangle with the specified color and stroke width. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">x</td><td>starting x-coordinate in pixels. </td></tr>
-    <tr><td class="paramname">y</td><td>starting y-coordinate in pixels. </td></tr>
-    <tr><td class="paramname">w</td><td>width of the rectangle. </td></tr>
-    <tr><td class="paramname">h</td><td>height of the rectangle. </td></tr>
-    <tr><td class="paramname">col</td><td>palette color index to use. </td></tr>
-    <tr><td class="paramname">stroke_width</td><td>width of the stroke in pixels. </td></tr>
+    <tr><td class="paramname">x</td><td>Starting x-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">y</td><td>Starting y-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">w</td><td>Width of the rectangle. </td></tr>
+    <tr><td class="paramname">h</td><td>Height of the rectangle. </td></tr>
+    <tr><td class="paramname">col</td><td>Color palette index to use. </td></tr>
+    <tr><td class="paramname">stroke_width</td><td>Width of the stroke in pixels. </td></tr>
   </table>
   </dd>
 </dl>
-
-</div>
-</div>
-<a id="a34dc8962232159595b0f717b1849ebd9" name="a34dc8962232159595b0f717b1849ebd9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a34dc8962232159595b0f717b1849ebd9">&#9670;&#160;</a></span>transpose() <span class="overload">[1/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, size_t H, int32_t S = 1, bool GR = false&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classconstixel_1_1image.html">image</a>&lt; T, H, W, S, GR &gt; <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, S, GR &gt;::transpose </td>
-          <td>(</td>
-          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p>/brief Return a transposed version of this image </p>
-
-</div>
-</div>
-<a id="a124a4e4a3d4b264fc00c86f1ce52f81f" name="a124a4e4a3d4b264fc00c86f1ce52f81f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a124a4e4a3d4b264fc00c86f1ce52f81f">&#9670;&#160;</a></span>transpose() <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, size_t H, int32_t S = 1, bool GR = false&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, S, GR &gt;::transpose </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classconstixel_1_1image.html">image</a>&lt; T, H, W, S, GR &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>dst</em></span></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p>/brief transpose this image into another </p>
 
 </div>
 </div>
