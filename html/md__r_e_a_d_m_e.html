@@ -190,7 +190,7 @@ Text drawing example</h1>
 <div class="line"> </div>
 <div class="line">    <a class="code hl_class" href="classconstixel_1_1image.html">image&lt;format_8bit, 512, 312, 1&gt;</a> <a class="code hl_class" href="classconstixel_1_1image.html">image</a>;</div>
 <div class="line">    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; strings.size(); i++) { </div>
-<div class="line">        uint8_t col = color::GREY_RAMP_STOP - <span class="keyword">static_cast&lt;</span>uint8_t<span class="keyword">&gt;</span>(i * 3);</div>
+<div class="line">        uint8_t col = color::GRAY_RAMP_STOP - <span class="keyword">static_cast&lt;</span>uint8_t<span class="keyword">&gt;</span>(i * 3);</div>
 <div class="line"> </div>
 <div class="line">        <a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="classconstixel_1_1image.html#a8f1119e641fb583a952c3b1a8a8b5212">draw_string_mono</a>&lt;large_font&gt;(16, 48 * <span class="keyword">static_cast&lt;</span>int32_t<span class="keyword">&gt;</span>(i) + 16, strings.at(i), col);</div>
 <div class="line">    }</div>
@@ -315,10 +315,10 @@ API</h1>
 <div class="line">    YELLOW = 5,</div>
 <div class="line">    CYAN = 6,</div>
 <div class="line">    MAGENTA = 7,</div>
-<div class="line">    GREY_80 = 8,</div>
-<div class="line">    GREY_60 = 9,</div>
-<div class="line">    GREY_40 = 10,</div>
-<div class="line">    GREY_20 = 11,</div>
+<div class="line">    GRAY_80 = 8,</div>
+<div class="line">    GRAY_60 = 9,</div>
+<div class="line">    GRAY_40 = 10,</div>
+<div class="line">    GRAY_20 = 11,</div>
 <div class="line">    DARK_RED = 12,</div>
 <div class="line">    DARK_GREEN = 13,</div>
 <div class="line">    DARK_BLUE = 14,</div>
@@ -360,7 +360,7 @@ API</h1>
 <div class="line">    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> FONT, <span class="keywordtype">bool</span> KERNING = false, ROTATION = DEGREE_0&gt;</div>
 <div class="line">    <span class="keyword">constexpr</span> int32_t draw_string_aa(int32_t x, int32_t y, <span class="keyword">const</span> <span class="keywordtype">char</span> *str, uint8_t col);</div>
 <div class="line"> </div>
-<div class="line">    <span class="comment">// Get the width of a utf8 string in pixels. #include a monochrome or grey font and specify the included struct as the template parameter</span></div>
+<div class="line">    <span class="comment">// Get the width of a utf8 string in pixels. #include a monochrome or antialiased font and specify the included struct as the template parameter</span></div>
 <div class="line">    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> FONT, <span class="keywordtype">bool</span> KERNING = false&gt;</div>
 <div class="line">    <span class="keyword">constexpr</span> int32_t string_width(<span class="keyword">const</span> <span class="keywordtype">char</span> *str);</div>
 <div class="line"> </div>
