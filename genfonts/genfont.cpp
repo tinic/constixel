@@ -15,33 +15,33 @@
 #include "fontbm/src/external/lodepng/lodepng.h"
 
 struct Char {
-    uint32_t id;
-    uint16_t x, y, width, height;
-    int16_t xoffset, yoffset, xadvance;
-    uint16_t page;
-    uint8_t chnl;
+    uint32_t id = 0;
+    uint16_t x = 0, y = 0, width = 0, height = 0;
+    int16_t xoffset = 0, yoffset = 0, xadvance = 0;
+    uint16_t page = 0;
+    uint8_t chnl = 0;
 };
 
 struct Kerning {
-    uint32_t first;
-    uint32_t second;
-    int32_t amount;
+    uint32_t first = 0;
+    uint32_t second = 0;
+    int32_t amount = 0;
 };
 
 struct Font {
-    std::string face;
-    std::string style;
-    int size;
-    int lineHeight;
-    int base;
-    int descent;
-    int scaleW, scaleH;
-    int pages;
-    std::string page_file;
-    std::vector<Char> chars;
-    std::vector<Kerning> kernings;
-    int smooth;
-    int totalHeight;
+    std::string face {};
+    std::string style {};
+    int size = 0;
+    int lineHeight = 0;
+    int base = 0;
+    int descent = 0;
+    int scaleW = 0, scaleH = 0;
+    int pages = 0;
+    std::string page_file {};
+    std::vector<Char> chars {};
+    std::vector<Kerning> kernings {};
+    int smooth = 0;
+    int totalHeight = 0;
 };
 
 static std::string_view trim(std::string_view sv) {

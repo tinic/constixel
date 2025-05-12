@@ -346,8 +346,7 @@ struct rect {
     T h = 0;  ///< height
 
     /// @brief intersects one rect with another
-    /// @param other
-    /// @return
+    /// @param other the other rectangle
     constexpr rect operator&(const rect &other) const {
         T nax = std::max(x, other.x);
         T nay = std::max(y, other.y);
@@ -357,8 +356,7 @@ struct rect {
     }
 
     /// @brief intersects one rect with another
-    /// @param other
-    /// @return
+    /// @param other the other rectangle
     constexpr rect &operator&=(const rect &other) {
         T nax = std::max(x, other.x);
         T nay = std::max(y, other.y);
@@ -713,10 +711,10 @@ class format {
 /// @endcond
 
 /// @brief 1-bit format, just b/w. Use as template parameter for image.
-/// @tparam W
-/// @tparam H
-/// @tparam S
-/// @tparam GR
+/// @tparam W width
+/// @tparam H height
+/// @tparam S scale
+/// @tparam GR greyscale
 template <size_t W, size_t H, int32_t S, bool GR>
 class format_1bit : public format {
  public:
@@ -728,9 +726,9 @@ class format_1bit : public format {
     static constexpr std::array<uint32_t, (1UL << bits_per_pixel)> palette = {0x00000000, 0x00ffffff};
 
     static constexpr uint8_t reverse(uint8_t b) {
-        b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
-        b = (b & 0xCC) >> 2 | (b & 0x33) << 2;
-        b = (b & 0xAA) >> 1 | (b & 0x55) << 1;
+        b = static_cast<uint8_t>((b & uint8_t{0xF0}) >> 4 | (b & uint8_t{0x0F}) << 4);
+        b = static_cast<uint8_t>((b & uint8_t{0xCC}) >> 2 | (b & uint8_t{0x33}) << 2);
+        b = static_cast<uint8_t>((b & uint8_t{0xAA}) >> 1 | (b & uint8_t{0x55}) << 1);
         return b;
     }
 
@@ -952,10 +950,10 @@ class format_1bit : public format {
 };
 
 /// @brief 2-bit color format, 4 colors total. Use as template parameter for image.
-/// @tparam W
-/// @tparam H
-/// @tparam S
-/// @tparam GR
+/// @tparam W width
+/// @tparam H height
+/// @tparam S scale
+/// @tparam GR greyscale
 template <size_t W, size_t H, int32_t S, bool GR>
 class format_2bit : public format {
  public:
@@ -980,12 +978,12 @@ class format_2bit : public format {
     static constexpr const constixel::quantize<1UL << bits_per_pixel> quant = gen_quant();
 
     static constexpr uint8_t reverse(uint8_t b) {
-        b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
-        b = (b & 0xCC) >> 2 | (b & 0x33) << 2;
+        b = static_cast<uint8_t>((b & uint8_t{0xF0}) >> 4 | (b & uint8_t{0x0F}) << 4);
+        b = static_cast<uint8_t>((b & uint8_t{0xCC}) >> 2 | (b & uint8_t{0x33}) << 2);
         return b;
     }
 
-    static constexpr void transpose(const uint8_t *src, uint8_t *dst) {
+    static constexpr void transpose(const uint8_t *, uint8_t *) {
         static_assert(false, "Not implemented yet.");
     }
 
@@ -1168,10 +1166,10 @@ class format_2bit : public format {
 };
 
 /// @brief 4-bit color format, 16 colors total. Use as template parameter for image.
-/// @tparam W
-/// @tparam H
-/// @tparam S
-/// @tparam GR
+/// @tparam W width
+/// @tparam H height
+/// @tparam S scale
+/// @tparam GR greyscale
 template <size_t W, size_t H, int32_t S, bool GR>
 class format_4bit : public format {
  public:
@@ -1200,11 +1198,11 @@ class format_4bit : public format {
     static constexpr const constixel::quantize<1UL << bits_per_pixel> quant = gen_quant();
 
     static constexpr uint8_t reverse(uint8_t b) {
-        b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
+        b = static_cast<uint8_t>((b & uint8_t{0xF0}) >> 4 | (b & uint8_t{0x0F}) << 4);
         return b;
     }
 
-    static constexpr void transpose(const uint8_t *src, uint8_t *dst) {
+    static constexpr void transpose(const uint8_t *, uint8_t *) {
         static_assert(false, "Not implemented yet.");
     }
 
@@ -1398,10 +1396,10 @@ class format_4bit : public format {
 };
 
 /// @brief 8-bit format, 256 colors total. Use as template parameter for image.
-/// @tparam W
-/// @tparam H
-/// @tparam S
-/// @tparam GR
+/// @tparam W width
+/// @tparam H height
+/// @tparam S scale
+/// @tparam GR greyscale
 template <size_t W, size_t H, int32_t S, bool GR>
 class format_8bit : public format {
  public:
@@ -1484,7 +1482,7 @@ class format_8bit : public format {
         return b;
     }
 
-    static constexpr void transpose(const uint8_t *src, uint8_t *dst) {
+    static constexpr void transpose(const uint8_t *, uint8_t *) {
         static_assert(false, "Not implemented yet.");
     }
 
