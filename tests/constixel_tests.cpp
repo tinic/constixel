@@ -328,7 +328,7 @@ static std::array<char, 8192> gen_separator() {
     size_t count = 0;
     constixel::image<constixel::format_8bit, 1024, 1> image;
     for (int32_t x = 0; x < 16; x++) {
-        image.draw_line(x * 64, 0, x * 64 + 64, 0, static_cast<uint8_t>(constixel::color::GREY_RAMP_STOP - uint32_t(x)));
+        image.draw_line(x * 64, 0, x * 64 + 64, 0, static_cast<uint8_t>(constixel::color::GRAY_RAMP_STOP - uint32_t(x)));
     }
     image.sixel([&sixel, &count](char ch) mutable {
         sixel[count++] = ch;
@@ -705,7 +705,7 @@ int main() {
                                                              "1234567890&@.,?!'"
                                                              ""};
         for (size_t i = 0; i < strings.size(); i++) {
-            uint8_t col = constixel::color::GREY_RAMP_STOP - static_cast<uint8_t>(i * 3);
+            uint8_t col = constixel::color::GRAY_RAMP_STOP - static_cast<uint8_t>(i * 3);
             image.draw_string_mono<constixel::ibmplexsans_bold_48_mono>(16, 48 * static_cast<int32_t>(i) + 16, strings.at(i), col);
         }
         std::vector<char> out{};
@@ -722,7 +722,7 @@ int main() {
         image.clear();
         std::array<uint8_t, 5> cols = {0, 4, 3, 125, 1};
         for (size_t i = 0; i < strings.size(); i++) {
-            uint8_t col = constixel::color::GREY_RAMP_STOP - static_cast<uint8_t>(i * 3);
+            uint8_t col = constixel::color::GRAY_RAMP_STOP - static_cast<uint8_t>(i * 3);
             image.fill_rect(0, static_cast<int32_t>(i) * 52 + 22, 512, 52, cols.at(i));
             image.draw_string_aa<constixel::ibmplexsans_bold_48_aa>(16, 52 * static_cast<int32_t>(i) + 16, strings.at(i), col);
         }
@@ -869,7 +869,7 @@ int main() {
 #if MAINLINE_TESTS
     {
         auto image = std::make_unique<constixel::image<constixel::format_4bit, 512, 96, 1, false>>();
-        image->fill_round_rect_aa(0, 0, 512, 96, 32, constixel::color::GREY_20);
+        image->fill_round_rect_aa(0, 0, 512, 96, 32, constixel::color::GRAY_20);
         int32_t sw = image->string_width<constixel::ibmplexsans_medium_48_aa>("ABCDEFGHIKLMNO");
         image->draw_string_aa<constixel::ibmplexsans_medium_48_aa>((512 - sw) / 2, 16, "ABCDEFGHIKLMNO", 2);
         image->sixel_to_cout();
