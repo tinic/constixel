@@ -33,41 +33,41 @@ void draw_status() {
 
     static char output[64] = {};
     snprintf(output, sizeof(output), "Air:");
-    screen.draw_string_mono<font>(0, -2, output, 1);
+    screen.draw_string_mono<font, true>(0, -2, output, 1);
     snprintf(output, sizeof(output), "%dpsi", static_cast<int>(psi_air));
-    screen.draw_string_mono<font>(192 / 2 - screen.string_width<font>(output) - 4, -2, output, 1);
+    screen.draw_string_mono<font, true>(192 / 2 - screen.string_width<font, true>(output) - 4, -2, output, 1);
     snprintf(output, sizeof(output), "N2:");
-    screen.draw_string_mono<font>(192 / 2 + 4, -2, output, 1);
+    screen.draw_string_mono<font, true>(192 / 2 + 4, -2, output, 1);
     snprintf(output, sizeof(output), "%dpsi", static_cast<int>(psi_nitrogen));
-    screen.draw_string_mono<font>(191 - screen.string_width<font>(output), -2, output, 1);
+    screen.draw_string_mono<font, true>(191 - screen.string_width<font, true>(output), -2, output, 1);
 
     snprintf(output, sizeof(output), "%s", solenoid_air ? "Open" : "Clsd");
-    screen.draw_string_mono<font>(0, 18, output, 1);
+    screen.draw_string_mono<font, true>(0, 18, output, 1);
     snprintf(output, sizeof(output), "%s", solenoid_nitrogen ? "Open" : "Clsd");
-    screen.draw_string_mono<font>(192 / 2 + 4, 18, output, 1);
+    screen.draw_string_mono<font, true>(192 / 2 + 4, 18, output, 1);
 
     screen.draw_line(192 / 2 + 1, 0, 192 / 2 + 1, 42, 1);
     screen.draw_line(0, 42, 192, 42, 1);
 
     snprintf(output, sizeof(output), "%02d%%", static_cast<int>(duty_cycle_average_air * 100.0f));
-    screen.draw_string_mono<font>(192 / 2 - screen.string_width<font>(output) - 4, 18, output, 1);
+    screen.draw_string_mono<font, true>(192 / 2 - screen.string_width<font, true>(output) - 4, 18, output, 1);
     snprintf(output, sizeof(output), "%02d%%", static_cast<int>(duty_cycle_average_nitrogen * 100.0f));
-    screen.draw_string_mono<font>(191 - screen.string_width<font>(output), 18, output, 1);
+    screen.draw_string_mono<font, true>(191 - screen.string_width<font, true>(output), 18, output, 1);
 
     const int32_t h = (static_cast<int32_t>(system_time) / 3600);
     const int32_t m = (static_cast<int32_t>(system_time) / 60) % 60;
     const int32_t s = (static_cast<int32_t>(system_time)) % 60;
     snprintf(output, sizeof(output), "T%03d:%02d:%02d", static_cast<int>(h), static_cast<int>(m), static_cast<int>(s));
-    screen.draw_string_mono<font>(0, 43, output, 1);
+    screen.draw_string_mono<font, true>(0, 43, output, 1);
 
     if (in_fault_state) {
         snprintf(output, sizeof(output), "⚠Fault!");
-        screen.draw_string_mono<font>(191 - screen.string_width<font>(output), 43, output, 1);
+        screen.draw_string_mono<font, true>(191 - screen.string_width<font>(output), 43, output, 1);
     } else {
         const int32_t em = (static_cast<int32_t>(refill_ellapsed_time) / 60) % 60;
         const int32_t es = (static_cast<int32_t>(refill_ellapsed_time)) % 60;
         snprintf(output, sizeof(output), "R%03d:%02d", static_cast<int>(em), static_cast<int>(es));
-        screen.draw_string_mono<font>(190 - screen.string_width<font>(output), 43, output, 1);
+        screen.draw_string_mono<font, true>(190 - screen.string_width<font>(output), 43, output, 1);
     }
 }
 

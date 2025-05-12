@@ -336,18 +336,18 @@ struct char_info {
 };
 /// @endcond
 
-/// @brief basic rectangle structure 
+/// @brief basic rectangle structure
 /// @tparam T coordinate number type
 template <typename T>
 struct rect {
-    T x = 0; ///< x coordinate
-    T y = 0; ///< y coordinate
-    T w = 0; ///< width
-    T h = 0; ///< height
+    T x = 0;  ///< x coordinate
+    T y = 0;  ///< y coordinate
+    T w = 0;  ///< width
+    T h = 0;  ///< height
 
     /// @brief intersects one rect with another
-    /// @param other 
-    /// @return 
+    /// @param other
+    /// @return
     constexpr rect operator&(const rect &other) const {
         T nax = std::max(x, other.x);
         T nay = std::max(y, other.y);
@@ -357,8 +357,8 @@ struct rect {
     }
 
     /// @brief intersects one rect with another
-    /// @param other 
-    /// @return 
+    /// @param other
+    /// @return
     constexpr rect &operator&=(const rect &other) {
         T nax = std::max(x, other.x);
         T nay = std::max(y, other.y);
@@ -713,10 +713,10 @@ class format {
 /// @endcond
 
 /// @brief 1-bit format, just b/w. Use as template parameter for image.
-/// @tparam W 
-/// @tparam H 
-/// @tparam S 
-/// @tparam GR 
+/// @tparam W
+/// @tparam H
+/// @tparam S
+/// @tparam GR
 template <size_t W, size_t H, int32_t S, bool GR>
 class format_1bit : public format {
  public:
@@ -732,6 +732,49 @@ class format_1bit : public format {
         b = (b & 0xCC) >> 2 | (b & 0x33) << 2;
         b = (b & 0xAA) >> 1 | (b & 0x55) << 1;
         return b;
+    }
+
+    static constexpr void transpose8x8(std::array<uint8_t, 8> &a) {
+        uint8_t t;
+
+        // clang-format off
+        t = (a[0] ^ (a[1] >> 1)) & 0x55;  a[0] ^=  t; a[1] ^= t << 1;
+        t = (a[2] ^ (a[3] >> 1)) & 0x55;  a[2] ^=  t; a[3] ^= t << 1;
+        t = (a[4] ^ (a[5] >> 1)) & 0x55;  a[4] ^=  t; a[5] ^= t << 1;
+        t = (a[6] ^ (a[7] >> 1)) & 0x55;  a[6] ^=  t; a[7] ^= t << 1;
+
+        t = (a[0] ^ (a[2] >> 2)) & 0x33;  a[0] ^=  t; a[2] ^= t << 2;
+        t = (a[1] ^ (a[3] >> 2)) & 0x33;  a[1] ^=  t; a[3] ^= t << 2;
+        t = (a[4] ^ (a[6] >> 2)) & 0x33;  a[4] ^=  t; a[6] ^= t << 2;
+        t = (a[5] ^ (a[7] >> 2)) & 0x33;  a[5] ^=  t; a[7] ^= t << 2;
+
+        t = (a[0] ^ (a[4] >> 4)) & 0x0F;  a[0] ^=  t; a[4] ^= t << 4;
+        t = (a[1] ^ (a[5] >> 4)) & 0x0F;  a[1] ^=  t; a[5] ^= t << 4;
+        t = (a[2] ^ (a[6] >> 4)) & 0x0F;  a[2] ^=  t; a[6] ^= t << 4;
+        t = (a[3] ^ (a[7] >> 4)) & 0x0F;  a[3] ^=  t; a[7] ^= t << 4;
+        // clang-format on
+    }
+
+    static constexpr void transpose(const uint8_t *src, uint8_t *dst) {
+        std::array<uint8_t, 8> tmp;
+        size_t src_stride = ((W + 7) / 8);
+        size_t dst_stride = ((H + 7) / 8);
+        for (size_t y = 0; y < dst_stride; y++) {
+            for (size_t x = 0; x < src_stride; x++) {
+                size_t xl = std::min(size_t{8}, H - (y * 8));
+                for (size_t c = 0; c < xl; c++) {
+                    tmp[c] = src[(y * 8 + c) * src_stride + x];
+                }
+                for (size_t c = xl; c < 8; c++) {
+                    tmp[c] = 0;
+                }
+                transpose8x8(tmp);
+                size_t yl = std::min(size_t{8}, W - (x * 8));
+                for (size_t c = 0; c < yl; c++) {
+                    dst[(x * 8 + c) * dst_stride + y] = tmp[c];
+                }
+            }
+        }
     }
 
     static constexpr void compose(std::array<uint8_t, image_size> &, size_t, size_t, float, float, float, float) {
@@ -909,10 +952,10 @@ class format_1bit : public format {
 };
 
 /// @brief 2-bit color format, 4 colors total. Use as template parameter for image.
-/// @tparam W 
-/// @tparam H 
-/// @tparam S 
-/// @tparam GR 
+/// @tparam W
+/// @tparam H
+/// @tparam S
+/// @tparam GR
 template <size_t W, size_t H, int32_t S, bool GR>
 class format_2bit : public format {
  public:
@@ -940,6 +983,10 @@ class format_2bit : public format {
         b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
         b = (b & 0xCC) >> 2 | (b & 0x33) << 2;
         return b;
+    }
+
+    static constexpr void transpose(const uint8_t *src, uint8_t *dst) {
+        static_assert(false, "Not implemented yet.");
     }
 
     static constexpr void compose(std::array<uint8_t, image_size> &, size_t, size_t, float, float, float, float) {
@@ -1121,10 +1168,10 @@ class format_2bit : public format {
 };
 
 /// @brief 4-bit color format, 16 colors total. Use as template parameter for image.
-/// @tparam W 
-/// @tparam H 
-/// @tparam S 
-/// @tparam GR 
+/// @tparam W
+/// @tparam H
+/// @tparam S
+/// @tparam GR
 template <size_t W, size_t H, int32_t S, bool GR>
 class format_4bit : public format {
  public:
@@ -1155,6 +1202,10 @@ class format_4bit : public format {
     static constexpr uint8_t reverse(uint8_t b) {
         b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
         return b;
+    }
+
+    static constexpr void transpose(const uint8_t *src, uint8_t *dst) {
+        static_assert(false, "Not implemented yet.");
     }
 
     static constexpr void compose(std::array<uint8_t, image_size> &data, size_t x, size_t y, float cola, float colr, float colg, float colb) {
@@ -1347,10 +1398,10 @@ class format_4bit : public format {
 };
 
 /// @brief 8-bit format, 256 colors total. Use as template parameter for image.
-/// @tparam W 
-/// @tparam H 
-/// @tparam S 
-/// @tparam GR 
+/// @tparam W
+/// @tparam H
+/// @tparam S
+/// @tparam GR
 template <size_t W, size_t H, int32_t S, bool GR>
 class format_8bit : public format {
  public:
@@ -1431,6 +1482,10 @@ class format_8bit : public format {
 
     static constexpr uint8_t reverse(uint8_t b) {
         return b;
+    }
+
+    static constexpr void transpose(const uint8_t *src, uint8_t *dst) {
+        static_assert(false, "Not implemented yet.");
     }
 
     static constexpr void plot(std::array<uint8_t, image_size> &data, size_t x, size_t y, uint8_t col) {
@@ -1686,6 +1741,14 @@ class image {
     }
 
     /**
+     * \brief Bytes per line in the image data.
+     * \return Bytes per line in the image data.
+     */
+    [[nodiscard]] static constexpr size_t bytes_per_line() {
+        return T<W, H, S, GR>::bytes_per_line;
+    }
+
+    /**
      * \brief Width in pixels of the image.
      * \return Width in pixels of the image.
      */
@@ -1710,9 +1773,9 @@ class image {
 
     /**
      * \brief Get a reference to the underlying raw data of the image.
-     * \return const reference to the data array which contains the raw image data.
+     * \return reference to the data array which contains the raw image data.
      */
-    [[nodiscard]] constexpr std::array<uint8_t, T<W, H, S, GR>::image_size> &data_ref() const {
+    [[nodiscard]] constexpr std::array<uint8_t, T<W, H, S, GR>::image_size> &data_ref() {
         return data;
     }
 
@@ -2289,13 +2352,13 @@ class image {
     constexpr void flip_h() {
         uint8_t *ptr = data.data();
         for (size_t y = 0; y < H; y++) {
-            for (size_t x = 0; x < T<W, H, S, GR>::bytes_per_line / 2; x++) {
+            for (size_t x = 0; x < bytes_per_line() / 2; x++) {
                 uint8_t a = T<W, H, S, GR>::reverse(ptr[x]);
-                uint8_t b = T<W, H, S, GR>::reverse(ptr[T<W, H, S, GR>::bytes_per_line - x - 1]);
+                uint8_t b = T<W, H, S, GR>::reverse(ptr[bytes_per_line() - x - 1]);
                 ptr[x] = b;
-                ptr[T<W, H, S, GR>::bytes_per_line - x - 1] = a;
+                ptr[bytes_per_line() - x - 1] = a;
             }
-            ptr += T<W, H, S, GR>::bytes_per_line;
+            ptr += bytes_per_line();
         }
     }
 
@@ -2304,10 +2367,10 @@ class image {
      */
     constexpr void flip_v() {
         uint8_t *ptr = data.data();
-        for (size_t x = 0; x < T<W, H, S, GR>::bytes_per_line; x++) {
+        for (size_t x = 0; x < bytes_per_line(); x++) {
             for (size_t y = 0; y < H / 2; y++) {
-                uint8_t *ptr_a = ptr + y * T<W, H, S, GR>::bytes_per_line;
-                uint8_t *ptr_b = ptr + (H - y - 1) * T<W, H, S, GR>::bytes_per_line;
+                uint8_t *ptr_a = ptr + y * bytes_per_line();
+                uint8_t *ptr_b = ptr + (H - y - 1) * bytes_per_line();
                 uint8_t a = ptr_a[x];
                 uint8_t b = ptr_b[x];
                 ptr_a[x] = b;
@@ -2321,16 +2384,36 @@ class image {
      */
     constexpr void flip_hv() {
         uint8_t *ptr = data.data();
-        for (size_t x = 0; x < T<W, H, S, GR>::bytes_per_line; x++) {
+        for (size_t x = 0; x < bytes_per_line(); x++) {
             for (size_t y = 0; y < H / 2; y++) {
-                uint8_t *ptr_a = ptr + y * T<W, H, S, GR>::bytes_per_line;
-                uint8_t *ptr_b = ptr + (H - y - 1) * T<W, H, S, GR>::bytes_per_line;
+                uint8_t *ptr_a = ptr + y * bytes_per_line();
+                uint8_t *ptr_b = ptr + (H - y - 1) * bytes_per_line();
                 uint8_t a = T<W, H, S, GR>::reverse(ptr_a[x]);
-                uint8_t b = T<W, H, S, GR>::reverse(ptr_b[T<W, H, S, GR>::bytes_per_line - x - 1]);
+                uint8_t b = T<W, H, S, GR>::reverse(ptr_b[bytes_per_line() - x - 1]);
                 ptr_a[x] = b;
-                ptr_b[T<W, H, S, GR>::bytes_per_line - x - 1] = a;
+                ptr_b[bytes_per_line() - x - 1] = a;
             }
         }
+    }
+
+    /**
+     * /brief Return a transposed version of this image
+     */
+    constexpr image<T, H, W, S, GR> transpose() const {
+        image<T, H, W, S, GR> transposed;
+        static_assert(T<W, H, S, GR>::bits_per_pixel != 1 || ((H + 7) / 8) == transposed.bytes_per_line());
+        static_assert(T<W, H, S, GR>::bits_per_pixel != 1 || ((W + 7) / 8) == bytes_per_line());
+        T<W, H, S, GR>::transpose(data.data(), transposed.data_ref().data());
+        return transposed;
+    }
+
+    /**
+     * /brief transpose this image into another
+     */
+    constexpr void transpose(image<T, H, W, S, GR> &dst) const {
+        static_assert(T<W, H, S, GR>::bits_per_pixel != 1 || ((H + 7) / 8) == dst.bytes_per_line());
+        static_assert(T<W, H, S, GR>::bits_per_pixel != 1 || ((W + 7) / 8) == bytes_per_line());
+        T<W, H, S, GR>::transpose(data, dst.data);
     }
 
     /**
