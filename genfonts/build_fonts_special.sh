@@ -10,7 +10,7 @@ set -euo pipefail
 shopt -s nullglob
 
 declare -A meta=(
-  [file1:name]=CD-IconsPC.ttf               [file1:size]=16        [file1:flags]=true
+  [file1:name]=CD-IconsPC.ttf               [file1:size]=20        [file1:flags]=true
   [file2:name]=PixelOperator.ttf            [file2:size]=16        [file2:flags]=true
   [file3:name]=PixelOperator-Bold.ttf       [file3:size]=16        [file3:flags]=true
   [file4:name]=PixelOperator8-Bold.ttf      [file4:size]=8         [file4:flags]=true
@@ -26,7 +26,7 @@ declare -A meta=(
   [file14:name]=PixelOperatorSC-Bold.ttf    [file14:size]=16       [file14:flags]=true
   [file15:name]=PixelOperatorSC.ttf         [file15:size]=16       [file15:flags]=true
 
-  [file15:name]=04B_30.TTF                  [file15:size]=17       [file15:flags]=true
+  [file15:name]=Bubbly-04B_30.TTF           [file15:size]=17       [file15:flags]=true
   [file16:name]=ABSTRACT.TTF                [file16:size]=8        [file16:flags]=true
   [file17:name]=advanced_pixel_lcd-7.ttf    [file17:size]=22       [file17:flags]=true
   [file18:name]=Fipps-Regular.otf           [file18:size]=8        [file18:flags]=true
