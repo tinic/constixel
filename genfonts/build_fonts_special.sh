@@ -34,7 +34,7 @@ declare -A meta=(
   [file20:name]=m12.TTF                     [file20:size]=32       [file20:flags]=true
   [file21:name]=m42.TTF                     [file21:size]=8        [file21:flags]=true
   [file22:name]=Mario-Kart-DS.ttf           [file22:size]=16       [file22:flags]=true
-  [file23:name]=Paskowy.ttf                 [file23:size]=27       [file23:flags]=true
+  [file23:name]=Paskowy.ttf                 [file23:size]=25       [file23:flags]=true
   [file24:name]=PixArrows.ttf               [file24:size]=10       [file24:flags]=true
   [file26:name]=upheavtt.ttf                [file26:size]=20       [file26:flags]=true
   [file27:name]=VCR_OSD_MONO.ttf            [file27:size]=21       [file27:flags]=true
