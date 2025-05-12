@@ -1,18 +1,22 @@
-#include "constixel.h"
-
 #include <format>
+
+#include "constixel.h"
 
 //
 // Font to show a specimen of
 //
+// clang-format off
 #include "fonts/cd_iconspc_mono.h"
 using font = constixel::cd_iconspc_mono;
+// clang-format on
 
 //--------------------------------------------------------------------
 
 // For for label
-#include "fonts/pxplus_hp_100lx_6x8_mono.h"
-using label = constixel::pxplus_hp_100lx_6x8_mono;
+// clang-format off
+#include "fonts/px437_hp_100lx_6x8_mono.h"
+using label = constixel::px437_hp_100lx_6x8_mono;
+// clang-format on
 
 // Function to convert UTF-32 to UTF-8
 static void append_utf8(std::string& out, char32_t cp) {
@@ -39,8 +43,9 @@ int main() {
     int32_t y_pos = 8;
     int32_t x_pos = 8;
 
-    for (auto c : font::glyph_table) {
+    screen.fill_rect(0, 0, screen.width(), screen.height(), 1);
 
+    for (auto c : font::glyph_table) {
         // Get a UTF-8 string with our character in it.
         std::string str{};
         append_utf8(str, c.first);
@@ -50,11 +55,11 @@ int main() {
         cw = std::max(32, cw);
 
         // Draw character
-        screen.draw_string_centered_mono<font>(x_pos + cw / 2, y_pos, str.c_str(), 1);
+        screen.draw_string_centered_mono<font>(x_pos + cw / 2, y_pos, str.c_str(), 0);
 
         // Draw label under it
         auto unicode = std::format("{:04x}", c.first);
-        screen.draw_string_centered_mono<label>(x_pos + cw / 2, y_pos + font::total_height + 4, unicode.c_str(), 1);
+        screen.draw_string_centered_mono<label>(x_pos + cw / 2, y_pos + font::total_height + 4, unicode.c_str(), 0);
 
         // Advance and break line
         x_pos += cw;
