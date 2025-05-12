@@ -48,8 +48,6 @@ target_include_directories(constixel_tests PRIVATE ${PROJECT_SOURCE_DIR}/.. ${PR
 
 # ----- FONTS -------------------------------------------------------------------------
 
-message(STATUS "Hello world!!!")
-
 set(HEADER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../fonts")   # adjust as needed
 file(GLOB HDRS "${HEADER_DIR}/*.h")                     # or *.hpp
 

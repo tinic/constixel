@@ -62,7 +62,7 @@ int main() {
         snprintf(size, 10, "%d", T::size);
         text.append(size);
         text.append(" ");
-        text.append("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567890!@#$%^&*()");
+        text.append("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567890!@#$%^&*()░▒▓███▚▚╚═╝");
         fonts.draw_string_mono<T, true>(0, y_pos, text.c_str(), 1);
         y_pos += T::total_height;
         if (y_pos + 100 > fonts.height()) {
