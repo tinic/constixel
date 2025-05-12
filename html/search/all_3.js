@@ -1,7 +1,7 @@
 var searchData=
 [
   ['data_20example_0',['Consteval embedded image data example',['../md__r_e_a_d_m_e.html#autotoc_md8',1,'']]],
-  ['data_5fref_1',['data_ref',['../classconstixel_1_1image.html#a8910a57707bdf33589fedd3d8407a9c3',1,'constixel::image']]],
+  ['data_5fref_1',['data_ref',['../classconstixel_1_1image.html#a2bd61322a96d761ed0b668711d63f20c',1,'constixel::image']]],
   ['device_5fformat_2',['device_format',['../classconstixel_1_1image.html#a3cd9ee4db9d92e6360d9650c3abe1bab',1,'constixel::image']]],
   ['disk_20example_3',['Saving a PNG to disk example',['../md__r_e_a_d_m_e.html#autotoc_md9',1,'']]],
   ['draw_5fline_4',['draw_line',['../classconstixel_1_1image.html#a5f0597345ba7082ff66f6db1c32b3aba',1,'constixel::image::draw_line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, uint32_t stroke_width=1)'],['../classconstixel_1_1image.html#a3e6cd47965d1b5f38909ed099e70c958',1,'constixel::image::draw_line(const rect&lt; int32_t &gt; &amp;rect, uint8_t col, uint32_t stroke_width=1)']]],
