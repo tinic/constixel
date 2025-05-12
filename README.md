@@ -92,7 +92,7 @@ int main() {
 
     image<format_8bit, 512, 312, 1> image;
     for (size_t i = 0; i < strings.size(); i++) { 
-        uint8_t col = color::GREY_RAMP_STOP - static_cast<uint8_t>(i * 3);
+        uint8_t col = color::GRAY_RAMP_STOP - static_cast<uint8_t>(i * 3);
 
         image.draw_string_mono<large_font>(16, 48 * static_cast<int32_t>(i) + 16, strings.at(i), col);
     }
@@ -237,10 +237,10 @@ enum color : uint8_t {
     YELLOW = 5,
     CYAN = 6,
     MAGENTA = 7,
-    GREY_80 = 8,
-    GREY_60 = 9,
-    GREY_40 = 10,
-    GREY_20 = 11,
+    GRAY_80 = 8,
+    GRAY_60 = 9,
+    GRAY_40 = 10,
+    GRAY_20 = 11,
     DARK_RED = 12,
     DARK_GREEN = 13,
     DARK_BLUE = 14,
@@ -282,7 +282,7 @@ class image {
     template <typename FONT, bool KERNING = false, ROTATION = DEGREE_0>
     constexpr int32_t draw_string_aa(int32_t x, int32_t y, const char *str, uint8_t col);
 
-    // Get the width of a utf8 string in pixels. #include a monochrome or grey font and specify the included struct as the template parameter
+    // Get the width of a utf8 string in pixels. #include a monochrome or antialiased font and specify the included struct as the template parameter
     template <typename FONT, bool KERNING = false>
     constexpr int32_t string_width(const char *str);
 
