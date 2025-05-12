@@ -337,6 +337,12 @@ class image {
     // Flip the contents of this image horizontally&vertically
     void flip_hv();
 
+    // Return a transposed version of this image
+    image<T, H, W, S, GR> transpose();
+
+    // transpose this image into another
+    transpose(image<T, H, W, S, GR> &dst);
+
     // Blit an RGBA (little endian) buffer into this instance. Colors are quantizied to the internal palette. 
     // NOTE: This is a slow operation due to the brute force color quantization and will likely not consteval.
     void blit_RGBA(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride);
