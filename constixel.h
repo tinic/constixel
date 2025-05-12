@@ -711,10 +711,10 @@ class format {
 /// @endcond
 
 /// @brief 1-bit format, just b/w. Use as template parameter for image.
-/// @tparam W width
-/// @tparam H height
-/// @tparam S scale
-/// @tparam GR greyscale
+/// @tparam W Width in pixels.
+/// @tparam H Height in pixels.
+/// @tparam S scale of sixel output.
+/// @tparam GR Grayscale palette.
 template <size_t W, size_t H, int32_t S, bool GR>
 class format_1bit : public format {
  public:
@@ -950,10 +950,10 @@ class format_1bit : public format {
 };
 
 /// @brief 2-bit color format, 4 colors total. Use as template parameter for image.
-/// @tparam W width
-/// @tparam H height
-/// @tparam S scale
-/// @tparam GR greyscale
+/// @tparam W Width in pixels.
+/// @tparam H Height in pixels.
+/// @tparam S scale of sixel output.
+/// @tparam GR Grayscale palette.
 template <size_t W, size_t H, int32_t S, bool GR>
 class format_2bit : public format {
  public:
@@ -1166,10 +1166,10 @@ class format_2bit : public format {
 };
 
 /// @brief 4-bit color format, 16 colors total. Use as template parameter for image.
-/// @tparam W width
-/// @tparam H height
-/// @tparam S scale
-/// @tparam GR greyscale
+/// @tparam W Width in pixels.
+/// @tparam H Height in pixels.
+/// @tparam S scale of sixel output.
+/// @tparam GR Grayscale palette.
 template <size_t W, size_t H, int32_t S, bool GR>
 class format_4bit : public format {
  public:
@@ -1396,10 +1396,10 @@ class format_4bit : public format {
 };
 
 /// @brief 8-bit format, 256 colors total. Use as template parameter for image.
-/// @tparam W width
-/// @tparam H height
-/// @tparam S scale
-/// @tparam GR greyscale
+/// @tparam W Width in pixels.
+/// @tparam H Height in pixels.
+/// @tparam S scale of sixel output.
+/// @tparam GR Grayscale palette.
 template <size_t W, size_t H, int32_t S, bool GR>
 class format_8bit : public format {
  public:
@@ -1652,18 +1652,18 @@ enum color : uint8_t {
     YELLOW = 5,        /*!< Yellow */
     CYAN = 6,          /*!< Cyan */
     MAGENTA = 7,       /*!< Magenta */
-    GREY_80 = 8,       /*!< Grey 80% */
-    GREY_60 = 9,       /*!< Grey 60% */
-    GREY_40 = 10,      /*!< Grey 40% */
-    GREY_20 = 11,      /*!< Grey 20% */
+    GRAY_80 = 8,       /*!< Gray 80% */
+    GRAY_60 = 9,       /*!< Gray 60% */
+    GRAY_40 = 10,      /*!< Gray 40% */
+    GRAY_20 = 11,      /*!< Gray 20% */
     DARK_RED = 12,     /*!< Dark Red (50%) */
     DARK_GREEN = 13,   /*!< Dark Green (50%) */
     DARK_BLUE = 14,    /*!< Dark Blue (50%) */
     DARK_YELLOW = 15,  /*!< Dark Yellow (50%) */
 
-    GREY_RAMP_START = 16,
-    GREY_RAMP_COUNT = 16,
-    GREY_RAMP_STOP = GREY_RAMP_START + 15,
+    GRAY_RAMP_START = 16,
+    GRAY_RAMP_COUNT = 16,
+    GRAY_RAMP_STOP = GRAY_RAMP_START + 15,
 
     RED_LUMA_RAMP_START = 32,
     RED_LUMA_RAMP_COUNT = 16,
@@ -1715,8 +1715,8 @@ class image {
 
  public:
     /**
-     * \brief Is this image greyscale?
-     * \return Is this image greyscale?
+     * \brief Is this image grayscale?
+     * \return Is this image grayscale?
      */
     [[nodiscard]] static constexpr size_t grayscale() {
         return T<W, H, S, GR>::grayscale;
