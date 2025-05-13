@@ -200,8 +200,8 @@ int main(int argc, char* argv[]) {
             ss << std::format("    static constexpr int32_t total_height = {};\n\n", font.totalHeight);
 
             uint32_t max_id = 0;
-            for (size_t c = 0; c < font.chars.size(); c++) {
-                max_id = std::max(font.chars[c].id, max_id);
+            for (auto c : font.chars) {
+                max_id = std::max(c.id, max_id);
             }
             if (font.chars.size() < 0xFF && max_id < 0xFF) {
                 ss << std::format("    using lookup_type = uint8_t;\n", name);
@@ -238,9 +238,9 @@ int main(int argc, char* argv[]) {
             }
 
             uint32_t max_utf32 = 0;
-            for (size_t c = 0; c < font.kernings.size(); c++) {
-                max_utf32 = std::max(font.kernings[c].first, max_utf32);
-                max_utf32 = std::max(font.kernings[c].second, max_utf32);
+            for (auto c : font.kernings) {
+                max_utf32 = std::max(c.first, max_utf32);
+                max_utf32 = std::max(c.second, max_utf32);
             }
 
             if (font.kernings.size() > 0 && font.kernings.size() < 0xFFFF && max_utf32 < 0xFF) {
@@ -280,14 +280,14 @@ int main(int argc, char* argv[]) {
             }
 
             int32_t max_value = 0;
-            for (size_t c = 0; c < font.chars.size(); c++) {
-                max_value = std::max(std::abs(static_cast<int32_t>(font.chars[c].x)), max_value);
-                max_value = std::max(std::abs(static_cast<int32_t>(font.chars[c].y)), max_value);
-                max_value = std::max(std::abs(static_cast<int32_t>(font.chars[c].width)), max_value);
-                max_value = std::max(std::abs(static_cast<int32_t>(font.chars[c].height)), max_value);
-                max_value = std::max(std::abs(static_cast<int32_t>(font.chars[c].xadvance)), max_value);
-                max_value = std::max(std::abs(static_cast<int32_t>(font.chars[c].xoffset)), max_value);
-                max_value = std::max(std::abs(static_cast<int32_t>(font.chars[c].yoffset)), max_value);
+            for (auto c : font.chars) {
+                max_value = std::max(std::abs(static_cast<int32_t>(c.x)), max_value);
+                max_value = std::max(std::abs(static_cast<int32_t>(c.y)), max_value);
+                max_value = std::max(std::abs(static_cast<int32_t>(c.width)), max_value);
+                max_value = std::max(std::abs(static_cast<int32_t>(c.height)), max_value);
+                max_value = std::max(std::abs(static_cast<int32_t>(c.xadvance)), max_value);
+                max_value = std::max(std::abs(static_cast<int32_t>(c.xoffset)), max_value);
+                max_value = std::max(std::abs(static_cast<int32_t>(c.yoffset)), max_value);
             }
             const char* chars_unit = max_value > 127 ? (max_value > 32767 ? "int32_t" : "int16_t") : "int8_t";
 
