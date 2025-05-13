@@ -271,12 +271,12 @@ int main(int argc, char* argv[]) {
 
                 ss << std::format("    static constexpr hextree<hextree<0, uint32_t>::size(kerning_table), uint32_t> kerning_tree{{kerning_table}};\n\n");
             } else {
-                ss << std::format("    using kerning_lookup_type = uint32_t;\n", name);
-                ss << std::format("    using kerning_amount_type = int32_t;\n", name);
-                ss << std::format("    static constexpr size_t kerning_code_shift = 16;\n", name);
-                ss << std::format("    static constexpr size_t kerning_amount_offset = 0x40000000;\n", name);
+                ss << std::format("    using kerning_lookup_type = uint8_t;\n", name);
+                ss << std::format("    using kerning_amount_type = int8_t;\n", name);
+                ss << std::format("    static constexpr size_t kerning_code_shift = 4;\n", name);
+                ss << std::format("    static constexpr size_t kerning_amount_offset = 0x40;\n", name);
 
-                ss << std::format("    static constexpr hextree<0, uint32_t> kerning_tree{{}};\n\n");
+                ss << std::format("    static constexpr hextree<0, uint8_t> kerning_tree{{}};\n\n");
             }
 
             int32_t max_value = 0;
