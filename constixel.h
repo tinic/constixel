@@ -37,6 +37,14 @@ SOFTWARE.
 #include <utility>
 #include <vector>
 
+#if defined(__ARM_NEON)
+#include <arm_neon.h>
+#endif  // #if defined(__ARM_NEON)
+
+#if defined(__AVX2__)
+#include <immintrin.h>
+#endif  // #if defined(__AVX2__)
+
 namespace constixel {
 
 /// @cond DOXYGEN_EXCLUDE
@@ -199,6 +207,16 @@ class quantize {
             linearpal.at(i * 3 + 0) = srgb_to_linear(static_cast<float>((pal[i] >> 16) & 0xFF) * (1.0f / 255.0f));
             linearpal.at(i * 3 + 1) = srgb_to_linear(static_cast<float>((pal[i] >> 8) & 0xFF) * (1.0f / 255.0f));
             linearpal.at(i * 3 + 2) = srgb_to_linear(static_cast<float>((pal[i] >> 0) & 0xFF) * (1.0f / 255.0f));
+#if defined(__ARM_NEON)
+            linearpal_neon.at(i) = srgb_to_linear(static_cast<float>((pal[i] >> 16) & 0xFF) * (1.0f / 255.0f));
+            linearpal_neon.at(i + pal.size()) = srgb_to_linear(static_cast<float>((pal[i] >> 8) & 0xFF) * (1.0f / 255.0f));
+            linearpal_neon.at(i + pal.size() * 2) = srgb_to_linear(static_cast<float>((pal[i] >> 0) & 0xFF) * (1.0f / 255.0f));
+#endif  // #if defined(__ARM_NEON)
+#if defined(__AVX2__)
+            linearpal_avx2.at(i) = srgb_to_linear(static_cast<float>((pal[i] >> 16) & 0xFF) * (1.0f / 255.0f));
+            linearpal_avx2.at(i + pal.size()) = srgb_to_linear(static_cast<float>((pal[i] >> 8) & 0xFF) * (1.0f / 255.0f));
+            linearpal_avx2.at(i + pal.size() * 2) = srgb_to_linear(static_cast<float>((pal[i] >> 0) & 0xFF) * (1.0f / 255.0f));
+#endif  // #if defined(__AVX2__)
         }
     }
 
@@ -218,8 +236,90 @@ class quantize {
     }
 
     std::array<float, palette_size * 3> linearpal{};
+#if defined(__ARM_NEON)
+    std::array<float, palette_size * 3> linearpal_neon{};
+#endif  // #if defined(__ARM_NEON)
+#if defined(__ARM_NEON)
+    std::array<float, palette_size * 3> linearpal_avx2{};
+#endif  // #if defined(__ARM_NEON)
 
     [[nodiscard]] constexpr uint8_t nearest_linear(float r, float g, float b) const {
+#if defined(__ARM_NEON)
+        if (!std::is_constant_evaluated() && pal.size() >= 4) {
+            const float32x4_t vR = vdupq_n_f32(r);
+            const float32x4_t vG = vdupq_n_f32(g);
+            const float32x4_t vB = vdupq_n_f32(b);
+
+            float best = std::numeric_limits<float>::infinity();
+            std::size_t bestIdx = 0;
+
+            for (size_t i = 0; i < pal.size(); i += 4) {
+                float32x4_t dr = vsubq_f32(vld1q_f32(&linearpal_neon[i]), vR);
+                float32x4_t dg = vsubq_f32(vld1q_f32(&linearpal_neon[i + pal.size()]), vG);
+                float32x4_t db = vsubq_f32(vld1q_f32(&linearpal_neon[i + pal.size() * 2]), vB);
+
+#if defined(__aarch64__) && defined(__ARM_FEATURE_FMA)
+                float32x4_t dist = vfmaq_f32(vfmaq_f32(vmulq_f32(dr, dr), dg, dg), db, db);
+#else
+                float32x4_t dist = vaddq_f32(vaddq_f32(vmulq_f32(dr, dr), vmulq_f32(dg, dg)), vmulq_f32(db, db));
+#endif
+
+                float32x2_t lo = vget_low_f32(dist), hi = vget_high_f32(dist);
+                float d0 = vget_lane_f32(lo, 0);
+                if (d0 < best) {
+                    best = d0;
+                    bestIdx = i;
+                }
+                float d1 = vget_lane_f32(lo, 1);
+                if (d1 < best) {
+                    best = d1;
+                    bestIdx = i + 1;
+                }
+                float d2 = vget_lane_f32(hi, 0);
+                if (d2 < best) {
+                    best = d2;
+                    bestIdx = i + 2;
+                }
+                float d3 = vget_lane_f32(hi, 1);
+                if (d3 < best) {
+                    best = d3;
+                    bestIdx = i + 3;
+                }
+            }
+            return static_cast<uint8_t>(bestIdx);
+        }
+#endif  // #if defined(__ARM_NEON)
+#if defined(__AVX2__)
+        if (!std::is_constant_evaluated() && pal.size() >= 8) {
+            const __m256 vR = _mm256_set1_ps(R);
+            const __m256 vG = _mm256_set1_ps(G);
+            const __m256 vB = _mm256_set1_ps(B);
+
+            float best = std::numeric_limits<float>::infinity();
+            std::uint8_t bestIdx = 0;
+
+            for (int i = 0; i < pal.size(); i += 8) {
+                __m256 pr = _mm256_load_ps(&linearpal_avx2[i]);                   // 8 × r
+                __m256 pg = _mm256_load_ps(&linearpal_avx2[i * pal.size()]);      // 8 × g
+                __m256 pb = _mm256_load_ps(&linearpal_avx2[i * pal.size() * 2]);  // 8 × b
+
+                // dist = dr² + dg² + db²  (3× FMA)
+                __m256 dist =
+                    _mm256_fmadd_ps(_mm256_sub_ps(pr, vR), _mm256_sub_ps(pr, vR),
+                                    _mm256_fmadd_ps(_mm256_sub_ps(pg, vG), _mm256_sub_ps(pg, vG), _mm256_mul_ps(_mm256_sub_ps(pb, vB), _mm256_sub_ps(pb, vB))));
+
+                alignas(32) float d[8];
+                _mm256_store_ps(d, dist);
+
+                for (int lane = 0; lane < 8; ++lane)
+                    if (d[lane] < best) {
+                        best = d[lane];
+                        bestIdx = i + lane;
+                    }
+            }
+            return static_cast<uint8_t>(best);
+        }
+#endif  // #if defined(__AVX2__)
         size_t best = 0;
         float bestd = 100.0f;
         for (size_t i = 0; i < pal.size(); ++i) {
@@ -2182,8 +2282,8 @@ class image {
     }
 
     /**
-     * \brief Draw antialiased text centered at the specified coordinate. The template parameter selects which antialiased font to use. Only format_8bit targets
-     * are supported.
+     * \brief Draw antialiased text centered at the specified coordinate. The template parameter selects which antialiased font to use. Only format_8bit
+     * targets are supported.
      * \tparam FONT The font struct name.
      * \tparam KERNING Boolean, use kerning information if available.
      * \tparam ROTATION Rotation around the x/y coordinate. Can be text_rotation::DEGREE_0, text_rotation::DEGREE_90, text_rotation::DEGREE_180 or
@@ -2642,8 +2742,8 @@ class image {
 
     /**
      * \brief Convert the current instance into a byte stream formatted for embedded displays. This function will write chunk_length of data into dst and
-     * update chunk_index on each call. You should pass chunk_index = 0 at the beginnig of the sequence. Returns true of there is more data, or false if there
-     * is no data left. This function is typically used to drive interrupt driven DMA transfers.
+     * update chunk_index on each call. You should pass chunk_index = 0 at the beginnig of the sequence. Returns true of there is more data, or false if
+     * there is no data left. This function is typically used to drive interrupt driven DMA transfers.
      * \tparam dst_format The desired data format.
      * \param dst The buffer the data will be written to.
      * \param chunk_size The requested chunk size in bytes. This value has to be kept the same during a full conversion sequence.
