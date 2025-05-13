@@ -1,0 +1,29 @@
+If you want to use JP/KO/ZH_CH/ZH_HK/ZH_TR/ZH_TW pixel fonts for your embedded 
+projects, I recommend the excellent fonts from TakWolf:
+
+https://github.com/TakWolf/ark-pixel-font
+https://github.com/TakWolf/fusion-pixel-font
+https://github.com/TakWolf/ark-pixel-font-inherited
+https://github.com/TakWolf/hzk-pixel-font
+https://github.com/TakWolf/winxp-pixel-font
+
+Warning:
+
+- The complete ark-pixel 12px font clocks in at around 700Kb in your binary.
+- The fusion-pixel at 12px is about 1Mb.
+- The WinXP fonts are even larger...
+
+Requirements:
+
+- Bash 4.0+ (On MacOS use homebrew to install a newer bash)
+- gcc-14 or newer, or clang
+- harfbuzz (Debian: libharfbuzz-dev MacOS(homebrew): harfbuzz )
+- freetype2 (Debian: libfreetype-dev MacOS(homebrew): freetype )
+
+Instructions:
+
+- Get the otf versions from the above links and place the otf files in this directory.
+- From a terminal 
+    > cd constixel/genfonts
+    > ./build_fonts_takwolf.sh
+- This will generate the header files which are placed in constixel/fonts
