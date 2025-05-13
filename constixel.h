@@ -733,23 +733,32 @@ class format_1bit : public format {
     }
 
     static constexpr void transpose8x8(std::array<uint8_t, 8> &a) {
-        uint8_t t;
-
         // clang-format off
-        t = (a[0] ^ (a[1] >> 1)) & 0x55;  a[0] ^=  t; a[1] ^= t << 1;
-        t = (a[2] ^ (a[3] >> 1)) & 0x55;  a[2] ^=  t; a[3] ^= t << 1;
-        t = (a[4] ^ (a[5] >> 1)) & 0x55;  a[4] ^=  t; a[5] ^= t << 1;
-        t = (a[6] ^ (a[7] >> 1)) & 0x55;  a[6] ^=  t; a[7] ^= t << 1;
+        uint32_t x = (static_cast<uint32_t>(a[0]) << 24) | 
+                     (static_cast<uint32_t>(a[1]) << 16) | 
+                     (static_cast<uint32_t>(a[2]) <<  8) | 
+                     (static_cast<uint32_t>(a[3])      );
+        uint32_t y = (static_cast<uint32_t>(a[4]) << 24) | 
+                     (static_cast<uint32_t>(a[5]) << 16) | 
+                     (static_cast<uint32_t>(a[6]) <<  8) | 
+                     (static_cast<uint32_t>(a[7])      );
 
-        t = (a[0] ^ (a[2] >> 2)) & 0x33;  a[0] ^=  t; a[2] ^= t << 2;
-        t = (a[1] ^ (a[3] >> 2)) & 0x33;  a[1] ^=  t; a[3] ^= t << 2;
-        t = (a[4] ^ (a[6] >> 2)) & 0x33;  a[4] ^=  t; a[6] ^= t << 2;
-        t = (a[5] ^ (a[7] >> 2)) & 0x33;  a[5] ^=  t; a[7] ^= t << 2;
+        uint32_t t = (x ^ (x >>  7)) & 0x00AA00AA; x = x ^ t ^ (t <<  7);
+                 t = (y ^ (y >>  7)) & 0x00AA00AA; y = y ^ t ^ (t <<  7);
+                 t = (x ^ (x >> 14)) & 0x0000CCCC; x = x ^ t ^ (t << 14);
+                 t = (y ^ (y >> 14)) & 0x0000CCCC; y = y ^ t ^ (t << 14);
 
-        t = (a[0] ^ (a[4] >> 4)) & 0x0F;  a[0] ^=  t; a[4] ^= t << 4;
-        t = (a[1] ^ (a[5] >> 4)) & 0x0F;  a[1] ^=  t; a[5] ^= t << 4;
-        t = (a[2] ^ (a[6] >> 4)) & 0x0F;  a[2] ^=  t; a[6] ^= t << 4;
-        t = (a[3] ^ (a[7] >> 4)) & 0x0F;  a[3] ^=  t; a[7] ^= t << 4;
+        t = ((y >> 4) & 0x0F0F0F0F) | (x & 0xF0F0F0F0);
+        y = ((x << 4) & 0xF0F0F0F0) | (y & 0x0F0F0F0F);
+
+        a[0] = static_cast<uint8_t>(t >> 24);
+        a[1] = static_cast<uint8_t>(t >> 16);
+        a[2] = static_cast<uint8_t>(t >>  8);
+        a[3] = static_cast<uint8_t>(t      );
+        a[4] = static_cast<uint8_t>(y >> 24);
+        a[5] = static_cast<uint8_t>(y >> 16);
+        a[6] = static_cast<uint8_t>(y >>  8);
+        a[7] = static_cast<uint8_t>(y      );
         // clang-format on
     }
 
@@ -1701,8 +1710,6 @@ enum text_rotation {
 /*! Data formats for the convert function */
 enum device_format {
     STRAIGHT_THROUGH,      //!< Just copy the data as is.
-    X_LEFT_TO_RIGHT_1BIT,  //!< 1-bit pixel data is stored from left to right, each byte containing 8 pixel values in the x direction.
-    Y_TOP_TO_BOTTOM_1BIT,  //!< 1-bit pixel data is stored from top to bottom, each byte containing 8 pixel values in the y direction.
     RGB565_8BIT_SERIAL,    //!< RGB565 pixel data is stored from left to right, each two bytes containing 1 pixel value in the x direction.
                            //   Byte encoding: 0xRRRRRGGG 0xGGGBBBBB
     RGB666_8BIT_SERIAL_1,  //!< RGB565 pixel data is stored from left to right, each three bytes containing 1 pixel values in the x direction.
@@ -2648,27 +2655,6 @@ class image {
         if (dst_format == STRAIGHT_THROUGH) {
             for (auto c : data) {
                 char_out(static_cast<char>(c));
-            }
-        } else if (dst_format == X_LEFT_TO_RIGHT_1BIT) {
-            static_assert(std::is_same_v<T<W, H, S, GR>, format_1bit<W, H, S, GR>>, "T must be format_1bit");
-            for (auto c : data) {
-                char_out(static_cast<char>(c));
-            }
-        } else if (dst_format == Y_TOP_TO_BOTTOM_1BIT) {
-            static_assert(std::is_same_v<T<W, H, S, GR>, format_1bit<W, H, S, GR>>, "T must be format_1bit");
-            for (size_t x = 0; x < W; x++) {
-                for (size_t y = 0; y < H; y += 8) {
-                    uint8_t b = 
-                    (data[(y + 0) * format.bytes_per_line + x] & 0x80) |
-                    (data[(y + 1) * format.bytes_per_line + x] & 0x40) |
-                    (data[(y + 2) * format.bytes_per_line + x] & 0x20) |
-                    (data[(y + 3) * format.bytes_per_line + x] & 0x10) |
-                    (data[(y + 4) * format.bytes_per_line + x] & 0x08) |
-                    (data[(y + 5) * format.bytes_per_line + x] & 0x04) |
-                    (data[(y + 6) * format.bytes_per_line + x] & 0x02) |
-                    (data[(y + 7) * format.bytes_per_line + x] & 0x01);
-                    char_out(static_cast<char>(b));
-                }
             }
         } else if (dst_format == RGB565_8BIT_SERIAL) {
             const uint8_t *ptr = data.data();
