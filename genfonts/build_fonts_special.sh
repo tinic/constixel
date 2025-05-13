@@ -34,10 +34,10 @@ declare -A meta=(
   [file21:name]=m42.TTF                                        [file21:size]=8        [file21:flags]="--all-chars --monochrome"
   [file22:name]=Mario-Kart-DS.ttf                              [file22:size]=16       [file22:flags]="--all-chars --monochrome"
   [file26:name]=upheavtt.ttf                                   [file26:size]=20       [file26:flags]="--all-chars --monochrome"
-  [file28:name]=vhs-gothic.ttf                                 [file28:size]=16       [file28:flags]="--all-chars --monochrome"
+  [file27:name]=vhs-gothic.ttf                                 [file27:size]=16       [file27:flags]="--all-chars --monochrome"
 
-  [file29:name]=PxPlus_Cordata_PPC-21.ttf                      [file29:size]=16       [file29:flags]="--all-chars --monochrome"
-  [file30:name]=PxPlus_Cordata_PPC-400.ttf                     [file30:size]=16       [file30:flags]="--all-chars --monochrome"
+  [file29:name]=PxPlus_Cordata_PPC-21.ttf                      [file29:size]=32       [file29:flags]="--all-chars --monochrome"
+  [file30:name]=PxPlus_Cordata_PPC-400.ttf                     [file30:size]=32       [file30:flags]="--all-chars --monochrome"
 
   [file31:name]=retro-pixel-arcade.otf                         [file31:size]=8        [file31:flags]="--all-chars --monochrome"
   [file32:name]=retro-pixel-cute-mono.otf                      [file32:size]=11       [file32:flags]="--all-chars --monochrome"
