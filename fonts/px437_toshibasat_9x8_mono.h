@@ -111,11 +111,11 @@ struct px437_toshibasat_9x8_mono {
 
     static constexpr hextree<hextree<0, uint8_t>::size(glyph_table), uint8_t> glyph_tree{glyph_table};
 
-    using kerning_lookup_type = uint32_t;
-    using kerning_amount_type = int32_t;
-    static constexpr size_t kerning_code_shift = 16;
-    static constexpr size_t kerning_amount_offset = 0x40000000;
-    static constexpr hextree<0, uint32_t> kerning_tree{};
+    using kerning_lookup_type = uint8_t;
+    using kerning_amount_type = int8_t;
+    static constexpr size_t kerning_code_shift = 4;
+    static constexpr size_t kerning_amount_offset = 0x40;
+    static constexpr hextree<0, uint8_t> kerning_tree{};
 
     using char_info_type = int8_t;
     static constexpr std::array<char_info<int8_t>, 95> char_table{{
