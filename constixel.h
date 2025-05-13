@@ -1491,8 +1491,12 @@ class format_8bit : public format {
         return b;
     }
 
-    static constexpr void transpose(const uint8_t *, uint8_t *) {
-        static_assert(false, "Not implemented yet.");
+    static constexpr void transpose(const uint8_t *src, uint8_t *dst) {
+        for (size_t y = 0; y < H; y++) {
+            for (size_t x = 0; x < W; x++) {
+                dst[x * H + y] = *src++;
+            }
+        }
     }
 
     static constexpr void plot(std::array<uint8_t, image_size> &data, size_t x, size_t y, uint8_t col) {
