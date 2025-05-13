@@ -29,17 +29,17 @@ struct Kerning {
 };
 
 struct Font {
-    std::string face {};
-    std::string style {};
+    std::string face{};
+    std::string style{};
     int size = 0;
     int lineHeight = 0;
     int base = 0;
     int descent = 0;
     int scaleW = 0, scaleH = 0;
     int pages = 0;
-    std::string page_file {};
-    std::vector<Char> chars {};
-    std::vector<Kerning> kernings {};
+    std::string page_file{};
+    std::vector<Char> chars{};
+    std::vector<Kerning> kernings{};
     int smooth = 0;
     int totalHeight = 0;
 };
@@ -203,7 +203,14 @@ int main(int argc, char* argv[]) {
             for (size_t c = 0; c < font.chars.size(); c++) {
                 max_id = std::max(font.chars[c].id, max_id);
             }
-            if (font.chars.size() < 65536 && max_id < 65536) {
+            if (font.chars.size() < 0xFF && max_id < 0xFF) {
+                ss << std::format("    using lookup_type = uint8_t;\n", name);
+                ss << std::format("    static constexpr std::array<std::pair<uint8_t, uint8_t>, {}> glyph_table{{{{\n", font.chars.size());
+                for (size_t c = 0; c < font.chars.size(); c++) {
+                    ss << std::format("        {{ uint8_t{{0x{:02x}}}, uint8_t{{0x{:02x}}} }}{}\n", font.chars[c].id, c,
+                                      (c < font.chars.size() - 1) ? "," : "");
+                }
+            } else if (font.chars.size() < 0xFFFF && max_id < 0xFFFF) {
                 ss << std::format("    using lookup_type = uint16_t;\n", name);
                 ss << std::format("    static constexpr std::array<std::pair<uint16_t, uint16_t>, {}> glyph_table{{{{\n", font.chars.size());
                 for (size_t c = 0; c < font.chars.size(); c++) {
@@ -219,7 +226,10 @@ int main(int argc, char* argv[]) {
                 }
             }
             ss << std::format("    }}}};\n\n");
-            if (font.chars.size() < 65536 && max_id < 65536) {
+            if (font.chars.size() < 0xFF && max_id < 0xFF) {
+                ss << std::format("    static constexpr hextree<hextree<0, uint8_t>::size(glyph_table), uint8_t> glyph_tree{{glyph_table}};\n\n",
+                                  font.chars.size());
+            } else if (font.chars.size() < 0xFFFF && max_id < 0xFFFF) {
                 ss << std::format("    static constexpr hextree<hextree<0, uint16_t>::size(glyph_table), uint16_t> glyph_tree{{glyph_table}};\n\n",
                                   font.chars.size());
             } else {
@@ -233,7 +243,7 @@ int main(int argc, char* argv[]) {
                 max_utf32 = std::max(font.kernings[c].second, max_utf32);
             }
 
-            if (font.kernings.size() > 0 && font.kernings.size() < 65536 && max_utf32 < 255) {
+            if (font.kernings.size() > 0 && font.kernings.size() < 0xFFFF && max_utf32 < 0xFF) {
                 ss << std::format("    using kerning_lookup_type = uint16_t;\n", name);
                 ss << std::format("    using kerning_amount_type = int16_t;\n", name);
                 ss << std::format("    static constexpr size_t kerning_code_shift = 8;\n", name);
@@ -269,12 +279,25 @@ int main(int argc, char* argv[]) {
                 ss << std::format("    static constexpr hextree<0, uint32_t> kerning_tree{{}};\n\n");
             }
 
-            ss << std::format("    static constexpr std::array<char_info, {}> char_table{{{{\n", font.chars.size());
+            int32_t max_value = 0;
             for (size_t c = 0; c < font.chars.size(); c++) {
-                ss << std::format(
-                    "        {{ int16_t{{{:4}}}, int16_t{{{:4}}}, int16_t{{{:4}}}, int16_t{{{:4}}}, int16_t{{{:4}}}, int16_t{{{:4}}}, int16_t{{{:4}}} }}{}\n",
-                    font.chars[c].x, font.chars[c].y, font.chars[c].width, font.chars[c].height, font.chars[c].xadvance, font.chars[c].xoffset,
-                    font.chars[c].yoffset, (c < font.chars.size() - 1) ? "," : "");
+                max_value = std::max(std::abs(static_cast<int32_t>(font.chars[c].x)), max_value);
+                max_value = std::max(std::abs(static_cast<int32_t>(font.chars[c].y)), max_value);
+                max_value = std::max(std::abs(static_cast<int32_t>(font.chars[c].width)), max_value);
+                max_value = std::max(std::abs(static_cast<int32_t>(font.chars[c].height)), max_value);
+                max_value = std::max(std::abs(static_cast<int32_t>(font.chars[c].xadvance)), max_value);
+                max_value = std::max(std::abs(static_cast<int32_t>(font.chars[c].xoffset)), max_value);
+                max_value = std::max(std::abs(static_cast<int32_t>(font.chars[c].yoffset)), max_value);
+            }
+            const char* chars_unit = max_value > 127 ? (max_value > 32767 ? "int32_t" : "int16_t") : "int8_t";
+
+            ss << std::format("    using char_info_type = {};\n", chars_unit);
+            ss << std::format("    static constexpr std::array<char_info<{}>, {}> char_table{{{{\n", chars_unit, font.chars.size());
+            for (size_t c = 0; c < font.chars.size(); c++) {
+                ss << std::format("        {{ {}{{{:4}}}, {}{{{:4}}}, {}{{{:4}}}, {}{{{:4}}}, {}{{{:4}}}, {}{{{:4}}}, {}{{{:4}}} }}{}\n", chars_unit,
+                                  font.chars[c].x, chars_unit, font.chars[c].y, chars_unit, font.chars[c].width, chars_unit, font.chars[c].height, chars_unit,
+                                  font.chars[c].xadvance, chars_unit, font.chars[c].xoffset, chars_unit, font.chars[c].yoffset,
+                                  (c < font.chars.size() - 1) ? "," : "");
             }
 
             ss << std::format("    }}}};\n\n");

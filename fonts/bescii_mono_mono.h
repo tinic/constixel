@@ -933,7 +933,8 @@ struct bescii_mono_mono {
     static constexpr size_t kerning_amount_offset = 0x40000000;
     static constexpr hextree<0, uint32_t> kerning_tree{};
 
-    static constexpr std::array<char_info, 911> char_table{{
+    using char_info_type = int16_t;
+    static constexpr std::array<char_info<int16_t>, 911> char_table{{
         { int16_t{ 144}, int16_t{ 188}, int16_t{   1}, int16_t{   1}, int16_t{   8}, int16_t{   0}, int16_t{   7} },
         { int16_t{ 169}, int16_t{ 102}, int16_t{   2}, int16_t{   7}, int16_t{   8}, int16_t{   3}, int16_t{   0} },
         { int16_t{ 116}, int16_t{ 189}, int16_t{   5}, int16_t{   3}, int16_t{   8}, int16_t{   2}, int16_t{   0} },

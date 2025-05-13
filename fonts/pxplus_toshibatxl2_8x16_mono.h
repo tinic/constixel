@@ -803,7 +803,8 @@ struct pxplus_toshibatxl2_8x16_mono {
     static constexpr size_t kerning_amount_offset = 0x40000000;
     static constexpr hextree<0, uint32_t> kerning_tree{};
 
-    static constexpr std::array<char_info, 781> char_table{{
+    using char_info_type = int16_t;
+    static constexpr std::array<char_info<int16_t>, 781> char_table{{
         { int16_t{  93}, int16_t{ 191}, int16_t{   1}, int16_t{   1}, int16_t{   8}, int16_t{   0}, int16_t{  13} },
         { int16_t{  14}, int16_t{ 207}, int16_t{   8}, int16_t{  13}, int16_t{   8}, int16_t{   0}, int16_t{   1} },
         { int16_t{  15}, int16_t{ 222}, int16_t{   8}, int16_t{  13}, int16_t{   8}, int16_t{   0}, int16_t{   1} },

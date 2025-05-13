@@ -310,7 +310,8 @@ struct px437_hp_100lx_16x12_full_mono {
     static constexpr size_t kerning_amount_offset = 0x40000000;
     static constexpr hextree<0, uint32_t> kerning_tree{};
 
-    static constexpr std::array<char_info, 288> char_table{{
+    using char_info_type = int16_t;
+    static constexpr std::array<char_info<int16_t>, 288> char_table{{
         { int16_t{  32}, int16_t{ 101}, int16_t{   1}, int16_t{   1}, int16_t{  16}, int16_t{   0}, int16_t{  10} },
         { int16_t{  46}, int16_t{ 113}, int16_t{  14}, int16_t{  11}, int16_t{  16}, int16_t{   2}, int16_t{   0} },
         { int16_t{  32}, int16_t{  12}, int16_t{  14}, int16_t{  11}, int16_t{  16}, int16_t{   2}, int16_t{   0} },

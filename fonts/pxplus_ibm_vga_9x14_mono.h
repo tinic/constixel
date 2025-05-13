@@ -803,7 +803,8 @@ struct pxplus_ibm_vga_9x14_mono {
     static constexpr size_t kerning_amount_offset = 0x40000000;
     static constexpr hextree<0, uint32_t> kerning_tree{};
 
-    static constexpr std::array<char_info, 781> char_table{{
+    using char_info_type = int16_t;
+    static constexpr std::array<char_info<int16_t>, 781> char_table{{
         { int16_t{  53}, int16_t{  54}, int16_t{   1}, int16_t{   1}, int16_t{   9}, int16_t{   0}, int16_t{  11} },
         { int16_t{  40}, int16_t{  36}, int16_t{   8}, int16_t{   9}, int16_t{   9}, int16_t{   0}, int16_t{   2} },
         { int16_t{  45}, int16_t{  46}, int16_t{   8}, int16_t{   9}, int16_t{   9}, int16_t{   0}, int16_t{   2} },

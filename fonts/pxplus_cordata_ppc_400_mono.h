@@ -803,7 +803,8 @@ struct pxplus_cordata_ppc_400_mono {
     static constexpr size_t kerning_amount_offset = 0x40000000;
     static constexpr hextree<0, uint32_t> kerning_tree{};
 
-    static constexpr std::array<char_info, 781> char_table{{
+    using char_info_type = int16_t;
+    static constexpr std::array<char_info<int16_t>, 781> char_table{{
         { int16_t{  38}, int16_t{  42}, int16_t{   1}, int16_t{   1}, int16_t{   8}, int16_t{   0}, int16_t{  12} },
         { int16_t{ 133}, int16_t{ 236}, int16_t{   6}, int16_t{  11}, int16_t{   8}, int16_t{   1}, int16_t{   1} },
         { int16_t{ 140}, int16_t{ 181}, int16_t{   6}, int16_t{  11}, int16_t{   8}, int16_t{   1}, int16_t{   1} },

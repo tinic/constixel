@@ -185,7 +185,8 @@ struct abstract_mono {
     static constexpr size_t kerning_amount_offset = 0x40000000;
     static constexpr hextree<0, uint32_t> kerning_tree{};
 
-    static constexpr std::array<char_info, 163> char_table{{
+    using char_info_type = int16_t;
+    static constexpr std::array<char_info<int16_t>, 163> char_table{{
         { int16_t{ 253}, int16_t{  20}, int16_t{   1}, int16_t{   1}, int16_t{  15}, int16_t{   0}, int16_t{   9} },
         { int16_t{ 254}, int16_t{  12}, int16_t{   2}, int16_t{  10}, int16_t{   5}, int16_t{   0}, int16_t{  -1} },
         { int16_t{ 135}, int16_t{  40}, int16_t{   5}, int16_t{   4}, int16_t{   8}, int16_t{   0}, int16_t{  -1} },

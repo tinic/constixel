@@ -260,7 +260,8 @@ struct pixeloperatormonohb8_mono {
     static constexpr size_t kerning_amount_offset = 0x40000000;
     static constexpr hextree<0, uint32_t> kerning_tree{};
 
-    static constexpr std::array<char_info, 238> char_table{{
+    using char_info_type = int16_t;
+    static constexpr std::array<char_info<int16_t>, 238> char_table{{
         { int16_t{  72}, int16_t{ 108}, int16_t{   1}, int16_t{   1}, int16_t{  16}, int16_t{   0}, int16_t{  14} },
         { int16_t{ 128}, int16_t{  74}, int16_t{   4}, int16_t{  14}, int16_t{  16}, int16_t{   6}, int16_t{   0} },
         { int16_t{  94}, int16_t{ 248}, int16_t{  10}, int16_t{   6}, int16_t{  16}, int16_t{   2}, int16_t{   0} },

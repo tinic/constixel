@@ -241,7 +241,8 @@ struct m12_mono {
     static constexpr size_t kerning_amount_offset = 0x40000000;
     static constexpr hextree<0, uint32_t> kerning_tree{};
 
-    static constexpr std::array<char_info, 219> char_table{{
+    using char_info_type = int16_t;
+    static constexpr std::array<char_info<int16_t>, 219> char_table{{
         { int16_t{ 252}, int16_t{   0}, int16_t{   1}, int16_t{   1}, int16_t{  16}, int16_t{   0}, int16_t{  32} },
         { int16_t{ 253}, int16_t{   0}, int16_t{   1}, int16_t{   1}, int16_t{  16}, int16_t{   0}, int16_t{  32} },
         { int16_t{ 254}, int16_t{   0}, int16_t{   1}, int16_t{   1}, int16_t{  16}, int16_t{   0}, int16_t{  32} },

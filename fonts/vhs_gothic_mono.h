@@ -411,7 +411,8 @@ struct vhs_gothic_mono {
     static constexpr size_t kerning_amount_offset = 0x40000000;
     static constexpr hextree<0, uint32_t> kerning_tree{};
 
-    static constexpr std::array<char_info, 389> char_table{{
+    using char_info_type = int16_t;
+    static constexpr std::array<char_info<int16_t>, 389> char_table{{
         { int16_t{  22}, int16_t{  14}, int16_t{   1}, int16_t{   1}, int16_t{  12}, int16_t{   0}, int16_t{  16} },
         { int16_t{ 197}, int16_t{  55}, int16_t{   2}, int16_t{  14}, int16_t{  12}, int16_t{   5}, int16_t{   2} },
         { int16_t{  57}, int16_t{ 107}, int16_t{   6}, int16_t{   4}, int16_t{  12}, int16_t{   3}, int16_t{   2} },
