@@ -183,8 +183,8 @@ struct srgb {
     return {oklch.l, oklch.c * cos(oklch.h * m_pi_d / 180.0), oklch.c * sin(oklch.h * m_pi_d / 180.0)};
 }
 
-static constexpr float epsilon_low = srgb_to_linear(0.5f / 255.f);
-static constexpr float epsilon_high = srgb_to_linear(254.5f / 255.f);
+static constexpr float epsilon_low = static_cast<float>(srgb_to_linear(0.5 / 255.0));
+static constexpr float epsilon_high = static_cast<float>(srgb_to_linear(254.5 / 255.0));
 /// @endcond
 
 /// @cond PRIVATE_CLASS
