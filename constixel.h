@@ -2008,7 +2008,7 @@ class image {
      * \param col Color palette index to use.
      */
     constexpr void plot(int32_t x, int32_t y, uint8_t col) {
-        if (x < 0 || x >= static_cast<int32_t>(W) || y < 0 || y >= static_cast<int32_t>(H)) {
+        if (static_cast<uint32_t>(x) >= static_cast<uint32_t>(W) || static_cast<uint32_t>(y) >= static_cast<uint32_t>(H)) {
             return;
         }
         T<W, H, S, GR>::plot(data, static_cast<uint32_t>(x), static_cast<uint32_t>(y), col);
@@ -2769,7 +2769,7 @@ class image {
     }
 
     constexpr void compose(int32_t x, int32_t y, float cola, float colr, float colg, float colb) {
-        if (x < 0 || x >= static_cast<int32_t>(W) || y < 0 || y >= static_cast<int32_t>(H)) {
+        if (static_cast<uint32_t>(x) >= static_cast<uint32_t>(W) || static_cast<uint32_t>(y) >= static_cast<uint32_t>(H)) {
             return;
         }
         T<W, H, S, GR>::compose(data, static_cast<uint32_t>(x), static_cast<uint32_t>(y), cola, colr, colg, colb);
