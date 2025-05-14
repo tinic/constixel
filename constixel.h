@@ -2942,6 +2942,20 @@ class image {
                 float dx = (static_cast<float>(x) + 0.5f) - static_cast<float>(cx);
                 float dy = (static_cast<float>(y) + 0.5f) - static_cast<float>(cy);
                 float dist_sq = dx * dx + dy * dy;
+                if (dist_sq > (r + 1.0f) * (r + 1.0f)) {
+                    continue;
+                }
+                if (dist_sq < r * r) {
+                    int32_t lx = x;
+                    int32_t ly = y;
+                    int32_t rx = cx + (x0 - x) + r + ox;
+                    int32_t ry = cy + (y0 - y) + r + oy;
+                    plot(lx, ly, col);
+                    plot(rx, ly, col);
+                    plot(rx, ry, col);
+                    plot(lx, ry, col);
+                    continue;
+                }
                 float a = static_cast<float>(r);
                 if (std::is_constant_evaluated()) {
                     a -= fast_sqrtf(dist_sq);
