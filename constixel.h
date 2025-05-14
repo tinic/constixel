@@ -2969,10 +2969,10 @@ class image {
                     int32_t rx = cx + (x0 - x) + r + ox;
                     int32_t ry = cy + (y0 - y) + r + oy;
                     if (a >= epsilon_high) {
-                        plot(lx, ly, 2);
-                        plot(rx, ly, 2);
-                        plot(rx, ry, 2);
-                        plot(lx, ry, 2);
+                        plot(lx, ly, col);
+                        plot(rx, ly, col);
+                        plot(rx, ry, col);
+                        plot(lx, ry, col);
                     } else {
                         compose(lx, ly, a, Rl * a, Gl * a, Bl * a);
                         compose(rx, ly, a, Rl * a, Gl * a, Bl * a);
