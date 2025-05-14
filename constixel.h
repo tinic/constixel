@@ -900,7 +900,9 @@ class format_1bit : public format {
     }
 
     static constexpr void compose(std::array<uint8_t, image_size> &, size_t, size_t, float, float, float, float) {
+#ifndef _MSC_VER
         static_assert(false, "composing not supported on 1-bit format, use a mono font.");
+#endif  // #ifndef _MSC_VER
     }
 
     static constexpr void plot(std::array<uint8_t, image_size> &data, size_t x0, size_t y, uint8_t col) {
@@ -1108,11 +1110,15 @@ class format_2bit : public format {
     }
 
     static constexpr void transpose(const uint8_t *, uint8_t *) {
+#ifndef _MSC_VER
         static_assert(false, "Not implemented yet.");
+#endif  // #ifndef _MSC_VER
     }
 
     static constexpr void compose(std::array<uint8_t, image_size> &, size_t, size_t, float, float, float, float) {
+#ifndef _MSC_VER
         static_assert(false, "composing not supported on 2-bit format, use a mono font.");
+#endif  // #ifndef _MSC_VER
     }
 
     static constexpr void plot(std::array<uint8_t, image_size> &data, size_t x0, size_t y, uint8_t col) {
@@ -1327,7 +1333,9 @@ class format_4bit : public format {
     }
 
     static constexpr void transpose(const uint8_t *, uint8_t *) {
+#ifndef _MSC_VER
         static_assert(false, "Not implemented yet.");
+#endif  // #ifndef _MSC_VER
     }
 
     static constexpr void compose(std::array<uint8_t, image_size> &data, size_t x, size_t y, float cola, float colr, float colg, float colb) {
