@@ -159,7 +159,11 @@ struct srgb {
     if (c <= 0.0031308f) {
         return 12.92f * c;
     } else {
-        return 1.055f * fast_pow(c, 1.0f / 2.4f) - 0.055f;
+        if (std::is_constant_evaluated()) {
+            return 1.055f * fast_pow(c, 1.0f / 2.4f) - 0.055f;
+        } else {
+            return 1.055f * std::powf(c, 1.0f / 2.4f) - 0.055f;
+        }
     }
 }
 
@@ -167,7 +171,11 @@ struct srgb {
     if (s <= 0.040449936f) {
         return s / 12.92f;
     } else {
-        return fast_pow((s + 0.055f) / 1.055f, 2.4f);
+        if (std::is_constant_evaluated()) {
+            return fast_pow((s + 0.055f) / 1.055f, 2.4f);
+        } else {
+            return std::powf((s + 0.055f) / 1.055f, 2.4f);
+        }
     }
 }
 
@@ -2934,7 +2942,12 @@ class image {
                 float dx = (static_cast<float>(x) + 0.5f) - static_cast<float>(cx);
                 float dy = (static_cast<float>(y) + 0.5f) - static_cast<float>(cy);
                 float dist_sq = dx * dx + dy * dy;
-                float a = static_cast<float>(r) - fast_sqrtf(dist_sq);
+                float a = static_cast<float>(r);
+                if (std::is_constant_evaluated()) {
+                    a -= fast_sqrtf(dist_sq);
+                } else {
+                    a -= std::sqrtf(dist_sq);
+                }
                 a = std::clamp(a + 0.5f, 0.0f, 1.0f);
                 if (a >= epsilon_low) {
                     int32_t lx = x;
