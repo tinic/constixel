@@ -2942,10 +2942,10 @@ class image {
                 float dx = (static_cast<float>(x) + 0.5f) - static_cast<float>(cx);
                 float dy = (static_cast<float>(y) + 0.5f) - static_cast<float>(cy);
                 float dist_sq = dx * dx + dy * dy;
-                if (dist_sq > (r + 1.0f) * (r + 1.0f)) {
+                if (dist_sq > (r + 0.5f) * (r + 0.5f)) {
                     continue;
                 }
-                if (dist_sq < r * r) {
+                if (dist_sq < (r - 0.5f) * (r - 0.5f)) {
                     int32_t lx = x;
                     int32_t ly = y;
                     int32_t rx = cx + (x0 - x) + r + ox;
