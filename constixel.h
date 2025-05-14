@@ -568,7 +568,7 @@ class format {
     static constexpr void png_header(F &&char_out, size_t w, size_t h, size_t depth) {
         const size_t chunkLength = 17;
         std::array<char, chunkLength> header;
-        uint32_t i = 0;
+        size_t i = 0;
         header.at(i++) = 'I';
         header.at(i++) = 'H';
         header.at(i++) = 'D';
@@ -586,7 +586,7 @@ class format {
         header.at(i++) = 0;
         header.at(i++) = 0;
         header.at(i++) = 0;
-        png_write_be(char_out, i - 4);
+        png_write_be(char_out, static_cast<uint32_t>(i - 4));
         png_write_array(char_out, header, i);
         png_write_crc32(char_out, header, i);
     }
@@ -594,7 +594,7 @@ class format {
     template <typename F, typename P>
     static constexpr void png_palette(F &&char_out, const P &palette) {
         std::array<char, 256 * 3 + 4> header;
-        uint32_t i = 0;
+        size_t i = 0;
         header.at(i++) = 'P';
         header.at(i++) = 'L';
         header.at(i++) = 'T';
@@ -604,7 +604,7 @@ class format {
             header.at(i++) = static_cast<char>((palette[c] >> 8) & 0xFF);
             header.at(i++) = static_cast<char>((palette[c] >> 0) & 0xFF);
         }
-        png_write_be(char_out, i - 4);
+        png_write_be(char_out, static_cast<uint32_t>(i - 4));
         png_write_array(char_out, header, i);
         png_write_crc32(char_out, header, i);
     }
@@ -612,12 +612,12 @@ class format {
     template <typename F>
     static constexpr void png_end(F &&char_out) {
         std::array<char, 4> header;
-        uint32_t i = 0;
+        size_t i = 0;
         header.at(i++) = 'I';
         header.at(i++) = 'E';
         header.at(i++) = 'N';
         header.at(i++) = 'D';
-        png_write_be(char_out, i - 4);
+        png_write_be(char_out, static_cast<uint32_t>(i - 4));
         png_write_array(char_out, header, i);
         png_write_crc32(char_out, header, i);
     }
@@ -625,14 +625,14 @@ class format {
     template <typename F>
     static constexpr void png_idat_zlib_header(F &&char_out) {
         std::array<char, 6> header;
-        uint32_t i = 0;
+        size_t i = 0;
         header.at(i++) = 'I';
         header.at(i++) = 'D';
         header.at(i++) = 'A';
         header.at(i++) = 'T';
         header.at(i++) = 0x78;
         header.at(i++) = 0x01;
-        png_write_be(char_out, i - 4);
+        png_write_be(char_out, static_cast<uint32_t>(i - 4));
         png_write_array(char_out, header, i);
         png_write_crc32(char_out, header, i);
     }
@@ -640,32 +640,32 @@ class format {
     template <typename F>
     [[nodiscard]] static constexpr uint32_t png_idat_zlib_stream(F &&char_out, const uint8_t *line, size_t bytes,
                                                                  uint32_t adler32_sum) {
-        const size_t max_data_use = 1024;
-        const size_t extra_data = 24;
+        const size_t max_data_use = size_t{1024};
+        const size_t extra_data = size_t{24};
         const size_t max_stack_use = max_data_use + extra_data;
         std::array<uint8_t, max_stack_use> header;
         while (bytes > 0) {
-            uint32_t i = 0;
+            size_t i = 0;
             header.at(i++) = 'I';
             header.at(i++) = 'D';
             header.at(i++) = 'A';
             header.at(i++) = 'T';
             header.at(i++) = 0x00;
 
-            size_t bytes_to_copy = std::min(static_cast<size_t>(max_data_use), bytes);
+            size_t bytes_to_copy = std::min(max_data_use, bytes);
             header.at(i++) = (((bytes_to_copy + 1) >> 0) & 0xFF);
             header.at(i++) = (((bytes_to_copy + 1) >> 8) & 0xFF);
             header.at(i++) = ((((bytes_to_copy + 1) ^ 0xffff) >> 0) & 0xFF);
             header.at(i++) = ((((bytes_to_copy + 1) ^ 0xffff) >> 8) & 0xFF);
 
-            uint32_t adlersum32_start_pos = i;
+            size_t adlersum32_start_pos = i;
             header.at(i++) = 0;
             for (size_t c = 0; c < bytes_to_copy; c++) {
                 header.at(i++) = line[c];
             }
             adler32_sum = adler32(&header[adlersum32_start_pos], i - adlersum32_start_pos, adler32_sum);
 
-            png_write_be(char_out, i - 4);
+            png_write_be(char_out, static_cast<uint32_t>(i - 4));
             png_write_array(char_out, header, i);
             png_write_crc32(char_out, header, i);
 
@@ -677,7 +677,7 @@ class format {
     template <typename F>
     static constexpr void png_idat_zlib_trailer(F &&char_out, uint32_t adler32_sum) {
         std::array<char, 8> header;
-        uint32_t i = 0;
+        size_t i = 0;
         header.at(i++) = 'I';
         header.at(i++) = 'D';
         header.at(i++) = 'A';
@@ -686,7 +686,7 @@ class format {
         header.at(i++) = static_cast<char>((adler32_sum >> 16) & 0xFF);
         header.at(i++) = static_cast<char>((adler32_sum >> 8) & 0xFF);
         header.at(i++) = static_cast<char>((adler32_sum >> 0) & 0xFF);
-        png_write_be(char_out, i - 4);
+        png_write_be(char_out, static_cast<uint32_t>(i - 4));
         png_write_array(char_out, header, i);
         png_write_crc32(char_out, header, i);
     }
@@ -2216,7 +2216,7 @@ class image {
         while (*str != 0) {
             uint32_t utf32 = 0;
             str = get_next_utf32(str, &utf32);
-            uint32_t index = 0;
+            size_t index = 0;
             if (lookup_glyph<FONT>(utf32, &index)) {
                 const char_info<typename FONT::char_info_type> &ch_info = FONT::char_table.at(index);
                 if (*str == 0) {
@@ -2251,7 +2251,7 @@ class image {
         while (*str != 0) {
             uint32_t utf32 = 0;
             str = get_next_utf32(str, &utf32);
-            uint32_t index = 0;
+            size_t index = 0;
             if (lookup_glyph<FONT>(utf32, &index)) {
                 const char_info<typename FONT::char_info_type> &ch_info = FONT::char_table.at(index);
                 draw_char_mono<FONT, ROTATION>(x, y, ch_info, col);
@@ -2329,7 +2329,7 @@ class image {
         while (*str != 0) {
             uint32_t utf32 = 0;
             str = get_next_utf32(str, &utf32);
-            uint32_t index = 0;
+            size_t index = 0;
             if (lookup_glyph<FONT>(utf32, &index)) {
                 const char_info<typename FONT::char_info_type> &ch_info = FONT::char_table.at(index);
                 draw_char_aa<FONT, ROTATION>(x, y, ch_info, col);
@@ -2916,7 +2916,7 @@ class image {
     }
 
     template <typename FONT>
-    constexpr bool lookup_glyph(uint32_t utf32, uint32_t *glyph_index) {
+    constexpr bool lookup_glyph(uint32_t utf32, size_t *glyph_index) {
         auto index = FONT::glyph_tree.lookup(static_cast<FONT::lookup_type>(utf32));
         if (index == FONT::glyph_tree.invalid) {
             index = FONT::glyph_tree.lookup(static_cast<FONT::lookup_type>(0xFFFD));
