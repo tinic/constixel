@@ -54,6 +54,16 @@ constixel is a single header minimalistic constexpr C++20 2D graphics palette ba
 > [!NOTE]
 > If you want to consteval either the sixel or image data you likely need to increase the constexpr ops limit. With g++ use '-fconstexpr-ops-limit=268435456' with clang use '-fconstexpr-steps=33554432'. The default limit in MSVC usually seems adequate.
 
+## Usage
+
+Option 1: Simply copy the header file to your project and include it. Optionally copy the fonts you want from the fonts directory.
+
+Option 2: If you prefer you can add this git repo as a cmake library:
+
+```find_package(constixel REQUIRED)
+target_link_libraries(MyTarget PRIVATE constixel::constixel)
+```
+
 ## Minimal example
 
 ```c++
