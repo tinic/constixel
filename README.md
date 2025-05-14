@@ -278,7 +278,7 @@ class image {
     // Draw smoothed utf8 text. #include a antialiased font and specify the included struct as the template parameter.
     // Rotation can be 0, 90, 180 or 270 degrees
     // Returns the current x caret position in pixels.
-    // NOTE 1: This only works with constixel::format_8bit images
+    // NOTE: This only works with constixel::format_8bit images
     template <typename FONT, bool KERNING = false, ROTATION = DEGREE_0>
     constexpr int32_t draw_string_aa(int32_t x, int32_t y, const char *str, uint8_t col);
 
@@ -316,7 +316,7 @@ class image {
     void fill_circle(int32_t x, int32_t y, int32_t radius, uint8_t col);
 
     // Draw a filled circle with antialiasing
-    // NOTE 1: This only works with constixel::format_8bit images
+    // NOTE: This only works with constixel::format_8bit images
     void fill_circle_aa(int32_t x, int32_t y, int32_t radius, uint8_t col);
 
     // Get closest matching color in the palette for given rgb values
