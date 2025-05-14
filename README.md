@@ -54,6 +54,16 @@ constixel is a single header minimalistic constexpr C++20 2D graphics palette ba
 > [!NOTE]
 > If you want to consteval either the sixel or image data you likely need to increase the constexpr ops limit. With g++ use '-fconstexpr-ops-limit=268435456' with clang use '-fconstexpr-steps=33554432'. The default limit in MSVC usually seems adequate.
 
+## Usage
+
+Option 1: Simply copy the header file to your project and include it. Optionally copy the fonts you want from the fonts directory.
+
+Option 2: If you prefer you can add this git repo as a cmake library:
+
+```find_package(constixel REQUIRED)
+target_link_libraries(MyTarget PRIVATE constixel::constixel)
+```
+
 ## Minimal example
 
 ```c++
@@ -278,7 +288,7 @@ class image {
     // Draw smoothed utf8 text. #include a antialiased font and specify the included struct as the template parameter.
     // Rotation can be 0, 90, 180 or 270 degrees
     // Returns the current x caret position in pixels.
-    // NOTE 1: This only works with constixel::format_8bit images
+    // NOTE: This only works with constixel::format_8bit images
     template <typename FONT, bool KERNING = false, ROTATION = DEGREE_0>
     constexpr int32_t draw_string_aa(int32_t x, int32_t y, const char *str, uint8_t col);
 
@@ -316,7 +326,7 @@ class image {
     void fill_circle(int32_t x, int32_t y, int32_t radius, uint8_t col);
 
     // Draw a filled circle with antialiasing
-    // NOTE 1: This only works with constixel::format_8bit images
+    // NOTE: This only works with constixel::format_8bit images
     void fill_circle_aa(int32_t x, int32_t y, int32_t radius, uint8_t col);
 
     // Get closest matching color in the palette for given rgb values
@@ -394,8 +404,6 @@ class image {
     /*! Data formats for the convert functions */
     enum device_format {
         STRAIGHT_THROUGH,     /*!< Just copy the data as is. */
-        X_LEFT_TO_RIGHT_1BIT, /*!< 1-bit pixel data is stored from left to right, each byte containing 8 pixel values in the x direction. */
-        Y_TOP_TO_BOTTOM_1BIT, /*!< 1-bit pixel data is stored from top to bottom, each byte containing 8 pixel values in the y direction. */
         RGB565_8BIT_SERIAL,   /*!< RGB565 pixel data is stored from left to right, each two bytes containing 1 pixel value in the x direction.
                                    Byte encoding: 0xRRRRRGGG 0xGGGBBBBB */
         RGB666_8BIT_SERIAL_1, /*!< RGB565 pixel data is stored from left to right, each three bytes containing 1 pixel values in the x direction.
