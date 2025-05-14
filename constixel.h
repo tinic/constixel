@@ -199,25 +199,45 @@ static constexpr float epsilon_high = static_cast<float>(srgb_to_linear(254.5 / 
 template <size_t S>
 class quantize {
     static constexpr size_t palette_size = S;
+
+#if defined(__ARM_NEON)
+    std::array<float, palette_size * 3> linearpal_neon{};
+#endif  // #if defined(__ARM_NEON)
+#if defined(__AVX2__)
+    alignas(32) std::array<float, palette_size * 3> linearpal_avx2{};
+#endif  // #if defined(__ARM_NEON)
+
     const std::array<uint32_t, palette_size> &pal;
 
  public:
     explicit constexpr quantize(const std::array<uint32_t, palette_size> &palette) : pal(palette) {
-        for (size_t i = 0; i < pal.size(); ++i) {
+        for (size_t i = 0; i < pal.size(); i++) {
             linearpal.at(i * 3 + 0) = srgb_to_linear(static_cast<float>((pal[i] >> 16) & 0xFF) * (1.0f / 255.0f));
             linearpal.at(i * 3 + 1) = srgb_to_linear(static_cast<float>((pal[i] >> 8) & 0xFF) * (1.0f / 255.0f));
             linearpal.at(i * 3 + 2) = srgb_to_linear(static_cast<float>((pal[i] >> 0) & 0xFF) * (1.0f / 255.0f));
+        }
 #if defined(__ARM_NEON)
-            linearpal_neon.at(i) = srgb_to_linear(static_cast<float>((pal[i] >> 16) & 0xFF) * (1.0f / 255.0f));
-            linearpal_neon.at(i + pal.size()) = srgb_to_linear(static_cast<float>((pal[i] >> 8) & 0xFF) * (1.0f / 255.0f));
-            linearpal_neon.at(i + pal.size() * 2) = srgb_to_linear(static_cast<float>((pal[i] >> 0) & 0xFF) * (1.0f / 255.0f));
+        if (pal.size() >= 4) {
+            for (size_t i = 0; i < pal.size(); i += 4) {
+                for (size_t j = 0; j < 4; j++) {
+                    linearpal_neon.at(i * 3 + j) = linearpal.at((i + j) * 3 + 0);
+                    linearpal_neon.at(i * 3 + j + 4) = linearpal.at((i + j) * 3 + 1);
+                    linearpal_neon.at(i * 3 + j + 8) = linearpal.at((i + j) * 3 + 2);
+                }
+            }
+        }
 #endif  // #if defined(__ARM_NEON)
 #if defined(__AVX2__)
-            linearpal_avx2.at(i) = srgb_to_linear(static_cast<float>((pal[i] >> 16) & 0xFF) * (1.0f / 255.0f));
-            linearpal_avx2.at(i + pal.size()) = srgb_to_linear(static_cast<float>((pal[i] >> 8) & 0xFF) * (1.0f / 255.0f));
-            linearpal_avx2.at(i + pal.size() * 2) = srgb_to_linear(static_cast<float>((pal[i] >> 0) & 0xFF) * (1.0f / 255.0f));
-#endif  // #if defined(__AVX2__)
+        if (pal.size() >= 8) {
+            for (size_t i = 0; i < pal.size(); i += 8) {
+                for (size_t j = 0; j < 8; j++) {
+                    linearpal_avx2.at(i * 3 + j) = linearpal.at((i + j) * 3 + 0);
+                    linearpal_avx2.at(i * 3 + j + 8) = linearpal.at((i + j) * 3 + 1);
+                    linearpal_avx2.at(i * 3 + j + 16) = linearpal.at((i + j) * 3 + 2);
+                }
+            }
         }
+#endif  // #if defined(__AVX2__)
     }
 
     [[nodiscard]] constexpr uint8_t nearest(int32_t r, int32_t g, int32_t b) const {
@@ -236,12 +256,6 @@ class quantize {
     }
 
     std::array<float, palette_size * 3> linearpal{};
-#if defined(__ARM_NEON)
-    std::array<float, palette_size * 3> linearpal_neon{};
-#endif  // #if defined(__ARM_NEON)
-#if defined(__ARM_NEON)
-    std::array<float, palette_size * 3> linearpal_avx2{};
-#endif  // #if defined(__ARM_NEON)
 
     [[nodiscard]] constexpr uint8_t nearest_linear(float r, float g, float b) const {
 #if defined(__ARM_NEON)
@@ -254,9 +268,9 @@ class quantize {
             std::size_t bestIdx = 0;
 
             for (size_t i = 0; i < pal.size(); i += 4) {
-                float32x4_t dr = vsubq_f32(vld1q_f32(&linearpal_neon[i]), vR);
-                float32x4_t dg = vsubq_f32(vld1q_f32(&linearpal_neon[i + pal.size()]), vG);
-                float32x4_t db = vsubq_f32(vld1q_f32(&linearpal_neon[i + pal.size() * 2]), vB);
+                float32x4_t dr = vsubq_f32(vld1q_f32(&linearpal_neon[i * 3]), vR);
+                float32x4_t dg = vsubq_f32(vld1q_f32(&linearpal_neon[i * 3 + 4]), vG);
+                float32x4_t db = vsubq_f32(vld1q_f32(&linearpal_neon[i * 3 + 8]), vB);
 
 #if defined(__aarch64__) && defined(__ARM_FEATURE_FMA)
                 float32x4_t dist = vfmaq_f32(vfmaq_f32(vmulq_f32(dr, dr), dg, dg), db, db);
@@ -291,19 +305,18 @@ class quantize {
 #endif  // #if defined(__ARM_NEON)
 #if defined(__AVX2__)
         if (!std::is_constant_evaluated() && pal.size() >= 8) {
-            const __m256 vR = _mm256_set1_ps(R);
-            const __m256 vG = _mm256_set1_ps(G);
-            const __m256 vB = _mm256_set1_ps(B);
+            const __m256 vR = _mm256_set1_ps(r);
+            const __m256 vG = _mm256_set1_ps(g);
+            const __m256 vB = _mm256_set1_ps(b);
 
             float best = std::numeric_limits<float>::infinity();
             std::uint8_t bestIdx = 0;
 
-            for (int i = 0; i < pal.size(); i += 8) {
-                __m256 pr = _mm256_load_ps(&linearpal_avx2[i]);                   // 8 × r
-                __m256 pg = _mm256_load_ps(&linearpal_avx2[i * pal.size()]);      // 8 × g
-                __m256 pb = _mm256_load_ps(&linearpal_avx2[i * pal.size() * 2]);  // 8 × b
+            for (size_t i = 0; i < pal.size(); i += 8) {
+                __m256 pr = _mm256_load_ps(&linearpal_avx2[i * 3]);
+                __m256 pg = _mm256_load_ps(&linearpal_avx2[i * 3 + 8]);
+                __m256 pb = _mm256_load_ps(&linearpal_avx2[i * 3 + 16]);
 
-                // dist = dr² + dg² + db²  (3× FMA)
                 __m256 dist =
                     _mm256_fmadd_ps(_mm256_sub_ps(pr, vR), _mm256_sub_ps(pr, vR),
                                     _mm256_fmadd_ps(_mm256_sub_ps(pg, vG), _mm256_sub_ps(pg, vG), _mm256_mul_ps(_mm256_sub_ps(pb, vB), _mm256_sub_ps(pb, vB))));
@@ -311,13 +324,15 @@ class quantize {
                 alignas(32) float d[8];
                 _mm256_store_ps(d, dist);
 
-                for (int lane = 0; lane < 8; ++lane)
+                for (size_t lane = 0; lane < 8; lane++) {
                     if (d[lane] < best) {
                         best = d[lane];
-                        bestIdx = i + lane;
+                        bestIdx = static_cast<uint8_t>(i + lane);
                     }
+                }
             }
-            return static_cast<uint8_t>(best);
+
+            return static_cast<uint8_t>(bestIdx);
         }
 #endif  // #if defined(__AVX2__)
         size_t best = 0;
