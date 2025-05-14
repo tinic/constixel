@@ -18,7 +18,7 @@ using monofontsmall = constixel::ibmplexsans_bold_18_mono;
 int main() {
     using namespace constixel;
 
-    image<format_8bit, 1024, 384, 2> image;
+    static image<format_8bit, 1024, 384, 2> image;
 
     int32_t x_pos = 20;
     int32_t y_pos = 20;
