@@ -2224,8 +2224,9 @@ class image {
         }
         if constexpr (ROTATION == DEGREE_90 || ROTATION == DEGREE_270) {
             return y;
+        } else {
+            return x;
         }
-        return x;
     }
 
     /**
@@ -2300,8 +2301,9 @@ class image {
         }
         if constexpr (ROTATION == DEGREE_90 || ROTATION == DEGREE_270) {
             return y;
+        } else {
+            return x;
         }
-        return x;
     }
 
     /**
