@@ -2168,7 +2168,7 @@ class image {
                     x += static_cast<int32_t>(ch_info.width);
                 } else {
                     x += static_cast<int32_t>(ch_info.xadvance);
-                    if (KERNING) {
+                    if constexpr (KERNING) {
                         x += get_kerning<FONT>(utf32, str);
                     }
                 }
@@ -2199,24 +2199,24 @@ class image {
             if (lookup_glyph<FONT>(utf32, &index)) {
                 const char_info<typename FONT::char_info_type> &ch_info = FONT::char_table.at(index);
                 draw_char_mono<FONT, ROTATION>(x, y, ch_info, col);
-                if (ROTATION == DEGREE_0) {
+                if constexpr (ROTATION == DEGREE_0) {
                     x += static_cast<int32_t>(ch_info.xadvance);
-                    if (KERNING) {
+                    if constexpr (KERNING) {
                         x += get_kerning<FONT>(utf32, str);
                     }
-                } else if (ROTATION == DEGREE_90) {
+                } else if constexpr (ROTATION == DEGREE_90) {
                     y += static_cast<int32_t>(ch_info.xadvance);
-                    if (KERNING) {
+                    if constexpr (KERNING) {
                         y += get_kerning<FONT>(utf32, str);
                     }
-                } else if (ROTATION == DEGREE_180) {
+                } else if constexpr (ROTATION == DEGREE_180) {
                     x -= static_cast<int32_t>(ch_info.xadvance);
-                    if (KERNING) {
+                    if constexpr (KERNING) {
                         x -= get_kerning<FONT>(utf32, str);
                     }
-                } else if (ROTATION == DEGREE_270) {
+                } else if constexpr (ROTATION == DEGREE_270) {
                     y -= static_cast<int32_t>(ch_info.xadvance);
-                    if (KERNING) {
+                    if constexpr (KERNING) {
                         y -= get_kerning<FONT>(utf32, str);
                     }
                 }
@@ -2241,13 +2241,13 @@ class image {
      */
     template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
     constexpr void draw_string_centered_mono(int32_t cx, int32_t y, const char *str, uint8_t col) {
-        if (ROTATION == DEGREE_0) {
+        if constexpr (ROTATION == DEGREE_0) {
             draw_string_mono<FONT, KERNING, ROTATION>(cx - string_width<FONT, KERNING>(str) / 2, y, str, col);
-        } else if (ROTATION == DEGREE_180) {
+        } else if constexpr (ROTATION == DEGREE_180) {
             draw_string_mono<FONT, KERNING, ROTATION>(cx + string_width<FONT, KERNING>(str) / 2, y, str, col);
-        } else if (ROTATION == DEGREE_90) {
+        } else if constexpr (ROTATION == DEGREE_90) {
             draw_string_mono<FONT, KERNING, ROTATION>(cx, y + string_width<FONT, KERNING>(str) / 2, str, col);
-        } else if (ROTATION == DEGREE_270) {
+        } else if constexpr (ROTATION == DEGREE_270) {
             draw_string_mono<FONT, KERNING, ROTATION>(cx, y - string_width<FONT, KERNING>(str) / 2, str, col);
         }
     }
@@ -2275,30 +2275,30 @@ class image {
             if (lookup_glyph<FONT>(utf32, &index)) {
                 const char_info<typename FONT::char_info_type> &ch_info = FONT::char_table.at(index);
                 draw_char_aa<FONT, ROTATION>(x, y, ch_info, col);
-                if (ROTATION == DEGREE_0) {
+                if constexpr (ROTATION == DEGREE_0) {
                     x += static_cast<int32_t>(ch_info.xadvance);
-                    if (KERNING) {
+                    if constexpr (KERNING) {
                         x += get_kerning<FONT>(utf32, str);
                     }
-                } else if (ROTATION == DEGREE_90) {
+                } else if constexpr (ROTATION == DEGREE_90) {
                     y += static_cast<int32_t>(ch_info.xadvance);
-                    if (KERNING) {
+                    if constexpr (KERNING) {
                         y += get_kerning<FONT>(utf32, str);
                     }
-                } else if (ROTATION == DEGREE_180) {
+                } else if constexpr (ROTATION == DEGREE_180) {
                     x -= static_cast<int32_t>(ch_info.xadvance);
-                    if (KERNING) {
+                    if constexpr (KERNING) {
                         x -= get_kerning<FONT>(utf32, str);
                     }
-                } else if (ROTATION == DEGREE_270) {
+                } else if constexpr (ROTATION == DEGREE_270) {
                     y -= static_cast<int32_t>(ch_info.xadvance);
-                    if (KERNING) {
+                    if constexpr (KERNING) {
                         y -= get_kerning<FONT>(utf32, str);
                     }
                 }
             }
         }
-        if (ROTATION == DEGREE_90 || ROTATION == DEGREE_270) {
+        if constexpr (ROTATION == DEGREE_90 || ROTATION == DEGREE_270) {
             return y;
         }
         return x;
@@ -2318,13 +2318,13 @@ class image {
      */
     template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
     constexpr void draw_string_centered_aa(int32_t cx, int32_t y, const char *str, uint8_t col) {
-        if (ROTATION == DEGREE_0) {
+        if constexpr (ROTATION == DEGREE_0) {
             draw_string_aa<FONT, KERNING, ROTATION>(cx - string_width<FONT, KERNING>(str) / 2, y, str, col);
-        } else if (ROTATION == DEGREE_180) {
+        } else if constexpr (ROTATION == DEGREE_180) {
             draw_string_aa<FONT, KERNING, ROTATION>(cx + string_width<FONT, KERNING>(str) / 2, y, str, col);
-        } else if (ROTATION == DEGREE_90) {
+        } else if constexpr (ROTATION == DEGREE_90) {
             draw_string_aa<FONT, KERNING, ROTATION>(cx, y + string_width<FONT, KERNING>(str) / 2, str, col);
-        } else if (ROTATION == DEGREE_270) {
+        } else if constexpr (ROTATION == DEGREE_270) {
             draw_string_aa<FONT, KERNING, ROTATION>(cx, y - string_width<FONT, KERNING>(str) / 2, str, col);
         }
     }
@@ -2791,11 +2791,11 @@ class image {
      */
     template <device_format dst_format, typename F>
     constexpr void convert(F &&char_out) {
-        if (dst_format == STRAIGHT_THROUGH) {
+        if constexpr (dst_format == STRAIGHT_THROUGH) {
             for (auto c : data) {
                 char_out(static_cast<char>(c));
             }
-        } else if (dst_format == RGB565_8BIT_SERIAL) {
+        } else if constexpr (dst_format == RGB565_8BIT_SERIAL) {
             const uint8_t *ptr = data.data();
             for (size_t y = 0; y < H; y++) {
                 for (size_t x = 0; x < W; x++) {
@@ -2807,7 +2807,7 @@ class image {
                 }
                 ptr += format.bytes_per_line;
             }
-        } else if (dst_format == RGB666_8BIT_SERIAL_1) {
+        } else if constexpr (dst_format == RGB666_8BIT_SERIAL_1) {
             const uint8_t *ptr = data.data();
             for (size_t y = 0; y < H; y++) {
                 for (size_t x = 0; x < W; x++) {
@@ -2818,7 +2818,7 @@ class image {
                 }
                 ptr += format.bytes_per_line;
             }
-        } else if (dst_format == RGB666_8BIT_SERIAL_2) {
+        } else if constexpr (dst_format == RGB666_8BIT_SERIAL_2) {
             const uint8_t *ptr = data.data();
             for (size_t y = 0; y < H; y++) {
                 for (size_t x = 0; x < W; x++) {
@@ -2856,7 +2856,7 @@ class image {
 
     template <typename FONT>
     constexpr int32_t get_kerning(uint32_t utf32, const char *str) const {
-        if (FONT::kerning_tree.byte_size()) {
+        if (FONT::kerning_tree.byte_size() > 0) {
             uint32_t utf_l = utf32;
             uint32_t utf_r = 0;
             get_next_utf32(str, &utf_r);
@@ -2959,7 +2959,7 @@ class image {
     constexpr void draw_char_mono(int32_t x, int32_t y, const char_info<typename FONT::char_info_type> &ch, uint8_t col) {
         static_assert(FONT::mono == true, "Can't use an antialiased font to draw mono/pixelized text.");
         int32_t ch_data_off = static_cast<int32_t>(ch.y) * static_cast<int32_t>(FONT::glyph_bitmap_stride) + static_cast<int32_t>(ch.x) / 8;
-        if (ROTATION == DEGREE_0) {
+        if constexpr (ROTATION == DEGREE_0) {
             x += ch.xoffset;
             y += ch.yoffset;
             const int32_t x2 = x + static_cast<int32_t>(ch.width);
@@ -2978,7 +2978,7 @@ class image {
                 }
                 ch_data_off += FONT::glyph_bitmap_stride;
             }
-        } else if (ROTATION == DEGREE_180) {
+        } else if constexpr (ROTATION == DEGREE_180) {
             x -= ch.xoffset;
             y -= FONT::ascent;
             const int32_t x2 = x - static_cast<int32_t>(ch.width);
@@ -2997,7 +2997,7 @@ class image {
                 }
                 ch_data_off += FONT::glyph_bitmap_stride;
             }
-        } else if (ROTATION == DEGREE_90) {
+        } else if constexpr (ROTATION == DEGREE_90) {
             x -= FONT::ascent;
             y += ch.xoffset;
             const int32_t x2 = x + static_cast<int32_t>(ch.height);
@@ -3016,7 +3016,7 @@ class image {
                 }
                 ch_data_off += FONT::glyph_bitmap_stride;
             }
-        } else if (ROTATION == DEGREE_270) {
+        } else if constexpr (ROTATION == DEGREE_270) {
             x += ch.yoffset;
             y -= ch.xoffset;
             const int32_t x2 = x + static_cast<int32_t>(ch.height);
@@ -3055,7 +3055,7 @@ class image {
         float Rl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 0);
         float Gl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 1);
         float Bl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 2);
-        if (ROTATION == DEGREE_0) {
+        if constexpr (ROTATION == DEGREE_0) {
             x += ch.xoffset;
             y += ch.yoffset;
             const int32_t x2 = x + static_cast<int32_t>(ch.width);
@@ -3079,7 +3079,7 @@ class image {
                 }
                 ch_data_off += FONT::glyph_bitmap_stride;
             }
-        } else if (ROTATION == DEGREE_180) {
+        } else if constexpr (ROTATION == DEGREE_180) {
             x -= ch.xoffset;
             y -= FONT::ascent;
             const int32_t x2 = x - static_cast<int32_t>(ch.width);
@@ -3103,7 +3103,7 @@ class image {
                 }
                 ch_data_off += FONT::glyph_bitmap_stride;
             }
-        } else if (ROTATION == DEGREE_90) {
+        } else if constexpr (ROTATION == DEGREE_90) {
             x -= FONT::ascent;
             y += ch.xoffset;
             const int32_t x2 = x + static_cast<int32_t>(ch.height);
@@ -3127,7 +3127,7 @@ class image {
                 }
                 ch_data_off += FONT::glyph_bitmap_stride;
             }
-        } else if (ROTATION == DEGREE_270) {
+        } else if constexpr (ROTATION == DEGREE_270) {
             x += ch.yoffset;
             y -= ch.xoffset;
             const int32_t x2 = x + static_cast<int32_t>(ch.height);
