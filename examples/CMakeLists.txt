@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 
 set(CMAKE_CXX_STANDARD 23)
 
-set(EXAMPLES "text" "graph" "embedded" "specimen" "minimal")
+set(EXAMPLES "text" "graph" "embedded" "specimen" "minimal" "drawingapi")
 
 project(examples)
 
