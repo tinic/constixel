@@ -2222,7 +2222,7 @@ class image {
                 }
             }
         }
-        if (ROTATION == DEGREE_90 || ROTATION == DEGREE_270) {
+        if constexpr (ROTATION == DEGREE_90 || ROTATION == DEGREE_270) {
             return y;
         }
         return x;
