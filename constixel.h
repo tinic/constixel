@@ -507,7 +507,7 @@ class format {
         return ((adler32_s2 << 16) | adler32_s1);
     }
 
-    //@private
+    // @private
     template <typename F>
     static constexpr void png_write_be(F &&char_out, uint32_t value) {
         char_out(static_cast<char>((value >> 24) & 0xFF));
@@ -857,14 +857,14 @@ class format_1bit : public format {
 
     static constexpr void transpose8x8(std::array<uint8_t, 8> &a) {
         // clang-format off
-        uint32_t x = (static_cast<uint32_t>(a[0]) << 24) | 
-                     (static_cast<uint32_t>(a[1]) << 16) | 
-                     (static_cast<uint32_t>(a[2]) <<  8) | 
-                     (static_cast<uint32_t>(a[3])      );
-        uint32_t y = (static_cast<uint32_t>(a[4]) << 24) | 
-                     (static_cast<uint32_t>(a[5]) << 16) | 
-                     (static_cast<uint32_t>(a[6]) <<  8) | 
-                     (static_cast<uint32_t>(a[7])      );
+        uint32_t x = (static_cast<uint32_t>(a[0]) << 24) |
+                     (static_cast<uint32_t>(a[1]) << 16) |
+                     (static_cast<uint32_t>(a[2]) <<  8) |
+                     (static_cast<uint32_t>(a[3]));
+        uint32_t y = (static_cast<uint32_t>(a[4]) << 24) |
+                     (static_cast<uint32_t>(a[5]) << 16) |
+                     (static_cast<uint32_t>(a[6]) <<  8) |
+                     (static_cast<uint32_t>(a[7]));
 
         uint32_t t = (x ^ (x >>  7)) & 0x00AA00AA; x = x ^ t ^ (t <<  7);
                  t = (y ^ (y >>  7)) & 0x00AA00AA; y = y ^ t ^ (t <<  7);
@@ -877,11 +877,11 @@ class format_1bit : public format {
         a[0] = static_cast<uint8_t>(t >> 24);
         a[1] = static_cast<uint8_t>(t >> 16);
         a[2] = static_cast<uint8_t>(t >>  8);
-        a[3] = static_cast<uint8_t>(t      );
+        a[3] = static_cast<uint8_t>(t);
         a[4] = static_cast<uint8_t>(y >> 24);
         a[5] = static_cast<uint8_t>(y >> 16);
         a[6] = static_cast<uint8_t>(y >>  8);
-        a[7] = static_cast<uint8_t>(y      );
+        a[7] = static_cast<uint8_t>(y);
         // clang-format on
     }
 
