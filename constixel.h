@@ -162,7 +162,7 @@ struct srgb {
         if (std::is_constant_evaluated()) {
             return 1.055f * fast_pow(c, 1.0f / 2.4f) - 0.055f;
         } else {
-            return 1.055f * std::powf(c, 1.0f / 2.4f) - 0.055f;
+            return 1.055f * std::pow(c, 1.0f / 2.4f) - 0.055f;
         }
     }
 }
@@ -174,7 +174,7 @@ struct srgb {
         if (std::is_constant_evaluated()) {
             return fast_pow((s + 0.055f) / 1.055f, 2.4f);
         } else {
-            return std::powf((s + 0.055f) / 1.055f, 2.4f);
+            return std::pow((s + 0.055f) / 1.055f, 2.4f);
         }
     }
 }
@@ -2946,7 +2946,7 @@ class image {
                 if (std::is_constant_evaluated()) {
                     a -= fast_sqrtf(dist_sq);
                 } else {
-                    a -= std::sqrtf(dist_sq);
+                    a -= std::sqrt(dist_sq);
                 }
                 a = std::clamp(a + 0.5f, 0.0f, 1.0f);
                 if (a >= epsilon_low) {
