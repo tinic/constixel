@@ -34,10 +34,10 @@ auto generate_plot() {
 }
 
 // ---------------------------
+static constixel::image<constixel::format_8bit, 1024, 1024, 1> img;
 
 auto draw_graph(const char *x_label, const char *y_label, float x_min, float x_max, float y_min, float y_max,
                 const std::vector<std::pair<float, float>> &points, uint8_t axis_col, uint8_t plot_col) {
-    constixel::image<constixel::format_8bit, 1024, 1024, 1> img;
 
     const int32_t left_margin = 40 + img.string_width<large_font>(y_label);
     const int32_t right_margin = 40;
