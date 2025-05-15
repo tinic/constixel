@@ -62,6 +62,10 @@ SOFTWARE.
 #include "fonts/notosansjp_thin_jp_24_mono.h"
 #endif  // #ifdef JP_TESTS
 
+#ifdef _MSC_VER
+#pragma once
+#pragma warning(push, 0)
+#else  // #ifdef _MSC_VER
 #if __GNUC__
 #pragma GCC diagnostic push
 
@@ -77,9 +81,13 @@ SOFTWARE.
 #pragma GCC diagnostic ignored "-Wweak-vtables"
 #endif  // #if __clang__
 #endif  // #if __GNUC__
+#endif  // _MSC_VER
 
 #include "fontbm/src/external/lodepng/lodepng.h"
 
+#ifdef _MSC_VER
+#pragma pop
+#else  // #ifdef _MSC_VER
 #if __GNUC__
 #pragma GCC diagnostic pop
 #pragma GCC diagnostic ignored "-Wunused-function"
@@ -88,6 +96,7 @@ SOFTWARE.
 #ifndef CMAKE_PROJECT_PATH
 #define CMAKE_PROJECT_PATH "."
 #endif  // #ifndef CMAKE_PROJECT_PATH
+#endif  // _MSC_VER
 
 #if 0
 static constexpr void hexdump(const uint8_t* data, std::size_t len) {
