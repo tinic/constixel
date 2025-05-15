@@ -1104,7 +1104,7 @@ class format_1bit : public format {
                 for (size_t y6 = 0; y6 < 6; y6++) {
                     out >>= 1;
                     if ((y + y6) < H * S) {
-                        out |= static_cast<uint8_t>(((((*ptr) >> (7 - x8)) & 1) == col) ? (1UL << 5) : 0);
+                        out |= static_cast<uint8_t>((static_cast<uint8_t>(((*ptr) >> (7 - x8)) & 1) == col) ? (1UL << 5) : 0);
                         if (y6 != 5) {
                             if (++inc >= S) {
                                 inc = 0;
@@ -1330,7 +1330,7 @@ class format_2bit : public format {
                 for (size_t y6 = 0; y6 < 6; y6++) {
                     out >>= 1;
                     if ((y + y6) < H * S) {
-                        out |= static_cast<uint8_t>(((((*ptr) >> (6 - x4 * 2)) & 3) == col) ? (1UL << 5) : 0);
+                        out |= static_cast<uint8_t>((static_cast<uint8_t>(((*ptr) >> (6 - x4 * 2)) & 3) == col) ? (1UL << 5) : 0);
                         if (y6 != 5) {
                             if (++inc >= S) {
                                 inc = 0;
@@ -1570,7 +1570,7 @@ class format_4bit : public format {
                 for (size_t y6 = 0; y6 < 6; y6++) {
                     out >>= 1;
                     if ((y + y6) < H * S) {
-                        out |= static_cast<uint8_t>(((((*ptr) >> (4 - x2 * 4)) & 0xF) == col) ? (1UL << 5) : 0);
+                        out |= static_cast<uint8_t>((static_cast<uint8_t>(((*ptr) >> (4 - x2 * 4)) & 0xF) == col) ? (1UL << 5) : 0);
                         if (y6 != 5) {
                             if (++inc >= S) {
                                 inc = 0;
