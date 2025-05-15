@@ -29,12 +29,13 @@ var NAVTREE =
       [ "Primary features and goals", "md__r_e_a_d_m_e.html#autotoc_md2", null ],
       [ "Applications", "md__r_e_a_d_m_e.html#autotoc_md3", null ],
       [ "Requirements", "md__r_e_a_d_m_e.html#autotoc_md4", null ],
-      [ "Minimal example", "md__r_e_a_d_m_e.html#autotoc_md5", null ],
-      [ "Text drawing example", "md__r_e_a_d_m_e.html#autotoc_md6", null ],
-      [ "Consteval sixel example", "md__r_e_a_d_m_e.html#autotoc_md7", null ],
-      [ "Consteval embedded image data example", "md__r_e_a_d_m_e.html#autotoc_md8", null ],
-      [ "Saving a PNG to disk example", "md__r_e_a_d_m_e.html#autotoc_md9", null ],
-      [ "API", "md__r_e_a_d_m_e.html#autotoc_md10", null ]
+      [ "Usage", "md__r_e_a_d_m_e.html#autotoc_md5", null ],
+      [ "Minimal example", "md__r_e_a_d_m_e.html#autotoc_md6", null ],
+      [ "Text drawing example", "md__r_e_a_d_m_e.html#autotoc_md7", null ],
+      [ "Consteval sixel example", "md__r_e_a_d_m_e.html#autotoc_md8", null ],
+      [ "Consteval embedded image data example", "md__r_e_a_d_m_e.html#autotoc_md9", null ],
+      [ "Saving a PNG to disk example", "md__r_e_a_d_m_e.html#autotoc_md10", null ],
+      [ "API", "md__r_e_a_d_m_e.html#autotoc_md11", null ]
     ] ],
     [ "Classes", "annotated.html", [
       [ "Class List", "annotated.html", "annotated_dup" ],
@@ -43,9 +44,7 @@ var NAVTREE =
       [ "Class Members", "functions.html", [
         [ "All", "functions.html", null ],
         [ "Functions", "functions_func.html", null ],
-        [ "Variables", "functions_vars.html", null ],
-        [ "Enumerations", "functions_enum.html", null ],
-        [ "Enumerator", "functions_eval.html", null ]
+        [ "Variables", "functions_vars.html", null ]
       ] ]
     ] ],
     [ "Files", "files.html", [

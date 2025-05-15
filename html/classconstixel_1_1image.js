@@ -1,13 +1,5 @@
 var classconstixel_1_1image =
 [
-    [ "device_format", "classconstixel_1_1image.html#a3cd9ee4db9d92e6360d9650c3abe1bab", [
-      [ "STRAIGHT_THROUGH", "classconstixel_1_1image.html#a3cd9ee4db9d92e6360d9650c3abe1baba88198c94f6f0775751b2025f7bb41b3b", null ],
-      [ "X_LEFT_TO_RIGHT_1BIT", "classconstixel_1_1image.html#a3cd9ee4db9d92e6360d9650c3abe1baba3c4109e1595496157f9b1b5c8948e91c", null ],
-      [ "Y_TOP_TO_BOTTOM_1BIT", "classconstixel_1_1image.html#a3cd9ee4db9d92e6360d9650c3abe1baba0d034448964721c62b75f76f73e52933", null ],
-      [ "RGB565_8BIT_SERIAL", "classconstixel_1_1image.html#a3cd9ee4db9d92e6360d9650c3abe1baba8fdcf117d4ca8ad5951070b0c765e6fb", null ],
-      [ "RGB666_8BIT_SERIAL_1", "classconstixel_1_1image.html#a3cd9ee4db9d92e6360d9650c3abe1babacd0bf473755b1006b5335f48168d391f", null ],
-      [ "RGB666_8BIT_SERIAL_2", "classconstixel_1_1image.html#a3cd9ee4db9d92e6360d9650c3abe1baba76bef89e932d1968fa60fb57be5c2041", null ]
-    ] ],
     [ "blit_RGBA", "classconstixel_1_1image.html#a4473525f717580c4cac6cfaf3d100eff", null ],
     [ "blit_RGBA", "classconstixel_1_1image.html#a73782d16aa62dc418c1affb5a5bd5566", null ],
     [ "blit_RGBA_diffused", "classconstixel_1_1image.html#af4a10b20835c53816e854cf8f961d4bf", null ],

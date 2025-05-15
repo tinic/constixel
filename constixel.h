@@ -201,6 +201,7 @@ struct srgb {
     return {oklch.l, oklch.c * cos(oklch.h * m_pi_d / 180.0), oklch.c * sin(oklch.h * m_pi_d / 180.0)};
 }
 
+
 static constexpr float epsilon_low = static_cast<float>(srgb_to_linear(0.5 / 255.0));
 static constexpr float epsilon_high = static_cast<float>(srgb_to_linear(254.5 / 255.0));
 
@@ -213,8 +214,6 @@ static constexpr auto gen_a2al_4bit() {
 }
 
 static constexpr std::array<float, 16> a2al_4bit = gen_a2al_4bit();
-
-/// @endcond
 
 /// @cond PRIVATE_CLASS
 template <size_t S>
@@ -372,7 +371,7 @@ class quantize {
         return static_cast<uint8_t>(best);
     }
 };
-/// @endcond
+/// @endcond // PRIVATE_CLASS
 
 /// @cond PRIVATE_CLASS
 template <size_t N, typename T>
@@ -393,6 +392,7 @@ class hextree {
 
  public:
     static constexpr T invalid = std::numeric_limits<T>::max();
+
     std::array<node, N> nodes{};
 
     [[nodiscard]] consteval size_t byte_size() const {
@@ -472,10 +472,13 @@ struct char_info {
     T xoffset;
     T yoffset;
 };
-/// @endcond
+/// @endcond // PRIVATE_CLASS
+/// @endcond // DOXYGEN_EXCLUSE
 
-/// @brief basic rectangle structure
-/// @tparam T coordinate number type
+/**
+ * @brief basic rectangle structure
+ * @tparam T coordinate number type
+ */
 template <typename T>
 struct rect {
     T x = 0;  ///< x coordinate
@@ -849,11 +852,17 @@ class format {
 };
 /// @endcond
 
-/// @brief 1-bit format, just b/w. Use as template parameter for image.
-/// @tparam W Width in pixels.
-/// @tparam H Height in pixels.
-/// @tparam S scale of sixel output.
-/// @tparam GR Grayscale palette.
+/** @brief 1-bit format, just b/w. Use as template parameter for image. Example:
+ *
+ * \code{.cpp}
+ * constixel::image<constixel::format_1bit, 640, 480> image;
+ * \endcode
+ *
+ * @tparam W Width in pixels.
+ * @tparam H Height in pixels.
+ * @tparam S scale of sixel output.
+ * @tparam GR Grayscale palette.
+ */
 template <size_t W, size_t H, int32_t S, bool GR>
 class format_1bit : public format {
  public:
@@ -1107,11 +1116,18 @@ class format_1bit : public format {
     /// @endcond
 };
 
-/// @brief 2-bit color format, 4 colors total. Use as template parameter for image.
-/// @tparam W Width in pixels.
-/// @tparam H Height in pixels.
-/// @tparam S scale of sixel output.
-/// @tparam GR Grayscale palette.
+/**
+ * @brief 2-bit color format, 4 colors total. Use as template parameter for image.
+ *
+ * \code{.cpp}
+ * constixel::image<constixel::format_2bit, 640, 480> image;
+ * \endcode
+ *
+ * @tparam W Width in pixels.
+ * @tparam H Height in pixels.
+ * @tparam S scale of sixel output.
+ * @tparam GR Grayscale palette.
+ */
 template <size_t W, size_t H, int32_t S, bool GR>
 class format_2bit : public format {
  public:
@@ -1332,11 +1348,18 @@ class format_2bit : public format {
     /// @endcond
 };
 
-/// @brief 4-bit color format, 16 colors total. Use as template parameter for image.
-/// @tparam W Width in pixels.
-/// @tparam H Height in pixels.
-/// @tparam S scale of sixel output.
-/// @tparam GR Grayscale palette.
+/**
+ * @brief 4-bit color format, 16 colors total. Use as template parameter for image.
+ *
+ * \code{.cpp}
+ * constixel::image<constixel::format_4bit, 640, 480> image;
+ * \endcode
+ *
+ * @tparam W Width in pixels.
+ * @tparam H Height in pixels.
+ * @tparam S scale of sixel output.
+ * @tparam GR Grayscale palette.
+ */
 template <size_t W, size_t H, int32_t S, bool GR>
 class format_4bit : public format {
  public:
@@ -1570,11 +1593,18 @@ class format_4bit : public format {
     /// @endcond
 };
 
-/// @brief 8-bit format, 256 colors total. Use as template parameter for image.
-/// @tparam W Width in pixels.
-/// @tparam H Height in pixels.
-/// @tparam S scale of sixel output.
-/// @tparam GR Grayscale palette.
+/**
+ * @brief 8-bit format, 256 colors total. Use as template parameter for image. Example:
+ *
+ * \code{.cpp}
+ * constixel::image<constixel::format_8bit, 640, 480> image;
+ * \endcode
+ *
+ * @tparam W Width in pixels.
+ * @tparam H Height in pixels.
+ * @tparam S scale of sixel output.
+ * @tparam GR Grayscale palette.
+ */
 template <size_t W, size_t H, int32_t S, bool GR>
 class format_8bit : public format {
  public:
@@ -1827,7 +1857,11 @@ class format_8bit : public format {
     /// @endcond
 };
 
-/*! Enum class which contains a list of predefined color name and values to use with the drawing API. */
+/**
+ * @enum
+ * @brief Enum class which contains a list of predefined color names and values to use with the drawing API. Not valid
+ * when using grayscale formats.
+ */
 enum color : uint8_t {
     BLACK = 0,         /*!< Black */
     TRANSPARENT = 0,   /*!< Transparent */
@@ -1877,7 +1911,10 @@ enum color : uint8_t {
     MAGENTA_LUMA_RAMP_STOP = MAGENTA_LUMA_RAMP_START + 15
 };
 
-/// @brief Text rotation
+/**
+ * @enum
+ * @brief Text rotation. One of DEGREE_0, DEGREE_90, DEGREE_180 or DEGREE_270.
+ */
 enum text_rotation {
     DEGREE_0,
     DEGREE_90,
@@ -1885,7 +1922,10 @@ enum text_rotation {
     DEGREE_270
 };
 
-/*! Data formats for the convert function */
+/**
+ * @enum
+ * @brief Data formats for the convert function
+ */
 enum device_format {
     STRAIGHT_THROUGH,    //!< Just copy the data as is.
     RGB565_8BIT_SERIAL,  //!< RGB565 pixel data is stored from left to right, each two bytes containing 1 pixel value in
@@ -1899,12 +1939,21 @@ enum device_format {
                            //   Byte encoding: 0xRRRRRR00 0xGGGGGG00 0xBBBBBB00
 };
 
-/// @brief Core class of constixel, holds a buffer of an image of a certain size and format.
-/// @tparam T Type of the image buffer. One of format_1bit, format_2bit, format_4bit or format_8bit
-/// @tparam W Width in pixels
-/// @tparam H Height in pixels
-/// @tparam S Scale factor for sixel output
-/// @tparam GR boolean to indicate if palette should be grayscale
+/**
+ * @class image
+ * @brief Core class of constixel. Holds a buffer of an image width a certain size and format. Typical use:
+ *
+ * \code{.cpp}
+ * constixel::image<constixel::format_8bit, 640, 480> image;
+ * \endcode
+ *
+ * @tparam T Type of the image buffer. One of format_1bit, format_2bit, format_4bit or format_8bit.
+ * @tparam W Width in pixels.
+ * @tparam H Height in pixels.
+ * @tparam S Scale factor for sixel output. Defaults to 1, meaning no scaling.
+ * @tparam GR boolean to indicate if palette should be grayscale. Otherwise a colored palette will be used. Defaults to
+ * false.
+ */
 template <template <size_t, size_t, int32_t, bool> class T, size_t W, size_t H, int32_t S = 1, bool GR = false>
 class image {
     static_assert(sizeof(W) >= sizeof(uint32_t));
@@ -1916,23 +1965,23 @@ class image {
 
  public:
     /**
-     * \brief Is this image grayscale?
-     * \return Is this image grayscale?
+     * \brief Boolean indicating that the palette is grayscale instead of color.
+     * \return If true, the palette is grayscale. If false a colored palette is used.
      */
-    [[nodiscard]] static constexpr size_t grayscale() {
+    [[nodiscard]] static constexpr bool grayscale() {
         return T<W, H, S, GR>::grayscale;
     }
 
     /**
      * \brief Bit depth of the image.
-     * \return Bit depth of the image.
+     * \return Bit depth of the image. 1 == 2 colors, 2 == 4 colors, 4 == 16 colors, 8 == 256 colors.
      */
     [[nodiscard]] static constexpr size_t bit_depth() {
         return T<W, H, S, GR>::bits_per_pixel;
     }
 
     /**
-     * \brief Size in bytes of the image data.
+     * \brief Size in bytes of the image data. This does not include the image instance size.
      * \return Size in bytes of the image data.
      */
     [[nodiscard]] static constexpr size_t size() {
@@ -1940,7 +1989,7 @@ class image {
     }
 
     /**
-     * \brief Bytes per line in the image data.
+     * \brief Bytes per line in the image data. Also called stride.
      * \return Bytes per line in the image data.
      */
     [[nodiscard]] static constexpr size_t bytes_per_line() {
@@ -1980,14 +2029,14 @@ class image {
 
     /**
      * \brief Returns a clone of this image. Data is copied.
-     * \return cloned image instance.
+     * \return Cloned image instance.
      */
     [[nodiscard]] constexpr image<T, W, H, S, GR> clone() const {
         return *this;
     }
     /**
-     * \brief Copy source image into this instance. No compositing occurs.
-     * \param src source image.
+     * \brief Copy source image into this instance. No compositing occurs, replaces current content.
+     * \param src Source image.
      */
     constexpr void copy(const image<T, W, H, S, GR> &src) {
         data = src.data;
@@ -1995,8 +2044,8 @@ class image {
 
     /**
      * \brief Copy raw source data into this instance. No compositing occurs.
-     * \tparam BYTE_SIZE Amount data in the source data. Typically a sizeof() of an array. Must match size()
-     * \param src source data.
+     * \tparam BYTE_SIZE Amount data in the source data. Typically a sizeof() of an array. Must match image::size()
+     * \param src Source data.
      */
     template <size_t BYTE_SIZE>
     constexpr void copy(const uint8_t *src) {
@@ -2007,13 +2056,18 @@ class image {
     }
 
     /**
-     * \brief Draw a line with the specified color and thickness.
-     * \param x0 starting x-coordinate in pixels.
-     * \param y0 starting x-coordinate in pixels.
-     * \param x1 ending x-coordinate in pixels.
-     * \param y1 ending x-coordinate in pixels.
+     * \brief Draw a line with the specified color and thickness. Example:
+     *
+     * \code{.cpp}
+     * image.draw_line(0, 0, 200, 100, constixel::color::WHITE, 2);
+     * \endcode
+     *
+     * \param x0 Starting X-coordinate in pixels.
+     * \param y0 Starting Y-coordinate in pixels.
+     * \param x1 Ending X-coordinate in pixels.
+     * \param y1 Ending Y-coordinate in pixels.
      * \param col Color palette index to use.
-     * \param stroke_width width of the stroke in pixels.
+     * \param stroke_width Width of the stroke in pixels.
      */
     constexpr void draw_line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, uint32_t stroke_width = 1) {
         int32_t steep = abs(y1 - y0) > abs(x1 - x0);
@@ -2070,21 +2124,31 @@ class image {
     }
 
     /**
-     * \brief Draw a line with the specified color and thickness.
-     * \param rect rectangle containing the line coordinates in pixels.
+     * \brief Draw a line with the specified color and thickness. Example:
+     *
+     * \code{.cpp}
+     * image.draw_line({.x=0, .y=0, .w=200, .h=100}, constixel::color::WHITE, 2);
+     * \endcode
+     *
+     * \param rect Rectangle containing the line coordinates in pixels.
      * \param col Color palette index to use.
-     * \param stroke_width width of the stroke in pixels.
+     * \param stroke_width Width of the stroke in pixels.
      */
     constexpr void draw_line(const rect<int32_t> &rect, uint8_t col, uint32_t stroke_width = 1) {
         draw_line(rect.x, rect.y, rect.x + rect.w, rect.y + rect.h, col, stroke_width);
     }
 
     /**
-     * \brief Draw a 1-pixel wide antialiased line with the specified color and thickness.
-     * \param x0 starting x-coordinate in pixels.
-     * \param y0 starting x-coordinate in pixels.
-     * \param x1 ending x-coordinate in pixels.
-     * \param y1 ending x-coordinate in pixels.
+     * \brief Draw a 1-pixel wide antialiased line with the specified color. Only format_8bit targets are supported. Example:
+     *
+     * \code{.cpp}
+     * image.draw_line_aa(0, 0, 200, 100, constixel::color::WHITE);
+     * \endcode
+     *
+     * \param x0 Starting X-coordinate in pixels.
+     * \param y0 Starting Y-coordinate in pixels.
+     * \param x1 Ending X-coordinate in pixels.
+     * \param y1 Ending Y-coordinate in pixels.
      * \param col Color palette index to use.
      */
     constexpr void draw_line_aa(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col) {
@@ -2170,8 +2234,13 @@ class image {
     }
 
     /**
-     * \brief Draw an antialiased line with the specified color and thickness.
-     * \param rect rectangle containing the line coordinates in pixels.
+     * \brief Draw a 1-pixel wide antialiased line with the specified color. Only format_8bit targets are supported. Example:
+     *
+     * \code{.cpp}
+     * image.draw_line_aa({.x=0, .y=0, .w=200, .h=100}, constixel::color::WHITE, 2);
+     * \endcode
+     *
+     * \param rect Rectangle containing the line coordinates in pixels.
      * \param col Color palette index to use.
      */
     constexpr void draw_line_aa(const rect<int32_t> &rect, uint8_t col) {
@@ -2179,9 +2248,9 @@ class image {
     }
 
     /**
-     * \brief Plot a single pixel at the specified coordinates used the supplied color.
-     * \param x x-coordinate in pixels.
-     * \param y y-coordinate in pixels.
+     * \brief Plot a single pixel at the specified coordinates using the supplied color.
+     * \param x X-coordinate in pixels.
+     * \param y Y-coordinate in pixels.
      * \param col Color palette index to use.
      */
     constexpr void plot(int32_t x, int32_t y, uint8_t col) {
@@ -2204,11 +2273,19 @@ class image {
     }
 
     /**
-     * \brief Return the width of a string using the specified font in the template parameter.
+     * \brief Return the width of a string using the specified font in the template parameter. Typical use:
+     *
+     * \code{.cpp}
+     * #include "some_font_aa.h"
+     * ...
+     *     int32_t width = image.string_width<constixel::some_font_aa>();
+     * ...
+     * \endcode
+     *
      * \tparam FONT The font struct name.
      * \tparam KERNING Boolean, use kerning information if available.
      * \param str UTF-8 string.
-     * \return width of the string in pixels
+     * \return Width of the string in pixels.
      */
     template <typename FONT, bool KERNING = false>
     [[nodiscard]] constexpr int32_t string_width(const char *str) {
@@ -2235,15 +2312,24 @@ class image {
     /**
      * \brief Draw text at the specified coordinate. The template parameter selects which mono font to use. Only
      * format_8bit targets are supported.
+
+     * \code{.cpp}
+     * #include "some_font_mono.h"
+     * ...
+     *     image.draw_string_mono<constixel::some_font_mono>(0, 0, "MyText");
+     * ...
+     * \endcode
+     *
      * \tparam FONT The font struct name.
-     * \tparam KERNING Boolean, use kerning information if available.
-     * \tparam ROTATION Rotation around the x/y coordinate. Can be text_rotation::DEGREE_0, text_rotation::DEGREE_90,
-     * text_rotation::DEGREE_180 or text_rotation::DEGREE_270
-     * \param x Starting x-coordinate in pixels.
-     * \param y Starting y-coordinate in pixels.
+     * \tparam KERNING Boolean, use kerning information if available. Default to false.
+     * \tparam ROTATION Rotation around the x/y coordinate. Defaults to text_rotation::DEGREE_0. Can be
+     * text_rotation::DEGREE_0, text_rotation::DEGREE_90, text_rotation::DEGREE_180 or text_rotation::DEGREE_270
+     * \param x Starting X-coordinate in pixels.
+     * \param y Starting Y-coordinate in pixels.
      * \param str UTF-8 string.
      * \param col Color palette index to use.
-     * \return Returns the new caret position.
+     * \return Returns the new caret X-coordinate position. Pass this value to the next draw_string call to get
+     * continious text.
      */
     template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
     constexpr int32_t draw_string_mono(int32_t x, int32_t y, const char *str, uint8_t col) {
@@ -2289,11 +2375,11 @@ class image {
      * \brief Draw text centered at the specified coordinate. The template parameter selects which mono font to use.
      * Only format_8bit targets are supported.
      * \tparam FONT The font struct name.
-     * \tparam KERNING Boolean, use kerning information if available.
+     * \tparam KERNING Boolean, use kerning information if available. Default to false.
      * \tparam ROTATION Rotation around the x/y coordinate. Can be text_rotation::DEGREE_0, text_rotation::DEGREE_90,
      * text_rotation::DEGREE_180 or text_rotation::DEGREE_270
-     * \param cx Center x-coordinate in pixels.
-     * \param y Starting y-coordinate in pixels.
+     * \param cx Center X-coordinate in pixels.
+     * \param y Starting Y-coordinate in pixels.
      * \param str UTF-8 string.
      * \param col Color palette index to use.
      */
@@ -2312,16 +2398,25 @@ class image {
 
     /**
      * \brief Draw antialiased text at the specified coordinate. The template parameter selects which antialiased font
-     * to use. Only format_8bit targets are supported.
+     * to use. Only format_8bit targets are supported. Typical use:
+     *
+     * \code{.cpp}
+     * #include "some_font_aa.h"
+     * ...
+     *     image.draw_string_aa<constixel::some_font_aa>(0, 0, "MyText");
+     * ...
+     * \endcode
+     *
      * \tparam FONT The font struct name.
-     * \tparam KERNING Boolean, use kerning information if available.
+     * \tparam KERNING Boolean, use kerning information if available. Default to false.
      * \tparam ROTATION Rotation around the x/y coordinate. Can be text_rotation::DEGREE_0, text_rotation::DEGREE_90,
      * text_rotation::DEGREE_180 or text_rotation::DEGREE_270
-     * \param x Starting x-coordinate in pixels.
-     * \param y Starting y-coordinate in pixels.
+     * \param x Starting X-coordinate in pixels.
+     * \param y Starting Y-coordinate in pixels.
      * \param str UTF-8 string.
      * \param col Color palette index to use.
-     * \return Returns the new caret position
+     * \return Returns the new caret X-coordinate position. Pass this value to the next draw_string call to get
+     * continious text.
      */
     template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
     constexpr int32_t draw_string_aa(int32_t x, int32_t y, const char *str, uint8_t col) {
@@ -2365,13 +2460,14 @@ class image {
 
     /**
      * \brief Draw antialiased text centered at the specified coordinate. The template parameter selects which
-     * antialiased font to use. Only format_8bit targets are supported.
+     * antialiased font to use. Only format_8bit targets are supported. Typical use
+     *
      * \tparam FONT The font struct name.
-     * \tparam KERNING Boolean, use kerning information if available.
+     * \tparam KERNING Boolean, use kerning information if available. Default to false.
      * \tparam ROTATION Rotation around the x/y coordinate. Can be text_rotation::DEGREE_0, text_rotation::DEGREE_90,
      * text_rotation::DEGREE_180 or text_rotation::DEGREE_270
-     * \param cx Senter x-coordinate in pixels.
-     * \param y Starting y-coordinate in pixels.
+     * \param cx Senter X-coordinate in pixels.
+     * \param y Starting Y-coordinate in pixels.
      * \param str UTF-8 string.
      * \param col Color palette index to use.
      */
@@ -2389,11 +2485,16 @@ class image {
     }
 
     /**
-     * \brief Fill a rectangle with the specified color.
-     * \param x Starting x-coordinate in pixels.
-     * \param y Starting y-coordinate in pixels.
-     * \param w Sidth of the rectangle.
-     * \param h Seight of the rectangle.
+     * \brief Fill a rectangle with the specified color. Example:
+     *
+     * \code{.cpp}
+     * image.fill_rect(0, 0, 320, 240, constixel::color::WHITE);
+     * \endcode
+     *
+     * \param x Starting X-coordinate in pixels.
+     * \param y Starting Y-coordinate in pixels.
+     * \param w Sidth of the rectangle in pixels.
+     * \param h Seight of the rectangle in pixels.
      * \param col Color palette index to use.
      */
     constexpr void fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col) {
@@ -2411,7 +2512,12 @@ class image {
     }
 
     /**
-     * \brief Fill a rectangle with the specified color.
+     * \brief Fill a rectangle with the specified color. Example:
+     *
+     * \code{.cpp}
+     * image.fill_rect({.x=0, .y=0, .w=320, .h=240}, constixel::color::WHITE, 2);
+     * \endcode
+     *
      * \param rect Rectangle containing the line coordinates in pixels.
      * \param col Color palette index to use.
      */
@@ -2420,11 +2526,16 @@ class image {
     }
 
     /**
-     * \brief Draw a stroked rectangle with the specified color and stroke width.
-     * \param x Starting x-coordinate in pixels.
-     * \param y Starting y-coordinate in pixels.
-     * \param w Width of the rectangle.
-     * \param h Height of the rectangle.
+     * \brief Draw a stroked rectangle with the specified color and stroke width. Example:
+     *
+     * \code{.cpp}
+     * image.stroke_rect(0, 0, 320, 240, constixel::color::WHITE);
+     * \endcode
+     *
+     * \param x Starting X-coordinate in pixels.
+     * \param y Starting Y-coordinate in pixels.
+     * \param w Width of the rectangle in pixels.
+     * \param h Height of the rectangle in pixels.
      * \param col Color palette index to use.
      * \param stroke_width Width of the stroke in pixels.
      */
@@ -2436,7 +2547,12 @@ class image {
     }
 
     /**
-     * \brief Draw a stroked rectangle with the specified color and stroke width.
+     * \brief Draw a stroked rectangle with the specified color and stroke width. Example:
+     *
+     * \code{.cpp}
+     * image.stroke_rect({.x=0, .y=0, .w=320, .h=240}, constixel::color::WHITE, 2);
+     * \endcode
+     *
      * \param rect Rectangle containing the line coordinates in pixels.
      * \param col Color palette index to use.
      * \param stroke_width Width of the stroke in pixels.
@@ -2446,9 +2562,14 @@ class image {
     }
 
     /**
-     * \brief Fill a circle with the specified radius and color.
-     * \param cx Center x-coordinate of the circle in pixels.
-     * \param cy Center y-coordinate of the circle in pixels.
+     * \brief Fill a circle with the specified radius and color. Example:
+     *
+     * \code{.cpp}
+     * image.fill_circle(64, 64, 32, constixel::color::WHITE);
+     * \endcode
+     *
+     * \param cx Center X-coordinate of the circle in pixels.
+     * \param cy Center Y-coordinate of the circle in pixels.
      * \param radius radius of the circle in pixels.
      * \param col Color palette index to use.
      */
@@ -2464,10 +2585,15 @@ class image {
     }
 
     /**
-     * \brief Fill a circle using antialiasing with with the specified radius and color. Only format_8bit targets are
-     * supported.
-     * \param cx Center x-coordinate of the circle in pixels.
-     * \param cy Center y-coordinate of the circle in pixels.
+     * \brief Fill a circle using antialiasing with the specified radius and color. Only format_8bit targets are
+     * supported. Example:
+     *
+     * \code{.cpp}
+     * image.fill_circle_aa(64, 64, 32, constixel::color::WHITE);
+     * \endcode
+     *
+     * \param cx Center X-coordinate of the circle in pixels.
+     * \param cy Center Y-coordinate of the circle in pixels.
      * \param radius Radius of the circle in pixels.
      * \param col Color palette index to use.
      */
@@ -2476,12 +2602,17 @@ class image {
     }
 
     /**
-     * \brief Fill a rounded rectangle with the specified color.
-     * \param x Starting x-coordinate in pixels.
-     * \param y Starting y-coordinate in pixels.
-     * \param w Width of the rectangle.
-     * \param h Height of the rectangle.
-     * \param radius Radius of the rounded corners.
+     * \brief Fill a rounded rectangle with the specified color. Example:
+     *
+     * \code{.cpp}
+     * image.fill_round_rect(0, 0, 200, 100, 15, constixel::color::WHITE);
+     * \endcode
+     *
+     * \param x Starting X-coordinate in pixels.
+     * \param y Starting Y-coordinate in pixels.
+     * \param w Width of the rectangle in pixels.
+     * \param h Height of the rectangle in pixels.
+     * \param radius Radius of the rounded corners in pixels.
      * \param col Color palette index to use.
      */
     constexpr void fill_round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col) {
@@ -2498,8 +2629,13 @@ class image {
     }
 
     /**
-     * \brief Fill a rounded rectangle with the specified color.
-     * \param rect Rectangle containing the line coordinates in pixels
+     * \brief Fill a rounded rectangle with the specified color. Example:
+     *
+     * \code{.cpp}
+     * image.fill_round_rect({.x=0, .y=0, .w=200, .h=100}, 15, constixel::color::WHITE);
+     * \endcode
+     *
+     * \param rect Rectangle containing the line coordinates in pixels.
      * \param radius Radius of the rounded corners.
      * \param col Color palette index to use.
      */
@@ -2509,9 +2645,14 @@ class image {
 
     /**
      * \brief Fill a rounded rectangle using antialiasing with the specified color. Only format_8bit targets are
-     * supported.
-     * \param x Starting x-coordinate in pixels.
-     * \param y Starting y-coordinate in pixels.
+     * supported. Example:
+     *
+     * \code{.cpp}
+     * image.fill_round_rect_aa(0, 0, 200, 100, 15, constixel::color::WHITE);
+     * \endcode
+     *
+     * \param x Starting X-coordinate in pixels.
+     * \param y Starting Y-coordinate in pixels.
      * \param w Width of the rectangle.
      * \param h Height of the rectangle.
      * \param radius Radius of the rounded corners.
@@ -2530,6 +2671,11 @@ class image {
     /**
      * \brief Fill a rounded rectangle using antialiasing with the specified color. Only format_8bit targets are
      * supported.
+     *
+     * \code{.cpp}
+     * image.fill_round_rect_aa({.x=0, .y=0, .w=200, .h=100}, 15, constixel::color::WHITE);
+     * \endcode
+     *
      * \param rect Rectangle containing the line coordinates in pixels.
      * \param radius Radius of the rounded corners.
      * \param col Color palette index to use.
@@ -2605,7 +2751,7 @@ class image {
     }
 
     /**
-     * \brief Return a transposed version of this image.
+     * \brief Return a transposed version of this image. Height and width will be flipped.
      */
     constexpr image<T, H, W, S, GR> transpose() const {
         image<T, H, W, S, GR> transposed;
@@ -2622,7 +2768,7 @@ class image {
     }
 
     /**
-     * \brief Transpose this image into another.
+     * \brief Transpose this image into another. Height and width will be flipped.
      */
     constexpr void transpose(image<T, H, W, S, GR> &dst) const {
         static_assert(T<W, H, S, GR>::bits_per_pixel != 1 || ((H + 7) / 8) == dst.bytes_per_line());
@@ -2638,8 +2784,8 @@ class image {
 
     /**
      * \brief Blit an RGBA8 buffer into this instance using brute force color mapping.
-     * \param x Starting x-coordinate position in the target instance in pixels
-     * \param y Starting y-coordinate position in the target instance in pixels
+     * \param x Starting X-coordinate position in the target instance in pixels.
+     * \param y Starting Y-coordinate position in the target instance in pixels.
      * \param w Width of the rectangle. If the width is smaller than the RGBA8 buffer content will be clipped.
      * \param h Weight of the rectangle. If the height is smaller than the RGBA8 buffer content will be clipped.
      * \param ptr Pointer to the RGBA8 buffer.
@@ -2674,8 +2820,8 @@ class image {
     /**
      * \brief Blit an RGBA8 buffer into this instance using brute force color mapping. Simple integer based diffusion is
      * applied.
-     * \param x Starting x-coordinate position in the target instance in pixels
-     * \param y Starting y-coordinate position in the target instance in pixels
+     * \param x Starting X-coordinate position in the target instance in pixels.
+     * \param y Starting Y-coordinate position in the target instance in pixels.
      * \param w Width of the rectangle. If the width is smaller than the RGBA8 buffer content will be clipped.
      * \param h Weight of the rectangle. If the height is smaller than the RGBA8 buffer content will be clipped.
      * \param ptr Pointer to the RGBA8 buffer.
@@ -2712,8 +2858,8 @@ class image {
     /**
      * \brief Blit an RGBA8 buffer into this instance using brute force color mapping. Diffusion in linear color space
      * is applied.
-     * \param x Starting x-coordinate position in the target instance in pixels
-     * \param y Starting y-coordinate position in the target instance in pixels
+     * \param x Starting X-coordinate position in the target instance in pixels.
+     * \param y Starting Y-coordinate position in the target instance in pixels.
      * \param w Width of the rectangle. If the width is smaller than the RGBA8 buffer content will be clipped.
      * \param h Weight of the rectangle. If the height is smaller than the RGBA8 buffer content will be clipped.
      * \param ptr Pointer to the RGBA8 buffer.
@@ -2748,7 +2894,15 @@ class image {
     }
 
     /**
-     * \brief Convert the current instance into a png image.
+     * \brief Convert the current instance into a png image. Typically an implementation looks like this:
+     *
+     * \code{.cpp}
+     * auto some_container;
+     * image.png([=](char ch) mutable {
+     *    some_container.push_back(ch);
+     * })
+     * \endcode
+     *
      * \param char_out A lambda function which consumes the png image data one byte at a time.
      */
     template <typename F>
@@ -2757,7 +2911,15 @@ class image {
     }
 
     /**
-     * \brief Convert the current instance into a sixel stream.
+     * \brief Convert the current instance into a sixel stream. Typically an implementation looks like this:
+     *
+     * \code{.cpp}
+     * auto some_container;
+     * image.sixel([=](char ch) mutable {
+     *    some_container.push_back(ch);
+     * })
+     * \endcode
+     *
      * \param char_out A lambda function which consumes the sixel stream data one byte at a time.
      */
     template <typename F>
@@ -2766,7 +2928,15 @@ class image {
     }
 
     /**
-     * \brief Convert the current instance into a sixel stream.
+     * \brief Convert the current instance into a sixel stream. Typically an implementation looks like this:
+     *
+     * \code{.cpp}
+     * auto some_container;
+     * image.sixel({.x=0,.y=0,.w=100,.h=100},[=](char ch) mutable {
+     *    some_container.push_back(ch);
+     * })
+     * \endcode
+     *
      * \param char_out A lambda function which consumes the sixel stream data one byte at a time
      * \param rect Clipping rectangle; to only show a portion of the image.
      */
@@ -2910,11 +3080,17 @@ class image {
     }
 
  private:
+    /**
+     * @private
+     */
     template <typename abs_T>
     [[nodiscard]] static constexpr abs_T abs(abs_T v) {
         return v < 0 ? -v : v;
     }
 
+    /**
+     * @private
+     */
     template <typename FONT>
     constexpr bool lookup_glyph(uint32_t utf32, size_t *glyph_index) {
         auto index = FONT::glyph_tree.lookup(static_cast<FONT::lookup_type>(utf32));
@@ -2931,6 +3107,9 @@ class image {
         return true;
     }
 
+    /**
+     * @private
+     */
     template <typename FONT>
     constexpr int32_t get_kerning(uint32_t utf32, const char *str) const {
         if (FONT::kerning_tree.byte_size() > 0) {
@@ -2947,6 +3126,9 @@ class image {
         return 0;
     }
 
+    /**
+     * @private
+     */
     constexpr const char *get_next_utf32(const char *str, uint32_t *utf32) const {
         *utf32 = 0;
         uint32_t lead = static_cast<uint32_t>(*str) & 0xFF;
@@ -2970,6 +3152,9 @@ class image {
         return str;
     }
 
+    /**
+     * @private
+     */
     constexpr void compose(int32_t x, int32_t y, float cola, float colr, float colg, float colb) {
         if (static_cast<uint32_t>(x) >= static_cast<uint32_t>(W) ||
             static_cast<uint32_t>(y) >= static_cast<uint32_t>(H)) {
@@ -2978,6 +3163,9 @@ class image {
         T<W, H, S, GR>::compose(data, static_cast<uint32_t>(x), static_cast<uint32_t>(y), cola, colr, colg, colb);
     }
 
+    /**
+     * @private
+     */
     void append_png_as_base64(std::string &output) const {
         size_t buffer = 0;
         size_t bits_collected = 0;
@@ -3001,6 +3189,9 @@ class image {
         });
     }
 
+    /**
+     * @private
+     */
     constexpr void fill_circle_aa_int(int32_t cx, int32_t cy, int32_t r, int32_t ox, int32_t oy, uint8_t col) {
         int32_t x0 = cx - r - 1;
         int32_t y0 = cy - r - 1;
@@ -3054,6 +3245,9 @@ class image {
         }
     }
 
+    /**
+     * @private
+     */
     template <typename FONT, text_rotation ROTATION>
     constexpr void draw_char_mono(int32_t x, int32_t y, const char_info<typename FONT::char_info_type> &ch,
                                   uint8_t col) {
@@ -3139,6 +3333,9 @@ class image {
         }
     }
 
+    /**
+     * @private
+     */
     template <typename FONT, text_rotation ROTATION>
     constexpr void draw_char_aa(int32_t x, int32_t y, const char_info<typename FONT::char_info_type> &ch, uint8_t col) {
         static_assert(FONT::mono == false, "Can't use a mono font to draw antialiased text.");
@@ -3246,6 +3443,9 @@ class image {
         }
     }
 
+    /**
+     * @private
+     */
     constexpr void span(int32_t x, int32_t w, int32_t y, uint8_t col) {
         if (x < 0) {
             w += x;
@@ -3263,6 +3463,9 @@ class image {
         T<W, H, S, GR>::span(data, _xl, _xr, _y, col);
     }
 
+    /**
+     * @private
+     */
     constexpr void fill_arc(int32_t x0, int32_t y0, int32_t r, uint8_t corners, int32_t delta, uint8_t col) {
         int32_t f = 1 - r;
         int32_t ddx = -2 * r;
@@ -3299,7 +3502,14 @@ class image {
         }
     }
 
+    /**
+     * @private
+     */
     std::array<uint8_t, T<W, H, S, GR>::image_size> data{};
+
+    /**
+     * @private
+     */
     T<W, H, S, GR> format{};
 };
 
