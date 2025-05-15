@@ -202,12 +202,12 @@ constexpr void&#160;</td><td class="memItemRight" valign="bottom"><b>clear</b> (
 <tr class="memitem:a43282bf395d9832dc8c3c2828dad0cd6" id="r_a43282bf395d9832dc8c3c2828dad0cd6"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a43282bf395d9832dc8c3c2828dad0cd6">fill_round_rect_aa</a> (const <a class="el" href="structconstixel_1_1rect.html">rect</a>&lt; int32_t &gt; &amp;<a class="el" href="structconstixel_1_1rect.html">rect</a>, int32_t radius, uint8_t col)</td></tr>
 <tr class="memdesc:a43282bf395d9832dc8c3c2828dad0cd6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill a rounded rectangle using antialiasing with the specified color. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported.  <br /></td></tr>
 <tr class="separator:a43282bf395d9832dc8c3c2828dad0cd6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a507a79c1ca6424e28f6ce571fadf949e" id="r_a507a79c1ca6424e28f6ce571fadf949e"><td class="memItemLeft" align="right" valign="top">constexpr std::array&lt; uint32_t, W *H &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a507a79c1ca6424e28f6ce571fadf949e">RGBA_uint32</a> () const</td></tr>
-<tr class="memdesc:a507a79c1ca6424e28f6ce571fadf949e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert this instance to an equivalent RGBA8 data array.  <br /></td></tr>
-<tr class="separator:a507a79c1ca6424e28f6ce571fadf949e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a348a4a053e9e88d9b0a02c69a309d608" id="r_a348a4a053e9e88d9b0a02c69a309d608"><td class="memItemLeft" align="right" valign="top">constexpr std::array&lt; uint8_t, W *H *4 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a348a4a053e9e88d9b0a02c69a309d608">RGBA_uint8</a> () const</td></tr>
-<tr class="memdesc:a348a4a053e9e88d9b0a02c69a309d608"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert this instance to an equivalent RGBA8 data array.  <br /></td></tr>
-<tr class="separator:a348a4a053e9e88d9b0a02c69a309d608"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac5a94249bd4d9c8ec73dd0d0fb8f5d73" id="r_ac5a94249bd4d9c8ec73dd0d0fb8f5d73"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac5a94249bd4d9c8ec73dd0d0fb8f5d73">RGBA_uint32</a> (std::array&lt; uint32_t, W *H &gt; &amp;dst) const</td></tr>
+<tr class="memdesc:ac5a94249bd4d9c8ec73dd0d0fb8f5d73"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert this instance to an equivalent RGBA8 data array.  <br /></td></tr>
+<tr class="separator:ac5a94249bd4d9c8ec73dd0d0fb8f5d73"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a34b4dd555e443605b3b41544cc58f531" id="r_a34b4dd555e443605b3b41544cc58f531"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a34b4dd555e443605b3b41544cc58f531">RGBA_uint8</a> (std::array&lt; uint8_t, W *H *4 &gt; &amp;dst) const</td></tr>
+<tr class="memdesc:a34b4dd555e443605b3b41544cc58f531"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert this instance to an equivalent RGBA8 data array.  <br /></td></tr>
+<tr class="separator:a34b4dd555e443605b3b41544cc58f531"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acb17751e0123835e7875034607af1814" id="r_acb17751e0123835e7875034607af1814"><td class="memItemLeft" align="right" valign="top"><a id="acb17751e0123835e7875034607af1814" name="acb17751e0123835e7875034607af1814"></a>
 constexpr void&#160;</td><td class="memItemRight" valign="bottom"><b>flip_h</b> ()</td></tr>
 <tr class="memdesc:acb17751e0123835e7875034607af1814"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flip the contents of this image horizontally. <br /></td></tr>
@@ -312,7 +312,7 @@ Static Public Member Functions</h2></td></tr>
 <div class="textblock"><div class="compoundTemplParams">template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, size_t H, int32_t S = 1, bool GR = false&gt;<br />
 class constixel::image&lt; T, W, H, S, GR &gt;</div><p>Core class of constixel. Holds a buffer of an image width a certain size and format. Typical use: </p>
 <div class="fragment"><div class="line"><a class="code hl_class" href="classconstixel_1_1image.html">constixel::image&lt;constixel::format_8bit, 640, 480&gt;</a> <a class="code hl_class" href="classconstixel_1_1image.html">image</a>;</div>
-<div class="ttc" id="aclassconstixel_1_1image_html"><div class="ttname"><a href="classconstixel_1_1image.html">constixel::image</a></div><div class="ttdoc">Core class of constixel. Holds a buffer of an image width a certain size and format....</div><div class="ttdef"><b>Definition</b> constixel.h:1958</div></div>
+<div class="ttc" id="aclassconstixel_1_1image_html"><div class="ttname"><a href="classconstixel_1_1image.html">constixel::image</a></div><div class="ttdoc">Core class of constixel. Holds a buffer of an image width a certain size and format....</div><div class="ttdef"><b>Definition</b> constixel.h:1929</div></div>
 </div><!-- fragment --><dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">T</td><td>Type of the image buffer. One of <a class="el" href="classconstixel_1_1format__1bit.html" title="1-bit format, just b/w. Use as template parameter for image. Example:">format_1bit</a>, <a class="el" href="classconstixel_1_1format__2bit.html" title="2-bit color format, 4 colors total. Use as template parameter for image.">format_2bit</a>, <a class="el" href="classconstixel_1_1format__4bit.html" title="4-bit color format, 16 colors total. Use as template parameter for image.">format_4bit</a> or <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a>. </td></tr>
@@ -1064,7 +1064,7 @@ template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, s
 
 <p>Draw a line with the specified color and thickness. Example: </p>
 <div class="fragment"><div class="line"><a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#acb85e31d9e1191081294b44c2c1af26b">draw_line</a>({.x=0, .y=0, .w=200, .h=100}, constixel::color::WHITE, 2);</div>
-<div class="ttc" id="aclassconstixel_1_1image_html_acb85e31d9e1191081294b44c2c1af26b"><div class="ttname"><a href="#acb85e31d9e1191081294b44c2c1af26b">constixel::image::draw_line</a></div><div class="ttdeci">constexpr void draw_line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, int32_t stroke_width=1)</div><div class="ttdoc">Draw a line with the specified color and thickness. Example:</div><div class="ttdef"><b>Definition</b> constixel.h:2072</div></div>
+<div class="ttc" id="aclassconstixel_1_1image_html_acb85e31d9e1191081294b44c2c1af26b"><div class="ttname"><a href="#acb85e31d9e1191081294b44c2c1af26b">constixel::image::draw_line</a></div><div class="ttdeci">constexpr void draw_line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, int32_t stroke_width=1)</div><div class="ttdoc">Draw a line with the specified color and thickness. Example:</div><div class="ttdef"><b>Definition</b> constixel.h:2043</div></div>
 </div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">rect</td><td>Rectangle containing the line coordinates in pixels. </td></tr>
@@ -1172,7 +1172,7 @@ template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, s
 
 <p>Draw a 1-pixel wide antialiased line with the specified color. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported. Example: </p>
 <div class="fragment"><div class="line"><a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#a6e3f2f33a33bf1b763d611083c414698">draw_line_aa</a>({.x=0, .y=0, .w=200, .h=100}, constixel::color::WHITE, 2);</div>
-<div class="ttc" id="aclassconstixel_1_1image_html_a6e3f2f33a33bf1b763d611083c414698"><div class="ttname"><a href="#a6e3f2f33a33bf1b763d611083c414698">constixel::image::draw_line_aa</a></div><div class="ttdeci">constexpr void draw_line_aa(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col)</div><div class="ttdoc">Draw a 1-pixel wide antialiased line with the specified color. Only format_8bit targets are supported...</div><div class="ttdef"><b>Definition</b> constixel.h:2155</div></div>
+<div class="ttc" id="aclassconstixel_1_1image_html_a6e3f2f33a33bf1b763d611083c414698"><div class="ttname"><a href="#a6e3f2f33a33bf1b763d611083c414698">constixel::image::draw_line_aa</a></div><div class="ttdeci">constexpr void draw_line_aa(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col)</div><div class="ttdoc">Draw a 1-pixel wide antialiased line with the specified color. Only format_8bit targets are supported...</div><div class="ttdef"><b>Definition</b> constixel.h:2126</div></div>
 </div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">rect</td><td>Rectangle containing the line coordinates in pixels. </td></tr>
@@ -1288,7 +1288,7 @@ template&lt;typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE
 <div class="line">...</div>
 <div class="line">    <a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#ab5af76bd1ced28da9e87b0d68b166515">draw_string_aa</a>&lt;constixel::some_font_aa&gt;(0, 0, <span class="stringliteral">&quot;MyText&quot;</span>);</div>
 <div class="line">...</div>
-<div class="ttc" id="aclassconstixel_1_1image_html_ab5af76bd1ced28da9e87b0d68b166515"><div class="ttname"><a href="#ab5af76bd1ced28da9e87b0d68b166515">constixel::image::draw_string_aa</a></div><div class="ttdeci">constexpr int32_t draw_string_aa(int32_t x, int32_t y, const char *str, uint8_t col)</div><div class="ttdoc">Draw antialiased text at the specified coordinate. The template parameter selects which antialiased f...</div><div class="ttdef"><b>Definition</b> constixel.h:2424</div></div>
+<div class="ttc" id="aclassconstixel_1_1image_html_ab5af76bd1ced28da9e87b0d68b166515"><div class="ttname"><a href="#ab5af76bd1ced28da9e87b0d68b166515">constixel::image::draw_string_aa</a></div><div class="ttdeci">constexpr int32_t draw_string_aa(int32_t x, int32_t y, const char *str, uint8_t col)</div><div class="ttdoc">Draw antialiased text at the specified coordinate. The template parameter selects which antialiased f...</div><div class="ttdef"><b>Definition</b> constixel.h:2395</div></div>
 </div><!-- fragment --><dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">FONT</td><td>The font struct name. </td></tr>
@@ -1480,7 +1480,7 @@ template&lt;typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE
 <div class="line">...</div>
 <div class="line">    <a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#a8f1119e641fb583a952c3b1a8a8b5212">draw_string_mono</a>&lt;constixel::some_font_mono&gt;(0, 0, <span class="stringliteral">&quot;MyText&quot;</span>);</div>
 <div class="line">...</div>
-<div class="ttc" id="aclassconstixel_1_1image_html_a8f1119e641fb583a952c3b1a8a8b5212"><div class="ttname"><a href="#a8f1119e641fb583a952c3b1a8a8b5212">constixel::image::draw_string_mono</a></div><div class="ttdeci">constexpr int32_t draw_string_mono(int32_t x, int32_t y, const char *str, uint8_t col)</div><div class="ttdoc">Draw text at the specified coordinate. The template parameter selects which mono font to use....</div><div class="ttdef"><b>Definition</b> constixel.h:2337</div></div>
+<div class="ttc" id="aclassconstixel_1_1image_html_a8f1119e641fb583a952c3b1a8a8b5212"><div class="ttname"><a href="#a8f1119e641fb583a952c3b1a8a8b5212">constixel::image::draw_string_mono</a></div><div class="ttdeci">constexpr int32_t draw_string_mono(int32_t x, int32_t y, const char *str, uint8_t col)</div><div class="ttdoc">Draw text at the specified coordinate. The template parameter selects which mono font to use....</div><div class="ttdef"><b>Definition</b> constixel.h:2308</div></div>
 </div><!-- fragment --><dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">FONT</td><td>The font struct name. </td></tr>
@@ -1543,7 +1543,7 @@ template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, s
 
 <p>Fill a circle with the specified radius and color. Example: </p>
 <div class="fragment"><div class="line"><a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#a0e0489e815f4b3ffb96ba38f2f3f70da">fill_circle</a>(64, 64, 32, constixel::color::WHITE);</div>
-<div class="ttc" id="aclassconstixel_1_1image_html_a0e0489e815f4b3ffb96ba38f2f3f70da"><div class="ttname"><a href="#a0e0489e815f4b3ffb96ba38f2f3f70da">constixel::image::fill_circle</a></div><div class="ttdeci">constexpr void fill_circle(int32_t cx, int32_t cy, int32_t radius, uint8_t col)</div><div class="ttdoc">Fill a circle with the specified radius and color. Example:</div><div class="ttdef"><b>Definition</b> constixel.h:2578</div></div>
+<div class="ttc" id="aclassconstixel_1_1image_html_a0e0489e815f4b3ffb96ba38f2f3f70da"><div class="ttname"><a href="#a0e0489e815f4b3ffb96ba38f2f3f70da">constixel::image::fill_circle</a></div><div class="ttdeci">constexpr void fill_circle(int32_t cx, int32_t cy, int32_t radius, uint8_t col)</div><div class="ttdoc">Fill a circle with the specified radius and color. Example:</div><div class="ttdef"><b>Definition</b> constixel.h:2549</div></div>
 </div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">cx</td><td>Center X-coordinate of the circle in pixels. </td></tr>
@@ -1597,7 +1597,7 @@ template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, s
 
 <p>Fill a circle using antialiasing with the specified radius and color. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported. Example: </p>
 <div class="fragment"><div class="line"><a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#a94d00139c4a481a874ebb560594e1b55">fill_circle_aa</a>(64, 64, 32, constixel::color::WHITE);</div>
-<div class="ttc" id="aclassconstixel_1_1image_html_a94d00139c4a481a874ebb560594e1b55"><div class="ttname"><a href="#a94d00139c4a481a874ebb560594e1b55">constixel::image::fill_circle_aa</a></div><div class="ttdeci">constexpr void fill_circle_aa(int32_t cx, int32_t cy, int32_t radius, uint8_t col)</div><div class="ttdoc">Fill a circle using antialiasing with the specified radius and color. Only format_8bit targets are su...</div><div class="ttdef"><b>Definition</b> constixel.h:2602</div></div>
+<div class="ttc" id="aclassconstixel_1_1image_html_a94d00139c4a481a874ebb560594e1b55"><div class="ttname"><a href="#a94d00139c4a481a874ebb560594e1b55">constixel::image::fill_circle_aa</a></div><div class="ttdeci">constexpr void fill_circle_aa(int32_t cx, int32_t cy, int32_t radius, uint8_t col)</div><div class="ttdoc">Fill a circle using antialiasing with the specified radius and color. Only format_8bit targets are su...</div><div class="ttdef"><b>Definition</b> constixel.h:2573</div></div>
 </div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">cx</td><td>Center X-coordinate of the circle in pixels. </td></tr>
@@ -1641,7 +1641,7 @@ template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, s
 
 <p>Fill a rectangle with the specified color. Example: </p>
 <div class="fragment"><div class="line"><a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#abd5c930c3645cb7b5ead82bad22dc7cb">fill_rect</a>({.x=0, .y=0, .w=320, .h=240}, constixel::color::WHITE, 2);</div>
-<div class="ttc" id="aclassconstixel_1_1image_html_abd5c930c3645cb7b5ead82bad22dc7cb"><div class="ttname"><a href="#abd5c930c3645cb7b5ead82bad22dc7cb">constixel::image::fill_rect</a></div><div class="ttdeci">constexpr void fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col)</div><div class="ttdoc">Fill a rectangle with the specified color. Example:</div><div class="ttdef"><b>Definition</b> constixel.h:2502</div></div>
+<div class="ttc" id="aclassconstixel_1_1image_html_abd5c930c3645cb7b5ead82bad22dc7cb"><div class="ttname"><a href="#abd5c930c3645cb7b5ead82bad22dc7cb">constixel::image::fill_rect</a></div><div class="ttdeci">constexpr void fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col)</div><div class="ttdoc">Fill a rectangle with the specified color. Example:</div><div class="ttdef"><b>Definition</b> constixel.h:2473</div></div>
 </div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">rect</td><td>Rectangle containing the line coordinates in pixels. </td></tr>
@@ -1747,7 +1747,7 @@ template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, s
 
 <p>Fill a rounded rectangle with the specified color. Example: </p>
 <div class="fragment"><div class="line"><a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#a7d89edf5750efce84aa9c30843ca552d">fill_round_rect</a>({.x=0, .y=0, .w=200, .h=100}, 15, constixel::color::WHITE);</div>
-<div class="ttc" id="aclassconstixel_1_1image_html_a7d89edf5750efce84aa9c30843ca552d"><div class="ttname"><a href="#a7d89edf5750efce84aa9c30843ca552d">constixel::image::fill_round_rect</a></div><div class="ttdeci">constexpr void fill_round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col)</div><div class="ttdoc">Fill a rounded rectangle with the specified color. Example:</div><div class="ttdef"><b>Definition</b> constixel.h:2620</div></div>
+<div class="ttc" id="aclassconstixel_1_1image_html_a7d89edf5750efce84aa9c30843ca552d"><div class="ttname"><a href="#a7d89edf5750efce84aa9c30843ca552d">constixel::image::fill_round_rect</a></div><div class="ttdeci">constexpr void fill_round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col)</div><div class="ttdoc">Fill a rounded rectangle with the specified color. Example:</div><div class="ttdef"><b>Definition</b> constixel.h:2591</div></div>
 </div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">rect</td><td>Rectangle containing the line coordinates in pixels. </td></tr>
@@ -1860,7 +1860,7 @@ template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, s
 
 <p>Fill a rounded rectangle using antialiasing with the specified color. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported. </p>
 <div class="fragment"><div class="line"><a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#a735fbf51e23e5ed5e4d36122a89bf5e8">fill_round_rect_aa</a>({.x=0, .y=0, .w=200, .h=100}, 15, constixel::color::WHITE);</div>
-<div class="ttc" id="aclassconstixel_1_1image_html_a735fbf51e23e5ed5e4d36122a89bf5e8"><div class="ttname"><a href="#a735fbf51e23e5ed5e4d36122a89bf5e8">constixel::image::fill_round_rect_aa</a></div><div class="ttdeci">constexpr void fill_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col)</div><div class="ttdoc">Fill a rounded rectangle using antialiasing with the specified color. Only format_8bit targets are su...</div><div class="ttdef"><b>Definition</b> constixel.h:2663</div></div>
+<div class="ttc" id="aclassconstixel_1_1image_html_a735fbf51e23e5ed5e4d36122a89bf5e8"><div class="ttname"><a href="#a735fbf51e23e5ed5e4d36122a89bf5e8">constixel::image::fill_round_rect_aa</a></div><div class="ttdeci">constexpr void fill_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col)</div><div class="ttdoc">Fill a rounded rectangle using antialiasing with the specified color. Only format_8bit targets are su...</div><div class="ttdef"><b>Definition</b> constixel.h:2634</div></div>
 </div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">rect</td><td>Rectangle containing the line coordinates in pixels. </td></tr>
@@ -2122,7 +2122,7 @@ template&lt;typename F&gt; </div>
 <div class="line"><a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#a8f373503c532f2a1be2f18f5c4f38ef2">png</a>([=](<span class="keywordtype">char</span> ch) <span class="keyword">mutable</span> {</div>
 <div class="line">   some_container.push_back(ch);</div>
 <div class="line">});</div>
-<div class="ttc" id="aclassconstixel_1_1image_html_a8f373503c532f2a1be2f18f5c4f38ef2"><div class="ttname"><a href="#a8f373503c532f2a1be2f18f5c4f38ef2">constixel::image::png</a></div><div class="ttdeci">constexpr void png(F &amp;&amp;char_out) const</div><div class="ttdoc">Convert the current instance into a png image. Typically an implementation looks like this:</div><div class="ttdef"><b>Definition</b> constixel.h:2911</div></div>
+<div class="ttc" id="aclassconstixel_1_1image_html_a8f373503c532f2a1be2f18f5c4f38ef2"><div class="ttname"><a href="#a8f373503c532f2a1be2f18f5c4f38ef2">constixel::image::png</a></div><div class="ttdeci">constexpr void png(F &amp;&amp;char_out) const</div><div class="ttdoc">Convert the current instance into a png image. Typically an implementation looks like this:</div><div class="ttdef"><b>Definition</b> constixel.h:2882</div></div>
 </div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">char_out</td><td>A lambda function which consumes the png image data one byte at a time. </td></tr>
@@ -2132,8 +2132,8 @@ template&lt;typename F&gt; </div>
 
 </div>
 </div>
-<a id="a507a79c1ca6424e28f6ce571fadf949e" name="a507a79c1ca6424e28f6ce571fadf949e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a507a79c1ca6424e28f6ce571fadf949e">&#9670;&#160;</a></span>RGBA_uint32()</h2>
+<a id="ac5a94249bd4d9c8ec73dd0d0fb8f5d73" name="ac5a94249bd4d9c8ec73dd0d0fb8f5d73"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac5a94249bd4d9c8ec73dd0d0fb8f5d73">&#9670;&#160;</a></span>RGBA_uint32()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2144,26 +2144,31 @@ template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, s
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">std::array&lt; uint32_t, W *H &gt; <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, S, GR &gt;::RGBA_uint32 </td>
+          <td class="memname">void <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, S, GR &gt;::RGBA_uint32 </td>
           <td>(</td>
-          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td class="paramtype">std::array&lt; uint32_t, W *H &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>dst</em></span></td><td>)</td>
           <td> const</td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
 <p>Convert this instance to an equivalent RGBA8 data array. </p>
-<dl class="section return"><dt>Returns</dt><dd>RGBA8 array made of uint32_t values. </dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dst</td><td>RGBA8 array made of <a class="el" href="#a3d2743ef8455345427de36dcf37a5ea4" title="Width in pixels of the image.">image::width()</a> * img::height() * uint32_t values. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
-<a id="a348a4a053e9e88d9b0a02c69a309d608" name="a348a4a053e9e88d9b0a02c69a309d608"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a348a4a053e9e88d9b0a02c69a309d608">&#9670;&#160;</a></span>RGBA_uint8()</h2>
+<a id="a34b4dd555e443605b3b41544cc58f531" name="a34b4dd555e443605b3b41544cc58f531"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a34b4dd555e443605b3b41544cc58f531">&#9670;&#160;</a></span>RGBA_uint8()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2174,21 +2179,26 @@ template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, s
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">std::array&lt; uint8_t, W *H *4 &gt; <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, S, GR &gt;::RGBA_uint8 </td>
+          <td class="memname">void <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, S, GR &gt;::RGBA_uint8 </td>
           <td>(</td>
-          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td class="paramtype">std::array&lt; uint8_t, W *H *4 &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>dst</em></span></td><td>)</td>
           <td> const</td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
 <p>Convert this instance to an equivalent RGBA8 data array. </p>
-<dl class="section return"><dt>Returns</dt><dd>RGBA8 array made of uint8_t values. </dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dst</td><td>RGBA8 array made of <a class="el" href="#a3d2743ef8455345427de36dcf37a5ea4" title="Width in pixels of the image.">image::width()</a> * img::height() * 4 * uint8_t values. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -2224,7 +2234,7 @@ template&lt;typename F&gt; </div>
 <div class="line"><a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#a3c9bce30fc15b58fa020488d824c8756">sixel</a>([=](<span class="keywordtype">char</span> ch) <span class="keyword">mutable</span> {</div>
 <div class="line">   some_container.push_back(ch);</div>
 <div class="line">});</div>
-<div class="ttc" id="aclassconstixel_1_1image_html_a3c9bce30fc15b58fa020488d824c8756"><div class="ttname"><a href="#a3c9bce30fc15b58fa020488d824c8756">constixel::image::sixel</a></div><div class="ttdeci">constexpr void sixel(F &amp;&amp;char_out) const</div><div class="ttdoc">Convert the current instance into a sixel stream. Typically an implementation looks like this:</div><div class="ttdef"><b>Definition</b> constixel.h:2928</div></div>
+<div class="ttc" id="aclassconstixel_1_1image_html_a3c9bce30fc15b58fa020488d824c8756"><div class="ttname"><a href="#a3c9bce30fc15b58fa020488d824c8756">constixel::image::sixel</a></div><div class="ttdeci">constexpr void sixel(F &amp;&amp;char_out) const</div><div class="ttdoc">Convert the current instance into a sixel stream. Typically an implementation looks like this:</div><div class="ttdef"><b>Definition</b> constixel.h:2899</div></div>
 </div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">char_out</td><td>A lambda function which consumes the sixel stream data one byte at a time. </td></tr>
@@ -2342,8 +2352,8 @@ template&lt;typename FONT, bool KERNING = false&gt; </div>
 <div class="line">...</div>
 <div class="line">    int32_t <a class="code hl_function" href="#a3d2743ef8455345427de36dcf37a5ea4">width</a> = <a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#af38f584f0951184975b11661d7c56bca">string_width</a>&lt;constixel::some_font_aa&gt;();</div>
 <div class="line">...</div>
-<div class="ttc" id="aclassconstixel_1_1image_html_a3d2743ef8455345427de36dcf37a5ea4"><div class="ttname"><a href="#a3d2743ef8455345427de36dcf37a5ea4">constixel::image::width</a></div><div class="ttdeci">static constexpr int32_t width()</div><div class="ttdoc">Width in pixels of the image.</div><div class="ttdef"><b>Definition</b> constixel.h:2003</div></div>
-<div class="ttc" id="aclassconstixel_1_1image_html_af38f584f0951184975b11661d7c56bca"><div class="ttname"><a href="#af38f584f0951184975b11661d7c56bca">constixel::image::string_width</a></div><div class="ttdeci">constexpr int32_t string_width(const char *str)</div><div class="ttdoc">Return the width of a string using the specified font in the template parameter. Typical use:</div><div class="ttdef"><b>Definition</b> constixel.h:2293</div></div>
+<div class="ttc" id="aclassconstixel_1_1image_html_a3d2743ef8455345427de36dcf37a5ea4"><div class="ttname"><a href="#a3d2743ef8455345427de36dcf37a5ea4">constixel::image::width</a></div><div class="ttdeci">static constexpr int32_t width()</div><div class="ttdoc">Width in pixels of the image.</div><div class="ttdef"><b>Definition</b> constixel.h:1974</div></div>
+<div class="ttc" id="aclassconstixel_1_1image_html_af38f584f0951184975b11661d7c56bca"><div class="ttname"><a href="#af38f584f0951184975b11661d7c56bca">constixel::image::string_width</a></div><div class="ttdeci">constexpr int32_t string_width(const char *str)</div><div class="ttdoc">Return the width of a string using the specified font in the template parameter. Typical use:</div><div class="ttdef"><b>Definition</b> constixel.h:2264</div></div>
 </div><!-- fragment --><dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">FONT</td><td>The font struct name. </td></tr>
@@ -2397,7 +2407,7 @@ template&lt;template&lt; size_t, size_t, int32_t, bool &gt; class T, size_t W, s
 
 <p>Draw a stroked rectangle with the specified color and stroke width. Example: </p>
 <div class="fragment"><div class="line"><a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#ab41ac3a5c0a415bf557579c68ce0dcfd">stroke_rect</a>({.x=0, .y=0, .w=320, .h=240}, constixel::color::WHITE, 2);</div>
-<div class="ttc" id="aclassconstixel_1_1image_html_ab41ac3a5c0a415bf557579c68ce0dcfd"><div class="ttname"><a href="#ab41ac3a5c0a415bf557579c68ce0dcfd">constixel::image::stroke_rect</a></div><div class="ttdeci">constexpr void stroke_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col, int32_t stroke_width=1)</div><div class="ttdoc">Draw a stroked rectangle with the specified color and stroke width. Example:</div><div class="ttdef"><b>Definition</b> constixel.h:2544</div></div>
+<div class="ttc" id="aclassconstixel_1_1image_html_ab41ac3a5c0a415bf557579c68ce0dcfd"><div class="ttname"><a href="#ab41ac3a5c0a415bf557579c68ce0dcfd">constixel::image::stroke_rect</a></div><div class="ttdeci">constexpr void stroke_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col, int32_t stroke_width=1)</div><div class="ttdoc">Draw a stroked rectangle with the specified color and stroke width. Example:</div><div class="ttdef"><b>Definition</b> constixel.h:2515</div></div>
 </div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">rect</td><td>Rectangle containing the line coordinates in pixels. </td></tr>

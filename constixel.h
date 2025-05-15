@@ -514,7 +514,6 @@ class format {
         return ((adler32_s2 << 16) | adler32_s1);
     }
 
-    // @private
     template <typename F>
     static constexpr void png_write_be(F &&char_out, uint32_t value) {
         char_out(static_cast<char>((value >> 24) & 0xFF));
