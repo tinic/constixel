@@ -112,44 +112,6 @@ static constexpr double m_pi_d = 3.14159265358979323846;
     return res;
 }
 
-[[nodiscard]] static consteval double consteval_abs(double x) {
-    return x < 0 ? -x : x;
-}
-
-[[nodiscard]] static consteval double consteval_exp(double x) {
-    double term = 1.0;
-    double sum = 1.0;
-    for (int i = 1; i < 50; ++i) {
-        term *= x / i;
-        sum += term;
-        if (consteval_abs(term) < 1e-12)
-            break;
-    }
-    return sum;
-}
-
-[[nodiscard]] static consteval double consteval_log(double x) {
-    if (x <= 0)
-        return 0.0;  // or handle error
-    double y = (x - 1) / (x + 1);
-    double y2 = y * y;
-    double term = y;
-    double sum = 0.0;
-    for (int i = 1; i < 100; i += 2) {
-        sum += term / i;
-        term *= y2;
-        if (consteval_abs(term) < 1e-12)
-            break;
-    }
-    return 2 * sum;
-}
-
-[[nodiscard]] static consteval double consteval_pow(double base, double exp) {
-    if (base == 0.0)
-        return 0.0;
-    return consteval_exp(exp * consteval_log(base));
-}
-
 struct oklch {
     double l, c, h;
 };
@@ -161,22 +123,6 @@ struct oklab {
 struct srgb {
     double r, g, b;
 };
-
-[[nodiscard]] static consteval double consteval_linear_to_srgb(double c) {
-    if (c <= 0.0031308) {
-        return 12.92 * c;
-    } else {
-        return 1.055 * consteval_pow(c, 1.0 / 2.4) - 0.055;
-    }
-}
-
-[[nodiscard]] static consteval double consteval_srgb_to_linear(double s) {
-    if (s <= 0.040449936) {
-        return s / 12.92;
-    } else {
-        return consteval_pow((s + 0.055) / 1.055, 2.4);
-    }
-}
 
 [[nodiscard]] static constexpr float linear_to_srgb(float c) {
     if (c <= 0.0031308f) {
@@ -215,9 +161,9 @@ struct srgb {
     double g = -1.2684380046 * l_ + 2.6097574011 * m_ - 0.3413193965 * s_;
     double bl = -0.0041960863 * l_ - 0.7034186168 * m_ + 1.7076147031 * s_;
 
-    return {consteval_linear_to_srgb(std::max(0.0, std::min(1.0, r))),
-            consteval_linear_to_srgb(std::max(0.0, std::min(1.0, g))),
-            consteval_linear_to_srgb(std::max(0.0, std::min(1.0, bl)))};
+    return {static_cast<double>(linear_to_srgb(std::max(0.0f, std::min(1.0f, static_cast<float>(r))))),
+            static_cast<double>(linear_to_srgb(std::max(0.0f, std::min(1.0f, static_cast<float>(g))))),
+            static_cast<double>(linear_to_srgb(std::max(0.0f, std::min(1.0f, static_cast<float>(bl)))))};
 }
 
 [[nodiscard]] static consteval oklab oklch_to_oklab_consteval(const oklch &oklch) {
@@ -225,13 +171,13 @@ struct srgb {
             oklch.c * consteval_sin(oklch.h * m_pi_d / 180.0)};
 }
 
-static constexpr const float epsilon_low = static_cast<float>(consteval_srgb_to_linear(0.5 / 255.0));
-static constexpr const float epsilon_high = static_cast<float>(consteval_srgb_to_linear(254.5 / 255.0));
+static constexpr const float epsilon_low = srgb_to_linear(0.5f / 255.0f);
+static constexpr const float epsilon_high = srgb_to_linear(254.5f / 255.0f);
 
 static consteval auto gen_a2al_4bit_consteval() {
     std::array<float, 16> a2al{};
     for (size_t c = 0; c < 16; c++) {
-        a2al[c] = static_cast<float>(consteval_srgb_to_linear(static_cast<double>(c) * (1.0 / 15.0)));
+        a2al[c] = srgb_to_linear(static_cast<float>(c) * (1.0f / 15.0f));
     }
     return a2al;
 }
@@ -241,7 +187,7 @@ static constexpr const std::array<float, 16> a2al_4bit = gen_a2al_4bit_consteval
 static consteval auto gen_a2al_8bit_consteval() {
     std::array<float, 256> a2al{};
     for (size_t c = 0; c < 16; c++) {
-        a2al[c] = static_cast<float>(consteval_srgb_to_linear(static_cast<double>(c) * (1.0 / 255.0)));
+        a2al[c] = srgb_to_linear(static_cast<float>(c) * (1.0f / 255.0f));
     }
     return a2al;
 }
@@ -266,12 +212,12 @@ class quantize {
     quantize &operator=(const quantize &) = delete;
     explicit consteval quantize(const std::array<uint32_t, palette_size> &palette) : pal(palette) {
         for (size_t i = 0; i < pal.size(); i++) {
-            linearpal.at(i * 3 + 0) = static_cast<float>(
-                hidden::consteval_srgb_to_linear(static_cast<double>((pal[i] >> 16) & 0xFF) * (1.0 / 255.0)));
-            linearpal.at(i * 3 + 1) = static_cast<float>(
-                hidden::consteval_srgb_to_linear(static_cast<double>((pal[i] >> 8) & 0xFF) * (1.0 / 255.0)));
-            linearpal.at(i * 3 + 2) = static_cast<float>(
-                hidden::consteval_srgb_to_linear(static_cast<double>((pal[i] >> 0) & 0xFF) * (1.0 / 255.0)));
+            linearpal.at(i * 3 + 0) =
+                hidden::srgb_to_linear(static_cast<float>((pal[i] >> 16) & 0xFF) * (1.0f / 255.0f));
+            linearpal.at(i * 3 + 1) =
+                hidden::srgb_to_linear(static_cast<float>((pal[i] >> 8) & 0xFF) * (1.0f / 255.0f));
+            linearpal.at(i * 3 + 2) =
+                hidden::srgb_to_linear(static_cast<float>((pal[i] >> 0) & 0xFF) * (1.0f / 255.0f));
         }
 #if defined(__ARM_NEON)
         if (pal.size() >= 4) {
