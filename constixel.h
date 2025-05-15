@@ -1696,7 +1696,7 @@ class format_8bit : public format {
         } else
 #endif  // #if defined(__ARM_NEON)
 #if defined(__AVX2__)
-            if (!std::is_constant_evaluated()) {
+        if (!std::is_constant_evaluated()) {
             __m128 cola_v = _mm_set1_ps(cola);
             __m128 inv_cola_v = _mm_set1_ps(1.0f - cola);
             __m128 col_rgb = _mm_set_ps(0.0f, colb, colg, colr);
