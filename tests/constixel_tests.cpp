@@ -447,10 +447,10 @@ void round_trip() {
         }
     }
     image.blit_RGBA_diffused_linear(0, 0, 256, 256, reinterpret_cast<const uint8_t *>(rgb->data()), 256, 256, 256 * 4);
-    auto rgba8 = std::make_unique<std::array<uint8_t, 256 * 256 * 4>>(image.RGBA_uint8());
+    auto rgba8 = std::make_unique<std::array<uint8_t, 256 * 256 * 4>>();
+    image.RGBA_uint8(*rgba8);
     image.blit_RGBA(0, 0, 256, 256, rgba8->data(), 256, 256, 256 * 4);
     std::string out;
-    out.reserve(1UL << 18);
     image.sixel([&out](char ch) mutable {
         out.push_back(ch);
     });

@@ -975,33 +975,29 @@ class format_1bit : public format {
         return static_cast<uint8_t>((line[x8] >> (7 - xb)) & 1);
     }
 
-    [[nodiscard]] static constexpr auto RGBA_uint32(const std::array<uint8_t, image_size> &data) {
-        std::array<uint32_t, W * H> rgba{};
-        const uint8_t *ptr = data.data();
+    static constexpr void RGBA_uint32(std::array<uint32_t, W * H> &dst, const std::array<uint8_t, image_size> &src) {
+        const uint8_t *ptr = src.data();
         for (size_t y = 0; y < H; y++) {
             for (size_t x = 0; x < W; x++) {
                 uint8_t col = get_col(ptr, x);
-                rgba[y * W + x] = quant.palette().at(col) | (col ? 0xFF000000 : 0x00000000);
+                dst[y * W + x] = quant.palette().at(col) | (col ? 0xFF000000 : 0x00000000);
             }
             ptr += bytes_per_line;
         }
-        return rgba;
     }
 
-    [[nodiscard]] static constexpr auto RGBA_uint8(const std::array<uint8_t, image_size> &data) {
-        std::array<uint8_t, W * H * 4> rgba{};
-        const uint8_t *ptr = data.data();
+    static constexpr void RGBA_uint8(std::array<uint8_t, W * H * 4> &dst, const std::array<uint8_t, image_size> &src) {
+        const uint8_t *ptr = src.data();
         for (size_t y = 0; y < H; y++) {
             for (size_t x = 0; x < W; x++) {
                 uint8_t col = get_col(ptr, x);
-                rgba[y * W * 4 + x * 4 + 0] = static_cast<uint8_t>((quant.palette().at(col) >> 16) & 0xFF);
-                rgba[y * W * 4 + x * 4 + 1] = static_cast<uint8_t>((quant.palette().at(col) >> 8) & 0xFF);
-                rgba[y * W * 4 + x * 4 + 2] = static_cast<uint8_t>((quant.palette().at(col) >> 0) & 0xFF);
-                rgba[y * W * 4 + x * 4 + 3] = (col ? 0xFF : 0x00);
+                dst[y * W * 4 + x * 4 + 0] = static_cast<uint8_t>((quant.palette().at(col) >> 16) & 0xFF);
+                dst[y * W * 4 + x * 4 + 1] = static_cast<uint8_t>((quant.palette().at(col) >> 8) & 0xFF);
+                dst[y * W * 4 + x * 4 + 2] = static_cast<uint8_t>((quant.palette().at(col) >> 0) & 0xFF);
+                dst[y * W * 4 + x * 4 + 3] = (col ? 0xFF : 0x00);
             }
             ptr += bytes_per_line;
         }
-        return rgba;
     }
 
     static constexpr void blit_RGBA(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr,
@@ -1198,33 +1194,29 @@ class format_2bit : public format {
         return static_cast<uint8_t>((line[x4] >> ((3 - xb) * 2)) & 0x3);
     }
 
-    [[nodiscard]] static constexpr auto RGBA_uint32(const std::array<uint8_t, image_size> &data) {
-        std::array<uint32_t, W * H> rgba{};
-        const uint8_t *ptr = data.data();
+    static constexpr void RGBA_uint32(std::array<uint32_t, W * H> &dst, const std::array<uint8_t, image_size> &src) {
+        const uint8_t *ptr = src.data();
         for (size_t y = 0; y < H; y++) {
             for (size_t x = 0; x < W; x++) {
                 uint8_t col = get_col(ptr, x);
-                rgba[y * W + x] = quant.palette().at(col) | (col ? 0xFF000000 : 0x00000000);
+                dst[y * W + x] = quant.palette().at(col) | (col ? 0xFF000000 : 0x00000000);
             }
             ptr += bytes_per_line;
         }
-        return rgba;
     }
 
-    [[nodiscard]] static constexpr auto RGBA_uint8(const std::array<uint8_t, image_size> &data) {
-        std::array<uint8_t, W * H * 4> rgba{};
-        const uint8_t *ptr = data.data();
+    static constexpr void RGBA_uint8(std::array<uint8_t, W * H * 4> &dst, const std::array<uint8_t, image_size> &src) {
+        const uint8_t *ptr = src.data();
         for (size_t y = 0; y < H; y++) {
             for (size_t x = 0; x < W; x++) {
                 uint8_t col = get_col(ptr, x);
-                rgba[y * W * 4 + x * 4 + 0] = static_cast<uint8_t>((quant.palette().at(col) >> 16) & 0xFF);
-                rgba[y * W * 4 + x * 4 + 1] = static_cast<uint8_t>((quant.palette().at(col) >> 8) & 0xFF);
-                rgba[y * W * 4 + x * 4 + 2] = static_cast<uint8_t>((quant.palette().at(col) >> 0) & 0xFF);
-                rgba[y * W * 4 + x * 4 + 3] = (col ? 0xFF : 0x00);
+                dst[y * W * 4 + x * 4 + 0] = static_cast<uint8_t>((quant.palette().at(col) >> 16) & 0xFF);
+                dst[y * W * 4 + x * 4 + 1] = static_cast<uint8_t>((quant.palette().at(col) >> 8) & 0xFF);
+                dst[y * W * 4 + x * 4 + 2] = static_cast<uint8_t>((quant.palette().at(col) >> 0) & 0xFF);
+                dst[y * W * 4 + x * 4 + 3] = (col ? 0xFF : 0x00);
             }
             ptr += bytes_per_line;
         }
-        return rgba;
     }
 
     static constexpr void blit_RGBA(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr,
@@ -1442,33 +1434,29 @@ class format_4bit : public format {
         return static_cast<uint8_t>((ptr[x2] >> ((1 - xb) * 4)) & 0xF);
     }
 
-    [[nodiscard]] static constexpr auto RGBA_uint32(const std::array<uint8_t, image_size> &data) {
-        std::array<uint32_t, W * H> rgba{};
-        const uint8_t *ptr = data.data();
+    static constexpr void RGBA_uint32(std::array<uint32_t, W * H> &dst, const std::array<uint8_t, image_size> &src) {
+        const uint8_t *ptr = src.data();
         for (size_t y = 0; y < H; y++) {
             for (size_t x = 0; x < W; x++) {
                 uint8_t col = get_col(ptr, x);
-                rgba[y * W + x] = quant.palette().at(col) | (col ? 0xFF000000 : 0x00000000);
+                dst[y * W + x] = quant.palette().at(col) | (col ? 0xFF000000 : 0x00000000);
             }
             ptr += bytes_per_line;
         }
-        return rgba;
     }
 
-    [[nodiscard]] static constexpr auto RGBA_uint8(const std::array<uint8_t, image_size> &data) {
-        std::array<uint8_t, W * H * 4> rgba{};
-        const uint8_t *ptr = data.data();
+    static constexpr void RGBA_uint8(std::array<uint8_t, W * H * 4> &dst, const std::array<uint8_t, image_size> &src) {
+        const uint8_t *ptr = src.data();
         for (size_t y = 0; y < H; y++) {
             for (size_t x = 0; x < W; x++) {
                 uint8_t col = get_col(ptr, x);
-                rgba[y * W * 4 + x * 4 + 0] = static_cast<uint8_t>((quant.palette().at(col) >> 16) & 0xFF);
-                rgba[y * W * 4 + x * 4 + 1] = static_cast<uint8_t>((quant.palette().at(col) >> 8) & 0xFF);
-                rgba[y * W * 4 + x * 4 + 2] = static_cast<uint8_t>((quant.palette().at(col) >> 0) & 0xFF);
-                rgba[y * W * 4 + x * 4 + 3] = (col ? 0xFF : 0x00);
+                dst[y * W * 4 + x * 4 + 0] = static_cast<uint8_t>((quant.palette().at(col) >> 16) & 0xFF);
+                dst[y * W * 4 + x * 4 + 1] = static_cast<uint8_t>((quant.palette().at(col) >> 8) & 0xFF);
+                dst[y * W * 4 + x * 4 + 2] = static_cast<uint8_t>((quant.palette().at(col) >> 0) & 0xFF);
+                dst[y * W * 4 + x * 4 + 3] = (col ? 0xFF : 0x00);
             }
             ptr += bytes_per_line;
         }
-        return rgba;
     }
 
     static constexpr void blit_RGBA(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr,
@@ -1701,33 +1689,29 @@ class format_8bit : public format {
         plot(data, x, y, quant.nearest_linear(Rl, Gl, Bl));
     }
 
-    [[nodiscard]] static constexpr auto RGBA_uint32(const std::array<uint8_t, image_size> &data) {
-        std::array<uint32_t, W * H> rgba{};
-        const uint8_t *ptr = data.data();
+    static constexpr void RGBA_uint32(std::array<uint32_t, W * H> &dst, const std::array<uint8_t, image_size> &src) {
+        const uint8_t *ptr = src.data();
         for (size_t y = 0; y < H; y++) {
             for (size_t x = 0; x < W; x++) {
                 uint8_t col = ptr[x];
-                rgba[y * W + x] = quant.palette().at(col) | (col ? 0xFF000000 : 0x00000000);
+                dst[y * W + x] = quant.palette().at(col) | (col ? 0xFF000000 : 0x00000000);
             }
             ptr += bytes_per_line;
         }
-        return rgba;
     }
 
-    [[nodiscard]] static constexpr auto RGBA_uint8(const std::array<uint8_t, image_size> &data) {
-        std::array<uint8_t, W * H * 4> rgba{};
-        const uint8_t *ptr = data.data();
+    static constexpr void RGBA_uint8(std::array<uint8_t, W * H * 4> &dst, const std::array<uint8_t, image_size> &src) {
+        const uint8_t *ptr = src.data();
         for (size_t y = 0; y < H; y++) {
             for (size_t x = 0; x < W; x++) {
                 uint8_t col = ptr[x];
-                rgba[y * W * 4 + x * 4 + 0] = static_cast<uint8_t>((quant.palette().at(col) >> 16) & 0xFF);
-                rgba[y * W * 4 + x * 4 + 1] = static_cast<uint8_t>((quant.palette().at(col) >> 8) & 0xFF);
-                rgba[y * W * 4 + x * 4 + 2] = static_cast<uint8_t>((quant.palette().at(col) >> 0) & 0xFF);
-                rgba[y * W * 4 + x * 4 + 3] = (col ? 0xFF : 0x00);
+                dst[y * W * 4 + x * 4 + 0] = static_cast<uint8_t>((quant.palette().at(col) >> 16) & 0xFF);
+                dst[y * W * 4 + x * 4 + 1] = static_cast<uint8_t>((quant.palette().at(col) >> 8) & 0xFF);
+                dst[y * W * 4 + x * 4 + 2] = static_cast<uint8_t>((quant.palette().at(col) >> 0) & 0xFF);
+                dst[y * W * 4 + x * 4 + 3] = (col ? 0xFF : 0x00);
             }
             ptr += bytes_per_line;
         }
-        return rgba;
     }
 
     static constexpr void blit_RGBA(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr,
@@ -2677,18 +2661,18 @@ class image {
 
     /**
      * \brief Convert this instance to an equivalent RGBA8 data array.
-     * \return RGBA8 array made of uint32_t values.
+     * \param dst RGBA8 array made of image::width() * img::height() * uint32_t values.
      */
-    [[nodiscard]] constexpr std::array<uint32_t, W * H> RGBA_uint32() const {
-        return T<W, H, S, GR>::RGBA_uint32(data);
+    constexpr void RGBA_uint32(std::array<uint32_t, W * H> &dst) const {
+        T<W, H, S, GR>::RGBA_uint32(dst, data);
     }
 
     /**
      * \brief Convert this instance to an equivalent RGBA8 data array.
-     * \return RGBA8 array made of uint8_t values.
+     * \param dst RGBA8 array made of image::width() * img::height() * 4 * uint8_t values.
      */
-    [[nodiscard]] constexpr std::array<uint8_t, W * H * 4> RGBA_uint8() const {
-        return T<W, H, S, GR>::RGBA_uint8(data);
+    constexpr void RGBA_uint8(std::array<uint8_t, W * H * 4> &dst) const {
+        T<W, H, S, GR>::RGBA_uint8(dst, data);
     }
 
     /**
