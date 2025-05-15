@@ -3053,6 +3053,9 @@ class image {
     }
 
  private:
+
+ /// @cond DOXYGEN_EXCLUDE
+
     /**
      * @private
      */
@@ -3484,6 +3487,9 @@ class image {
      * @private
      */
     T<W, H, S, GR> format{};
+
+/// @endcond  // DOXYGEN_EXCLUDE
+
 };
 
 }  // namespace constixel
