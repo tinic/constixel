@@ -230,7 +230,7 @@ class quantize {
 
  public:
     quantize &operator=(const quantize &) = delete;
-    explicit constexpr quantize(const std::array<uint32_t, palette_size> &palette) : pal(palette) {
+    explicit consteval quantize(const std::array<uint32_t, palette_size> &palette) : pal(palette) {
         for (size_t i = 0; i < pal.size(); i++) {
             linearpal.at(i * 3 + 0) = srgb_to_linear(static_cast<float>((pal[i] >> 16) & 0xFF) * (1.0f / 255.0f));
             linearpal.at(i * 3 + 1) = srgb_to_linear(static_cast<float>((pal[i] >> 8) & 0xFF) * (1.0f / 255.0f));
@@ -1144,12 +1144,7 @@ class format_2bit : public format {
         }
     }
     static constexpr const auto palette = gen_palette();
-
-    static consteval auto gen_quant() {
-        return constixel::quantize<1UL << bits_per_pixel>(palette);
-    }
-
-    static constexpr const auto quant = gen_quant();
+    static constexpr const auto quant = constixel::quantize<1UL << bits_per_pixel>(palette);
 
     static constexpr uint8_t reverse(uint8_t b) {
         b = static_cast<uint8_t>((b & uint8_t{0xF0}) >> 4 | (b & uint8_t{0x0F}) << 4);
@@ -1382,12 +1377,7 @@ class format_4bit : public format {
     }
 
     static constexpr const auto palette = gen_palette();
-
-    static consteval auto gen_quant() {
-        return constixel::quantize<1UL << bits_per_pixel>(palette);
-    }
-
-    static constexpr const auto quant = gen_quant();
+    static constexpr const auto quant = constixel::quantize<1UL << bits_per_pixel>(palette);
 
     static constexpr uint8_t reverse(uint8_t b) {
         b = static_cast<uint8_t>((b & uint8_t{0xF0}) >> 4 | (b & uint8_t{0x0F}) << 4);
@@ -1679,12 +1669,7 @@ class format_8bit : public format {
     }
 
     static constexpr const auto palette = gen_palette();
-
-    static consteval auto gen_quant() {
-        return constixel::quantize<1UL << bits_per_pixel>(palette);
-    }
-
-    static constexpr const auto quant = gen_quant();
+    static constexpr const auto quant = constixel::quantize<1UL << bits_per_pixel>(palette);
 
     static constexpr uint8_t reverse(uint8_t b) {
         return b;
