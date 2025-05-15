@@ -1555,7 +1555,7 @@ class format_4bit : public format {
                 for (size_t y6 = 0; y6 < 6; y6++) {
                     out >>= 1;
                     if ((y + y6) < H * S) {
-                        out |= ((((*ptr) >> (4 - x2 * 4)) & 0xF) == col) ? (1UL << 5) : 0;
+                        out |= static_cast<uint8_t>(((((*ptr) >> (4 - x2 * 4)) & 0xF) == col) ? (1UL << 5) : 0);
                         if (y6 != 5) {
                             if (++inc >= S) {
                                 inc = 0;
@@ -1784,9 +1784,9 @@ class format_8bit : public format {
                 Bl = Bl + err_b;
                 uint8_t n = quant.nearest_linear(Rl, Gl, Bl);
                 data.data()[(y + static_cast<size_t>(r.y)) * bytes_per_line + (x + static_cast<size_t>(r.x))] = n;
-                err_r = std::clamp(Rl - quant.linearpal.at(n * 3 + 0), -1.0f, 1.0f);
-                err_g = std::clamp(Gl - quant.linearpal.at(n * 3 + 1), -1.0f, 1.0f);
-                err_b = std::clamp(Bl - quant.linearpal.at(n * 3 + 2), -1.0f, 1.0f);
+                err_r = std::clamp(Rl - quant.linearpal.at(n * size_t{3} + size_t{0}), -1.0f, 1.0f);
+                err_g = std::clamp(Gl - quant.linearpal.at(n * size_t{3} + size_t{1}), -1.0f, 1.0f);
+                err_b = std::clamp(Bl - quant.linearpal.at(n * size_t{3} + size_t{2}), -1.0f, 1.0f);
             }
         }
     }
@@ -1811,7 +1811,7 @@ class format_8bit : public format {
                 for (size_t y6 = 0; y6 < 6; y6++) {
                     out >>= 1;
                     if ((y + y6) < H * S) {
-                        out |= (*ptr == col) ? (1UL << 5) : 0;
+                        out |= static_cast<uint8_t>((*ptr == col) ? (1UL << 5) : 0);
                         if (y6 != 5) {
                             if (++inc >= S) {
                                 inc = 0;
@@ -3344,7 +3344,7 @@ class image {
                     const int32_t bit_index = (1 - (x_off % 2)) * 4;
                     const size_t byte_index = static_cast<size_t>(ch_data_off + x_off / 2);
                     if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
-                        const uint8_t a = (FONT::glyph_bitmap[byte_index] >> bit_index) & 0xF;
+                        const uint8_t a = static_cast<uint8_t>((FONT::glyph_bitmap[byte_index] >> bit_index) & 0xF);
                         if (a != 0) {
                             if (a == 0xF) {
                                 plot(xx, yy, col);
@@ -3368,7 +3368,7 @@ class image {
                     const int32_t bit_index = (1 - (x_off % 2)) * 4;
                     const size_t byte_index = static_cast<size_t>(ch_data_off + x_off / 2);
                     if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
-                        const uint8_t a = (FONT::glyph_bitmap[byte_index] >> bit_index) & 0xF;
+                        const uint8_t a = static_cast<uint8_t>((FONT::glyph_bitmap[byte_index] >> bit_index) & 0xF);
                         if (a != 0) {
                             if (a == 0xF) {
                                 plot(xx, yy, col);
@@ -3392,7 +3392,7 @@ class image {
                     const int32_t bit_index = (1 - (x_off % 2)) * 4;
                     const size_t byte_index = static_cast<size_t>(ch_data_off + x_off / 2);
                     if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
-                        const uint8_t a = (FONT::glyph_bitmap[byte_index] >> bit_index) & 0xF;
+                        const uint8_t a = static_cast<uint8_t>((FONT::glyph_bitmap[byte_index] >> bit_index) & 0xF);
                         if (a != 0) {
                             if (a == 0xF) {
                                 plot(xx, yy, col);
@@ -3416,7 +3416,7 @@ class image {
                     const int32_t bit_index = (1 - (x_off % 2)) * 4;
                     const size_t byte_index = static_cast<size_t>(ch_data_off + x_off / 2);
                     if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
-                        const uint8_t a = (FONT::glyph_bitmap[byte_index] >> bit_index) & 0xF;
+                        const uint8_t a = static_cast<uint8_t>((FONT::glyph_bitmap[byte_index] >> bit_index) & 0xF);
                         if (a != 0) {
                             if (a == 0xF) {
                                 plot(xx, yy, col);
