@@ -1936,7 +1936,6 @@ class image {
     static_assert(S >= 1 && S <= 256);
 
  public:
-
     /**
      * \brief Boolean indicating that the palette is grayscale instead of color.
      * \return If true, the palette is grayscale. If false a colored palette is used.
