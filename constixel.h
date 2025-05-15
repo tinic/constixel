@@ -201,7 +201,6 @@ struct srgb {
     return {oklch.l, oklch.c * cos(oklch.h * m_pi_d / 180.0), oklch.c * sin(oklch.h * m_pi_d / 180.0)};
 }
 
-
 static constexpr float epsilon_low = static_cast<float>(srgb_to_linear(0.5 / 255.0));
 static constexpr float epsilon_high = static_cast<float>(srgb_to_linear(254.5 / 255.0));
 
@@ -230,6 +229,7 @@ class quantize {
     const std::array<uint32_t, palette_size> &pal;
 
  public:
+    quantize &operator=(const quantize &) = delete;
     explicit constexpr quantize(const std::array<uint32_t, palette_size> &palette) : pal(palette) {
         for (size_t i = 0; i < pal.size(); i++) {
             linearpal.at(i * 3 + 0) = srgb_to_linear(static_cast<float>((pal[i] >> 16) & 0xFF) * (1.0f / 255.0f));
@@ -837,9 +837,9 @@ class format {
                         }
                         break;
                     }
-                    if (repeat_count > 3) {
+                    if (repeat_count > uint16_t{3}) {
                         char_out('!');
-                        sixel_number(char_out, repeat_count + 1);
+                        sixel_number(char_out, static_cast<uint16_t>(repeat_count + 1));
                         x += repeat_count;
                     }
                     char_out(static_cast<char>('?' + bits6));
@@ -871,7 +871,7 @@ class format_1bit : public format {
     static constexpr size_t bits_per_pixel = 1;
     static constexpr size_t bytes_per_line = (W * bits_per_pixel + 7) / 8;
     static constexpr size_t image_size = H * bytes_per_line;
-    static constexpr std::array<uint32_t, (1UL << bits_per_pixel)> palette = {0x00000000, 0x00ffffff};
+    static constexpr std::array<uint32_t, (1UL << bits_per_pixel)> palette = {{0x00000000, 0x00ffffff}};
 
     static constexpr uint8_t reverse(uint8_t b) {
         b = static_cast<uint8_t>((b & uint8_t{0xF0}) >> 4 | (b & uint8_t{0x0F}) << 4);
@@ -978,7 +978,7 @@ class format_1bit : public format {
     [[nodiscard]] static constexpr uint8_t get_col(const uint8_t *line, size_t x) {
         size_t x8 = x / 8;
         size_t xb = x % 8;
-        return (line[x8] >> (7 - xb)) & 1;
+        return static_cast<uint8_t>((line[x8] >> (7 - xb)) & 1);
     }
 
     [[nodiscard]] static constexpr auto RGBA_uint32(const std::array<uint8_t, image_size> &data) {
@@ -1086,7 +1086,7 @@ class format_1bit : public format {
                 for (size_t y6 = 0; y6 < 6; y6++) {
                     out >>= 1;
                     if ((y + y6) < H * S) {
-                        out |= ((((*ptr) >> (7 - x8)) & 1) == col) ? (1UL << 5) : 0;
+                        out |= static_cast<uint8_t>(((((*ptr) >> (7 - x8)) & 1) == col) ? (1UL << 5) : 0);
                         if (y6 != 5) {
                             if (++inc >= S) {
                                 inc = 0;
@@ -1104,7 +1104,7 @@ class format_1bit : public format {
                         for (size_t xx = 0; xx < (w + S - 1) / S; xx++) {
                             const uint8_t *ptr = &data_raw[((y + y6) / S) * bytes_per_line + (xx + x) / 8];
                             size_t x8 = (xx + x) % 8;
-                            set.mark((((*ptr) >> (7 - x8)) & 1));
+                            set.mark(static_cast<uint8_t>(((*ptr) >> (7 - x8)) & 1));
                         }
                         if (++inc >= S) {
                             inc = 0;
@@ -1136,20 +1136,20 @@ class format_2bit : public format {
     static constexpr size_t bits_per_pixel = 2;
     static constexpr size_t bytes_per_line = (W * bits_per_pixel + 7) / 8;
     static constexpr size_t image_size = H * bytes_per_line;
-    static consteval const std::array<uint32_t, (1UL << bits_per_pixel)> gen_palette() {
+    static consteval auto gen_palette() {
         if (GR) {
-            return {0x000000, 0x444444, 0x888888, 0xffffff};
+            return std::array<uint32_t, (1UL << bits_per_pixel)>({{0x000000, 0x444444, 0x888888, 0xffffff}});
         } else {
-            return {0x000000, 0xffffff, 0xff0000, 0x0077ff};
+            return std::array<uint32_t, (1UL << bits_per_pixel)>({{0x000000, 0xffffff, 0xff0000, 0x0077ff}});
         }
     }
-    static constexpr std::array<uint32_t, (1UL << bits_per_pixel)> palette = gen_palette();
+    static constexpr const auto palette = gen_palette();
 
-    static constexpr const constixel::quantize<1UL << bits_per_pixel> gen_quant() {
+    static consteval auto gen_quant() {
         return constixel::quantize<1UL << bits_per_pixel>(palette);
     }
 
-    static constexpr const constixel::quantize<1UL << bits_per_pixel> quant = gen_quant();
+    static constexpr const auto quant = gen_quant();
 
     static constexpr uint8_t reverse(uint8_t b) {
         b = static_cast<uint8_t>((b & uint8_t{0xF0}) >> 4 | (b & uint8_t{0x0F}) << 4);
@@ -1206,7 +1206,7 @@ class format_2bit : public format {
     static constexpr uint8_t get_col(const uint8_t *line, size_t x) {
         size_t x4 = x / 4;
         size_t xb = x % 4;
-        return (line[x4] >> ((3 - xb) * 2)) & 0x3;
+        return static_cast<uint8_t>((line[x4] >> ((3 - xb) * 2)) & 0x3);
     }
 
     [[nodiscard]] static constexpr auto RGBA_uint32(const std::array<uint8_t, image_size> &data) {
@@ -1290,9 +1290,9 @@ class format_2bit : public format {
                 Bl = Bl + err_b;
                 uint8_t n = quant.nearest_linear(Rl, Gl, Bl);
                 plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
-                err_r = std::clamp(Rl - quant.linearpal.at(n * 3 + 0), -1.0f, 1.0f);
-                err_g = std::clamp(Gl - quant.linearpal.at(n * 3 + 1), -1.0f, 1.0f);
-                err_b = std::clamp(Bl - quant.linearpal.at(n * 3 + 2), -1.0f, 1.0f);
+                err_r = std::clamp(Rl - quant.linearpal.at(n * size_t{3} + size_t{0}), -1.0f, 1.0f);
+                err_g = std::clamp(Gl - quant.linearpal.at(n * size_t{3} + size_t{1}), -1.0f, 1.0f);
+                err_b = std::clamp(Bl - quant.linearpal.at(n * size_t{3} + size_t{2}), -1.0f, 1.0f);
             }
         }
     }
@@ -1318,7 +1318,7 @@ class format_2bit : public format {
                 for (size_t y6 = 0; y6 < 6; y6++) {
                     out >>= 1;
                     if ((y + y6) < H * S) {
-                        out |= ((((*ptr) >> (6 - x4 * 2)) & 3) == col) ? (1UL << 5) : 0;
+                        out |= static_cast<uint8_t>(((((*ptr) >> (6 - x4 * 2)) & 3) == col) ? (1UL << 5) : 0);
                         if (y6 != 5) {
                             if (++inc >= S) {
                                 inc = 0;
@@ -1336,7 +1336,7 @@ class format_2bit : public format {
                         for (size_t xx = 0; xx < (w + S - 1) / S; xx++) {
                             const uint8_t *ptr = &data_raw[((y + y6) / S) * bytes_per_line + (xx + x) / 4];
                             size_t x4 = (xx + x) % 4;
-                            set.mark((((*ptr) >> (6 - x4 * 2)) & 3));
+                            set.mark(static_cast<uint8_t>(((*ptr) >> (6 - x4 * 2)) & 3));
                         }
                         if (++inc >= S) {
                             inc = 0;
@@ -1369,23 +1369,25 @@ class format_4bit : public format {
     static constexpr size_t bytes_per_line = (W * bits_per_pixel + 7) / 8;
     static constexpr size_t image_size = H * bytes_per_line;
 
-    static consteval const std::array<uint32_t, (1UL << bits_per_pixel)> gen_palette() {
+    static consteval auto gen_palette() {
         if (GR) {
-            return {0x000000, 0x111111, 0x222222, 0x333333, 0x444444, 0x555555, 0x666666, 0x777777,
-                    0x888888, 0x999999, 0xaaaaaa, 0xbbbbbb, 0xcccccc, 0xdddddd, 0xeeeeee, 0xffffff};
+            return std::array<uint32_t, (1UL << bits_per_pixel)>(
+                {{0x000000, 0x111111, 0x222222, 0x333333, 0x444444, 0x555555, 0x666666, 0x777777, 0x888888, 0x999999,
+                  0xaaaaaa, 0xbbbbbb, 0xcccccc, 0xdddddd, 0xeeeeee, 0xffffff}});
         } else {
-            return {0x000000, 0xffffff, 0xff0000, 0x00ff00, 0x0000ff, 0xffff00, 0x00ffff, 0xff00ff,
-                    0x333333, 0x666666, 0x999999, 0xcccccc, 0x7f0000, 0x007f00, 0x00007f, 0x7f7f00};
+            return std::array<uint32_t, (1UL << bits_per_pixel)>(
+                {{0x000000, 0xffffff, 0xff0000, 0x00ff00, 0x0000ff, 0xffff00, 0x00ffff, 0xff00ff, 0x333333, 0x666666,
+                  0x999999, 0xcccccc, 0x7f0000, 0x007f00, 0x00007f, 0x7f7f00}});
         }
     }
 
-    static constexpr std::array<uint32_t, (1UL << bits_per_pixel)> palette = gen_palette();
+    static constexpr const auto palette = gen_palette();
 
-    static constexpr const constixel::quantize<1UL << bits_per_pixel> gen_quant() {
+    static consteval auto gen_quant() {
         return constixel::quantize<1UL << bits_per_pixel>(palette);
     }
 
-    static constexpr const constixel::quantize<1UL << bits_per_pixel> quant = gen_quant();
+    static constexpr const auto quant = gen_quant();
 
     static constexpr uint8_t reverse(uint8_t b) {
         b = static_cast<uint8_t>((b & uint8_t{0xF0}) >> 4 | (b & uint8_t{0x0F}) << 4);
@@ -1444,14 +1446,14 @@ class format_4bit : public format {
     [[nodiscard]] static constexpr uint8_t get_col(const uint8_t *line, size_t x) {
         size_t x2 = x / 2;
         size_t xb = x % 2;
-        return (line[x2] >> ((1 - xb) * 4)) & 0xF;
+        return static_cast<uint8_t>((line[x2] >> ((1 - xb) * 4)) & 0xF);
     }
 
     [[nodiscard]] static constexpr uint8_t get_col(const std::array<uint8_t, image_size> &data, size_t x, size_t y) {
         const uint8_t *ptr = data.data() + y * bytes_per_line;
         size_t x2 = x / 2;
         size_t xb = x % 2;
-        return (ptr[x2] >> ((1 - xb) * 4)) & 0xF;
+        return static_cast<uint8_t>((ptr[x2] >> ((1 - xb) * 4)) & 0xF);
     }
 
     [[nodiscard]] static constexpr auto RGBA_uint32(const std::array<uint8_t, image_size> &data) {
@@ -1535,9 +1537,9 @@ class format_4bit : public format {
                 Bl = Bl + err_b;
                 uint8_t n = quant.nearest_linear(Rl, Gl, Bl);
                 plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
-                err_r = std::clamp(Rl - quant.linearpal.at(n * 3 + 0), -1.0f, 1.0f);
-                err_g = std::clamp(Gl - quant.linearpal.at(n * 3 + 1), -1.0f, 1.0f);
-                err_b = std::clamp(Bl - quant.linearpal.at(n * 3 + 2), -1.0f, 1.0f);
+                err_r = std::clamp(Rl - quant.linearpal.at(n * size_t{3} + size_t{0}), -1.0f, 1.0f);
+                err_g = std::clamp(Gl - quant.linearpal.at(n * size_t{3} + size_t{1}), -1.0f, 1.0f);
+                err_b = std::clamp(Bl - quant.linearpal.at(n * size_t{3} + size_t{2}), -1.0f, 1.0f);
             }
         }
     }
@@ -1581,7 +1583,7 @@ class format_4bit : public format {
                         for (size_t xx = 0; xx < (w + S - 1) / S; xx++) {
                             const uint8_t *ptr = &data_raw[((y + y6) / S) * bytes_per_line + (xx + x) / 2];
                             size_t x2 = (xx + x) % 2;
-                            set.mark((((*ptr) >> (4 - x2 * 4)) & 0xF));
+                            set.mark(static_cast<uint8_t>(((*ptr) >> (4 - x2 * 4)) & 0xF));
                         }
                         if (++inc >= S) {
                             inc = 0;
@@ -1614,7 +1616,7 @@ class format_8bit : public format {
     static constexpr size_t bytes_per_line = W;
     static constexpr size_t image_size = H * bytes_per_line;
 
-    static consteval const std::array<uint32_t, (1UL << bits_per_pixel)> gen_palette() {
+    static consteval auto gen_palette() {
         std::array<uint32_t, (1UL << bits_per_pixel)> pal{};
         if (GR) {
             for (size_t c = 0; c < 256; c++) {
@@ -1676,13 +1678,13 @@ class format_8bit : public format {
         return pal;
     }
 
-    static constexpr std::array<uint32_t, 1UL << bits_per_pixel> palette = gen_palette();
+    static constexpr const auto palette = gen_palette();
 
-    static constexpr const constixel::quantize<1UL << bits_per_pixel> gen_quant() {
+    static consteval auto gen_quant() {
         return constixel::quantize<1UL << bits_per_pixel>(palette);
     }
 
-    static constexpr const constixel::quantize<1UL << bits_per_pixel> quant = gen_quant();
+    static constexpr const auto quant = gen_quant();
 
     static constexpr uint8_t reverse(uint8_t b) {
         return b;
@@ -2069,7 +2071,7 @@ class image {
      * \param col Color palette index to use.
      * \param stroke_width Width of the stroke in pixels.
      */
-    constexpr void draw_line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, uint32_t stroke_width = 1) {
+    constexpr void draw_line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, int32_t stroke_width = 1) {
         int32_t steep = abs(y1 - y0) > abs(x1 - x0);
 
         if (steep) {
@@ -2134,12 +2136,13 @@ class image {
      * \param col Color palette index to use.
      * \param stroke_width Width of the stroke in pixels.
      */
-    constexpr void draw_line(const rect<int32_t> &rect, uint8_t col, uint32_t stroke_width = 1) {
+    constexpr void draw_line(const rect<int32_t> &rect, uint8_t col, int32_t stroke_width = 1) {
         draw_line(rect.x, rect.y, rect.x + rect.w, rect.y + rect.h, col, stroke_width);
     }
 
     /**
-     * \brief Draw a 1-pixel wide antialiased line with the specified color. Only format_8bit targets are supported. Example:
+     * \brief Draw a 1-pixel wide antialiased line with the specified color. Only format_8bit targets are supported.
+     * Example:
      *
      * \code{.cpp}
      * image.draw_line_aa(0, 0, 200, 100, constixel::color::WHITE);
@@ -2234,7 +2237,8 @@ class image {
     }
 
     /**
-     * \brief Draw a 1-pixel wide antialiased line with the specified color. Only format_8bit targets are supported. Example:
+     * \brief Draw a 1-pixel wide antialiased line with the specified color. Only format_8bit targets are supported.
+     * Example:
      *
      * \code{.cpp}
      * image.draw_line_aa({.x=0, .y=0, .w=200, .h=100}, constixel::color::WHITE, 2);
@@ -2539,7 +2543,7 @@ class image {
      * \param col Color palette index to use.
      * \param stroke_width Width of the stroke in pixels.
      */
-    constexpr void stroke_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col, uint32_t stroke_width = 1) {
+    constexpr void stroke_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col, int32_t stroke_width = 1) {
         draw_line(x, y, x + w, y, col, stroke_width);
         draw_line(x + w, y, x + w, y + h, col, stroke_width);
         draw_line(x + w, y + h, x, y + h, col, stroke_width);
@@ -2557,7 +2561,7 @@ class image {
      * \param col Color palette index to use.
      * \param stroke_width Width of the stroke in pixels.
      */
-    constexpr void stroke_rect(const rect<int32_t> &rect, uint8_t col, uint32_t stroke_width = 1) {
+    constexpr void stroke_rect(const rect<int32_t> &rect, uint8_t col, int32_t stroke_width = 1) {
         stroke_rect(rect.x, rect.y, rect.w, rect.h, col, stroke_width);
     }
 
@@ -3112,7 +3116,7 @@ class image {
      */
     template <typename FONT>
     constexpr int32_t get_kerning(uint32_t utf32, const char *str) const {
-        if (FONT::kerning_tree.byte_size() > 0) {
+        if constexpr (FONT::kerning_tree.byte_size() > 0) {
             uint32_t utf_l = utf32;
             uint32_t utf_r = 0;
             get_next_utf32(str, &utf_r);
@@ -3265,7 +3269,7 @@ class image {
                     const int32_t bit_index = 7 - (x_off % 8);
                     const size_t byte_index = static_cast<size_t>(ch_data_off + x_off / 8);
                     if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
-                        const uint8_t a = (FONT::glyph_bitmap[byte_index] >> bit_index) & 1;
+                        const uint8_t a = static_cast<uint8_t>((FONT::glyph_bitmap[byte_index] >> bit_index) & 1);
                         if (a) {
                             plot(xx, yy, col);
                         }
@@ -3284,7 +3288,7 @@ class image {
                     const int32_t bit_index = 7 - (x_off % 8);
                     const size_t byte_index = static_cast<size_t>(ch_data_off + x_off / 8);
                     if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
-                        const uint8_t a = (FONT::glyph_bitmap[byte_index] >> bit_index) & 1;
+                        const uint8_t a = static_cast<uint8_t>((FONT::glyph_bitmap[byte_index] >> bit_index) & 1);
                         if (a) {
                             plot(xx, yy, col);
                         }
@@ -3303,7 +3307,7 @@ class image {
                     const int32_t bit_index = 7 - (x_off % 8);
                     const size_t byte_index = static_cast<size_t>(ch_data_off + x_off / 8);
                     if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
-                        const uint8_t a = (FONT::glyph_bitmap[byte_index] >> bit_index) & 1;
+                        const uint8_t a = static_cast<uint8_t>((FONT::glyph_bitmap[byte_index] >> bit_index) & 1);
                         if (a) {
                             plot(xx, yy, col);
                         }
@@ -3322,7 +3326,7 @@ class image {
                     const int32_t bit_index = 7 - (x_off % 8);
                     const size_t byte_index = static_cast<size_t>(ch_data_off + x_off / 8);
                     if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
-                        const uint8_t a = (FONT::glyph_bitmap[byte_index] >> bit_index) & 1;
+                        const uint8_t a = static_cast<uint8_t>((FONT::glyph_bitmap[byte_index] >> bit_index) & 1);
                         if (a) {
                             plot(xx, yy, col);
                         }
