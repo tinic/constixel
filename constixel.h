@@ -1679,11 +1679,26 @@ class format_8bit : public format {
 
     static constexpr void compose(std::array<uint8_t, image_size> &data, size_t x, size_t y, float cola, float colr,
                                   float colg, float colb) {
-        size_t bg = static_cast<size_t>(data.data()[y * bytes_per_line + x]);
-        float Rl = colr * cola + quant.linear_palette().at(bg * 3 + 0) * (1.0f - cola);
-        float Gl = colg * cola + quant.linear_palette().at(bg * 3 + 1) * (1.0f - cola);
-        float Bl = colb * cola + quant.linear_palette().at(bg * 3 + 2) * (1.0f - cola);
-        plot(data, x, y, quant.nearest_linear(Rl, Gl, Bl));
+#if defined(__AVX2__)
+        if (!std::is_constant_evaluated()) {
+            __m128 cola_v = _mm_set1_ps(cola);
+            __m128 inv_cola_v = _mm_set1_ps(1.0f - cola);
+            __m128 col_rgb = _mm_set_ps(0.0f, colb, colg, colr);
+            size_t bg = static_cast<size_t>(data.data()[y * bytes_per_line + x]);
+            __m128 bg_rgb = _mm_loadu_ps(&quant.linear_palette()[bg * 3]);
+            __m128 result_rgb = _mm_add_ps(_mm_mul_ps(col_rgb, cola_v), _mm_mul_ps(bg_rgb, inv_cola_v));
+            alignas(16) float result[4];
+            _mm_store_ps(result, result_rgb);
+            plot(data, x, y, quant.nearest_linear(result[0], result[1], result[2]));
+        } else
+#endif  // #if defined(__AVX2__)
+        {
+            size_t bg = static_cast<size_t>(data.data()[y * bytes_per_line + x]);
+            float Rl = colr * cola + quant.linear_palette().at(bg * 3 + 0) * (1.0f - cola);
+            float Gl = colg * cola + quant.linear_palette().at(bg * 3 + 1) * (1.0f - cola);
+            float Bl = colb * cola + quant.linear_palette().at(bg * 3 + 2) * (1.0f - cola);
+            plot(data, x, y, quant.nearest_linear(Rl, Gl, Bl));
+        }
     }
 
     static constexpr void RGBA_uint32(std::array<uint32_t, W * H> &dst, const std::array<uint8_t, image_size> &src) {
@@ -3051,9 +3066,8 @@ class image {
     }
 
  private:
-
- #ifndef __INTELLISENSE__
- /// @cond DOXYGEN_EXCLUDE
+#ifndef __INTELLISENSE__
+    /// @cond DOXYGEN_EXCLUDE
 
     /**
      * @private
@@ -3489,7 +3503,6 @@ class image {
 
 /// @endcond  // DOXYGEN_EXCLUDE
 #endif  // #ifndef __INTELLISENSE__
-
 };
 
 }  // namespace constixel
