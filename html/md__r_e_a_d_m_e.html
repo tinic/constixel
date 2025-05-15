@@ -140,7 +140,7 @@ Primary features and goals</h1>
 Applications</h1>
 <ul>
 <li>Interface rendering on embedded devices.</li>
-<li>Send graphical data to your terminal through a serial or ssh connections from embedded or remote device.</li>
+<li>Send graphical data to your terminal through a serial or ssh connections from embedded or remote devices.</li>
 <li>Add graphical output to unit tests.</li>
 <li>Programmatically render static graphical assets.</li>
 <li>Help debug dynamic memory handling issues in complex C++ projects.</li>
@@ -177,8 +177,8 @@ Minimal example</h1>
 <div class="line">    image.<a class="code hl_function" href="classconstixel_1_1image.html#a58ede242948ae8c59879c8165c43ab49">sixel_to_cout</a>();</div>
 <div class="line">}</div>
 <div class="ttc" id="aclassconstixel_1_1image_html"><div class="ttname"><a href="classconstixel_1_1image.html">constixel::image</a></div><div class="ttdoc">Core class of constixel. Holds a buffer of an image width a certain size and format....</div><div class="ttdef"><b>Definition</b> constixel.h:1958</div></div>
-<div class="ttc" id="aclassconstixel_1_1image_html_a58ede242948ae8c59879c8165c43ab49"><div class="ttname"><a href="classconstixel_1_1image.html#a58ede242948ae8c59879c8165c43ab49">constixel::image::sixel_to_cout</a></div><div class="ttdeci">void sixel_to_cout() const</div><div class="ttdoc">Convert the current instance into a sixel stream and output it to std::cout.</div><div class="ttdef"><b>Definition</b> constixel.h:2951</div></div>
-<div class="ttc" id="aclassconstixel_1_1image_html_abd5c930c3645cb7b5ead82bad22dc7cb"><div class="ttname"><a href="classconstixel_1_1image.html#abd5c930c3645cb7b5ead82bad22dc7cb">constixel::image::fill_rect</a></div><div class="ttdeci">constexpr void fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col)</div><div class="ttdoc">Fill a rectangle with the specified color. Example:</div><div class="ttdef"><b>Definition</b> constixel.h:2500</div></div>
+<div class="ttc" id="aclassconstixel_1_1image_html_a58ede242948ae8c59879c8165c43ab49"><div class="ttname"><a href="classconstixel_1_1image.html#a58ede242948ae8c59879c8165c43ab49">constixel::image::sixel_to_cout</a></div><div class="ttdeci">void sixel_to_cout() const</div><div class="ttdoc">Convert the current instance into a sixel stream and output it to std::cout.</div><div class="ttdef"><b>Definition</b> constixel.h:2953</div></div>
+<div class="ttc" id="aclassconstixel_1_1image_html_abd5c930c3645cb7b5ead82bad22dc7cb"><div class="ttname"><a href="classconstixel_1_1image.html#abd5c930c3645cb7b5ead82bad22dc7cb">constixel::image::fill_rect</a></div><div class="ttdeci">constexpr void fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col)</div><div class="ttdoc">Fill a rectangle with the specified color. Example:</div><div class="ttdef"><b>Definition</b> constixel.h:2502</div></div>
 </div><!-- fragment --><p><img src="./media/constixel.jpg" alt="constixel" title="Example in iTerm" class="inline"/></p>
 <h1><a class="anchor" id="autotoc_md7"></a>
 Text drawing example</h1>
@@ -203,7 +203,7 @@ Text drawing example</h1>
 <div class="line"> </div>
 <div class="line">    <a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="classconstixel_1_1image.html#a58ede242948ae8c59879c8165c43ab49">sixel_to_cout</a>();</div>
 <div class="line">}</div>
-<div class="ttc" id="aclassconstixel_1_1image_html_a8f1119e641fb583a952c3b1a8a8b5212"><div class="ttname"><a href="classconstixel_1_1image.html#a8f1119e641fb583a952c3b1a8a8b5212">constixel::image::draw_string_mono</a></div><div class="ttdeci">constexpr int32_t draw_string_mono(int32_t x, int32_t y, const char *str, uint8_t col)</div><div class="ttdoc">Draw text at the specified coordinate. The template parameter selects which mono font to use....</div><div class="ttdef"><b>Definition</b> constixel.h:2335</div></div>
+<div class="ttc" id="aclassconstixel_1_1image_html_a8f1119e641fb583a952c3b1a8a8b5212"><div class="ttname"><a href="classconstixel_1_1image.html#a8f1119e641fb583a952c3b1a8a8b5212">constixel::image::draw_string_mono</a></div><div class="ttdeci">constexpr int32_t draw_string_mono(int32_t x, int32_t y, const char *str, uint8_t col)</div><div class="ttdoc">Draw text at the specified coordinate. The template parameter selects which mono font to use....</div><div class="ttdef"><b>Definition</b> constixel.h:2337</div></div>
 </div><!-- fragment --><p><img src="./media/constixel_text.jpg" alt="constixel" title="Example in iTerm" class="inline"/></p>
 <h1><a class="anchor" id="autotoc_md8"></a>
 Consteval sixel example</h1>
@@ -240,7 +240,7 @@ Consteval sixel example</h1>
 <div class="line">    std::cout &lt;&lt; <span class="stringliteral">&quot;Actual byte size: &quot;</span> &lt;&lt; strlen(sixel.data()) &lt;&lt; <span class="stringliteral">&quot;\n&quot;</span>;</div>
 <div class="line">    std::cout &lt;&lt; sixel.data() &lt;&lt; std::endl;</div>
 <div class="line">}</div>
-<div class="ttc" id="aclassconstixel_1_1image_html_a3c9bce30fc15b58fa020488d824c8756"><div class="ttname"><a href="classconstixel_1_1image.html#a3c9bce30fc15b58fa020488d824c8756">constixel::image::sixel</a></div><div class="ttdeci">constexpr void sixel(F &amp;&amp;char_out) const</div><div class="ttdoc">Convert the current instance into a sixel stream. Typically an implementation looks like this:</div><div class="ttdef"><b>Definition</b> constixel.h:2926</div></div>
+<div class="ttc" id="aclassconstixel_1_1image_html_a3c9bce30fc15b58fa020488d824c8756"><div class="ttname"><a href="classconstixel_1_1image.html#a3c9bce30fc15b58fa020488d824c8756">constixel::image::sixel</a></div><div class="ttdeci">constexpr void sixel(F &amp;&amp;char_out) const</div><div class="ttdoc">Convert the current instance into a sixel stream. Typically an implementation looks like this:</div><div class="ttdef"><b>Definition</b> constixel.h:2928</div></div>
 </div><!-- fragment --><h1><a class="anchor" id="autotoc_md9"></a>
 Consteval embedded image data example</h1>
 <p>This example will consteval gen_image_1bit() into a std::array, while dynamically generating the sixel string.</p>
@@ -301,7 +301,7 @@ Saving a PNG to disk example</h1>
 <div class="line">    std::ofstream file(<span class="stringliteral">&quot;constixel.png&quot;</span>, std::ios::binary);</div>
 <div class="line">    file.write(<span class="keyword">reinterpret_cast&lt;</span><span class="keyword">const </span><span class="keywordtype">char</span>*<span class="keyword">&gt;</span>(out.data()), <span class="keyword">static_cast&lt;</span>std::streamsize<span class="keyword">&gt;</span>(out.size()));</div>
 <div class="line">}</div>
-<div class="ttc" id="aclassconstixel_1_1image_html_a8f373503c532f2a1be2f18f5c4f38ef2"><div class="ttname"><a href="classconstixel_1_1image.html#a8f373503c532f2a1be2f18f5c4f38ef2">constixel::image::png</a></div><div class="ttdeci">constexpr void png(F &amp;&amp;char_out) const</div><div class="ttdoc">Convert the current instance into a png image. Typically an implementation looks like this:</div><div class="ttdef"><b>Definition</b> constixel.h:2909</div></div>
+<div class="ttc" id="aclassconstixel_1_1image_html_a8f373503c532f2a1be2f18f5c4f38ef2"><div class="ttname"><a href="classconstixel_1_1image.html#a8f373503c532f2a1be2f18f5c4f38ef2">constixel::image::png</a></div><div class="ttdeci">constexpr void png(F &amp;&amp;char_out) const</div><div class="ttdoc">Convert the current instance into a png image. Typically an implementation looks like this:</div><div class="ttdef"><b>Definition</b> constixel.h:2911</div></div>
 </div><!-- fragment --><h1><a class="anchor" id="autotoc_md11"></a>
 API</h1>
 <p>The following image formats are available. [Width] is the width in pixels, [Height] is the height in pixels. [Scale] is an optional parameter to specify a scale factor for the sixel output only. For instance setting this to 4 would scale the output of the sixel stream by a factor of 4. [Grayscale] will set the palette to a grayscale palette with black being the first entry in the palette and white being the last entry in the palette.</p>
@@ -487,9 +487,9 @@ API</h1>
 <div class="line">    <span class="keywordtype">bool</span> <a class="code hl_function" href="classconstixel_1_1image.html#a7424b858c178f46521c0bca428a5f6b1">convert_chunk&lt;device_format&gt;</a>(<span class="keywordtype">char</span> *dst, <span class="keywordtype">size_t</span> chunk_size, <span class="keywordtype">size_t</span> &amp;chunk_actual, <span class="keywordtype">size_t</span> &amp;chunk_index);</div>
 <div class="line"> </div>
 <div class="line">}</div>
-<div class="ttc" id="aclassconstixel_1_1image_html_a6b947155fd45a2da9943b07c9d2d131f"><div class="ttname"><a href="classconstixel_1_1image.html#a6b947155fd45a2da9943b07c9d2d131f">constixel::image::convert</a></div><div class="ttdeci">constexpr void convert(F &amp;&amp;char_out)</div><div class="ttdoc">Convert the current instance into a byte stream formatted for embedded displays.</div><div class="ttdef"><b>Definition</b> constixel.h:3040</div></div>
-<div class="ttc" id="aclassconstixel_1_1image_html_a7424b858c178f46521c0bca428a5f6b1"><div class="ttname"><a href="classconstixel_1_1image.html#a7424b858c178f46521c0bca428a5f6b1">constixel::image::convert_chunk</a></div><div class="ttdeci">bool convert_chunk(char *dst, size_t chunk_size, size_t &amp;chunk_actual, size_t &amp;chunk_index)</div><div class="ttdoc">Convert the current instance into a byte stream formatted for embedded displays. This function will w...</div><div class="ttdef"><b>Definition</b> constixel.h:3025</div></div>
-<div class="ttc" id="astructconstixel_1_1rect_html"><div class="ttname"><a href="structconstixel_1_1rect.html">constixel::rect</a></div><div class="ttdoc">basic rectangle structure</div><div class="ttdef"><b>Definition</b> constixel.h:483</div></div>
+<div class="ttc" id="aclassconstixel_1_1image_html_a6b947155fd45a2da9943b07c9d2d131f"><div class="ttname"><a href="classconstixel_1_1image.html#a6b947155fd45a2da9943b07c9d2d131f">constixel::image::convert</a></div><div class="ttdeci">constexpr void convert(F &amp;&amp;char_out)</div><div class="ttdoc">Convert the current instance into a byte stream formatted for embedded displays.</div><div class="ttdef"><b>Definition</b> constixel.h:3042</div></div>
+<div class="ttc" id="aclassconstixel_1_1image_html_a7424b858c178f46521c0bca428a5f6b1"><div class="ttname"><a href="classconstixel_1_1image.html#a7424b858c178f46521c0bca428a5f6b1">constixel::image::convert_chunk</a></div><div class="ttdeci">bool convert_chunk(char *dst, size_t chunk_size, size_t &amp;chunk_actual, size_t &amp;chunk_index)</div><div class="ttdoc">Convert the current instance into a byte stream formatted for embedded displays. This function will w...</div><div class="ttdef"><b>Definition</b> constixel.h:3027</div></div>
+<div class="ttc" id="astructconstixel_1_1rect_html"><div class="ttname"><a href="structconstixel_1_1rect.html">constixel::rect</a></div><div class="ttdoc">basic rectangle structure</div><div class="ttdef"><b>Definition</b> constixel.h:497</div></div>
 </div><!-- fragment --> </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

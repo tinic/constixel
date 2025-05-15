@@ -48,6 +48,8 @@ SOFTWARE.
 namespace constixel {
 
 /// @cond DOXYGEN_EXCLUDE
+namespace hidden {
+
 [[nodiscard]] static constexpr float fast_exp2(const float p) {
     const float offset = (p < 0) ? 1.0f : 0.0f;
     const float clipp = (p < -126) ? -126.0f : p;
@@ -88,7 +90,7 @@ static constexpr float fast_sqrtf(const float x) {
 
 static constexpr double m_pi_d = 3.14159265358979323846;
 
-[[nodiscard]] static consteval double cos_constexpr(double x, int32_t terms = 10) {
+[[nodiscard]] static consteval double cos_consteval(double x, int32_t terms = 10) {
     x = x - 6.283185307179586 * static_cast<int32_t>(x / 6.283185307179586);  // wrap x to [0, 2π)
     double res = 1.0, term = 1.0;
     double x2 = x * x;
@@ -99,7 +101,7 @@ static constexpr double m_pi_d = 3.14159265358979323846;
     return res;
 }
 
-[[nodiscard]] static consteval double sin_constexpr(double x, int32_t terms = 10) {
+[[nodiscard]] static consteval double sin_consteval(double x, int32_t terms = 10) {
     x = x - 6.283185307179586 * static_cast<int32_t>(x / 6.283185307179586);  // wrap x to [0, 2π)
     double res = x, term = x;
     double x2 = x * x;
@@ -110,7 +112,7 @@ static constexpr double m_pi_d = 3.14159265358979323846;
     return res;
 }
 
-[[nodiscard]] static consteval double pow_constexpr(double base, double exp, int32_t terms = 10) {
+[[nodiscard]] static consteval double pow_consteval(double base, double exp, int32_t terms = 10) {
     if (base <= 0.0)
         return (base == 0.0) ? 0.0 : 0.0 / 0.0;  // NaN for negative base
     double ln = 0.0, y = (base - 1) / (base + 1);
@@ -140,19 +142,19 @@ struct srgb {
     double r, g, b;
 };
 
-[[nodiscard]] static consteval double linear_to_srgb_constexpr(double c) {
+[[nodiscard]] static consteval double linear_to_srgb_consteval(double c) {
     if (c <= 0.0031308) {
         return 12.92 * c;
     } else {
-        return 1.055 * pow_constexpr(c, 1.0 / 2.4) - 0.055;
+        return 1.055 * pow_consteval(c, 1.0 / 2.4) - 0.055;
     }
 }
 
-[[nodiscard]] static consteval double srgb_to_linear_constexpr(double s) {
+[[nodiscard]] static consteval double srgb_to_linear_consteval(double s) {
     if (s <= 0.040449936) {
         return s / 12.92;
     } else {
-        return pow_constexpr((s + 0.055) / 1.055, 2.4);
+        return pow_consteval((s + 0.055) / 1.055, 2.4);
     }
 }
 
@@ -180,7 +182,7 @@ struct srgb {
     }
 }
 
-[[nodiscard]] static consteval srgb oklab_to_srgb(const oklab &oklab) {
+[[nodiscard]] static consteval srgb oklab_to_srgb_consteval(const oklab &oklab) {
     double l = oklab.l;
     double a = oklab.a;
     double b = oklab.b;
@@ -193,34 +195,34 @@ struct srgb {
     double g = -1.2684380046 * l_ + 2.6097574011 * m_ - 0.3413193965 * s_;
     double bl = -0.0041960863 * l_ - 0.7034186168 * m_ + 1.7076147031 * s_;
 
-    return {linear_to_srgb_constexpr(std::max(0.0, std::min(1.0, r))),
-            linear_to_srgb_constexpr(std::max(0.0, std::min(1.0, g))),
-            linear_to_srgb_constexpr(std::max(0.0, std::min(1.0, bl)))};
+    return {linear_to_srgb_consteval(std::max(0.0, std::min(1.0, r))),
+            linear_to_srgb_consteval(std::max(0.0, std::min(1.0, g))),
+            linear_to_srgb_consteval(std::max(0.0, std::min(1.0, bl)))};
 }
 
-[[nodiscard]] static consteval oklab oklch_to_oklab(const oklch &oklch) {
-    return {oklch.l, oklch.c * cos_constexpr(oklch.h * m_pi_d / 180.0),
-            oklch.c * sin_constexpr(oklch.h * m_pi_d / 180.0)};
+[[nodiscard]] static consteval oklab oklch_to_oklab_consteval(const oklch &oklch) {
+    return {oklch.l, oklch.c * cos_consteval(oklch.h * m_pi_d / 180.0),
+            oklch.c * sin_consteval(oklch.h * m_pi_d / 180.0)};
 }
 
-static constexpr const float epsilon_low = static_cast<float>(srgb_to_linear_constexpr(0.5 / 255.0));
-static constexpr const float epsilon_high = static_cast<float>(srgb_to_linear_constexpr(254.5 / 255.0));
+static constexpr const float epsilon_low = static_cast<float>(srgb_to_linear_consteval(0.5 / 255.0));
+static constexpr const float epsilon_high = static_cast<float>(srgb_to_linear_consteval(254.5 / 255.0));
 
-static consteval auto gen_a2al_4bit() {
+static consteval auto gen_a2al_4bit_consteval() {
     std::array<float, 16> a2al{};
     for (size_t c = 0; c < 16; c++) {
-        a2al[c] = static_cast<float>(constixel::srgb_to_linear_constexpr(static_cast<double>(c) * (1.0 / 15.0)));
+        a2al[c] = static_cast<float>(srgb_to_linear_consteval(static_cast<double>(c) * (1.0 / 15.0)));
     }
     return a2al;
 }
 
-static constexpr const std::array<float, 16> a2al_4bit = gen_a2al_4bit();
+static constexpr const std::array<float, 16> a2al_4bit = gen_a2al_4bit_consteval();
 
-/// @cond PRIVATE_CLASS
 template <size_t S>
 class quantize {
     static constexpr size_t palette_size = S;
 
+    std::array<float, palette_size * 3> linearpal{};
 #if defined(__ARM_NEON)
     std::array<float, palette_size * 3> linearpal_neon{};
 #endif  // #if defined(__ARM_NEON)
@@ -228,18 +230,18 @@ class quantize {
     alignas(32) std::array<float, palette_size * 3> linearpal_avx2{};
 #endif  // #if defined(__ARM_NEON)
 
-    const std::array<uint32_t, palette_size> &pal;
+    const std::array<uint32_t, palette_size> pal{};
 
  public:
     quantize &operator=(const quantize &) = delete;
     explicit consteval quantize(const std::array<uint32_t, palette_size> &palette) : pal(palette) {
         for (size_t i = 0; i < pal.size(); i++) {
             linearpal.at(i * 3 + 0) = static_cast<float>(
-                srgb_to_linear_constexpr(static_cast<double>((pal[i] >> 16) & 0xFF) * (1.0 / 255.0)));
+                hidden::srgb_to_linear_consteval(static_cast<double>((pal[i] >> 16) & 0xFF) * (1.0 / 255.0)));
             linearpal.at(i * 3 + 1) =
-                static_cast<float>(srgb_to_linear_constexpr(static_cast<double>((pal[i] >> 8) & 0xFF) * (1.0 / 255.0)));
+                static_cast<float>(hidden::srgb_to_linear_consteval(static_cast<double>((pal[i] >> 8) & 0xFF) * (1.0 / 255.0)));
             linearpal.at(i * 3 + 2) =
-                static_cast<float>(srgb_to_linear_constexpr(static_cast<double>((pal[i] >> 0) & 0xFF) * (1.0 / 255.0)));
+                static_cast<float>(hidden::srgb_to_linear_consteval(static_cast<double>((pal[i] >> 0) & 0xFF) * (1.0 / 255.0)));
         }
 #if defined(__ARM_NEON)
         if (pal.size() >= 4) {
@@ -280,7 +282,13 @@ class quantize {
         return static_cast<uint8_t>(best);
     }
 
-    std::array<float, palette_size * 3> linearpal{};
+    [[nodiscard]] constexpr auto palette() const {
+        return pal;
+    }
+
+    [[nodiscard]] constexpr auto linear_palette() const {
+        return linearpal;
+    }
 
     [[nodiscard]] constexpr uint8_t nearest_linear(float r, float g, float b) const {
 #if defined(__ARM_NEON)
@@ -376,7 +384,9 @@ class quantize {
         return static_cast<uint8_t>(best);
     }
 };
-/// @endcond // PRIVATE_CLASS
+
+} // namespace hidden
+/// @endcond // DOXYGEN_EXCLUDE
 
 /// @cond PRIVATE_CLASS
 template <size_t N, typename T>
@@ -464,7 +474,7 @@ class hextree {
         return nodes.at(idx).child[key & child_nodes_n_mask];
     }
 };
-/// @endcond
+/// @endcond // PRIVATE_CLASS
 
 /// @cond PRIVATE_CLASS
 template <typename T>
@@ -478,7 +488,6 @@ struct char_info {
     T yoffset;
 };
 /// @endcond // PRIVATE_CLASS
-/// @endcond // DOXYGEN_EXCLUSE
 
 /**
  * @brief basic rectangle structure
@@ -876,7 +885,11 @@ class format_1bit : public format {
     static constexpr size_t bits_per_pixel = 1;
     static constexpr size_t bytes_per_line = (W * bits_per_pixel + 7) / 8;
     static constexpr size_t image_size = H * bytes_per_line;
-    static constexpr std::array<uint32_t, (1UL << bits_per_pixel)> palette = {{0x00000000, 0x00ffffff}};
+
+    static consteval auto gen_palette_consteval() {
+        return std::array<uint32_t, (1UL << bits_per_pixel)>({{0x00000000, 0x00ffffff}});
+    }
+    static constexpr const auto quant = hidden::quantize<1UL << bits_per_pixel>(gen_palette_consteval());
 
     static constexpr uint8_t reverse(uint8_t b) {
         b = static_cast<uint8_t>((b & uint8_t{0xF0}) >> 4 | (b & uint8_t{0x0F}) << 4);
@@ -992,7 +1005,7 @@ class format_1bit : public format {
         for (size_t y = 0; y < H; y++) {
             for (size_t x = 0; x < W; x++) {
                 uint8_t col = get_col(ptr, x);
-                rgba[y * W + x] = palette.at(col) | (col ? 0xFF000000 : 0x00000000);
+                rgba[y * W + x] = quant.palette().at(col) | (col ? 0xFF000000 : 0x00000000);
             }
             ptr += bytes_per_line;
         }
@@ -1005,9 +1018,9 @@ class format_1bit : public format {
         for (size_t y = 0; y < H; y++) {
             for (size_t x = 0; x < W; x++) {
                 uint8_t col = get_col(ptr, x);
-                rgba[y * W * 4 + x * 4 + 0] = static_cast<uint8_t>((palette.at(col) >> 16) & 0xFF);
-                rgba[y * W * 4 + x * 4 + 1] = static_cast<uint8_t>((palette.at(col) >> 8) & 0xFF);
-                rgba[y * W * 4 + x * 4 + 2] = static_cast<uint8_t>((palette.at(col) >> 0) & 0xFF);
+                rgba[y * W * 4 + x * 4 + 0] = static_cast<uint8_t>((quant.palette().at(col) >> 16) & 0xFF);
+                rgba[y * W * 4 + x * 4 + 1] = static_cast<uint8_t>((quant.palette().at(col) >> 8) & 0xFF);
+                rgba[y * W * 4 + x * 4 + 2] = static_cast<uint8_t>((quant.palette().at(col) >> 0) & 0xFF);
                 rgba[y * W * 4 + x * 4 + 3] = (col ? 0xFF : 0x00);
             }
             ptr += bytes_per_line;
@@ -1054,9 +1067,9 @@ class format_1bit : public format {
                 float R = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 0]) * (1.0f / 255.0f);
                 float G = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 1]) * (1.0f / 255.0f);
                 float B = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 2]) * (1.0f / 255.0f);
-                float Rl = constixel::srgb_to_linear(R);
-                float Gl = constixel::srgb_to_linear(G);
-                float Bl = constixel::srgb_to_linear(B);
+                float Rl = hidden::srgb_to_linear(R);
+                float Gl = hidden::srgb_to_linear(G);
+                float Bl = hidden::srgb_to_linear(B);
                 Rl = Rl + err_r;
                 Gl = Gl + err_g;
                 Bl = Bl + err_b;
@@ -1072,7 +1085,7 @@ class format_1bit : public format {
 
     template <typename F>
     static constexpr void png(const std::array<uint8_t, image_size> &data, F &&char_out) {
-        png_image<W, H, S, uint8_t, bits_per_pixel>(data.data(), palette, char_out,
+        png_image<W, H, S, uint8_t, bits_per_pixel>(data.data(), quant.palette(), char_out,
                                                     [](const uint8_t *data_raw, size_t y, size_t &bpl) {
                                                         bpl = bytes_per_line;
                                                         return data_raw + y * bytes_per_line;
@@ -1082,7 +1095,7 @@ class format_1bit : public format {
     template <typename F>
     static constexpr void sixel(const std::array<uint8_t, image_size> &data, F &&char_out, const rect<int32_t> &r) {
         sixel_image<W, H, S, uint8_t, bits_per_pixel>(
-            data.data(), palette, char_out, r,
+            data.data(), quant.palette(), char_out, r,
             [](const uint8_t *data_raw, size_t x, size_t col, size_t y) {
                 const uint8_t *ptr = &data_raw[(y / S) * bytes_per_line + (x / S) / 8];
                 size_t x8 = (x / S) % 8;
@@ -1141,15 +1154,14 @@ class format_2bit : public format {
     static constexpr size_t bits_per_pixel = 2;
     static constexpr size_t bytes_per_line = (W * bits_per_pixel + 7) / 8;
     static constexpr size_t image_size = H * bytes_per_line;
-    static consteval auto gen_palette() {
+    static consteval auto gen_palette_consteval() {
         if (GR) {
             return std::array<uint32_t, (1UL << bits_per_pixel)>({{0x000000, 0x444444, 0x888888, 0xffffff}});
         } else {
             return std::array<uint32_t, (1UL << bits_per_pixel)>({{0x000000, 0xffffff, 0xff0000, 0x0077ff}});
         }
     }
-    static constexpr const auto palette = gen_palette();
-    static constexpr const auto quant = constixel::quantize<1UL << bits_per_pixel>(palette);
+    static constexpr const auto quant = hidden::quantize<1UL << bits_per_pixel>(gen_palette_consteval());
 
     static constexpr uint8_t reverse(uint8_t b) {
         b = static_cast<uint8_t>((b & uint8_t{0xF0}) >> 4 | (b & uint8_t{0x0F}) << 4);
@@ -1215,7 +1227,7 @@ class format_2bit : public format {
         for (size_t y = 0; y < H; y++) {
             for (size_t x = 0; x < W; x++) {
                 uint8_t col = get_col(ptr, x);
-                rgba[y * W + x] = palette.at(col) | (col ? 0xFF000000 : 0x00000000);
+                rgba[y * W + x] = quant.palette().at(col) | (col ? 0xFF000000 : 0x00000000);
             }
             ptr += bytes_per_line;
         }
@@ -1228,9 +1240,9 @@ class format_2bit : public format {
         for (size_t y = 0; y < H; y++) {
             for (size_t x = 0; x < W; x++) {
                 uint8_t col = get_col(ptr, x);
-                rgba[y * W * 4 + x * 4 + 0] = static_cast<uint8_t>((palette.at(col) >> 16) & 0xFF);
-                rgba[y * W * 4 + x * 4 + 1] = static_cast<uint8_t>((palette.at(col) >> 8) & 0xFF);
-                rgba[y * W * 4 + x * 4 + 2] = static_cast<uint8_t>((palette.at(col) >> 0) & 0xFF);
+                rgba[y * W * 4 + x * 4 + 0] = static_cast<uint8_t>((quant.palette().at(col) >> 16) & 0xFF);
+                rgba[y * W * 4 + x * 4 + 1] = static_cast<uint8_t>((quant.palette().at(col) >> 8) & 0xFF);
+                rgba[y * W * 4 + x * 4 + 2] = static_cast<uint8_t>((quant.palette().at(col) >> 0) & 0xFF);
                 rgba[y * W * 4 + x * 4 + 3] = (col ? 0xFF : 0x00);
             }
             ptr += bytes_per_line;
@@ -1265,9 +1277,9 @@ class format_2bit : public format {
                 B = B + err_b;
                 uint8_t n = quant.nearest(R, G, B);
                 plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
-                err_r = std::clamp(R - static_cast<int32_t>((palette.at(n) >> 16) & 0xFF), int32_t{-255}, int32_t{255});
-                err_g = std::clamp(G - static_cast<int32_t>((palette.at(n) >> 8) & 0xFF), int32_t{-255}, int32_t{255});
-                err_b = std::clamp(B - static_cast<int32_t>((palette.at(n) >> 0) & 0xFF), int32_t{-255}, int32_t{255});
+                err_r = std::clamp(R - static_cast<int32_t>((quant.palette().at(n) >> 16) & 0xFF), int32_t{-255}, int32_t{255});
+                err_g = std::clamp(G - static_cast<int32_t>((quant.palette().at(n) >> 8) & 0xFF), int32_t{-255}, int32_t{255});
+                err_b = std::clamp(B - static_cast<int32_t>((quant.palette().at(n) >> 0) & 0xFF), int32_t{-255}, int32_t{255});
             }
         }
     }
@@ -1282,24 +1294,24 @@ class format_2bit : public format {
                 float R = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 0]) * (1.0f / 255.0f);
                 float G = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 1]) * (1.0f / 255.0f);
                 float B = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 2]) * (1.0f / 255.0f);
-                float Rl = constixel::srgb_to_linear(R);
-                float Gl = constixel::srgb_to_linear(G);
-                float Bl = constixel::srgb_to_linear(B);
+                float Rl = hidden::srgb_to_linear(R);
+                float Gl = hidden::srgb_to_linear(G);
+                float Bl = hidden::srgb_to_linear(B);
                 Rl = Rl + err_r;
                 Gl = Gl + err_g;
                 Bl = Bl + err_b;
                 uint8_t n = quant.nearest_linear(Rl, Gl, Bl);
                 plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
-                err_r = std::clamp(Rl - quant.linearpal.at(n * size_t{3} + size_t{0}), -1.0f, 1.0f);
-                err_g = std::clamp(Gl - quant.linearpal.at(n * size_t{3} + size_t{1}), -1.0f, 1.0f);
-                err_b = std::clamp(Bl - quant.linearpal.at(n * size_t{3} + size_t{2}), -1.0f, 1.0f);
+                err_r = std::clamp(Rl - quant.linear_palette().at(n * size_t{3} + size_t{0}), -1.0f, 1.0f);
+                err_g = std::clamp(Gl - quant.linear_palette().at(n * size_t{3} + size_t{1}), -1.0f, 1.0f);
+                err_b = std::clamp(Bl - quant.linear_palette().at(n * size_t{3} + size_t{2}), -1.0f, 1.0f);
             }
         }
     }
 
     template <typename F>
     static constexpr void png(const std::array<uint8_t, image_size> &data, F &&char_out) {
-        png_image<W, H, S, uint8_t, bits_per_pixel>(data.data(), palette, char_out,
+        png_image<W, H, S, uint8_t, bits_per_pixel>(data.data(), quant.palette(), char_out,
                                                     [](const uint8_t *data_raw, size_t y, size_t &bpl) {
                                                         bpl = bytes_per_line;
                                                         return data_raw + y * bytes_per_line;
@@ -1309,7 +1321,7 @@ class format_2bit : public format {
     template <typename F>
     static constexpr void sixel(const std::array<uint8_t, image_size> &data, F &&char_out, const rect<int32_t> &r) {
         sixel_image<W, H, S, uint8_t, bits_per_pixel>(
-            data.data(), palette, char_out, r,
+            data.data(), quant.palette(), char_out, r,
             [](const uint8_t *data_raw, size_t x, size_t col, size_t y) {
                 const uint8_t *ptr = &data_raw[(y / S) * bytes_per_line + (x / S) / 4];
                 size_t x4 = (x / S) % 4;
@@ -1369,7 +1381,7 @@ class format_4bit : public format {
     static constexpr size_t bytes_per_line = (W * bits_per_pixel + 7) / 8;
     static constexpr size_t image_size = H * bytes_per_line;
 
-    static consteval auto gen_palette() {
+    static consteval auto gen_palette_consteval() {
         if (GR) {
             return std::array<uint32_t, (1UL << bits_per_pixel)>(
                 {{0x000000, 0x111111, 0x222222, 0x333333, 0x444444, 0x555555, 0x666666, 0x777777, 0x888888, 0x999999,
@@ -1380,9 +1392,7 @@ class format_4bit : public format {
                   0x999999, 0xcccccc, 0x7f0000, 0x007f00, 0x00007f, 0x7f7f00}});
         }
     }
-
-    static constexpr const auto palette = gen_palette();
-    static constexpr const auto quant = constixel::quantize<1UL << bits_per_pixel>(palette);
+    static constexpr const auto quant = hidden::quantize<1UL << bits_per_pixel>(gen_palette_consteval());
 
     static constexpr uint8_t reverse(uint8_t b) {
         b = static_cast<uint8_t>((b & uint8_t{0xF0}) >> 4 | (b & uint8_t{0x0F}) << 4);
@@ -1398,9 +1408,9 @@ class format_4bit : public format {
     static constexpr void compose(std::array<uint8_t, image_size> &data, size_t x, size_t y, float cola, float colr,
                                   float colg, float colb) {
         size_t bg = static_cast<size_t>(get_col(data, x, y));
-        float Rl = colr + quant.linearpal.at(bg * 3 + 0) * (1.0f - cola);
-        float Gl = colg + quant.linearpal.at(bg * 3 + 1) * (1.0f - cola);
-        float Bl = colb + quant.linearpal.at(bg * 3 + 2) * (1.0f - cola);
+        float Rl = colr + quant.linear_palette().at(bg * 3 + 0) * (1.0f - cola);
+        float Gl = colg + quant.linear_palette().at(bg * 3 + 1) * (1.0f - cola);
+        float Bl = colb + quant.linear_palette().at(bg * 3 + 2) * (1.0f - cola);
         plot(data, x, y, quant.nearest_linear(Rl, Gl, Bl));
     }
 
@@ -1457,7 +1467,7 @@ class format_4bit : public format {
         for (size_t y = 0; y < H; y++) {
             for (size_t x = 0; x < W; x++) {
                 uint8_t col = get_col(ptr, x);
-                rgba[y * W + x] = palette.at(col) | (col ? 0xFF000000 : 0x00000000);
+                rgba[y * W + x] = quant.palette().at(col) | (col ? 0xFF000000 : 0x00000000);
             }
             ptr += bytes_per_line;
         }
@@ -1470,9 +1480,9 @@ class format_4bit : public format {
         for (size_t y = 0; y < H; y++) {
             for (size_t x = 0; x < W; x++) {
                 uint8_t col = get_col(ptr, x);
-                rgba[y * W * 4 + x * 4 + 0] = static_cast<uint8_t>((palette.at(col) >> 16) & 0xFF);
-                rgba[y * W * 4 + x * 4 + 1] = static_cast<uint8_t>((palette.at(col) >> 8) & 0xFF);
-                rgba[y * W * 4 + x * 4 + 2] = static_cast<uint8_t>((palette.at(col) >> 0) & 0xFF);
+                rgba[y * W * 4 + x * 4 + 0] = static_cast<uint8_t>((quant.palette().at(col) >> 16) & 0xFF);
+                rgba[y * W * 4 + x * 4 + 1] = static_cast<uint8_t>((quant.palette().at(col) >> 8) & 0xFF);
+                rgba[y * W * 4 + x * 4 + 2] = static_cast<uint8_t>((quant.palette().at(col) >> 0) & 0xFF);
                 rgba[y * W * 4 + x * 4 + 3] = (col ? 0xFF : 0x00);
             }
             ptr += bytes_per_line;
@@ -1507,9 +1517,9 @@ class format_4bit : public format {
                 B = B + err_b;
                 uint8_t n = quant.nearest(R, G, B);
                 plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
-                err_r = std::clamp(R - static_cast<int32_t>((palette.at(n) >> 16) & 0xFF), int32_t{-255}, int32_t{255});
-                err_g = std::clamp(G - static_cast<int32_t>((palette.at(n) >> 8) & 0xFF), int32_t{-255}, int32_t{255});
-                err_b = std::clamp(B - static_cast<int32_t>((palette.at(n) >> 0) & 0xFF), int32_t{-255}, int32_t{255});
+                err_r = std::clamp(R - static_cast<int32_t>((quant.palette().at(n) >> 16) & 0xFF), int32_t{-255}, int32_t{255});
+                err_g = std::clamp(G - static_cast<int32_t>((quant.palette().at(n) >> 8) & 0xFF), int32_t{-255}, int32_t{255});
+                err_b = std::clamp(B - static_cast<int32_t>((quant.palette().at(n) >> 0) & 0xFF), int32_t{-255}, int32_t{255});
             }
         }
     }
@@ -1524,24 +1534,24 @@ class format_4bit : public format {
                 float R = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 0]) * (1.0f / 255.0f);
                 float G = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 1]) * (1.0f / 255.0f);
                 float B = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 2]) * (1.0f / 255.0f);
-                float Rl = constixel::srgb_to_linear(R);
-                float Gl = constixel::srgb_to_linear(G);
-                float Bl = constixel::srgb_to_linear(B);
+                float Rl = hidden::srgb_to_linear(R);
+                float Gl = hidden::srgb_to_linear(G);
+                float Bl = hidden::srgb_to_linear(B);
                 Rl = Rl + err_r;
                 Gl = Gl + err_g;
                 Bl = Bl + err_b;
                 uint8_t n = quant.nearest_linear(Rl, Gl, Bl);
                 plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
-                err_r = std::clamp(Rl - quant.linearpal.at(n * size_t{3} + size_t{0}), -1.0f, 1.0f);
-                err_g = std::clamp(Gl - quant.linearpal.at(n * size_t{3} + size_t{1}), -1.0f, 1.0f);
-                err_b = std::clamp(Bl - quant.linearpal.at(n * size_t{3} + size_t{2}), -1.0f, 1.0f);
+                err_r = std::clamp(Rl - quant.linear_palette().at(n * size_t{3} + size_t{0}), -1.0f, 1.0f);
+                err_g = std::clamp(Gl - quant.linear_palette().at(n * size_t{3} + size_t{1}), -1.0f, 1.0f);
+                err_b = std::clamp(Bl - quant.linear_palette().at(n * size_t{3} + size_t{2}), -1.0f, 1.0f);
             }
         }
     }
 
     template <typename F>
     static constexpr void png(const std::array<uint8_t, image_size> &data, F &&char_out) {
-        png_image<W, H, S, uint8_t, bits_per_pixel>(data.data(), palette, char_out,
+        png_image<W, H, S, uint8_t, bits_per_pixel>(data.data(), quant.palette(), char_out,
                                                     [](const uint8_t *data_raw, size_t y, size_t &bpl) {
                                                         bpl = bytes_per_line;
                                                         return data_raw + y * bytes_per_line;
@@ -1551,7 +1561,7 @@ class format_4bit : public format {
     template <typename F>
     static constexpr void sixel(const std::array<uint8_t, image_size> &data, F &&char_out, const rect<int32_t> &r) {
         sixel_image<W, H, S, uint8_t, bits_per_pixel>(
-            data.data(), palette, char_out, r,
+            data.data(), quant.palette(), char_out, r,
             [](const uint8_t *data_raw, size_t x, size_t col, size_t y) {
                 const uint8_t *ptr = &data_raw[(y / S) * bytes_per_line + (x / S) / 2];
                 size_t x2 = (x / S) % 2;
@@ -1611,7 +1621,7 @@ class format_8bit : public format {
     static constexpr size_t bytes_per_line = W;
     static constexpr size_t image_size = H * bytes_per_line;
 
-    static consteval auto gen_palette() {
+    static consteval auto gen_palette_consteval() {
         std::array<uint32_t, (1UL << bits_per_pixel)> pal{};
         if (GR) {
             for (size_t c = 0; c < 256; c++) {
@@ -1655,10 +1665,10 @@ class format_8bit : public format {
                 pal[0x70 + c + 8] = (255 << 16) | (x << 8) | (255 << 0);
             }
             for (size_t c = 0; c < 8; c++) {
-                constixel::oklab lft{static_cast<double>(c) / 7 - 0.2, 0.2, 0.0};
-                constixel::oklab rgh{static_cast<double>(c) / 7 - 0.2, 0.2, 337.5};
+                hidden::oklab lft{static_cast<double>(c) / 7 - 0.2, 0.2, 0.0};
+                hidden::oklab rgh{static_cast<double>(c) / 7 - 0.2, 0.2, 337.5};
                 for (size_t d = 0; d < 16; d++) {
-                    auto res = constixel::oklab_to_srgb(constixel::oklch_to_oklab(constixel::oklch{
+                    auto res = hidden::oklab_to_srgb_consteval(hidden::oklch_to_oklab_consteval(hidden::oklch{
                         std::lerp(lft.l, rgh.l, static_cast<double>(d) / 15.0),
                         std::lerp(lft.a, rgh.a, static_cast<double>(d) / 15.0),
                         std::lerp(lft.b, rgh.b, static_cast<double>(d) / 15.0),
@@ -1672,9 +1682,7 @@ class format_8bit : public format {
         }
         return pal;
     }
-
-    static constexpr const auto palette = gen_palette();
-    static constexpr const auto quant = constixel::quantize<1UL << bits_per_pixel>(palette);
+    static constexpr const auto quant = hidden::quantize<1UL << bits_per_pixel>(gen_palette_consteval());
 
     static constexpr uint8_t reverse(uint8_t b) {
         return b;
@@ -1702,9 +1710,9 @@ class format_8bit : public format {
     static constexpr void compose(std::array<uint8_t, image_size> &data, size_t x, size_t y, float cola, float colr,
                                   float colg, float colb) {
         size_t bg = static_cast<size_t>(data.data()[y * bytes_per_line + x]);
-        float Rl = colr + quant.linearpal.at(bg * 3 + 0) * (1.0f - cola);
-        float Gl = colg + quant.linearpal.at(bg * 3 + 1) * (1.0f - cola);
-        float Bl = colb + quant.linearpal.at(bg * 3 + 2) * (1.0f - cola);
+        float Rl = colr + quant.linear_palette().at(bg * 3 + 0) * (1.0f - cola);
+        float Gl = colg + quant.linear_palette().at(bg * 3 + 1) * (1.0f - cola);
+        float Bl = colb + quant.linear_palette().at(bg * 3 + 2) * (1.0f - cola);
         plot(data, x, y, quant.nearest_linear(Rl, Gl, Bl));
     }
 
@@ -1714,7 +1722,7 @@ class format_8bit : public format {
         for (size_t y = 0; y < H; y++) {
             for (size_t x = 0; x < W; x++) {
                 uint8_t col = ptr[x];
-                rgba[y * W + x] = palette.at(col) | (col ? 0xFF000000 : 0x00000000);
+                rgba[y * W + x] = quant.palette().at(col) | (col ? 0xFF000000 : 0x00000000);
             }
             ptr += bytes_per_line;
         }
@@ -1727,9 +1735,9 @@ class format_8bit : public format {
         for (size_t y = 0; y < H; y++) {
             for (size_t x = 0; x < W; x++) {
                 uint8_t col = ptr[x];
-                rgba[y * W * 4 + x * 4 + 0] = static_cast<uint8_t>((palette.at(col) >> 16) & 0xFF);
-                rgba[y * W * 4 + x * 4 + 1] = static_cast<uint8_t>((palette.at(col) >> 8) & 0xFF);
-                rgba[y * W * 4 + x * 4 + 2] = static_cast<uint8_t>((palette.at(col) >> 0) & 0xFF);
+                rgba[y * W * 4 + x * 4 + 0] = static_cast<uint8_t>((quant.palette().at(col) >> 16) & 0xFF);
+                rgba[y * W * 4 + x * 4 + 1] = static_cast<uint8_t>((quant.palette().at(col) >> 8) & 0xFF);
+                rgba[y * W * 4 + x * 4 + 2] = static_cast<uint8_t>((quant.palette().at(col) >> 0) & 0xFF);
                 rgba[y * W * 4 + x * 4 + 3] = (col ? 0xFF : 0x00);
             }
             ptr += bytes_per_line;
@@ -1764,9 +1772,9 @@ class format_8bit : public format {
                 B = B + err_b;
                 uint8_t n = quant.nearest(R, G, B);
                 data.data()[(y + static_cast<size_t>(r.y)) * bytes_per_line + (x + static_cast<size_t>(r.x))] = n;
-                err_r = std::clamp(R - static_cast<int32_t>((palette.at(n) >> 16) & 0xFF), int32_t{-255}, int32_t{255});
-                err_g = std::clamp(G - static_cast<int32_t>((palette.at(n) >> 8) & 0xFF), int32_t{-255}, int32_t{255});
-                err_b = std::clamp(B - static_cast<int32_t>((palette.at(n) >> 0) & 0xFF), int32_t{-255}, int32_t{255});
+                err_r = std::clamp(R - static_cast<int32_t>((quant.palette().at(n) >> 16) & 0xFF), int32_t{-255}, int32_t{255});
+                err_g = std::clamp(G - static_cast<int32_t>((quant.palette().at(n) >> 8) & 0xFF), int32_t{-255}, int32_t{255});
+                err_b = std::clamp(B - static_cast<int32_t>((quant.palette().at(n) >> 0) & 0xFF), int32_t{-255}, int32_t{255});
             }
         }
     }
@@ -1781,24 +1789,24 @@ class format_8bit : public format {
                 float R = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 0]) * (1.0f / 255.0f);
                 float G = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 1]) * (1.0f / 255.0f);
                 float B = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 2]) * (1.0f / 255.0f);
-                float Rl = constixel::srgb_to_linear(R);
-                float Gl = constixel::srgb_to_linear(G);
-                float Bl = constixel::srgb_to_linear(B);
+                float Rl = hidden::srgb_to_linear(R);
+                float Gl = hidden::srgb_to_linear(G);
+                float Bl = hidden::srgb_to_linear(B);
                 Rl = Rl + err_r;
                 Gl = Gl + err_g;
                 Bl = Bl + err_b;
                 uint8_t n = quant.nearest_linear(Rl, Gl, Bl);
                 data.data()[(y + static_cast<size_t>(r.y)) * bytes_per_line + (x + static_cast<size_t>(r.x))] = n;
-                err_r = std::clamp(Rl - quant.linearpal.at(n * size_t{3} + size_t{0}), -1.0f, 1.0f);
-                err_g = std::clamp(Gl - quant.linearpal.at(n * size_t{3} + size_t{1}), -1.0f, 1.0f);
-                err_b = std::clamp(Bl - quant.linearpal.at(n * size_t{3} + size_t{2}), -1.0f, 1.0f);
+                err_r = std::clamp(Rl - quant.linear_palette().at(n * size_t{3} + size_t{0}), -1.0f, 1.0f);
+                err_g = std::clamp(Gl - quant.linear_palette().at(n * size_t{3} + size_t{1}), -1.0f, 1.0f);
+                err_b = std::clamp(Bl - quant.linear_palette().at(n * size_t{3} + size_t{2}), -1.0f, 1.0f);
             }
         }
     }
 
     template <typename F>
     static constexpr void png(const std::array<uint8_t, image_size> &data, F &&char_out) {
-        png_image<W, H, S, uint8_t, bits_per_pixel>(data.data(), palette, char_out,
+        png_image<W, H, S, uint8_t, bits_per_pixel>(data.data(), quant.palette(), char_out,
                                                     [](const uint8_t *data_raw, size_t y, size_t &bpl) {
                                                         bpl = bytes_per_line;
                                                         return data_raw + y * bytes_per_line;
@@ -1808,7 +1816,7 @@ class format_8bit : public format {
     template <typename F>
     static constexpr void sixel(const std::array<uint8_t, image_size> &data, F &&char_out, const rect<int32_t> &r) {
         sixel_image<W, H, S, uint8_t, bits_per_pixel>(
-            data.data(), palette, char_out, r,
+            data.data(), quant.palette(), char_out, r,
             [](const uint8_t *data_raw, size_t x, size_t col, size_t y) {
                 const uint8_t *ptr = &data_raw[(y / S) * bytes_per_line + x / S];
                 uint8_t out = 0;
@@ -2165,18 +2173,18 @@ class image {
             std::swap(y0, y1);
         }
 
-        float Rl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 0);
-        float Gl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 1);
-        float Bl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 2);
+        float Rl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 0);
+        float Gl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 1);
+        float Bl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 2);
 
         float dx = static_cast<float>(x1 - x0);
         float dy = static_cast<float>(y1 - y0);
         float gradient = dx == 0.0f ? 1.0f : dy / dx;
 
         auto color_compose = [&](int32_t x, int32_t y, float a) {
-            if (a < epsilon_low) {
+            if (a < hidden::epsilon_low) {
                 return;
-            } else if (a >= epsilon_high) {
+            } else if (a >= hidden::epsilon_high) {
                 plot(x, y, col);
             } else {
                 compose(x, y, a, Rl * a, Gl * a, Bl * a);
@@ -3189,9 +3197,9 @@ class image {
     constexpr void fill_circle_aa_int(int32_t cx, int32_t cy, int32_t r, int32_t ox, int32_t oy, uint8_t col) {
         int32_t x0 = cx - r - 1;
         int32_t y0 = cy - r - 1;
-        float Rl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 0);
-        float Gl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 1);
-        float Bl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 2);
+        float Rl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 0);
+        float Gl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 1);
+        float Bl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 2);
         for (int32_t y = y0; y <= cy; ++y) {
             for (int32_t x = x0; x <= cx; ++x) {
                 float dx = (static_cast<float>(x) + 0.5f) - static_cast<float>(cx);
@@ -3213,17 +3221,17 @@ class image {
                 }
                 float a = static_cast<float>(r);
                 if (std::is_constant_evaluated()) {
-                    a -= fast_sqrtf(dist_sq);
+                    a -= hidden::fast_sqrtf(dist_sq);
                 } else {
                     a -= std::sqrt(dist_sq);
                 }
                 a = std::clamp(a + 0.5f, 0.0f, 1.0f);
-                if (a >= epsilon_low) {
+                if (a >= hidden::epsilon_low) {
                     int32_t lx = x;
                     int32_t ly = y;
                     int32_t rx = cx + (x0 - x) + r + ox;
                     int32_t ry = cy + (y0 - y) + r + oy;
-                    if (a >= epsilon_high) {
+                    if (a >= hidden::epsilon_high) {
                         plot(lx, ly, col);
                         plot(rx, ly, col);
                         plot(rx, ry, col);
@@ -3335,9 +3343,9 @@ class image {
         static_assert(FONT::mono == false, "Can't use a mono font to draw antialiased text.");
         int32_t ch_data_off = static_cast<int32_t>(ch.y) * static_cast<int32_t>(FONT::glyph_bitmap_stride) +
                               static_cast<int32_t>(ch.x) / 2;
-        float Rl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 0);
-        float Gl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 1);
-        float Bl = format.quant.linearpal.at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 2);
+        float Rl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 0);
+        float Gl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 1);
+        float Bl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 2);
         if constexpr (ROTATION == DEGREE_0) {
             x += ch.xoffset;
             y += ch.yoffset;
@@ -3354,7 +3362,7 @@ class image {
                             if (a == 0xF) {
                                 plot(xx, yy, col);
                             } else {
-                                float Al = a2al_4bit[a];
+                                float Al = hidden::a2al_4bit[a];
                                 compose(xx, yy, Al, Rl * Al, Gl * Al, Bl * Al);
                             }
                         }
@@ -3378,7 +3386,7 @@ class image {
                             if (a == 0xF) {
                                 plot(xx, yy, col);
                             } else {
-                                float Al = a2al_4bit[a];
+                                float Al = hidden::a2al_4bit[a];
                                 compose(xx, yy, Al, Rl * Al, Gl * Al, Bl * Al);
                             }
                         }
@@ -3402,7 +3410,7 @@ class image {
                             if (a == 0xF) {
                                 plot(xx, yy, col);
                             } else {
-                                float Al = a2al_4bit[a];
+                                float Al = hidden::a2al_4bit[a];
                                 compose(xx, yy, Al, Rl * Al, Gl * Al, Bl * Al);
                             }
                         }
@@ -3426,7 +3434,7 @@ class image {
                             if (a == 0xF) {
                                 plot(xx, yy, col);
                             } else {
-                                float Al = a2al_4bit[a];
+                                float Al = hidden::a2al_4bit[a];
                                 compose(xx, yy, Al, Rl * Al, Gl * Al, Bl * Al);
                             }
                         }
