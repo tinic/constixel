@@ -3054,6 +3054,7 @@ class image {
 
  private:
 
+ #ifndef __INTELLISENSE__
  /// @cond DOXYGEN_EXCLUDE
 
     /**
@@ -3489,6 +3490,7 @@ class image {
     T<W, H, S, GR> format{};
 
 /// @endcond  // DOXYGEN_EXCLUDE
+#endif  // #ifndef __INTELLISENSE__
 
 };
 
