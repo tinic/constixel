@@ -218,6 +218,17 @@ static consteval auto gen_a2al_4bit_consteval() {
 
 static constexpr const std::array<float, 16> a2al_4bit = gen_a2al_4bit_consteval();
 
+
+static consteval auto gen_a2al_8bit_consteval() {
+    std::array<float, 256> a2al{};
+    for (size_t c = 0; c < 16; c++) {
+        a2al[c] = static_cast<float>(srgb_to_linear_consteval(static_cast<double>(c) * (1.0 / 255.0)));
+    }
+    return a2al;
+}
+
+static constexpr const std::array<float, 256> a2al_8bit = gen_a2al_8bit_consteval();
+
 template <size_t S>
 class quantize {
     static constexpr size_t palette_size = S;
@@ -238,10 +249,10 @@ class quantize {
         for (size_t i = 0; i < pal.size(); i++) {
             linearpal.at(i * 3 + 0) = static_cast<float>(
                 hidden::srgb_to_linear_consteval(static_cast<double>((pal[i] >> 16) & 0xFF) * (1.0 / 255.0)));
-            linearpal.at(i * 3 + 1) =
-                static_cast<float>(hidden::srgb_to_linear_consteval(static_cast<double>((pal[i] >> 8) & 0xFF) * (1.0 / 255.0)));
-            linearpal.at(i * 3 + 2) =
-                static_cast<float>(hidden::srgb_to_linear_consteval(static_cast<double>((pal[i] >> 0) & 0xFF) * (1.0 / 255.0)));
+            linearpal.at(i * 3 + 1) = static_cast<float>(
+                hidden::srgb_to_linear_consteval(static_cast<double>((pal[i] >> 8) & 0xFF) * (1.0 / 255.0)));
+            linearpal.at(i * 3 + 2) = static_cast<float>(
+                hidden::srgb_to_linear_consteval(static_cast<double>((pal[i] >> 0) & 0xFF) * (1.0 / 255.0)));
         }
 #if defined(__ARM_NEON)
         if (pal.size() >= 4) {
@@ -385,7 +396,7 @@ class quantize {
     }
 };
 
-} // namespace hidden
+}  // namespace hidden
 /// @endcond // DOXYGEN_EXCLUDE
 
 /// @cond PRIVATE_CLASS
@@ -1104,7 +1115,8 @@ class format_1bit : public format {
                 for (size_t y6 = 0; y6 < 6; y6++) {
                     out >>= 1;
                     if ((y + y6) < H * S) {
-                        out |= static_cast<uint8_t>((static_cast<uint8_t>(((*ptr) >> (7 - x8)) & 1) == col) ? (1UL << 5) : 0);
+                        out |= static_cast<uint8_t>((static_cast<uint8_t>(((*ptr) >> (7 - x8)) & 1) == col) ? (1UL << 5)
+                                                                                                            : 0);
                         if (y6 != 5) {
                             if (++inc >= S) {
                                 inc = 0;
@@ -1277,9 +1289,12 @@ class format_2bit : public format {
                 B = B + err_b;
                 uint8_t n = quant.nearest(R, G, B);
                 plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
-                err_r = std::clamp(R - static_cast<int32_t>((quant.palette().at(n) >> 16) & 0xFF), int32_t{-255}, int32_t{255});
-                err_g = std::clamp(G - static_cast<int32_t>((quant.palette().at(n) >> 8) & 0xFF), int32_t{-255}, int32_t{255});
-                err_b = std::clamp(B - static_cast<int32_t>((quant.palette().at(n) >> 0) & 0xFF), int32_t{-255}, int32_t{255});
+                err_r = std::clamp(R - static_cast<int32_t>((quant.palette().at(n) >> 16) & 0xFF), int32_t{-255},
+                                   int32_t{255});
+                err_g = std::clamp(G - static_cast<int32_t>((quant.palette().at(n) >> 8) & 0xFF), int32_t{-255},
+                                   int32_t{255});
+                err_b = std::clamp(B - static_cast<int32_t>((quant.palette().at(n) >> 0) & 0xFF), int32_t{-255},
+                                   int32_t{255});
             }
         }
     }
@@ -1330,7 +1345,8 @@ class format_2bit : public format {
                 for (size_t y6 = 0; y6 < 6; y6++) {
                     out >>= 1;
                     if ((y + y6) < H * S) {
-                        out |= static_cast<uint8_t>((static_cast<uint8_t>(((*ptr) >> (6 - x4 * 2)) & 3) == col) ? (1UL << 5) : 0);
+                        out |= static_cast<uint8_t>(
+                            (static_cast<uint8_t>(((*ptr) >> (6 - x4 * 2)) & 3) == col) ? (1UL << 5) : 0);
                         if (y6 != 5) {
                             if (++inc >= S) {
                                 inc = 0;
@@ -1408,9 +1424,9 @@ class format_4bit : public format {
     static constexpr void compose(std::array<uint8_t, image_size> &data, size_t x, size_t y, float cola, float colr,
                                   float colg, float colb) {
         size_t bg = static_cast<size_t>(get_col(data, x, y));
-        float Rl = colr + quant.linear_palette().at(bg * 3 + 0) * (1.0f - cola);
-        float Gl = colg + quant.linear_palette().at(bg * 3 + 1) * (1.0f - cola);
-        float Bl = colb + quant.linear_palette().at(bg * 3 + 2) * (1.0f - cola);
+        float Rl = colr * cola + quant.linear_palette().at(bg * 3 + 0) * (1.0f - cola);
+        float Gl = colg * cola + quant.linear_palette().at(bg * 3 + 1) * (1.0f - cola);
+        float Bl = colb * cola + quant.linear_palette().at(bg * 3 + 2) * (1.0f - cola);
         plot(data, x, y, quant.nearest_linear(Rl, Gl, Bl));
     }
 
@@ -1517,9 +1533,12 @@ class format_4bit : public format {
                 B = B + err_b;
                 uint8_t n = quant.nearest(R, G, B);
                 plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
-                err_r = std::clamp(R - static_cast<int32_t>((quant.palette().at(n) >> 16) & 0xFF), int32_t{-255}, int32_t{255});
-                err_g = std::clamp(G - static_cast<int32_t>((quant.palette().at(n) >> 8) & 0xFF), int32_t{-255}, int32_t{255});
-                err_b = std::clamp(B - static_cast<int32_t>((quant.palette().at(n) >> 0) & 0xFF), int32_t{-255}, int32_t{255});
+                err_r = std::clamp(R - static_cast<int32_t>((quant.palette().at(n) >> 16) & 0xFF), int32_t{-255},
+                                   int32_t{255});
+                err_g = std::clamp(G - static_cast<int32_t>((quant.palette().at(n) >> 8) & 0xFF), int32_t{-255},
+                                   int32_t{255});
+                err_b = std::clamp(B - static_cast<int32_t>((quant.palette().at(n) >> 0) & 0xFF), int32_t{-255},
+                                   int32_t{255});
             }
         }
     }
@@ -1570,7 +1589,8 @@ class format_4bit : public format {
                 for (size_t y6 = 0; y6 < 6; y6++) {
                     out >>= 1;
                     if ((y + y6) < H * S) {
-                        out |= static_cast<uint8_t>((static_cast<uint8_t>(((*ptr) >> (4 - x2 * 4)) & 0xF) == col) ? (1UL << 5) : 0);
+                        out |= static_cast<uint8_t>(
+                            (static_cast<uint8_t>(((*ptr) >> (4 - x2 * 4)) & 0xF) == col) ? (1UL << 5) : 0);
                         if (y6 != 5) {
                             if (++inc >= S) {
                                 inc = 0;
@@ -1710,9 +1730,9 @@ class format_8bit : public format {
     static constexpr void compose(std::array<uint8_t, image_size> &data, size_t x, size_t y, float cola, float colr,
                                   float colg, float colb) {
         size_t bg = static_cast<size_t>(data.data()[y * bytes_per_line + x]);
-        float Rl = colr + quant.linear_palette().at(bg * 3 + 0) * (1.0f - cola);
-        float Gl = colg + quant.linear_palette().at(bg * 3 + 1) * (1.0f - cola);
-        float Bl = colb + quant.linear_palette().at(bg * 3 + 2) * (1.0f - cola);
+        float Rl = colr * cola + quant.linear_palette().at(bg * 3 + 0) * (1.0f - cola);
+        float Gl = colg * cola + quant.linear_palette().at(bg * 3 + 1) * (1.0f - cola);
+        float Bl = colb * cola + quant.linear_palette().at(bg * 3 + 2) * (1.0f - cola);
         plot(data, x, y, quant.nearest_linear(Rl, Gl, Bl));
     }
 
@@ -1772,9 +1792,12 @@ class format_8bit : public format {
                 B = B + err_b;
                 uint8_t n = quant.nearest(R, G, B);
                 data.data()[(y + static_cast<size_t>(r.y)) * bytes_per_line + (x + static_cast<size_t>(r.x))] = n;
-                err_r = std::clamp(R - static_cast<int32_t>((quant.palette().at(n) >> 16) & 0xFF), int32_t{-255}, int32_t{255});
-                err_g = std::clamp(G - static_cast<int32_t>((quant.palette().at(n) >> 8) & 0xFF), int32_t{-255}, int32_t{255});
-                err_b = std::clamp(B - static_cast<int32_t>((quant.palette().at(n) >> 0) & 0xFF), int32_t{-255}, int32_t{255});
+                err_r = std::clamp(R - static_cast<int32_t>((quant.palette().at(n) >> 16) & 0xFF), int32_t{-255},
+                                   int32_t{255});
+                err_g = std::clamp(G - static_cast<int32_t>((quant.palette().at(n) >> 8) & 0xFF), int32_t{-255},
+                                   int32_t{255});
+                err_b = std::clamp(B - static_cast<int32_t>((quant.palette().at(n) >> 0) & 0xFF), int32_t{-255},
+                                   int32_t{255});
             }
         }
     }
@@ -2187,7 +2210,7 @@ class image {
             } else if (a >= hidden::epsilon_high) {
                 plot(x, y, col);
             } else {
-                compose(x, y, a, Rl * a, Gl * a, Bl * a);
+                compose(x, y, a, Rl, Gl, Bl);
             }
         };
 
@@ -3237,10 +3260,10 @@ class image {
                         plot(rx, ry, col);
                         plot(lx, ry, col);
                     } else {
-                        compose(lx, ly, a, Rl * a, Gl * a, Bl * a);
-                        compose(rx, ly, a, Rl * a, Gl * a, Bl * a);
-                        compose(rx, ry, a, Rl * a, Gl * a, Bl * a);
-                        compose(lx, ry, a, Rl * a, Gl * a, Bl * a);
+                        compose(lx, ly, a, Rl, Gl, Bl);
+                        compose(rx, ly, a, Rl, Gl, Bl);
+                        compose(rx, ry, a, Rl, Gl, Bl);
+                        compose(lx, ry, a, Rl, Gl, Bl);
                     }
                 }
             }
@@ -3363,7 +3386,7 @@ class image {
                                 plot(xx, yy, col);
                             } else {
                                 float Al = hidden::a2al_4bit[a];
-                                compose(xx, yy, Al, Rl * Al, Gl * Al, Bl * Al);
+                                compose(xx, yy, Al, Rl, Gl, Bl);
                             }
                         }
                     }
@@ -3387,7 +3410,7 @@ class image {
                                 plot(xx, yy, col);
                             } else {
                                 float Al = hidden::a2al_4bit[a];
-                                compose(xx, yy, Al, Rl * Al, Gl * Al, Bl * Al);
+                                compose(xx, yy, Al, Rl, Gl, Bl);
                             }
                         }
                     }
@@ -3411,7 +3434,7 @@ class image {
                                 plot(xx, yy, col);
                             } else {
                                 float Al = hidden::a2al_4bit[a];
-                                compose(xx, yy, Al, Rl * Al, Gl * Al, Bl * Al);
+                                compose(xx, yy, Al, Rl, Gl, Bl);
                             }
                         }
                     }
@@ -3435,7 +3458,7 @@ class image {
                                 plot(xx, yy, col);
                             } else {
                                 float Al = hidden::a2al_4bit[a];
-                                compose(xx, yy, Al, Rl * Al, Gl * Al, Bl * Al);
+                                compose(xx, yy, Al, Rl, Gl, Bl);
                             }
                         }
                     }
