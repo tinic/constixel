@@ -198,9 +198,11 @@ class quantize {
 
     std::array<float, palette_size * 3> linearpal{};
 #if defined(__ARM_NEON)
+    // Note: ordering after linearpal critical for overreads
     std::array<float, palette_size * 3> linearpal_neon{};
 #endif  // #if defined(__ARM_NEON)
 #if defined(__AVX2__)
+    // Note: ordering after linearpal critical for overreads
     alignas(32) std::array<float, palette_size * 3> linearpal_avx2{};
 #endif  // #if defined(__ARM_NEON)
 
@@ -425,12 +427,12 @@ class hextree {
                 T next = vnodes.at(idx).child[nib];
                 if (next == invalid) {
                     next = static_cast<T>(vnodes.size());
-                    vnodes.at(idx).child[nib] = next;
+                    vnodes[idx].child[nib] = next;
                     vnodes.emplace_back();
                 }
                 idx = next;
             }
-            vnodes.at(idx).child[key & child_nodes_n_mask] = val;
+            vnodes[idx].child[key & child_nodes_n_mask] = val;
         }
         return static_cast<T>(vnodes.size());
     }
@@ -1679,12 +1681,27 @@ class format_8bit : public format {
 
     static constexpr void compose(std::array<uint8_t, image_size> &data, size_t x, size_t y, float cola, float colr,
                                   float colg, float colb) {
+#if defined(__ARM_NEON)
+        if (!std::is_constant_evaluated()) {
+            size_t bg = static_cast<size_t>(data.data()[y * bytes_per_line + x]);
+            float32x4_t cola_v = vdupq_n_f32(cola);
+            float32x4_t inv_cola_v = vdupq_n_f32(1.0f - cola);
+            float32x4_t col_rgb = {colr, colg, colb, 0.0f};
+            // Note: this reads 1 float into linearpal_neon
+            float32x4_t bg_rgb = vld1q_f32(&quant.linear_palette()[bg * 3]);
+            float32x4_t result_rgb = vaddq_f32(vmulq_f32(col_rgb, cola_v), vmulq_f32(bg_rgb, inv_cola_v));
+            alignas(16) float result[4];
+            vst1q_f32(result, result_rgb);
+            plot(data, x, y, quant.nearest_linear(result[0], result[1], result[2]));
+        } else
+#endif  // #if defined(__ARM_NEON)
 #if defined(__AVX2__)
         if (!std::is_constant_evaluated()) {
             __m128 cola_v = _mm_set1_ps(cola);
             __m128 inv_cola_v = _mm_set1_ps(1.0f - cola);
             __m128 col_rgb = _mm_set_ps(0.0f, colb, colg, colr);
             size_t bg = static_cast<size_t>(data.data()[y * bytes_per_line + x]);
+            // Note: this reads 1 float into linearpal_avx2
             __m128 bg_rgb = _mm_loadu_ps(&quant.linear_palette()[bg * 3]);
             __m128 result_rgb = _mm_add_ps(_mm_mul_ps(col_rgb, cola_v), _mm_mul_ps(bg_rgb, inv_cola_v));
             alignas(16) float result[4];
