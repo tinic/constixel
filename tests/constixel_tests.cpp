@@ -399,16 +399,15 @@ void draw_palette() {
 template <typename T>
 void draw_rgb() {
     static T image;
-    std::array<uint32_t, 65536> rgb{};
+    auto rgb = std::make_unique<std::array<uint32_t, 65536>>();
     for (uint32_t y = 0; y < 256; y++) {
         for (uint32_t x = 0; x < 256; x++) {
-            rgb.data()[y * 256 + x] = ((255 - y) << 16) | (x << 0) | (y << 8);
+            rgb->data()[y * 256 + x] = ((255 - y) << 16) | (x << 0) | (y << 8);
         }
     }
     {
-        image.blit_RGBA(0, 0, 256, 256, reinterpret_cast<const uint8_t *>(rgb.data()), 256, 256, 256 * 4);
+        image.blit_RGBA(0, 0, 256, 256, reinterpret_cast<const uint8_t *>(rgb->data()), 256, 256, 256 * 4);
         std::string out;
-        out.reserve(1UL << 18);
         image.sixel([&out](char ch) mutable {
             out.push_back(ch);
         });
@@ -417,9 +416,8 @@ void draw_rgb() {
         separator();
     }
     {
-        image.blit_RGBA_diffused(0, 0, 256, 256, reinterpret_cast<const uint8_t *>(rgb.data()), 256, 256, 256 * 4);
+        image.blit_RGBA_diffused(0, 0, 256, 256, reinterpret_cast<const uint8_t *>(rgb->data()), 256, 256, 256 * 4);
         std::string out;
-        out.reserve(1UL << 18);
         image.sixel([&out](char ch) mutable {
             out.push_back(ch);
         });
@@ -428,9 +426,8 @@ void draw_rgb() {
         separator();
     }
     {
-        image.blit_RGBA_diffused_linear(0, 0, 256, 256, reinterpret_cast<const uint8_t *>(rgb.data()), 256, 256, 256 * 4);
+        image.blit_RGBA_diffused_linear(0, 0, 256, 256, reinterpret_cast<const uint8_t *>(rgb->data()), 256, 256, 256 * 4);
         std::string out;
-        out.reserve(1UL << 18);
         image.sixel([&out](char ch) mutable {
             out.push_back(ch);
         });
@@ -443,17 +440,17 @@ void draw_rgb() {
 template <typename T>
 void round_trip() {
     static T image;
-    static std::array<uint32_t, 65536> rgb{};
+    auto rgb = std::make_unique<std::array<uint32_t, 65536>>();
     for (uint32_t y = 0; y < 256; y++) {
         for (uint32_t x = 0; x < 256; x++) {
-            rgb.data()[y * 256 + x] = ((255 - y) << 16) | (x << 0) | (y << 8);
+            rgb->data()[y * 256 + x] = ((255 - y) << 16) | (x << 0) | (y << 8);
         }
     }
-    image.blit_RGBA_diffused_linear(0, 0, 256, 256, reinterpret_cast<const uint8_t *>(rgb.data()), 256, 256, 256 * 4);
-    auto rgba8 = image.RGBA_uint8();
-    image.blit_RGBA(0, 0, 256, 256, rgba8.data(), 256, 256, 256 * 4);
+    image.blit_RGBA_diffused_linear(0, 0, 256, 256, reinterpret_cast<const uint8_t *>(rgb->data()), 256, 256, 256 * 4);
+    auto rgba8 = std::make_unique<std::array<uint8_t, 256 * 256 * 4>>();
+    image.RGBA_uint8(*rgba8);
+    image.blit_RGBA(0, 0, 256, 256, rgba8->data(), 256, 256, 256 * 4);
     std::string out;
-    out.reserve(1UL << 18);
     image.sixel([&out](char ch) mutable {
         out.push_back(ch);
     });

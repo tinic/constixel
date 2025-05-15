@@ -62,7 +62,8 @@
         "cinttypes": "cpp",
         "span": "cpp",
         "iterator": "cpp",
-        "filesystem": "cpp"
+        "filesystem": "cpp",
+        "cstddef": "cpp"
     },
     "cmake.sourceDirectory": "/Users/turo/constixel/tests",
     "editor.autoClosingBrackets": "never",
