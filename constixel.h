@@ -2965,14 +2965,21 @@ class image {
      * \brief Send a escape command to std::cout to clear the screen and scroll buffer of a vt100 compatible terminal.
      */
     void vt100_clear() const {
-        std::cout << "\033[2J\033[H" << std::endl;
+        std::cout << "\033[2J\033[3J\033[H";
+    }
+
+    /**
+     * \brief Send a escape command to std::cout to clear the screen and scroll buffer of a vt100 compatible terminal.
+     */
+    void vt100_clear_scrollback() const {
+        std::cout << "\033[3J";
     }
 
     /**
      * \brief Send a escape command to std::cout to home the cursor of a vt100 compatible terminal.
      */
     void vt100_home() const {
-        std::cout << "\033[H" << std::endl;
+        std::cout << "\033[H";
     }
 
     /**

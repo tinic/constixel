@@ -463,10 +463,10 @@ template <typename T, size_t I>
 void draw_functions() {
     static T image;
     image.clear();
-    puts("\033[2J\033[H");
+    image.vt100_clear();
     for (int32_t c = 0; c < static_cast<int32_t>(I); c++) {
         image.fill_rect(16 + c * 37, c * 32, 128, 128, static_cast<uint8_t>(c));
-        puts("\033[H");
+        image.vt100_home();
         std::string out;
         out.reserve(1UL << 18);
         image.sixel([&out](char ch) mutable {
@@ -478,7 +478,7 @@ void draw_functions() {
     }
     for (int32_t c = 0; c < static_cast<int32_t>(I); c++) {
         image.draw_line(16, 16, 64 + c * 42, 700, static_cast<uint8_t>(c), static_cast<uint8_t>(c));
-        puts("\033[H");
+        image.vt100_home();
         std::string out;
         out.reserve(1UL << 18);
         image.sixel([&out](char ch) mutable {
@@ -490,7 +490,7 @@ void draw_functions() {
     }
     for (int32_t c = 0; c < static_cast<int32_t>(I); c++) {
         image.fill_circle(600, 384, 256 - c * 16, static_cast<uint8_t>(c));
-        puts("\033[H");
+        image.vt100_home();
         std::string out;
         out.reserve(1UL << 18);
         image.sixel([&out](char ch) mutable {
@@ -506,10 +506,10 @@ template <typename T, size_t I>
 void draw_functions_aa() {
     static T image;
     image.clear();
-    puts("\033[2J\033[H");
+    image.vt100_clear();
     for (int32_t c = 0; c < static_cast<int32_t>(I); c++) {
         image.fill_rect(16 + c * 37, c * 32, 128, 128, static_cast<uint8_t>(c));
-        puts("\033[H");
+        image.vt100_home();
         std::string out;
         out.reserve(1UL << 18);
         image.sixel([&out](char ch) mutable {
@@ -521,7 +521,7 @@ void draw_functions_aa() {
     }
     for (int32_t c = 0; c < static_cast<int32_t>(I); c++) {
         image.draw_line_aa(16, 16, 64 + c * 42, 700, static_cast<uint8_t>(c));
-        puts("\033[H");
+        image.vt100_home();
         std::string out;
         out.reserve(1UL << 18);
         image.sixel([&out](char ch) mutable {
@@ -533,7 +533,7 @@ void draw_functions_aa() {
     }
     for (int32_t c = 0; c < static_cast<int32_t>(I); c++) {
         image.fill_circle_aa(600, 384, 256 - c * 16, static_cast<uint8_t>(c));
-        puts("\033[H");
+        image.vt100_home();
         std::string out;
         out.reserve(1UL << 18);
         image.sixel([&out](char ch) mutable {
