@@ -2900,7 +2900,7 @@ class image {
      * auto some_container;
      * image.png([=](char ch) mutable {
      *    some_container.push_back(ch);
-     * })
+     * });
      * \endcode
      *
      * \param char_out A lambda function which consumes the png image data one byte at a time.
@@ -2917,7 +2917,7 @@ class image {
      * auto some_container;
      * image.sixel([=](char ch) mutable {
      *    some_container.push_back(ch);
-     * })
+     * });
      * \endcode
      *
      * \param char_out A lambda function which consumes the sixel stream data one byte at a time.
@@ -2934,7 +2934,7 @@ class image {
      * auto some_container;
      * image.sixel({.x=0,.y=0,.w=100,.h=100},[=](char ch) mutable {
      *    some_container.push_back(ch);
-     * })
+     * });
      * \endcode
      *
      * \param char_out A lambda function which consumes the sixel stream data one byte at a time
