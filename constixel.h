@@ -353,7 +353,7 @@ class quantize {
                         best = d[lane];
                         bestIdx = static_cast<uint8_t>(i + lane);
                         if ( d[lane] <= epsilon ) {
-                            break;
+                            return static_cast<uint8_t>(bestIdx);
                         }
                     }
                 }
