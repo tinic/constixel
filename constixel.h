@@ -3328,7 +3328,7 @@ class image {
      * @private
      */
     constexpr void fill_circle_aa_int(int32_t cx, int32_t cy, int32_t r, int32_t ox, int32_t oy, uint8_t col) {
-        r = std::abs(r);
+        r = abs(r);
 
         int32_t x0 = cx - r - 1;
         int32_t y0 = cy - r - 1;
@@ -3627,7 +3627,7 @@ class image {
      */
     constexpr void fill_arc(int32_t x0, int32_t y0, int32_t r, uint8_t corners, int32_t delta, uint8_t col) {
 
-        r = std::abs(r);
+        r = abs(r);
 
         int32_t f = 1 - r;
         int32_t ddx = -2 * r;
