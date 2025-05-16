@@ -268,7 +268,7 @@ class quantize {
 
    
     [[nodiscard]] constexpr uint8_t nearest_linear(float r, float g, float b) const {
-            static constexpr float epsilon = 0.0001f;
+            static const float epsilon = 0.0001f;
 #if defined(__ARM_NEON)
         if (!std::is_constant_evaluated() && pal.size() >= 4) {
             const float32x4_t vR = vdupq_n_f32(r);
