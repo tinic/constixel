@@ -3626,6 +3626,9 @@ class image {
      * @private
      */
     constexpr void fill_arc(int32_t x0, int32_t y0, int32_t r, uint8_t corners, int32_t delta, uint8_t col) {
+
+        r = std::abs(r);
+
         int32_t f = 1 - r;
         int32_t ddx = -2 * r;
         int32_t ddy = 1;
