@@ -99,7 +99,7 @@ int main() {
         "ABCDEFGHIJKLM", "NOPQRTSUVWXYZ", "abcdefghijklm", "nopqrstuvwxyz","1234567890&@.,?!'"""
     };
 
-    image<format_8bit, 512, 312, 1> image;
+    image<format_8bit, 512, 312> image;
     for (size_t i = 0; i < strings.size(); i++) { 
         uint8_t col = color::GRAY_RAMP_STOP - static_cast<uint8_t>(i * 3);
 
@@ -165,7 +165,7 @@ This example will consteval gen_image_1bit() into a std::array, while dynamicall
 #include <cstring>
 
 consteval auto gen_image_1bit() {
-    constixel::image<constixel::format_1bit, 256, 256, 1> image;
+    constixel::image<constixel::format_1bit, 256, 256> image;
     for (int32_t y = 0; y < 16; y++) {
         for (int32_t x = 0; x < 16; x++) {
             image.fill_rect(x * 16, y * 16, 16, 16, static_cast<uint8_t>(y + x) & 1);
