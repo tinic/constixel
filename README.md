@@ -63,6 +63,12 @@ Option 2: If you prefer you can add this git repo as a cmake library:
 target_link_libraries(MyTarget PRIVATE constixel::constixel)
 ```
 
+Don't forget to enable C++20/23:
+
+```
+g++ -std=C++20 [...]
+```
+
 ## Minimal example
 
 ```c++
