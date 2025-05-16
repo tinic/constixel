@@ -266,7 +266,9 @@ class quantize {
         return linearpal;
     }
 
+   
     [[nodiscard]] constexpr uint8_t nearest_linear(float r, float g, float b) const {
+            static constexpr float epsilon = a2al_8bit[1] * a2al_8bit[1];
 #if defined(__ARM_NEON)
         if (!std::is_constant_evaluated() && pal.size() >= 4) {
             const float32x4_t vR = vdupq_n_f32(r);
@@ -292,21 +294,33 @@ class quantize {
                 if (d0 < best) {
                     best = d0;
                     bestIdx = i;
+                    if ( d0 <= epsilon ) {
+                        break;
+                    }
                 }
                 float d1 = vget_lane_f32(lo, 1);
                 if (d1 < best) {
                     best = d1;
                     bestIdx = i + 1;
+                    if ( d1 <= epsilon ) {
+                        break;
+                    }
                 }
                 float d2 = vget_lane_f32(hi, 0);
                 if (d2 < best) {
                     best = d2;
                     bestIdx = i + 2;
+                    if ( d2 <= epsilon ) {
+                        break;
+                    }
                 }
                 float d3 = vget_lane_f32(hi, 1);
                 if (d3 < best) {
                     best = d3;
                     bestIdx = i + 3;
+                    if ( d3 <= epsilon ) {
+                        break;
+                    }
                 }
             }
             return static_cast<uint8_t>(bestIdx);
@@ -338,6 +352,9 @@ class quantize {
                     if (d[lane] < best) {
                         best = d[lane];
                         bestIdx = static_cast<uint8_t>(i + lane);
+                        if ( d <= epsilon ) {
+                            break;
+                        }
                     }
                 }
             }
@@ -355,6 +372,9 @@ class quantize {
             if (d < bestd) {
                 bestd = d;
                 best = i;
+                if ( d <= epsilon ) {
+                    break;
+                }
             }
         }
         return static_cast<uint8_t>(best);
