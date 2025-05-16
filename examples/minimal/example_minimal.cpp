@@ -1,4 +1,4 @@
-#include "constixel.h"
+#include "constixel.hpp"
 
 int main() {
     static constixel::image<constixel::format_8bit, 256, 256> image;

@@ -16,7 +16,7 @@ target_include_directories(constixel INTERFACE
 install(TARGETS constixel
         EXPORT ConstixelConfig)
 
-install(FILES constixel.h
+install(FILES constixel.hpp
         DESTINATION include)
 
 install(EXPORT ConstixelConfig

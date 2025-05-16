@@ -7,7 +7,7 @@
 #include <print>
 #endif  // #if __cplusplus >= 202302L
 
-#include "constixel.h"
+#include "constixel.hpp"
 #include "fontslist.h"
 
 static constixel::image<constixel::format_8bit, 1024, 2048> fonts;

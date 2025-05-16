@@ -66,7 +66,7 @@ target_link_libraries(MyTarget PRIVATE constixel::constixel)
 ## Minimal example
 
 ```c++
-#include "constixel.h"
+#include "constixel.hpp"
 
 int main() {
     static constixel::image<constixel::format_8bit, 256, 256> image;
@@ -88,7 +88,7 @@ int main() {
 Include a text font and pass the struct name as a template parameter to the draw_string function:
 
 ```c++
-#include "constixel.h"
+#include "constixel.hpp"
 #include "fonts/ibmplexsans_medium_48_mono.h"
 using large_font = constixel::ibmplexsans_medium_48_mono;
 
@@ -123,7 +123,7 @@ Compile as such:
 ```
 
 ```c++
-#include "constixel.h"
+#include "constixel.hpp"
 
 #include <cstring>
 
@@ -160,7 +160,7 @@ int main() {
 This example will consteval gen_image_1bit() into a std::array, while dynamically generating the sixel string.
 
 ```c++
-#include "constixel.h"
+#include "constixel.hpp"
 
 #include <cstring>
 
@@ -196,7 +196,7 @@ int main() {
 ## Saving a PNG to disk example
 
 ```c++
-#include "constixel.h"
+#include "constixel.hpp"
 #include <iostream>
 #include <fstream>
 #include <filesystem>

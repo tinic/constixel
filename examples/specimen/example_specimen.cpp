@@ -1,6 +1,6 @@
 #include <format>
 
-#include "constixel.h"
+#include "constixel.hpp"
 
 //
 // Font to show a specimen of

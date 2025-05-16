@@ -1,4 +1,4 @@
-#include "constixel.h"
+#include "constixel.hpp"
 
 #include "fonts/ibmplexsans_bold_48_aa.h"
 using myfont = constixel::ibmplexsans_bold_48_aa;

@@ -1,4 +1,4 @@
-#include "constixel.h"
+#include "constixel.hpp"
 
 #include "fonts/pixeloperator_bold_mono.h"
 using myfont = constixel::pixeloperator_bold_mono;

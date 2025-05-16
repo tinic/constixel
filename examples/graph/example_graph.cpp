@@ -1,4 +1,4 @@
-#include "constixel.h"
+#include "constixel.hpp"
 
 #include "fonts/ibmplexsans_semibold_24_aa.h"
 using large_font = constixel::ibmplexsans_semibold_24_aa;
