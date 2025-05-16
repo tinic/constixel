@@ -989,8 +989,10 @@ class format_1bit : public format {
             for (size_t x = xl8 + 1; x < xr8; x++) {
                 yptr[x] = c8;
             }
-            yptr[xr8] &= ~mr[xr0];
-            yptr[xr8] |= mr[xr0] & c8;
+            if (xr0) {
+                yptr[xr8] &= ~mr[xr0];
+                yptr[xr8] |= mr[xr0] & c8;
+            }
         } else {
             yptr[xl8] &= ~(ml[xl0] & mr[xr0]);
             yptr[xl8] |= (ml[xl0] & mr[xr0] & c8);
@@ -1209,8 +1211,10 @@ class format_2bit : public format {
             for (size_t x = xl4 + 1; x < xr4; x++) {
                 yptr[x] = c4;
             }
-            yptr[xr4] &= ~mr[xr0];
-            yptr[xr4] |= mr[xr0] & c4;
+            if (xr0) {
+                yptr[xr4] &= ~mr[xr0];
+                yptr[xr4] |= mr[xr0] & c4;
+            }
         } else {
             yptr[xl4] &= ~(ml[xl0] & mr[xr0]);
             yptr[xl4] |= (ml[xl0] & mr[xr0] & c4);
@@ -1443,8 +1447,10 @@ class format_4bit : public format {
             for (size_t x = xl2 + 1; x < xr2; x++) {
                 yptr[x] = c2;
             }
-            yptr[xr2] &= ~mr[xr0];
-            yptr[xr2] |= mr[xr0] & c2;
+            if (xr0) {
+                yptr[xr2] &= ~mr[xr0];
+                yptr[xr2] |= mr[xr0] & c2;
+            }
         } else {
             yptr[xl2] &= ~(ml[xl0] & mr[xr0]);
             yptr[xl2] |= (ml[xl0] & mr[xr0] & c2);
