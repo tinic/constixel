@@ -266,9 +266,8 @@ class quantize {
         return linearpal;
     }
 
-   
     [[nodiscard]] constexpr uint8_t nearest_linear(float r, float g, float b) const {
-            const float epsilon = 0.0001f;
+        const float epsilon = 0.0001f;
 #if defined(__ARM_NEON)
         if (!std::is_constant_evaluated() && pal.size() >= 4) {
             const float32x4_t vR = vdupq_n_f32(r);
@@ -294,7 +293,7 @@ class quantize {
                 if (d0 < best) {
                     best = d0;
                     bestIdx = i;
-                    if ( d0 <= epsilon ) {
+                    if (d0 <= epsilon) {
                         break;
                     }
                 }
@@ -302,7 +301,7 @@ class quantize {
                 if (d1 < best) {
                     best = d1;
                     bestIdx = i + 1;
-                    if ( d1 <= epsilon ) {
+                    if (d1 <= epsilon) {
                         break;
                     }
                 }
@@ -310,7 +309,7 @@ class quantize {
                 if (d2 < best) {
                     best = d2;
                     bestIdx = i + 2;
-                    if ( d2 <= epsilon ) {
+                    if (d2 <= epsilon) {
                         break;
                     }
                 }
@@ -318,7 +317,7 @@ class quantize {
                 if (d3 < best) {
                     best = d3;
                     bestIdx = i + 3;
-                    if ( d3 <= epsilon ) {
+                    if (d3 <= epsilon) {
                         break;
                     }
                 }
@@ -352,7 +351,7 @@ class quantize {
                     if (d[lane] < best) {
                         best = d[lane];
                         bestIdx = static_cast<uint8_t>(i + lane);
-                        if ( d[lane] <= epsilon ) {
+                        if (d[lane] <= epsilon) {
                             return static_cast<uint8_t>(bestIdx);
                         }
                     }
@@ -372,7 +371,7 @@ class quantize {
             if (d < bestd) {
                 bestd = d;
                 best = i;
-                if ( d <= epsilon ) {
+                if (d <= epsilon) {
                     break;
                 }
             }
@@ -923,7 +922,7 @@ class format_1bit : public format {
         // clang-format on
     }
 
-    template<bool FLIP_H = false, bool FLIP_V = false>
+    template <bool FLIP_H = false, bool FLIP_V = false>
     static constexpr void transpose(const uint8_t *src, uint8_t *dst) {
         std::array<uint8_t, 8> tmp;
         size_t src_stride = ((W + 7) / 8);
@@ -1172,7 +1171,7 @@ class format_2bit : public format {
         return b;
     }
 
-    template<bool FLIP_H = false, bool FLIP_V = false>
+    template <bool FLIP_H = false, bool FLIP_V = false>
     static constexpr void transpose(const uint8_t *, uint8_t *) {
 #ifndef _MSC_VER
         static_assert(false, "Not implemented yet.");
@@ -1405,7 +1404,7 @@ class format_4bit : public format {
         return b;
     }
 
-    template<bool FLIP_H = false, bool FLIP_V = false>
+    template <bool FLIP_H = false, bool FLIP_V = false>
     static constexpr void transpose(const uint8_t *, uint8_t *) {
 #ifndef _MSC_VER
         static_assert(false, "Not implemented yet.");
@@ -1697,7 +1696,7 @@ class format_8bit : public format {
         return b;
     }
 
-    template<bool FLIP_H = false, bool FLIP_V = false>
+    template <bool FLIP_H = false, bool FLIP_V = false>
     static constexpr void transpose(const uint8_t *src, uint8_t *dst) {
         for (size_t y = 0; y < H; y++) {
             for (size_t x = 0; x < W; x++) {
@@ -1746,7 +1745,7 @@ class format_8bit : public format {
         } else
 #endif  // #if defined(__ARM_NEON)
 #if defined(__AVX2__)
-        if (!std::is_constant_evaluated()) {
+            if (!std::is_constant_evaluated()) {
             __m128 cola_v = _mm_set1_ps(cola);
             __m128 inv_cola_v = _mm_set1_ps(1.0f - cola);
             __m128 col_rgb = _mm_set_ps(0.0f, colb, colg, colr);
@@ -2808,7 +2807,7 @@ class image {
      * \tparam FLIP_H Flip image horizontally
      * \tparam FLIP_V Flip image vertically
      */
-    template<bool FLIP_H = false, bool FLIP_V = false>
+    template <bool FLIP_H = false, bool FLIP_V = false>
     constexpr image<T, H, W, S, GR> transpose() const {
         image<T, H, W, S, GR> transposed;
         static_assert(T<W, H, S, GR>::bits_per_pixel != 1 || ((H + 7) / 8) == transposed.bytes_per_line());
@@ -2828,7 +2827,7 @@ class image {
      * \tparam FLIP_H Flip image horizontally
      * \tparam FLIP_V Flip image vertically
      */
-    template<bool FLIP_H = false, bool FLIP_V = false>
+    template <bool FLIP_H = false, bool FLIP_V = false>
     constexpr void transpose(image<T, H, W, S, GR> &dst) const {
         static_assert(T<W, H, S, GR>::bits_per_pixel != 1 || ((H + 7) / 8) == dst.bytes_per_line());
         static_assert(T<W, H, S, GR>::bits_per_pixel != 1 || ((W + 7) / 8) == bytes_per_line());
@@ -3262,13 +3261,37 @@ class image {
      * @private
      */
     constexpr void fill_circle_aa_int(int32_t cx, int32_t cy, int32_t r, int32_t ox, int32_t oy, uint8_t col) {
+        r = std::abs(r);
+
         int32_t x0 = cx - r - 1;
         int32_t y0 = cy - r - 1;
+        int32_t x1 = cx;
+        int32_t y1 = cy;
+
+        rect<int32_t> bounds{.x = 0, .y = 0, .w = W, .h = H};
+        bounds &= rect<int32_t>{.x = x0, .y = y0, .w = r * 2, .h = r * 2};
+        if (bounds.w <= 0 || bounds.h <= 0) {
+            return;
+        }
+
+        if (x0 < 0) {
+            x0 = 0;
+        }
+        if (y0 < 0) {
+            y0 = 0;
+        }
+        if (x1 >= static_cast<int32_t>(W)) {
+            x1 = static_cast<int32_t>(W);
+        }
+        if (y1 >= static_cast<int32_t>(H)) {
+            y1 = static_cast<int32_t>(H);
+        }
+
         float Rl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 0);
         float Gl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 1);
         float Bl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 2);
-        for (int32_t y = y0; y <= cy; ++y) {
-            for (int32_t x = x0; x <= cx; ++x) {
+        for (int32_t y = y0; y <= y1; y++) {
+            for (int32_t x = x0; x <= x1; x++) {
                 float dx = (static_cast<float>(x) + 0.5f) - static_cast<float>(cx);
                 float dy = (static_cast<float>(y) + 0.5f) - static_cast<float>(cy);
                 float dist_sq = dx * dx + dy * dy;
