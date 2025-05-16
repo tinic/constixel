@@ -3156,7 +3156,7 @@ class image {
 #ifndef __INTELLISENSE__
     /// @cond DOXYGEN_EXCLUDE
 
-    bool clip_line(int32_t &x0, int32_t &y0, int32_t &x1, int32_t &y1) {
+    constexpr bool clip_line(int32_t &x0, int32_t &y0, int32_t &x1, int32_t &y1) {
         const int32_t INSIDE = 0;
         const int32_t LEFT = 1;
         const int32_t RIGHT = 2;
