@@ -32,7 +32,7 @@ SOFTWARE.
 #include <string>
 #include <vector>
 
-#define SLOW_TESTS 1
+#define SLOW_TESTS 0
 #define MAINLINE_TESTS 1
 #define JP_TESTS 0
 

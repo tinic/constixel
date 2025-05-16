@@ -1086,10 +1086,10 @@ class format_1bit : public format {
     template <typename F>
     static constexpr void png(const std::array<uint8_t, image_size> &data, F &&char_out) {
         png_image<W, H, uint8_t, bits_per_pixel>(data.data(), quant.palette(), char_out,
-                                                    [](const uint8_t *data_raw, size_t y, size_t &bpl) {
-                                                        bpl = bytes_per_line;
-                                                        return data_raw + y * bytes_per_line;
-                                                    });
+                                                 [](const uint8_t *data_raw, size_t y, size_t &bpl) {
+                                                     bpl = bytes_per_line;
+                                                     return data_raw + y * bytes_per_line;
+                                                 });
     }
 
     template <size_t S, typename F>
@@ -1314,10 +1314,10 @@ class format_2bit : public format {
     template <typename F>
     static constexpr void png(const std::array<uint8_t, image_size> &data, F &&char_out) {
         png_image<W, H, uint8_t, bits_per_pixel>(data.data(), quant.palette(), char_out,
-                                                    [](const uint8_t *data_raw, size_t y, size_t &bpl) {
-                                                        bpl = bytes_per_line;
-                                                        return data_raw + y * bytes_per_line;
-                                                    });
+                                                 [](const uint8_t *data_raw, size_t y, size_t &bpl) {
+                                                     bpl = bytes_per_line;
+                                                     return data_raw + y * bytes_per_line;
+                                                 });
     }
 
     template <size_t S, typename F>
@@ -1556,10 +1556,10 @@ class format_4bit : public format {
     template <typename F>
     static constexpr void png(const std::array<uint8_t, image_size> &data, F &&char_out) {
         png_image<W, H, uint8_t, bits_per_pixel>(data.data(), quant.palette(), char_out,
-                                                    [](const uint8_t *data_raw, size_t y, size_t &bpl) {
-                                                        bpl = bytes_per_line;
-                                                        return data_raw + y * bytes_per_line;
-                                                    });
+                                                 [](const uint8_t *data_raw, size_t y, size_t &bpl) {
+                                                     bpl = bytes_per_line;
+                                                     return data_raw + y * bytes_per_line;
+                                                 });
     }
 
     template <size_t S, typename F>
@@ -1853,10 +1853,10 @@ class format_8bit : public format {
     template <typename F>
     static constexpr void png(const std::array<uint8_t, image_size> &data, F &&char_out) {
         png_image<W, H, uint8_t, bits_per_pixel>(data.data(), quant.palette(), char_out,
-                                                    [](const uint8_t *data_raw, size_t y, size_t &bpl) {
-                                                        bpl = bytes_per_line;
-                                                        return data_raw + y * bytes_per_line;
-                                                    });
+                                                 [](const uint8_t *data_raw, size_t y, size_t &bpl) {
+                                                     bpl = bytes_per_line;
+                                                     return data_raw + y * bytes_per_line;
+                                                 });
     }
 
     template <size_t S, typename F>
@@ -2114,6 +2114,10 @@ class image {
      * \param stroke_width Width of the stroke in pixels.
      */
     constexpr void draw_line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, int32_t stroke_width = 1) {
+        if (!clip_line(x0, y0, x1, y1)) {
+            return;
+        }
+
         int32_t steep = abs(y1 - y0) > abs(x1 - x0);
 
         if (steep) {
@@ -2124,10 +2128,6 @@ class image {
         if (x0 > x1) {
             std::swap(x0, x1);
             std::swap(y0, y1);
-        }
-
-        if (!clip_line(x0, y0, x1, y1)) {
-            return;
         }
 
         int32_t dx, dy;
@@ -2201,6 +2201,9 @@ class image {
      * \param col Color palette index to use.
      */
     constexpr void draw_line_aa(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col) {
+        if (!clip_line(x0, y0, x1, y1)) {
+            return;
+        }
 
         bool steep = abs(y1 - y0) > abs(x1 - x0);
         if (steep) {
@@ -2210,10 +2213,6 @@ class image {
         if (x0 > x1) {
             std::swap(x0, x1);
             std::swap(y0, y1);
-        }
-
-        if (!clip_line(x0, y0, x1, y1)) {
-            return;
         }
 
         float Rl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 0);
@@ -3010,17 +3009,17 @@ class image {
 
     /**
      * \brief Convert the current instance into a sixel stream and output it to std::cout.
-     * 
+     *
      * @tparam S scale of sixel output.
      */
     template <size_t S = 1>
     void sixel_to_cout() const {
         std::string out;
         T<W, H, GR>::template sixel<S>(data,
-                              [&out](char ch) mutable {
-                                  out.push_back(ch);
-                              },
-                              {0, 0, W, H});
+                                       [&out](char ch) mutable {
+                                           out.push_back(ch);
+                                       },
+                                       {0, 0, W, H});
         std::cout << out << std::endl;
     }
 
@@ -3157,29 +3156,31 @@ class image {
     /// @cond DOXYGEN_EXCLUDE
 
     constexpr bool clip_line(int32_t &x0, int32_t &y0, int32_t &x1, int32_t &y1) {
-        const int32_t INSIDE = 0;
-        const int32_t LEFT = 1;
-        const int32_t RIGHT = 2;
-        const int32_t BOTTOM = 4;
-        const int32_t TOP = 8;
+        enum clip_code : uint32_t {
+            INSIDE = 0,
+            XMIN = 1,
+            XMAX = 2,
+            YMIN = 4,
+            YMAX = 8
+        };
 
         auto calc_code = [=](int32_t x, int32_t y) {
-            int code = INSIDE;
+            uint32_t code = INSIDE;
             if (x < 0) {
-                code |= LEFT;
-            } else if (x > static_cast<int32_t>(W)) {
-                code |= RIGHT;
+                code |= XMIN;
+            } else if (x >= static_cast<int32_t>(W)) {
+                code |= XMAX;
             }
             if (y < 0) {
-                code |= BOTTOM;
-            } else if (y > static_cast<int32_t>(W)) {
-                code |= TOP;
+                code |= YMIN;
+            } else if (y >= static_cast<int32_t>(H)) {
+                code |= YMAX;
             }
             return code;
         };
 
-        int32_t outcode0 = calc_code(x0, y0);
-        int32_t outcode1 = calc_code(x1, y1);
+        uint32_t outcode0 = calc_code(x0, y0);
+        uint32_t outcode1 = calc_code(x1, y1);
 
         while (true) {
             if ((outcode0 | outcode1) == INSIDE) {
@@ -3187,19 +3188,31 @@ class image {
             } else if (outcode0 & outcode1) {
                 return false;
             } else {
-                int32_t outcode_out = outcode0 ? outcode0 : outcode1;
+                uint32_t outcode_out = outcode1 > outcode0 ? outcode1 : outcode0;
                 int32_t x = 0, y = 0;
-                if (outcode_out & TOP) {
-                    x = x0 + (x1 - x0) * (static_cast<int32_t>(H) - y0) / (y1 - y0);
-                    y = static_cast<int32_t>(H);
-                } else if (outcode_out & BOTTOM) {
-                    x = x0 + (x1 - x0) * y0 / (y1 - y0);
+                if (outcode_out & YMAX) {
+                    int64_t x1x0 = static_cast<int64_t>(x1 - x0);
+                    int64_t w1y0 = static_cast<int64_t>(static_cast<int32_t>(H) - y0 - 1);
+                    int64_t y1y0 = static_cast<int64_t>(y1 - y0);
+                    x = x0 + static_cast<int32_t>((x1x0 * w1y0) / y1y0);
+                    y = static_cast<int32_t>(H) - 1;
+                } else if (outcode_out & YMIN) {
+                    int64_t x1x0 = static_cast<int64_t>(x1 - x0);
+                    int64_t negy0 = static_cast<int64_t>(-y0);
+                    int64_t y1y0 = static_cast<int64_t>(y1 - y0);
+                    x = x0 + static_cast<int32_t>((x1x0 * negy0) / y1y0);
                     y = 0;
-                } else if (outcode_out & RIGHT) {
-                    y = y0 + (y1 - y0) * (static_cast<int32_t>(W) - x0) / (x1 - x0);
-                    x = static_cast<int32_t>(W);
+                } else if (outcode_out & XMAX) {
+                    int64_t y1y0 = static_cast<int64_t>(y1 - y0);
+                    int64_t w1x0 = static_cast<int64_t>(static_cast<int32_t>(W) - x0 - 1);
+                    int64_t x1x0 = static_cast<int64_t>(x1 - x0);
+                    y = y0 + static_cast<int32_t>((y1y0 * w1x0) / x1x0);
+                    x = static_cast<int32_t>(W) - 1;
                 } else {
-                    y = y0 + (y1 - y0) * x0 / (x1 - x0);
+                    int64_t y1y0 = static_cast<int64_t>(y1 - y0);
+                    int64_t negx0 = static_cast<int64_t>(-x0);
+                    int64_t x1x0 = static_cast<int64_t>(x1 - x0);
+                    y = y0 + static_cast<int32_t>((y1y0 * negx0) / x1x0);
                     x = 0;
                 }
                 if (outcode_out == outcode0) {
@@ -3626,7 +3639,6 @@ class image {
      * @private
      */
     constexpr void fill_arc(int32_t x0, int32_t y0, int32_t r, uint8_t corners, int32_t delta, uint8_t col) {
-
         r = abs(r);
 
         int32_t f = 1 - r;
