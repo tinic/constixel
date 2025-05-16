@@ -2120,6 +2120,11 @@ class image {
      * \param stroke_width Width of the stroke in pixels.
      */
     constexpr void draw_line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, int32_t stroke_width = 1) {
+
+        if (!clip_line(x0, y0, x1, y1)) {
+            return;
+        }
+
         int32_t steep = abs(y1 - y0) > abs(x1 - x0);
 
         if (steep) {
@@ -2203,6 +2208,11 @@ class image {
      * \param col Color palette index to use.
      */
     constexpr void draw_line_aa(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col) {
+
+        if (!clip_line(x0, y0, x1, y1)) {
+            return;
+        }
+
         auto ipart = [](float x) {
             return std::floor(x);
         };
@@ -3145,8 +3155,69 @@ class image {
     }
 
  private:
+
 #ifndef __INTELLISENSE__
-    /// @cond DOXYGEN_EXCLUDE
+/// @cond DOXYGEN_EXCLUDE
+
+    bool clip_line(int32_t &x0, int32_t &y0, int32_t &x1, int32_t &y1) {
+
+        const int32_t INSIDE = 0;
+        const int32_t LEFT = 1;
+        const int32_t RIGHT = 2;
+        const int32_t BOTTOM = 4;
+        const int32_t TOP = 8;
+
+        auto calc_code = [=](int32_t x, int32_t y) {
+            int code = INSIDE;
+            if (x < 0) {
+                code |= LEFT;
+            } else if (x > static_cast<int32_t>(W)) {
+                code |= RIGHT;
+            }
+            if (y < 0) {
+                code |= BOTTOM;
+            } else if (y > static_cast<int32_t>(W)) {
+                code |= TOP;
+            }
+            return code;
+        };
+
+        int32_t outcode0 = calc_code(x0, y0);
+        int32_t outcode1 = calc_code(x1, y1);
+
+        while (true) {
+            if ((outcode0 | outcode1) == INSIDE) {
+                return true;
+            } else if (outcode0 & outcode1) {
+                return false;
+            } else {
+                int32_t outcode_out = outcode0 ? outcode0 : outcode1;
+                int32_t x = 0, y = 0;
+                if (outcode_out & TOP) {
+                    x = x0 + (x1 - x0) * (static_cast<int32_t>(H) - y0) / (y1 - y0);
+                    y = static_cast<int32_t>(H);
+                } else if (outcode_out & BOTTOM) {
+                    x = x0 + (x1 - x0) * y0 / (y1 - y0);
+                    y = 0;
+                } else if (outcode_out & RIGHT) {
+                    y = y0 + (y1 - y0) * (static_cast<int32_t>(W) - x0) / (x1 - x0);
+                    x = static_cast<int32_t>(W);
+                } else {
+                    y = y0 + (y1 - y0) * x0 / (x1 - x0);
+                    x = 0;
+                }
+                if (outcode_out == outcode0) {
+                    x0 = x;
+                    y0 = y;
+                    outcode0 = calc_code(x0, y0);
+                } else {
+                    x1 = x;
+                    y1 = y;
+                    outcode1 = calc_code(x1, y1);
+                }
+            }
+        }
+    }
 
     /**
      * @private
