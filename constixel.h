@@ -797,7 +797,7 @@ class format {
         static constexpr size_t set_idx_mask = (1UL << sizeof(set) / 4) - 1;
     };
 
-    template <size_t W, size_t H, int32_t S, typename PBT, size_t PBS, typename P, typename F, typename L>
+    template <size_t W, size_t H, typename PBT, size_t PBS, typename P, typename F, typename L>
     static constexpr void png_image(const uint8_t *data, const P &palette, F &&char_out, const L &line_ptr) {
         png_marker(char_out);
         png_header(char_out, W, H, PBS);
@@ -868,10 +868,9 @@ class format {
  *
  * @tparam W Width in pixels.
  * @tparam H Height in pixels.
- * @tparam S scale of sixel output.
  * @tparam GR Grayscale palette.
  */
-template <size_t W, size_t H, int32_t S, bool GR>
+template <size_t W, size_t H, bool GR>
 class format_1bit : public format {
  public:
     /// @cond DOXYGEN_EXCLUDE
@@ -1086,14 +1085,14 @@ class format_1bit : public format {
 
     template <typename F>
     static constexpr void png(const std::array<uint8_t, image_size> &data, F &&char_out) {
-        png_image<W, H, S, uint8_t, bits_per_pixel>(data.data(), quant.palette(), char_out,
+        png_image<W, H, uint8_t, bits_per_pixel>(data.data(), quant.palette(), char_out,
                                                     [](const uint8_t *data_raw, size_t y, size_t &bpl) {
                                                         bpl = bytes_per_line;
                                                         return data_raw + y * bytes_per_line;
                                                     });
     }
 
-    template <typename F>
+    template <size_t S, typename F>
     static constexpr void sixel(const std::array<uint8_t, image_size> &data, F &&char_out, const rect<int32_t> &r) {
         sixel_image<W, H, S, uint8_t, bits_per_pixel>(
             data.data(), quant.palette(), char_out, r,
@@ -1145,10 +1144,9 @@ class format_1bit : public format {
  *
  * @tparam W Width in pixels.
  * @tparam H Height in pixels.
- * @tparam S scale of sixel output.
  * @tparam GR Grayscale palette.
  */
-template <size_t W, size_t H, int32_t S, bool GR>
+template <size_t W, size_t H, bool GR>
 class format_2bit : public format {
  public:
     /// @cond DOXYGEN_EXCLUDE
@@ -1315,14 +1313,14 @@ class format_2bit : public format {
 
     template <typename F>
     static constexpr void png(const std::array<uint8_t, image_size> &data, F &&char_out) {
-        png_image<W, H, S, uint8_t, bits_per_pixel>(data.data(), quant.palette(), char_out,
+        png_image<W, H, uint8_t, bits_per_pixel>(data.data(), quant.palette(), char_out,
                                                     [](const uint8_t *data_raw, size_t y, size_t &bpl) {
                                                         bpl = bytes_per_line;
                                                         return data_raw + y * bytes_per_line;
                                                     });
     }
 
-    template <typename F>
+    template <size_t S, typename F>
     static constexpr void sixel(const std::array<uint8_t, image_size> &data, F &&char_out, const rect<int32_t> &r) {
         sixel_image<W, H, S, uint8_t, bits_per_pixel>(
             data.data(), quant.palette(), char_out, r,
@@ -1374,10 +1372,9 @@ class format_2bit : public format {
  *
  * @tparam W Width in pixels.
  * @tparam H Height in pixels.
- * @tparam S scale of sixel output.
  * @tparam GR Grayscale palette.
  */
-template <size_t W, size_t H, int32_t S, bool GR>
+template <size_t W, size_t H, bool GR>
 class format_4bit : public format {
  public:
     /// @cond DOXYGEN_EXCLUDE
@@ -1558,14 +1555,14 @@ class format_4bit : public format {
 
     template <typename F>
     static constexpr void png(const std::array<uint8_t, image_size> &data, F &&char_out) {
-        png_image<W, H, S, uint8_t, bits_per_pixel>(data.data(), quant.palette(), char_out,
+        png_image<W, H, uint8_t, bits_per_pixel>(data.data(), quant.palette(), char_out,
                                                     [](const uint8_t *data_raw, size_t y, size_t &bpl) {
                                                         bpl = bytes_per_line;
                                                         return data_raw + y * bytes_per_line;
                                                     });
     }
 
-    template <typename F>
+    template <size_t S, typename F>
     static constexpr void sixel(const std::array<uint8_t, image_size> &data, F &&char_out, const rect<int32_t> &r) {
         sixel_image<W, H, S, uint8_t, bits_per_pixel>(
             data.data(), quant.palette(), char_out, r,
@@ -1617,10 +1614,9 @@ class format_4bit : public format {
  *
  * @tparam W Width in pixels.
  * @tparam H Height in pixels.
- * @tparam S scale of sixel output.
  * @tparam GR Grayscale palette.
  */
-template <size_t W, size_t H, int32_t S, bool GR>
+template <size_t W, size_t H, bool GR>
 class format_8bit : public format {
  public:
     /// @cond DOXYGEN_EXCLUDE
@@ -1856,14 +1852,14 @@ class format_8bit : public format {
 
     template <typename F>
     static constexpr void png(const std::array<uint8_t, image_size> &data, F &&char_out) {
-        png_image<W, H, S, uint8_t, bits_per_pixel>(data.data(), quant.palette(), char_out,
+        png_image<W, H, uint8_t, bits_per_pixel>(data.data(), quant.palette(), char_out,
                                                     [](const uint8_t *data_raw, size_t y, size_t &bpl) {
                                                         bpl = bytes_per_line;
                                                         return data_raw + y * bytes_per_line;
                                                     });
     }
 
-    template <typename F>
+    template <size_t S, typename F>
     static constexpr void sixel(const std::array<uint8_t, image_size> &data, F &&char_out, const rect<int32_t> &r) {
         sixel_image<W, H, S, uint8_t, bits_per_pixel>(
             data.data(), quant.palette(), char_out, r,
@@ -2000,18 +1996,16 @@ enum device_format {
  * @tparam T Type of the image buffer. One of format_1bit, format_2bit, format_4bit or format_8bit.
  * @tparam W Width in pixels.
  * @tparam H Height in pixels.
- * @tparam S Scale factor for sixel output. Defaults to 1, meaning no scaling.
  * @tparam GR boolean to indicate if palette should be grayscale. Otherwise a colored palette will be used. Defaults to
  * false.
  */
-template <template <size_t, size_t, int32_t, bool> class T, size_t W, size_t H, int32_t S = 1, bool GR = false>
+template <template <size_t, size_t, bool> class T, size_t W, size_t H, bool GR = false>
 class image {
     static_assert(sizeof(W) >= sizeof(uint32_t));
     static_assert(sizeof(H) >= sizeof(uint32_t));
 
     static_assert(W > 0 && H > 0);
-    static_assert((W * S) <= 16384 && (H * S) <= 16384);
-    static_assert(S >= 1 && S <= 256);
+    static_assert(W <= 16384 && H <= 16384);
 
  public:
     /**
@@ -2019,7 +2013,7 @@ class image {
      * \return If true, the palette is grayscale. If false a colored palette is used.
      */
     [[nodiscard]] static constexpr bool grayscale() {
-        return T<W, H, S, GR>::grayscale;
+        return T<W, H, GR>::grayscale;
     }
 
     /**
@@ -2027,7 +2021,7 @@ class image {
      * \return Bit depth of the image. 1 == 2 colors, 2 == 4 colors, 4 == 16 colors, 8 == 256 colors.
      */
     [[nodiscard]] static constexpr size_t bit_depth() {
-        return T<W, H, S, GR>::bits_per_pixel;
+        return T<W, H, GR>::bits_per_pixel;
     }
 
     /**
@@ -2035,7 +2029,7 @@ class image {
      * \return Size in bytes of the image data.
      */
     [[nodiscard]] static constexpr size_t size() {
-        return T<W, H, S, GR>::image_size;
+        return T<W, H, GR>::image_size;
     }
 
     /**
@@ -2043,7 +2037,7 @@ class image {
      * \return Bytes per line in the image data.
      */
     [[nodiscard]] static constexpr size_t bytes_per_line() {
-        return T<W, H, S, GR>::bytes_per_line;
+        return T<W, H, GR>::bytes_per_line;
     }
 
     /**
@@ -2073,7 +2067,7 @@ class image {
      * \brief Get a reference to the underlying raw data of the image.
      * \return Reference to the data array which contains the raw image data.
      */
-    [[nodiscard]] constexpr std::array<uint8_t, T<W, H, S, GR>::image_size> &data_ref() {
+    [[nodiscard]] constexpr std::array<uint8_t, T<W, H, GR>::image_size> &data_ref() {
         return data;
     }
 
@@ -2081,14 +2075,14 @@ class image {
      * \brief Returns a clone of this image. Data is copied.
      * \return Cloned image instance.
      */
-    [[nodiscard]] constexpr image<T, W, H, S, GR> clone() const {
+    [[nodiscard]] constexpr image<T, W, H, GR> clone() const {
         return *this;
     }
     /**
      * \brief Copy source image into this instance. No compositing occurs, replaces current content.
      * \param src Source image.
      */
-    constexpr void copy(const image<T, W, H, S, GR> &src) {
+    constexpr void copy(const image<T, W, H, GR> &src) {
         data = src.data;
     }
 
@@ -2319,7 +2313,7 @@ class image {
             static_cast<uint32_t>(y) >= static_cast<uint32_t>(H)) {
             return;
         }
-        T<W, H, S, GR>::plot(data, static_cast<uint32_t>(x), static_cast<uint32_t>(y), col);
+        T<W, H, GR>::plot(data, static_cast<uint32_t>(x), static_cast<uint32_t>(y), col);
     }
 
     /**
@@ -2750,7 +2744,7 @@ class image {
      * \param dst RGBA8 array made of image::width() * img::height() * uint32_t values.
      */
     constexpr void RGBA_uint32(std::array<uint32_t, W * H> &dst) const {
-        T<W, H, S, GR>::RGBA_uint32(dst, data);
+        T<W, H, GR>::RGBA_uint32(dst, data);
     }
 
     /**
@@ -2758,7 +2752,7 @@ class image {
      * \param dst RGBA8 array made of image::width() * img::height() * 4 * uint8_t values.
      */
     constexpr void RGBA_uint8(std::array<uint8_t, W * H * 4> &dst) const {
-        T<W, H, S, GR>::RGBA_uint8(dst, data);
+        T<W, H, GR>::RGBA_uint8(dst, data);
     }
 
     /**
@@ -2768,8 +2762,8 @@ class image {
         uint8_t *ptr = data.data();
         for (size_t y = 0; y < H; y++) {
             for (size_t x = 0; x < bytes_per_line() / 2; x++) {
-                uint8_t a = T<W, H, S, GR>::reverse(ptr[x]);
-                uint8_t b = T<W, H, S, GR>::reverse(ptr[bytes_per_line() - x - 1]);
+                uint8_t a = T<W, H, GR>::reverse(ptr[x]);
+                uint8_t b = T<W, H, GR>::reverse(ptr[bytes_per_line() - x - 1]);
                 ptr[x] = b;
                 ptr[bytes_per_line() - x - 1] = a;
             }
@@ -2803,8 +2797,8 @@ class image {
             for (size_t y = 0; y < H / 2; y++) {
                 uint8_t *ptr_a = ptr + y * bytes_per_line();
                 uint8_t *ptr_b = ptr + (H - y - 1) * bytes_per_line();
-                uint8_t a = T<W, H, S, GR>::reverse(ptr_a[x]);
-                uint8_t b = T<W, H, S, GR>::reverse(ptr_b[bytes_per_line() - x - 1]);
+                uint8_t a = T<W, H, GR>::reverse(ptr_a[x]);
+                uint8_t b = T<W, H, GR>::reverse(ptr_b[bytes_per_line() - x - 1]);
                 ptr_a[x] = b;
                 ptr_b[bytes_per_line() - x - 1] = a;
             }
@@ -2817,17 +2811,17 @@ class image {
      * \tparam FLIP_V Flip image vertically
      */
     template <bool FLIP_H = false, bool FLIP_V = false>
-    constexpr image<T, H, W, S, GR> transpose() const {
-        image<T, H, W, S, GR> transposed;
-        static_assert(T<W, H, S, GR>::bits_per_pixel != 1 || ((H + 7) / 8) == transposed.bytes_per_line());
-        static_assert(T<W, H, S, GR>::bits_per_pixel != 1 || ((W + 7) / 8) == bytes_per_line());
-        static_assert(T<W, H, S, GR>::bits_per_pixel != 2 || ((H + 3) / 4) == transposed.bytes_per_line());
-        static_assert(T<W, H, S, GR>::bits_per_pixel != 2 || ((W + 3) / 4) == bytes_per_line());
-        static_assert(T<W, H, S, GR>::bits_per_pixel != 4 || ((H + 1) / 2) == transposed.bytes_per_line());
-        static_assert(T<W, H, S, GR>::bits_per_pixel != 4 || ((W + 1) / 2) == bytes_per_line());
-        static_assert(T<W, H, S, GR>::bits_per_pixel != 8 || H == transposed.bytes_per_line());
-        static_assert(T<W, H, S, GR>::bits_per_pixel != 8 || W == bytes_per_line());
-        T<W, H, S, GR>::template transpose<FLIP_H, FLIP_V>(data.data(), transposed.data_ref().data());
+    constexpr image<T, H, W, GR> transpose() const {
+        image<T, H, W, GR> transposed;
+        static_assert(T<W, H, GR>::bits_per_pixel != 1 || ((H + 7) / 8) == transposed.bytes_per_line());
+        static_assert(T<W, H, GR>::bits_per_pixel != 1 || ((W + 7) / 8) == bytes_per_line());
+        static_assert(T<W, H, GR>::bits_per_pixel != 2 || ((H + 3) / 4) == transposed.bytes_per_line());
+        static_assert(T<W, H, GR>::bits_per_pixel != 2 || ((W + 3) / 4) == bytes_per_line());
+        static_assert(T<W, H, GR>::bits_per_pixel != 4 || ((H + 1) / 2) == transposed.bytes_per_line());
+        static_assert(T<W, H, GR>::bits_per_pixel != 4 || ((W + 1) / 2) == bytes_per_line());
+        static_assert(T<W, H, GR>::bits_per_pixel != 8 || H == transposed.bytes_per_line());
+        static_assert(T<W, H, GR>::bits_per_pixel != 8 || W == bytes_per_line());
+        T<W, H, GR>::template transpose<FLIP_H, FLIP_V>(data.data(), transposed.data_ref().data());
         return transposed;
     }
 
@@ -2837,16 +2831,16 @@ class image {
      * \tparam FLIP_V Flip image vertically
      */
     template <bool FLIP_H = false, bool FLIP_V = false>
-    constexpr void transpose(image<T, H, W, S, GR> &dst) const {
-        static_assert(T<W, H, S, GR>::bits_per_pixel != 1 || ((H + 7) / 8) == dst.bytes_per_line());
-        static_assert(T<W, H, S, GR>::bits_per_pixel != 1 || ((W + 7) / 8) == bytes_per_line());
-        static_assert(T<W, H, S, GR>::bits_per_pixel != 2 || ((H + 3) / 4) == dst.bytes_per_line());
-        static_assert(T<W, H, S, GR>::bits_per_pixel != 2 || ((W + 3) / 4) == bytes_per_line());
-        static_assert(T<W, H, S, GR>::bits_per_pixel != 4 || ((H + 1) / 2) == dst.bytes_per_line());
-        static_assert(T<W, H, S, GR>::bits_per_pixel != 4 || ((W + 1) / 2) == bytes_per_line());
-        static_assert(T<W, H, S, GR>::bits_per_pixel != 8 || H == dst.bytes_per_line());
-        static_assert(T<W, H, S, GR>::bits_per_pixel != 8 || W == bytes_per_line());
-        T<W, H, S, GR>::template transpose<FLIP_H, FLIP_V>(data, dst.data);
+    constexpr void transpose(image<T, H, W, GR> &dst) const {
+        static_assert(T<W, H, GR>::bits_per_pixel != 1 || ((H + 7) / 8) == dst.bytes_per_line());
+        static_assert(T<W, H, GR>::bits_per_pixel != 1 || ((W + 7) / 8) == bytes_per_line());
+        static_assert(T<W, H, GR>::bits_per_pixel != 2 || ((H + 3) / 4) == dst.bytes_per_line());
+        static_assert(T<W, H, GR>::bits_per_pixel != 2 || ((W + 3) / 4) == bytes_per_line());
+        static_assert(T<W, H, GR>::bits_per_pixel != 4 || ((H + 1) / 2) == dst.bytes_per_line());
+        static_assert(T<W, H, GR>::bits_per_pixel != 4 || ((W + 1) / 2) == bytes_per_line());
+        static_assert(T<W, H, GR>::bits_per_pixel != 8 || H == dst.bytes_per_line());
+        static_assert(T<W, H, GR>::bits_per_pixel != 8 || W == bytes_per_line());
+        T<W, H, GR>::template transpose<FLIP_H, FLIP_V>(data, dst.data);
     }
 
     /**
@@ -2865,7 +2859,7 @@ class image {
         rect<int32_t> blitrect{x, y, w, h};
         blitrect &= {0, 0, W, H};
         blitrect &= {x, y, iw, ih};
-        T<W, H, S, GR>::blit_RGBA(data, blitrect, ptr, stride);
+        T<W, H, GR>::blit_RGBA(data, blitrect, ptr, stride);
     }
 
     /**
@@ -2881,7 +2875,7 @@ class image {
         rect<int32_t> blitrect{dstrect};
         blitrect &= {0, 0, W, H};
         blitrect &= {dstrect.x, dstrect.y, iw, ih};
-        T<W, H, S, GR>::blit_RGBA(data, blitrect, ptr, stride);
+        T<W, H, GR>::blit_RGBA(data, blitrect, ptr, stride);
     }
 
     /**
@@ -2901,7 +2895,7 @@ class image {
         rect<int32_t> blitrect{x, y, w, h};
         blitrect &= {0, 0, W, H};
         blitrect &= {x, y, iw, ih};
-        T<W, H, S, GR>::blit_RGBA_diffused(data, blitrect, ptr, stride);
+        T<W, H, GR>::blit_RGBA_diffused(data, blitrect, ptr, stride);
     }
 
     /**
@@ -2919,7 +2913,7 @@ class image {
         rect<int32_t> blitrect{dstrect};
         blitrect &= {0, 0, W, H};
         blitrect &= {dstrect.x, dstrect.y, iw, ih};
-        T<W, H, S, GR>::blit_RGBA_diffused(data, blitrect, ptr, stride);
+        T<W, H, GR>::blit_RGBA_diffused(data, blitrect, ptr, stride);
     }
 
     /**
@@ -2939,7 +2933,7 @@ class image {
         rect<int32_t> blitrect{x, y, w, h};
         blitrect &= {0, 0, W, H};
         blitrect &= {x, y, iw, ih};
-        T<W, H, S, GR>::blit_RGBA_diffused_linear(data, blitrect, ptr, stride);
+        T<W, H, GR>::blit_RGBA_diffused_linear(data, blitrect, ptr, stride);
     }
 
     /**
@@ -2957,7 +2951,7 @@ class image {
         rect<int32_t> blitrect{dstrect};
         blitrect &= {0, 0, W, H};
         blitrect &= {dstrect.x, dstrect.y, iw, ih};
-        T<W, H, S, GR>::blit_RGBA_diffused_linear(data, blitrect, ptr, stride);
+        T<W, H, GR>::blit_RGBA_diffused_linear(data, blitrect, ptr, stride);
     }
 
     /**
@@ -2974,7 +2968,7 @@ class image {
      */
     template <typename F>
     constexpr void png(F &&char_out) const {
-        T<W, H, S, GR>::png(data, char_out);
+        T<W, H, GR>::png(data, char_out);
     }
 
     /**
@@ -2987,11 +2981,12 @@ class image {
      * });
      * \endcode
      *
+     * \tparam S scale of sixel output.
      * \param char_out A lambda function which consumes the sixel stream data one byte at a time.
      */
-    template <typename F>
+    template <size_t S = 1, typename F>
     constexpr void sixel(F &&char_out) const {
-        T<W, H, S, GR>::sixel(data, char_out, {0, 0, W, H});
+        T<W, H, GR>::template sixel<S>(data, char_out, {0, 0, W, H});
     }
 
     /**
@@ -3004,20 +2999,24 @@ class image {
      * });
      * \endcode
      *
+     * \tparam S scale of sixel output.
      * \param char_out A lambda function which consumes the sixel stream data one byte at a time
      * \param rect Clipping rectangle; to only show a portion of the image.
      */
-    template <typename F>
+    template <size_t S = 1, typename F>
     constexpr void sixel(F &&char_out, const rect<int32_t> &rect) const {
-        T<W, H, S, GR>::sixel(data, char_out, rect);
+        T<W, H, GR>::template sixel<S>(data, char_out, rect);
     }
 
     /**
      * \brief Convert the current instance into a sixel stream and output it to std::cout.
+     * 
+     * @tparam S scale of sixel output.
      */
+    template <size_t S = 1>
     void sixel_to_cout() const {
         std::string out;
-        T<W, H, S, GR>::sixel(data,
+        T<W, H, GR>::template sixel<S>(data,
                               [&out](char ch) mutable {
                                   out.push_back(ch);
                               },
@@ -3296,7 +3295,7 @@ class image {
             static_cast<uint32_t>(y) >= static_cast<uint32_t>(H)) {
             return;
         }
-        T<W, H, S, GR>::compose(data, static_cast<uint32_t>(x), static_cast<uint32_t>(y), cola, colr, colg, colb);
+        T<W, H, GR>::compose(data, static_cast<uint32_t>(x), static_cast<uint32_t>(y), cola, colr, colg, colb);
     }
 
     /**
@@ -3305,7 +3304,7 @@ class image {
     void append_png_as_base64(std::string &output) const {
         size_t buffer = 0;
         size_t bits_collected = 0;
-        T<W, H, S, GR>::png(data, [&buffer, &bits_collected, &output](char byte) mutable {
+        T<W, H, GR>::png(data, [&buffer, &bits_collected, &output](char byte) mutable {
             static constexpr char base64_chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
             buffer = (buffer << 8) | static_cast<uint8_t>(byte);
@@ -3620,7 +3619,7 @@ class image {
         size_t _xl = static_cast<size_t>(x);
         size_t _xr = static_cast<size_t>(x + w);
         size_t _y = static_cast<size_t>(y);
-        T<W, H, S, GR>::span(data, _xl, _xr, _y, col);
+        T<W, H, GR>::span(data, _xl, _xr, _y, col);
     }
 
     /**
@@ -3668,12 +3667,12 @@ class image {
     /**
      * @private
      */
-    std::array<uint8_t, T<W, H, S, GR>::image_size> data{};
+    std::array<uint8_t, T<W, H, GR>::image_size> data{};
 
     /**
      * @private
      */
-    T<W, H, S, GR> format{};
+    T<W, H, GR> format{};
 
 /// @endcond  // DOXYGEN_EXCLUDE
 #endif  // #ifndef __INTELLISENSE__

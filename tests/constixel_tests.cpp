@@ -199,12 +199,12 @@ static constexpr std::string test4() {
 static constexpr std::string test5() {
     std::string out{};
     out.reserve(1UL << 18);
-    constixel::image<constixel::format_4bit, 7, 128, 8> image;
+    constixel::image<constixel::format_4bit, 7, 128> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
         image.fill_circle(c, c, 256 - c * 16, static_cast<uint8_t>(c));
     }
-    image.sixel([&out](char ch) mutable {
+    image.sixel<8>([&out](char ch) mutable {
         out.push_back(ch);
     });
     return out;
@@ -241,12 +241,12 @@ static constexpr std::string test7() {
 static constexpr std::string test8() {
     std::string out{};
     out.reserve(1UL << 18);
-    constixel::image<constixel::format_4bit, 7, 7, 8> image;
+    constixel::image<constixel::format_4bit, 7, 7> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
         image.draw_line(-8, -8, c * 8, 64, static_cast<uint8_t>(c), static_cast<uint8_t>(c));
     }
-    image.sixel([&out](char ch) mutable {
+    image.sixel<8>([&out](char ch) mutable {
         out.push_back(ch);
     });
     return out;
@@ -267,7 +267,7 @@ static constexpr std::string test9() {
 }
 
 static constexpr std::string test10() {
-    constixel::image<constixel::format_1bit, 256, 256, 1> image;
+    constixel::image<constixel::format_1bit, 256, 256> image;
     image.fill_rect(0, 0, 256, 256, 2);
     std::string out{};
     out.reserve(1UL << 18);
@@ -278,7 +278,7 @@ static constexpr std::string test10() {
 }
 
 static constexpr std::string test11() {
-    constixel::image<constixel::format_8bit, 64, 64, 1> image;
+    constixel::image<constixel::format_8bit, 64, 64> image;
     image.draw_string_aa<constixel::ibmplexsans_medium_48_aa>(0, 0, "ABCDEFGHIKLMNO", 1);
     std::string out{};
     out.reserve(1UL << 18);
@@ -289,7 +289,7 @@ static constexpr std::string test11() {
 }
 
 static constexpr std::string test12() {
-    constixel::image<constixel::format_8bit, 64, 64, 1> image;
+    constixel::image<constixel::format_8bit, 64, 64> image;
     image.draw_string_mono<constixel::ibmplexsans_medium_48_mono>(0, 0, "ABCDEFGHIKLMNO", 1);
     std::string out{};
     out.reserve(1UL << 18);
@@ -300,7 +300,7 @@ static constexpr std::string test12() {
 }
 
 static constexpr std::string test13() {
-    constixel::image<constixel::format_4bit, 64, 64, 1> image;
+    constixel::image<constixel::format_4bit, 64, 64> image;
     image.draw_string_aa<constixel::ibmplexsans_medium_48_aa>(0, 0, "ABCDEFGHIKLMNO", 1);
     std::string out{};
     out.reserve(1UL << 18);
@@ -311,7 +311,7 @@ static constexpr std::string test13() {
 }
 
 static constexpr std::string test14() {
-    constixel::image<constixel::format_1bit, 64, 64, 1> image;
+    constixel::image<constixel::format_1bit, 64, 64> image;
     image.draw_string_mono<constixel::ibmplexsans_medium_48_mono>(0, 0, "ABCDEFGHIKLMNO", 1);
     std::string out{};
     out.reserve(1UL << 18);
@@ -322,7 +322,7 @@ static constexpr std::string test14() {
 }
 
 static constexpr std::string test15() {
-    constixel::image<constixel::format_2bit, 64, 64, 1> image;
+    constixel::image<constixel::format_2bit, 64, 64> image;
     image.draw_string_mono<constixel::ibmplexsans_medium_48_mono>(0, 0, "ABCDEFGHIKLMNO", 1);
     std::string out{};
     out.reserve(1UL << 18);
@@ -388,7 +388,7 @@ void draw_palette() {
     }
     std::string out;
     out.reserve(1UL << 18);
-    image.sixel([&out](char ch) mutable {
+    image.template sixel<32>([&out](char ch) mutable {
         out.push_back(ch);
     });
     puts(out.c_str());
@@ -615,9 +615,9 @@ int main() {
     draw_functions<constixel::image<constixel::format_4bit, 768, 768>, 32>();
     draw_functions<constixel::image<constixel::format_8bit, 768, 768>, 32>();
 
-    draw_functions<constixel::image<constixel::format_1bit, 768, 768, 1, true>, 32>();
-    draw_functions<constixel::image<constixel::format_2bit, 768, 768, 1, true>, 32>();
-    draw_functions<constixel::image<constixel::format_4bit, 768, 768, 1, true>, 32>();
+    draw_functions<constixel::image<constixel::format_1bit, 768, 768, true>, 32>();
+    draw_functions<constixel::image<constixel::format_2bit, 768, 768, true>, 32>();
+    draw_functions<constixel::image<constixel::format_4bit, 768, 768, true>, 32>();
     puts("\n");
 #endif  // #if 0
 
@@ -625,21 +625,21 @@ int main() {
     draw_functions_aa<constixel::image<constixel::format_4bit, 768, 768>, 32>();
     draw_functions_aa<constixel::image<constixel::format_8bit, 768, 768>, 32>();
 
-    draw_functions_aa<constixel::image<constixel::format_4bit, 768, 768, 1, true>, 32>();
-    draw_functions_aa<constixel::image<constixel::format_8bit, 768, 768, 1, true>, 32>();
+    draw_functions_aa<constixel::image<constixel::format_4bit, 768, 768, true>, 32>();
+    draw_functions_aa<constixel::image<constixel::format_8bit, 768, 768, true>, 32>();
     puts("\n");
 #endif  // #if 0
 
 #if MAINLINE_TESTS
-    draw_palette<constixel::image<constixel::format_1bit, 16, 16, 32>>();
-    draw_palette<constixel::image<constixel::format_2bit, 16, 16, 32>>();
-    draw_palette<constixel::image<constixel::format_4bit, 16, 16, 32>>();
-    draw_palette<constixel::image<constixel::format_8bit, 16, 16, 32>>();
+    draw_palette<constixel::image<constixel::format_1bit, 16, 16>>();
+    draw_palette<constixel::image<constixel::format_2bit, 16, 16>>();
+    draw_palette<constixel::image<constixel::format_4bit, 16, 16>>();
+    draw_palette<constixel::image<constixel::format_8bit, 16, 16>>();
 
-    draw_palette<constixel::image<constixel::format_1bit, 16, 16, 32, true>>();
-    draw_palette<constixel::image<constixel::format_2bit, 16, 16, 32, true>>();
-    draw_palette<constixel::image<constixel::format_4bit, 16, 16, 32, true>>();
-    draw_palette<constixel::image<constixel::format_8bit, 16, 16, 32, true>>();
+    draw_palette<constixel::image<constixel::format_1bit, 16, 16, true>>();
+    draw_palette<constixel::image<constixel::format_2bit, 16, 16, true>>();
+    draw_palette<constixel::image<constixel::format_4bit, 16, 16, true>>();
+    draw_palette<constixel::image<constixel::format_8bit, 16, 16, true>>();
     puts("\n");
 #endif  // #if 1
 
@@ -667,35 +667,35 @@ int main() {
         draw_image_linear<constixel::image<constixel::format_4bit, ow, oh>>(rgbaimage, int32_t(w), int32_t(h));
         draw_image_linear<constixel::image<constixel::format_8bit, ow, oh>>(rgbaimage, int32_t(w), int32_t(h));
 
-        draw_image_linear<constixel::image<constixel::format_1bit, ow, oh, 1, true>>(rgbaimage, int32_t(w), int32_t(h));
-        draw_image_linear<constixel::image<constixel::format_2bit, ow, oh, 1, true>>(rgbaimage, int32_t(w), int32_t(h));
-        draw_image_linear<constixel::image<constixel::format_4bit, ow, oh, 1, true>>(rgbaimage, int32_t(w), int32_t(h));
-        draw_image_linear<constixel::image<constixel::format_8bit, ow, oh, 1, true>>(rgbaimage, int32_t(w), int32_t(h));
+        draw_image_linear<constixel::image<constixel::format_1bit, ow, oh, true>>(rgbaimage, int32_t(w), int32_t(h));
+        draw_image_linear<constixel::image<constixel::format_2bit, ow, oh, true>>(rgbaimage, int32_t(w), int32_t(h));
+        draw_image_linear<constixel::image<constixel::format_4bit, ow, oh, true>>(rgbaimage, int32_t(w), int32_t(h));
+        draw_image_linear<constixel::image<constixel::format_8bit, ow, oh, true>>(rgbaimage, int32_t(w), int32_t(h));
     }
 #endif  // #if 1
 
 #if MAINLINE_TESTS
-    draw_rgb<constixel::image<constixel::format_1bit, 256, 256, 1>>();
-    draw_rgb<constixel::image<constixel::format_2bit, 256, 256, 1>>();
-    draw_rgb<constixel::image<constixel::format_4bit, 256, 256, 1>>();
-    draw_rgb<constixel::image<constixel::format_8bit, 256, 256, 1>>();
+    draw_rgb<constixel::image<constixel::format_1bit, 256, 256>>();
+    draw_rgb<constixel::image<constixel::format_2bit, 256, 256>>();
+    draw_rgb<constixel::image<constixel::format_4bit, 256, 256>>();
+    draw_rgb<constixel::image<constixel::format_8bit, 256, 256>>();
 
-    draw_rgb<constixel::image<constixel::format_1bit, 256, 256, 1, true>>();
-    draw_rgb<constixel::image<constixel::format_2bit, 256, 256, 1, true>>();
-    draw_rgb<constixel::image<constixel::format_4bit, 256, 256, 1, true>>();
-    draw_rgb<constixel::image<constixel::format_8bit, 256, 256, 1, true>>();
+    draw_rgb<constixel::image<constixel::format_1bit, 256, 256, true>>();
+    draw_rgb<constixel::image<constixel::format_2bit, 256, 256, true>>();
+    draw_rgb<constixel::image<constixel::format_4bit, 256, 256, true>>();
+    draw_rgb<constixel::image<constixel::format_8bit, 256, 256, true>>();
 #endif  // #if 1
 
 #if MAINLINE_TESTS
-    round_trip<constixel::image<constixel::format_1bit, 256, 256, 1>>();
-    round_trip<constixel::image<constixel::format_2bit, 256, 256, 1>>();
-    round_trip<constixel::image<constixel::format_4bit, 256, 256, 1>>();
-    round_trip<constixel::image<constixel::format_8bit, 256, 256, 1>>();
+    round_trip<constixel::image<constixel::format_1bit, 256, 256>>();
+    round_trip<constixel::image<constixel::format_2bit, 256, 256>>();
+    round_trip<constixel::image<constixel::format_4bit, 256, 256>>();
+    round_trip<constixel::image<constixel::format_8bit, 256, 256>>();
 #endif  // #if 1
 
 #if MAINLINE_TESTS
     {
-        auto image = std::make_unique<constixel::image<constixel::format_8bit, 1024, 1024, 1>>();
+        auto image = std::make_unique<constixel::image<constixel::format_8bit, 1024, 1024>>();
         image->draw_string_mono<constixel::ibmplexsans_bold_48_mono>(0, 0, "Pack my box with five dozen liquor jugs", 2);
         image->draw_string_mono<constixel::ibmplexsans_bold_32_mono>(0, 50, "Pack my box with five dozen liquor jugs", 3);
         image->draw_string_mono<constixel::ibmplexmono_regular_18_mono>(0, 100, "Pack my box with five dozen liquor jugs", 5);
@@ -706,7 +706,7 @@ int main() {
 
 #if MAINLINE_TESTS
     {
-        static constixel::image<constixel::format_8bit, 512, 312, 1> image;
+        static constixel::image<constixel::format_8bit, 512, 312> image;
         static constexpr std::array<const char *, 5> strings{"ABCDEFGHIJKLM", "NOPQRTSUVWXYZ", "abcdefghijklm", "nopqrstuvwxyz",
                                                              "1234567890&@.,?!'"
                                                              ""};
@@ -746,7 +746,7 @@ int main() {
 
 #if JP_TESTS
     {
-        static constixel::image<constixel::format_8bit, 2048, 128, 1> image;
+        static constixel::image<constixel::format_8bit, 2048, 128> image;
         image.draw_string_aa<constixel::notosansjp_thin_jp_24_aa>(0, 0, "日本語の文章には、漢字(常用漢字)、カタカナ、ひらがな、そして句読点が含まれています。",
                                                                   1);
         image.draw_string_aa<constixel::notosansjp_black_jp_24_aa>(0, 64,
@@ -754,7 +754,7 @@ int main() {
         image.sixel_to_cout();
     }
     {
-        static constixel::image<constixel::format_1bit, 2048, 128, 1> image;
+        static constixel::image<constixel::format_1bit, 2048, 128> image;
         image.draw_string_mono<constixel::notosansjp_thin_jp_24_mono>(
             0, 0, "日本語の文章には、漢字(常用漢字)、カタカナ、ひらがな、そして句読点が含まれています。", 1);
         image.draw_string_mono<constixel::notosansjp_black_jp_24_mono>(
@@ -762,7 +762,7 @@ int main() {
         image.sixel_to_cout();
     }
     {
-        static constixel::image<constixel::format_1bit, 2048, 128, 1> image;
+        static constixel::image<constixel::format_1bit, 2048, 128> image;
         image.draw_string_mono<constixel::notosansjp_regular_jp_48_mono>(
             0, 0, "日本語の文章には、漢字(常用漢字)、カタカナ、ひらがな、そして句読点が含まれています。", 1);
         image.draw_string_mono<constixel::notosansjp_regular_jp_24_mono>(
@@ -770,7 +770,7 @@ int main() {
         image.sixel_to_cout();
     }
     {
-        static constixel::image<constixel::format_8bit, 2048, 128, 1> image;
+        static constixel::image<constixel::format_8bit, 2048, 128> image;
         image.draw_string_aa<constixel::notosansjp_regular_jp_48_aa>(0, 0,
                                                                      "日本語の文章には、漢字(常用漢字)、カタカナ、ひらがな、そして句読点が含まれています。", 1);
         image.draw_string_aa<constixel::notosansjp_regular_jp_24_aa>(0, 64,
@@ -781,19 +781,19 @@ int main() {
 
 #if MAINLINE_TESTS
     {
-        auto image = std::make_unique<constixel::image<constixel::format_8bit, 128, 256, 5>>();
+        auto image = std::make_unique<constixel::image<constixel::format_8bit, 128, 256>>();
         for (int32_t x = 0; x < 16; x++) {
             image->draw_string_aa<constixel::ibmplexsans_bold_48_aa>(x * 7, x * 7, "Pack my box with five dozen liquor jugs", static_cast<uint8_t>(x));
             image->draw_string_aa<constixel::ibmplexmono_bold_48_aa>(x * 7, x * 7 + 100, "Pack my box with five dozen liquor jugs",
                                                                      static_cast<uint8_t>(15 - x));
         }
-        image->sixel_to_cout();
+        image->sixel_to_cout<5>();
     }
 #endif  // #if 0
 
 #if MAINLINE_TESTS
     {
-        auto image = std::make_unique<constixel::image<constixel::format_8bit, 768, 384, 1>>();
+        auto image = std::make_unique<constixel::image<constixel::format_8bit, 768, 384>>();
         image->fill_round_rect_aa(32, 32, 400, 100, 32, 3);
         image->fill_round_rect_aa(32, 200, 400, 64, 32, 1);
         image->sixel_to_cout();
@@ -802,7 +802,7 @@ int main() {
 
 #if MAINLINE_TESTS
     {
-        auto image = std::make_unique<constixel::image<constixel::format_8bit, 768, 384, 1>>();
+        auto image = std::make_unique<constixel::image<constixel::format_8bit, 768, 384>>();
         image->fill_round_rect(32, 32, 400, 100, 32, 3);
         image->fill_round_rect(32, 200, 400, 64, 32, 1);
         image->sixel_to_cout();
@@ -811,7 +811,7 @@ int main() {
 
 #if MAINLINE_TESTS
     {
-        auto image = std::make_unique<constixel::image<constixel::format_8bit, 48, 48, 16>>();
+        auto image = std::make_unique<constixel::image<constixel::format_8bit, 48, 48>>();
 
         image->fill_circle_aa(14, 7, 7, 2);
         image->fill_circle(14, 7, 7, 4);
@@ -835,13 +835,13 @@ int main() {
         image->fill_circle(4 + 24 + 8, 40, 2, 4);
         image->fill_circle(4 + 24 + 8 + 4, 40, 1, 4);
 
-        image->sixel_to_cout();
+        image->sixel_to_cout<16>();
     }
 #endif  // #if 0
 
 #if MAINLINE_TESTS
     {
-        using image_type = constixel::image<constixel::format_8bit, 512, 512, 1, false>;
+        using image_type = constixel::image<constixel::format_8bit, 512, 512, false>;
 
         auto image = std::make_unique<image_type>();
         image->draw_string_aa<constixel::ibmplexsans_bold_48_aa>(0, 0, "Pack my box with five dozen liquor jugs", 1);
@@ -854,7 +854,7 @@ int main() {
 
 #if MAINLINE_TESTS
     {
-        auto image = std::make_unique<constixel::image<constixel::format_4bit, 512, 96, 1, true>>();
+        auto image = std::make_unique<constixel::image<constixel::format_4bit, 512, 96, true>>();
         image->fill_round_rect_aa(0, 0, 512, 96, 32, 15);
         int32_t sw = image->string_width<constixel::ibmplexsans_medium_48_aa>("ABCDEFGHIKLMNO");
         image->draw_string_aa<constixel::ibmplexsans_medium_48_aa>((512 - sw) / 2, 16, "ABCDEFGHIKLMNO", 0);
@@ -864,7 +864,7 @@ int main() {
 
 #if MAINLINE_TESTS
     {
-        auto image = std::make_unique<constixel::image<constixel::format_4bit, 512, 96, 1, false>>();
+        auto image = std::make_unique<constixel::image<constixel::format_4bit, 512, 96, false>>();
         image->fill_round_rect_aa(0, 0, 512, 96, 32, 2);
         int32_t sw = image->string_width<constixel::ibmplexsans_medium_48_aa>("ABCDEFGHIKLMNO");
         image->draw_string_aa<constixel::ibmplexsans_medium_48_aa>((512 - sw) / 2, 16, "ABCDEFGHIKLMNO", 0);
@@ -874,7 +874,7 @@ int main() {
 
 #if MAINLINE_TESTS
     {
-        auto image = std::make_unique<constixel::image<constixel::format_4bit, 512, 96, 1, false>>();
+        auto image = std::make_unique<constixel::image<constixel::format_4bit, 512, 96, false>>();
         image->fill_round_rect_aa(0, 0, 512, 96, 32, constixel::color::GRAY_20);
         int32_t sw = image->string_width<constixel::ibmplexsans_medium_48_aa>("ABCDEFGHIKLMNO");
         image->draw_string_aa<constixel::ibmplexsans_medium_48_aa>((512 - sw) / 2, 16, "ABCDEFGHIKLMNO", 2);
@@ -884,7 +884,7 @@ int main() {
 
 #if MAINLINE_TESTS
     {
-        auto image = std::make_unique<constixel::image<constixel::format_4bit, 512, 96, 1, true>>();
+        auto image = std::make_unique<constixel::image<constixel::format_4bit, 512, 96, true>>();
         image->fill_round_rect_aa(0, 0, 512, 96, 32, 3);
         int32_t sw = image->string_width<constixel::ibmplexsans_medium_48_aa>("ABCDEFGHIKLMNO");
         image->draw_string_aa<constixel::ibmplexsans_medium_48_aa>((512 - sw) / 2, 16, "ABCDEFGHIKLMNO", 15);
@@ -894,7 +894,7 @@ int main() {
 
 #if 0
     {
-        auto image = std::make_unique<constixel::image<constixel::format_1bit, 512, 96, 1, true>>();
+        auto image = std::make_unique<constixel::image<constixel::format_1bit, 512, 96, true>>();
         image->fill_round_rect(0, 0, 512, 96, 32, 1);
         int32_t sw = image->string_width<constixel::ibmplexsans_medium_48_aa>("ABCDEFGHIKLMNO");
         image->draw_string_mono<constixel::ibmplexsans_medium_48_aa>((512-sw)/2, 16, "ABCDEFGHIKLMNO", 0);
@@ -904,7 +904,7 @@ int main() {
 
 #if 0
     {
-        auto image = std::make_unique<constixel::image<constixel::format_1bit, 512, 96, 1, true>>();
+        auto image = std::make_unique<constixel::image<constixel::format_1bit, 512, 96, true>>();
         image->fill_round_rect(0, 0, 512, 96, 32, 1);
         int32_t sw = image->string_width<constixel::ibmplexsans_medium_48_aa>("ABCDEFGHIKLMNO");
         image->draw_string_mono<constixel::ibmplexsans_medium_48_aa>((512-sw)/2, 16, "ABCDEFGHIKLMNO", 0);
@@ -914,14 +914,14 @@ int main() {
 
 #if MAINLINE_TESTS
     {
-        auto image = std::make_unique<constixel::image<constixel::format_8bit, 512, 512, 1, false>>();
+        auto image = std::make_unique<constixel::image<constixel::format_8bit, 512, 512, false>>();
         for (int32_t c = 0; c < 64; c++) {
             image->draw_line_aa(0, 8 * c, 16 * c, 512, static_cast<uint8_t>(c & 0xFF));
         }
         image->sixel_to_cout();
     }
     {
-        auto image = std::make_unique<constixel::image<constixel::format_8bit, 512, 512, 1, true>>();
+        auto image = std::make_unique<constixel::image<constixel::format_8bit, 512, 512, true>>();
         for (int32_t c = 0; c < 64; c++) {
             image->draw_line_aa(0, 8 * c, 16 * c, 512, static_cast<uint8_t>((c * 2 + 128) & 0xFF));
         }
@@ -931,7 +931,7 @@ int main() {
 
 #if MAINLINE_TESTS
     {
-        auto image = std::make_unique<constixel::image<constixel::format_8bit, 1024, 512, 1, false>>();
+        auto image = std::make_unique<constixel::image<constixel::format_8bit, 1024, 512, false>>();
 
         for (int32_t c = 0; c < 8; c++) {
             const int32_t delta = 8;
@@ -945,7 +945,7 @@ int main() {
         image->sixel_to_cout();
     }
     {
-        auto image = std::make_unique<constixel::image<constixel::format_8bit, 1024, 512, 1, false>>();
+        auto image = std::make_unique<constixel::image<constixel::format_8bit, 1024, 512, false>>();
         for (int32_t c = 0; c < 8; c++) {
             const int32_t delta = 8;
             for (int32_t x = 0; x < 1024; x += delta) {
@@ -964,7 +964,7 @@ int main() {
         using font_aa = constixel::ibmplexsans_bold_12_aa;
         using namespace constixel;
 
-        static image<format_8bit, 192, 300, 5> i;
+        static image<format_8bit, 192, 300> i;
 
         auto draw_bg_for_rotate_test = [=]<typename FONT>(const char *str, int32_t x_pos, int32_t y_pos) mutable {
             int32_t s_wdh = i.string_width<FONT>(str);
@@ -1003,7 +1003,7 @@ int main() {
         i.draw_string_aa<font_aa, false, text_rotation::DEGREE_90>(x_pos, y_pos, str.c_str(), color::WHITE);
         i.draw_string_aa<font_aa, false, text_rotation::DEGREE_270>(x_pos, y_pos, str.c_str(), color::WHITE);
 
-        i.sixel_to_cout();
+        i.sixel_to_cout<5>();
     }
 #endif  // #if MAINLINE_TESTS
 

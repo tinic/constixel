@@ -91,5 +91,6 @@
     },
     "cmake.sourceDirectory": "/Users/turo/constixel/tests",
     "editor.autoClosingBrackets": "never",
-    "terminal.integrated.enableImages": true
+    "terminal.integrated.enableImages": true,
+    "C_Cpp.dimInactiveRegions": false
 }

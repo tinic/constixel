@@ -15,7 +15,7 @@ using font = constixel::ibmplexsans_regular_18_mono;
 // Flash use: 3269 bytes, all of it the interdisplay_bold_18_mono data
 //
 
-static constixel::image<constixel::format_1bit, 192, 64, 2> screen;
+static constixel::image<constixel::format_1bit, 192, 64> screen;
 
 bool in_fault_state = false;
 float refill_ellapsed_time = 641.0;
@@ -77,7 +77,7 @@ int main() {
     size_t flash_memory_used = sizeof(font::glyph_bitmap) + sizeof(font::char_table) + sizeof(font::glyph_tree);
     size_t ram_memory_used = sizeof(screen);
 
-    screen.sixel_to_cout();
+    screen.sixel_to_cout<2>();
 
     printf("This example occupies %d bytes of Flash ROM and %d bytes of RAM on a device\n", int(flash_memory_used), int(ram_memory_used));
 }

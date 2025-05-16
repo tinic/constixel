@@ -6,7 +6,7 @@ using myfont = constixel::ibmplexsans_bold_48_aa;
 static consteval auto create_static_panel_image() {
     using namespace constixel;
 
-    image<format_8bit, 300, 256, 1> image;
+    image<format_8bit, 300, 256> image;
 
     const int32_t buttonHeight = 75;
     const int32_t textCenterY = ( buttonHeight + myfont::ascent) / 2 - myfont::line_height + 3;
