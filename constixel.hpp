@@ -2114,7 +2114,7 @@ class image {
      * \param stroke_width Width of the stroke in pixels.
      */
     constexpr void draw_line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, int32_t stroke_width = 1) {
-        if (!clip_line(x0, y0, x1, y1)) {
+        if (!clip_line(x0, y0, x1, y1, -stroke_width, -stroke_width, W + stroke_width, H + stroke_width)) {
             return;
         }
 
@@ -2201,7 +2201,7 @@ class image {
      * \param col Color palette index to use.
      */
     constexpr void draw_line_aa(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col) {
-        if (!clip_line(x0, y0, x1, y1)) {
+        if (!clip_line(x0, y0, x1, y1, 0, 0, W, H)) {
             return;
         }
 
@@ -3155,7 +3155,8 @@ class image {
 #ifndef __INTELLISENSE__
     /// @cond DOXYGEN_EXCLUDE
 
-    constexpr bool clip_line(int32_t &x0, int32_t &y0, int32_t &x1, int32_t &y1) {
+    constexpr bool clip_line(int32_t &x0, int32_t &y0, int32_t &x1, int32_t &y1, int32_t xmin, int32_t ymin,
+                             int32_t xmax, int32_t ymax) {
         enum clip_code : uint32_t {
             INSIDE = 0,
             XMIN = 1,
@@ -3166,14 +3167,14 @@ class image {
 
         auto calc_code = [=](int32_t x, int32_t y) {
             uint32_t code = INSIDE;
-            if (x < 0) {
+            if (x < xmin) {
                 code |= XMIN;
-            } else if (x >= static_cast<int32_t>(W)) {
+            } else if (x > xmax) {
                 code |= XMAX;
             }
-            if (y < 0) {
+            if (y < ymin) {
                 code |= YMIN;
-            } else if (y >= static_cast<int32_t>(H)) {
+            } else if (y > ymax) {
                 code |= YMAX;
             }
             return code;
@@ -3192,28 +3193,28 @@ class image {
                 int32_t x = 0, y = 0;
                 if (outcode_out & YMAX) {
                     int64_t x1x0 = static_cast<int64_t>(x1 - x0);
-                    int64_t w1y0 = static_cast<int64_t>(static_cast<int32_t>(H) - y0 - 1);
+                    int64_t w1y0 = static_cast<int64_t>(ymax - y0);
                     int64_t y1y0 = static_cast<int64_t>(y1 - y0);
                     x = x0 + static_cast<int32_t>((x1x0 * w1y0) / y1y0);
-                    y = static_cast<int32_t>(H) - 1;
+                    y = ymax;
                 } else if (outcode_out & YMIN) {
                     int64_t x1x0 = static_cast<int64_t>(x1 - x0);
-                    int64_t negy0 = static_cast<int64_t>(-y0);
+                    int64_t ymy0 = static_cast<int64_t>(ymin - y0);
                     int64_t y1y0 = static_cast<int64_t>(y1 - y0);
-                    x = x0 + static_cast<int32_t>((x1x0 * negy0) / y1y0);
-                    y = 0;
+                    x = x0 + static_cast<int32_t>((x1x0 * ymy0) / y1y0);
+                    y = ymin;
                 } else if (outcode_out & XMAX) {
                     int64_t y1y0 = static_cast<int64_t>(y1 - y0);
-                    int64_t w1x0 = static_cast<int64_t>(static_cast<int32_t>(W) - x0 - 1);
+                    int64_t w1x0 = static_cast<int64_t>(xmax - x0);
                     int64_t x1x0 = static_cast<int64_t>(x1 - x0);
                     y = y0 + static_cast<int32_t>((y1y0 * w1x0) / x1x0);
-                    x = static_cast<int32_t>(W) - 1;
+                    x = xmax;
                 } else {
                     int64_t y1y0 = static_cast<int64_t>(y1 - y0);
-                    int64_t negx0 = static_cast<int64_t>(-x0);
+                    int64_t xmx0 = static_cast<int64_t>(xmin - x0);
                     int64_t x1x0 = static_cast<int64_t>(x1 - x0);
-                    y = y0 + static_cast<int32_t>((y1y0 * negx0) / x1x0);
-                    x = 0;
+                    y = y0 + static_cast<int32_t>((y1y0 * xmx0) / x1x0);
+                    x = xmin;
                 }
                 if (outcode_out == outcode0) {
                     x0 = x;
