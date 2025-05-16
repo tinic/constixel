@@ -22,7 +22,7 @@ constixel is a single header minimalistic constexpr C++20 2D graphics palette ba
 - No dynamic allocations. The backbuffer and the very few internal data structures can live as global static variables.
 - Minimalistic interface and single header implementation so it can be used without fuzz in any modern C++ project.
 - 1, 2, 4 and 8bit palette based back buffers for minimal memory usage. Reasonable standard palettes are provided.
-- Simple fill_rect, fill_round_rect, line and fill_circle drawing functions.
+- Simple fill_rect(), fill_round_rect(), draw_line() and fill_circle() drawing functions among others.
 - Render proportional text, optionally with kerning, using fonts genenerated by a custom version of fontbm. Repository includes a set of pre-made fonts which are trivial to use. UTF-8 is supported.
 - A uncompressed png encoder is included to reduce dependencies.
 - Blit raw 32-bit RGBA image buffers into the palette backed back buffer (with or without dithering). Also convert back into a RGBA buffer when needed.
