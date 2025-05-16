@@ -923,6 +923,7 @@ class format_1bit : public format {
         // clang-format on
     }
 
+    template<bool FLIP_H = false, bool FLIP_V = false>
     static constexpr void transpose(const uint8_t *src, uint8_t *dst) {
         std::array<uint8_t, 8> tmp;
         size_t src_stride = ((W + 7) / 8);
@@ -931,7 +932,11 @@ class format_1bit : public format {
             for (size_t x = 0; x < src_stride; x++) {
                 size_t xl = std::min(size_t{8}, H - (y * 8));
                 for (size_t c = 0; c < xl; c++) {
-                    tmp[c] = src[(y * 8 + c) * src_stride + x];
+                    if constexpr (FLIP_V) {
+                        tmp[c] = src[(H - 1 - (y * 8 + c)) * src_stride + x];
+                    } else {
+                        tmp[c] = src[(y * 8 + c) * src_stride + x];
+                    }
                 }
                 for (size_t c = xl; c < 8; c++) {
                     tmp[c] = 0;
@@ -939,7 +944,11 @@ class format_1bit : public format {
                 transpose8x8(tmp);
                 size_t yl = std::min(size_t{8}, W - (x * 8));
                 for (size_t c = 0; c < yl; c++) {
-                    dst[(x * 8 + c) * dst_stride + y] = tmp[c];
+                    if constexpr (FLIP_H) {
+                        dst[((src_stride - x - 1) * 8 + 7 - c) * dst_stride + y] = tmp[c];
+                    } else {
+                        dst[(x * 8 + c) * dst_stride + y] = tmp[c];
+                    }
                 }
             }
         }
@@ -1161,6 +1170,7 @@ class format_2bit : public format {
         return b;
     }
 
+    template<bool FLIP_H = false, bool FLIP_V = false>
     static constexpr void transpose(const uint8_t *, uint8_t *) {
 #ifndef _MSC_VER
         static_assert(false, "Not implemented yet.");
@@ -1391,6 +1401,7 @@ class format_4bit : public format {
         return b;
     }
 
+    template<bool FLIP_H = false, bool FLIP_V = false>
     static constexpr void transpose(const uint8_t *, uint8_t *) {
 #ifndef _MSC_VER
         static_assert(false, "Not implemented yet.");
@@ -1680,10 +1691,23 @@ class format_8bit : public format {
         return b;
     }
 
+    template<bool FLIP_H = false, bool FLIP_V = false>
     static constexpr void transpose(const uint8_t *src, uint8_t *dst) {
         for (size_t y = 0; y < H; y++) {
             for (size_t x = 0; x < W; x++) {
-                dst[x * H + y] = *src++;
+                if constexpr (FLIP_H) {
+                    if constexpr (FLIP_V) {
+                        dst[(W - x - 1) * H + (H - y - 1)] = *src++;
+                    } else {
+                        dst[(W - x - 1) * H + y] = *src++;
+                    }
+                } else {
+                    if constexpr (FLIP_V) {
+                        dst[x * H + (H - y - 1)] = *src++;
+                    } else {
+                        dst[x * H + y] = *src++;
+                    }
+                }
             }
         }
     }
@@ -2774,8 +2798,11 @@ class image {
     }
 
     /**
-     * \brief Return a transposed version of this image. Height and width will be flipped.
+     * \brief Return a transposed version of this image.
+     * \tparam FLIP_H Flip image horizontally
+     * \tparam FLIP_V Flip image vertically
      */
+    template<bool FLIP_H = false, bool FLIP_V = false>
     constexpr image<T, H, W, S, GR> transpose() const {
         image<T, H, W, S, GR> transposed;
         static_assert(T<W, H, S, GR>::bits_per_pixel != 1 || ((H + 7) / 8) == transposed.bytes_per_line());
@@ -2786,13 +2813,16 @@ class image {
         static_assert(T<W, H, S, GR>::bits_per_pixel != 4 || ((W + 1) / 2) == bytes_per_line());
         static_assert(T<W, H, S, GR>::bits_per_pixel != 8 || H == transposed.bytes_per_line());
         static_assert(T<W, H, S, GR>::bits_per_pixel != 8 || W == bytes_per_line());
-        T<W, H, S, GR>::transpose(data.data(), transposed.data_ref().data());
+        T<W, H, S, GR>::template transpose<FLIP_H, FLIP_V>(data.data(), transposed.data_ref().data());
         return transposed;
     }
 
     /**
-     * \brief Transpose this image into another. Height and width will be flipped.
+     * \brief Transpose this image into another.
+     * \tparam FLIP_H Flip image horizontally
+     * \tparam FLIP_V Flip image vertically
      */
+    template<bool FLIP_H = false, bool FLIP_V = false>
     constexpr void transpose(image<T, H, W, S, GR> &dst) const {
         static_assert(T<W, H, S, GR>::bits_per_pixel != 1 || ((H + 7) / 8) == dst.bytes_per_line());
         static_assert(T<W, H, S, GR>::bits_per_pixel != 1 || ((W + 7) / 8) == bytes_per_line());
@@ -2802,7 +2832,7 @@ class image {
         static_assert(T<W, H, S, GR>::bits_per_pixel != 4 || ((W + 1) / 2) == bytes_per_line());
         static_assert(T<W, H, S, GR>::bits_per_pixel != 8 || H == dst.bytes_per_line());
         static_assert(T<W, H, S, GR>::bits_per_pixel != 8 || W == bytes_per_line());
-        T<W, H, S, GR>::transpose(data, dst.data);
+        T<W, H, S, GR>::template transpose<FLIP_H, FLIP_V>(data, dst.data);
     }
 
     /**
