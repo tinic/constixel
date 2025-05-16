@@ -99,7 +99,7 @@ int main() {
         "ABCDEFGHIJKLM", "NOPQRTSUVWXYZ", "abcdefghijklm", "nopqrstuvwxyz","1234567890&@.,?!'"""
     };
 
-    image<format_8bit, 512, 312, 1> image;
+    image<format_8bit, 512, 312> image;
     for (size_t i = 0; i < strings.size(); i++) { 
         uint8_t col = color::GRAY_RAMP_STOP - static_cast<uint8_t>(i * 3);
 
@@ -165,7 +165,7 @@ This example will consteval gen_image_1bit() into a std::array, while dynamicall
 #include <cstring>
 
 consteval auto gen_image_1bit() {
-    constixel::image<constixel::format_1bit, 256, 256, 1> image;
+    constixel::image<constixel::format_1bit, 256, 256> image;
     for (int32_t y = 0; y < 16; y++) {
         for (int32_t x = 0; x < 16; x++) {
             image.fill_rect(x * 16, y * 16, 16, 16, static_cast<uint8_t>(y + x) & 1);
@@ -223,13 +223,13 @@ int main() {
 
 ## API
 
-The following image formats are available. [Width] is the width in pixels, [Height] is the height in pixels. [Scale] is an optional parameter to specify a scale factor for the sixel output only. For instance setting this to 4 would scale the output of the sixel stream by a factor of 4. [Grayscale] will set the palette to a grayscale palette with black being the first entry in the palette and white being the last entry in the palette.
+The following image formats are available. [Width] is the width in pixels, [Height] is the height in pixels. [Grayscale] will set the palette to a grayscale palette with black being the first entry in the palette and white being the last entry in the palette.
 
 ```c++
-    constixel::image<constixel::format_1bit, [Width], [Height], [Scale=1]>
-    constixel::image<constixel::format_2bit, [Width], [Height], [Scale=1], [Grayscale=false]>
-    constixel::image<constixel::format_4bit, [Width], [Height], [Scale=1], [Grayscale=false]>
-    constixel::image<constixel::format_8bit, [Width], [Height], [Scale=1], [Grayscale=false]>
+    constixel::image<constixel::format_1bit, [Width], [Height]>
+    constixel::image<constixel::format_2bit, [Width], [Height], [Grayscale=false]>
+    constixel::image<constixel::format_4bit, [Width], [Height], [Grayscale=false]>
+    constixel::image<constixel::format_8bit, [Width], [Height], [Grayscale=false]>
 ```
 
 The most important member function of image:
@@ -377,16 +377,19 @@ class image {
 
     // Convert the current instance into a sixel stream. Provide a lambda function in the form of:
     //
-    // image.sixel([](char ch) {
+    // image.sixel<[scale factor]>([](char ch) {
     //    [do something with the character]
     // });
     //
     // Optionally you can provide a rectangle to get a portion of the image only.
     //
+    template<SCALE_FACTOR = 1>
     void sixel(F &&charOut);
+    template<SCALE_FACTOR = 1>
     void sixel(F &&charOut, const constixel::rect<int32_t> &r);
 
     // Convert the current instance into a sixel stream and output it to std::cout
+    template<SCALE_FACTOR = 1>
     void sixel_to_cout();
 
     // Convert the current instance into a png and display it in iTerm
