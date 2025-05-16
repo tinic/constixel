@@ -2207,17 +2207,8 @@ class image {
      * \param col Color palette index to use.
      */
     constexpr void draw_line_aa(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col) {
-        auto ipart = [](float x) {
-            return std::floor(x);
-        };
-        auto fpart = [](float x) {
-            return x - std::floor(x);
-        };
-        auto rfpart = [&](float x) {
-            return 1.0f - fpart(x);
-        };
 
-        bool steep = std::fabs(y1 - y0) > std::fabs(x1 - x0);
+        bool steep = abs(y1 - y0) > abs(x1 - x0);
         if (steep) {
             std::swap(x0, y0);
             std::swap(x1, y1);
@@ -2247,6 +2238,16 @@ class image {
             } else {
                 compose(x, y, a, Rl, Gl, Bl);
             }
+        };
+
+        auto ipart = [](float x) {
+            return std::floor(x);
+        };
+        auto fpart = [](float x) {
+            return x - std::floor(x);
+        };
+        auto rfpart = [&](float x) {
+            return 1.0f - fpart(x);
         };
 
         // first endpoint
