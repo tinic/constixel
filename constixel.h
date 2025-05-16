@@ -2120,10 +2120,6 @@ class image {
      * \param stroke_width Width of the stroke in pixels.
      */
     constexpr void draw_line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, int32_t stroke_width = 1) {
-        if (!clip_line(x0, y0, x1, y1)) {
-            return;
-        }
-
         int32_t steep = abs(y1 - y0) > abs(x1 - x0);
 
         if (steep) {
@@ -2134,6 +2130,10 @@ class image {
         if (x0 > x1) {
             std::swap(x0, x1);
             std::swap(y0, y1);
+        }
+
+        if (!clip_line(x0, y0, x1, y1)) {
+            return;
         }
 
         int32_t dx, dy;
@@ -2207,10 +2207,6 @@ class image {
      * \param col Color palette index to use.
      */
     constexpr void draw_line_aa(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col) {
-        if (!clip_line(x0, y0, x1, y1)) {
-            return;
-        }
-
         auto ipart = [](float x) {
             return std::floor(x);
         };
@@ -2229,6 +2225,10 @@ class image {
         if (x0 > x1) {
             std::swap(x0, x1);
             std::swap(y0, y1);
+        }
+
+        if (!clip_line(x0, y0, x1, y1)) {
+            return;
         }
 
         float Rl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 0);
