@@ -2174,6 +2174,7 @@ class image {
                 }
             }
         } else if (stroke_width > 1) {
+            stroke_width = std::min(stroke_width, int32_t{16});
             for (; x0 <= x1; x0++) {
                 if (steep) {
                     fill_circle(y0, x0, (stroke_width + 1) / 2, col);
@@ -3195,7 +3196,7 @@ class image {
         uint32_t outcode0 = calc_code(x0, y0);
         uint32_t outcode1 = calc_code(x1, y1);
 
-        while (true) {
+        for (size_t i = 0; i < 4; i++) {
             if ((outcode0 | outcode1) == INSIDE) {
                 return true;
             } else if (outcode0 & outcode1) {
@@ -3239,6 +3240,7 @@ class image {
                 }
             }
         }
+        return false;
     }
 
     /**
