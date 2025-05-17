@@ -10,6 +10,7 @@ using fontaa = constixel::ibmplexmono_bold_24_aa;
 #include <format>
 #include <limits>
 #include <random>
+#include <algorithm>
 
 static int32_t random_int32() {
     static std::random_device rd;
@@ -60,7 +61,7 @@ static int32_t random_limit() {
         std::numeric_limits<uint8_t>::max()-1,
     };
 
-    return limits[random_int32() % limits.size()];
+    return limits[static_cast<size_t>(random_int32()) % limits.size()];
 }
 
 template <class T, bool AA>
@@ -71,6 +72,7 @@ void fuzz_limits() {
         image.fill_circle(random_limit(),random_limit(),random_limit(),static_cast<uint8_t>(random_limit()&0xFF));
         image.fill_rect(random_limit(), random_limit(), random_limit(), random_limit(), static_cast<uint8_t>(random_limit()&0xFF));
         image.stroke_rect(random_limit(), random_limit(), random_limit(), random_int32(), static_cast<uint8_t>(random_limit()&0xFF));
+        image.stroke_rect(random_limit(), random_limit(), random_limit(), random_int32(), static_cast<uint8_t>(random_limit()&0xFF), random_limit());
         image.fill_round_rect(random_limit(), random_limit(), random_limit(), random_limit(), random_limit(), static_cast<uint8_t>(random_limit()&0xFF));
         image.plot(random_limit(), random_limit(), static_cast<uint8_t>(random_limit()&0xFF));
         image.template draw_string_mono<font>(random_limit(), random_limit(), "ABCabc", static_cast<uint8_t>(random_limit()&0xFF));
@@ -89,7 +91,6 @@ void fuzz_limits() {
     }
     for (size_t c = 0; c < 256; c++) {
         //image.draw_line(random_limit(),random_limit(),random_limit(),random_int32(),static_cast<uint8_t>(random_limit()&0xFF),random_limit());
-        //image.stroke_rect(random_limit(), random_limit(), random_limit(), random_int32(), static_cast<uint8_t>(random_limit()&0xFF), random_limit());
     }
 }
 
@@ -97,29 +98,29 @@ template <class T, bool AA>
 void fuzz_random() {
     T image;
     for (size_t c = 0; c < 65536; c++) {
-        image.draw_line(random_int32(),random_int32(),random_int32(),random_int32(),static_cast<uint8_t>(random_limit()&0xFF));
-        image.fill_circle(random_int32(),random_int32(),random_int32(),static_cast<uint8_t>(random_limit()&0xFF));
-        image.fill_rect(random_int32(), random_int32(), random_int32(), random_int32(), static_cast<uint8_t>(random_limit()&0xFF));
-        image.stroke_rect(random_int32(), random_int32(), random_int32(), random_int32(), static_cast<uint8_t>(random_limit()&0xFF));
-        image.fill_round_rect(random_int32(), random_int32(), random_int32(), random_int32(), random_int32(), static_cast<uint8_t>(random_limit()&0xFF));
-        image.plot(random_int32(), random_int32(), static_cast<uint8_t>(random_limit()&0xFF));
-        image.template draw_string_mono<font>(random_int32(), random_int32(), "ABCabc", static_cast<uint8_t>(random_limit()&0xFF));
-        image.template draw_string_mono<font, false, constixel::DEGREE_90>(random_int32(), random_int32(), "ABCabc", static_cast<uint8_t>(random_limit()&0xFF));
-        image.template draw_string_mono<font, false, constixel::DEGREE_180>(random_int32(), random_int32(), "ABCabc", static_cast<uint8_t>(random_limit()&0xFF));
-        image.template draw_string_mono<font, false, constixel::DEGREE_270>(random_int32(), random_int32(), "ABCabc", static_cast<uint8_t>(random_limit()&0xFF));
+        image.draw_line(random_int32(),random_int32(),random_int32(),random_int32(),static_cast<uint8_t>(random_int32()&0xFF));
+        image.fill_circle(random_int32(),random_int32(),random_int32(),static_cast<uint8_t>(random_int32()&0xFF));
+        image.fill_rect(random_int32(), random_int32(), random_int32(), random_int32(), static_cast<uint8_t>(random_int32()&0xFF));
+        image.stroke_rect(random_int32(), random_int32(), random_int32(), random_int32(), static_cast<uint8_t>(random_int32()&0xFF));
+        image.stroke_rect(random_int32(), random_int32(), random_int32(), random_int32(), static_cast<uint8_t>(random_int32()&0xFF), random_int32());
+        image.fill_round_rect(random_int32(), random_int32(), random_int32(), random_int32(), random_int32(), static_cast<uint8_t>(random_int32()&0xFF));
+        image.plot(random_int32(), random_int32(), static_cast<uint8_t>(random_int32()&0xFF));
+        image.template draw_string_mono<font>(random_int32(), random_int32(), "ABCabc", static_cast<uint8_t>(random_int32()&0xFF));
+        image.template draw_string_mono<font, false, constixel::DEGREE_90>(random_int32(), random_int32(), "ABCabc", static_cast<uint8_t>(random_int32()&0xFF));
+        image.template draw_string_mono<font, false, constixel::DEGREE_180>(random_int32(), random_int32(), "ABCabc", static_cast<uint8_t>(random_int32()&0xFF));
+        image.template draw_string_mono<font, false, constixel::DEGREE_270>(random_int32(), random_int32(), "ABCabc", static_cast<uint8_t>(random_int32()&0xFF));
         if constexpr (AA) {
-            image.draw_line_aa(random_int32(),random_int32(),random_int32(),random_int32(),static_cast<uint8_t>(random_limit()&0xFF));
-            image.fill_circle_aa(random_int32(), random_int32(), random_int32(), static_cast<uint8_t>(random_limit()&0xFF));
-            image.fill_round_rect_aa(random_int32(), random_int32(), random_int32(), random_int32(), random_int32(), static_cast<uint8_t>(random_limit()&0xFF));
-            image.template draw_string_aa<fontaa>(random_int32(), random_int32(), "ABCabc", static_cast<uint8_t>(random_limit()&0xFF));
-            image.template draw_string_aa<fontaa, false, constixel::DEGREE_90>(random_int32(), random_int32(), "ABCabc", static_cast<uint8_t>(random_limit()&0xFF));
-            image.template draw_string_aa<fontaa, false, constixel::DEGREE_180>(random_int32(), random_int32(), "ABCabc", static_cast<uint8_t>(random_limit()&0xFF));
-            image.template draw_string_aa<fontaa, false, constixel::DEGREE_270>(random_int32(), random_int32(), "ABCabc", static_cast<uint8_t>(random_limit()&0xFF));
+            image.draw_line_aa(random_int32(),random_int32(),random_int32(),random_int32(),static_cast<uint8_t>(random_int32()&0xFF));
+            image.fill_circle_aa(random_int32(), random_int32(), random_int32(), static_cast<uint8_t>(random_int32()&0xFF));
+            image.fill_round_rect_aa(random_int32(), random_int32(), random_int32(), random_int32(), random_int32(), static_cast<uint8_t>(random_int32()&0xFF));
+            image.template draw_string_aa<fontaa>(random_int32(), random_int32(), "ABCabc", static_cast<uint8_t>(random_int32()&0xFF));
+            image.template draw_string_aa<fontaa, false, constixel::DEGREE_90>(random_int32(), random_int32(), "ABCabc", static_cast<uint8_t>(random_int32()&0xFF));
+            image.template draw_string_aa<fontaa, false, constixel::DEGREE_180>(random_int32(), random_int32(), "ABCabc", static_cast<uint8_t>(random_int32()&0xFF));
+            image.template draw_string_aa<fontaa, false, constixel::DEGREE_270>(random_int32(), random_int32(), "ABCabc", static_cast<uint8_t>(random_int32()&0xFF));
         }
     }
     for (size_t c = 0; c < 256; c++) {
         //image.draw_line(random_int32(),random_int32(),random_int32(),random_int32(),static_cast<uint8_t>(random_int32()&0xFF),random_int32());
-        //image.stroke_rect(random_int32(), random_int32(), random_int32(), random_int32(), static_cast<uint8_t>(random_int32()&0xFF), random_int32());
     }
 }
 

@@ -2571,6 +2571,13 @@ class image {
      * \param col Color palette index to use.
      */
     constexpr void fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col) {
+
+        rect<int32_t> intersect_rect{0, 0, W, H};
+        intersect_rect &= rect<int32_t>{x, y, w, h};
+        if (intersect_rect.w <= 0 || intersect_rect.h <= 0) {
+            return;
+        }
+
         if (y < 0) {
             h += y;
             y = 0;
@@ -2613,10 +2620,14 @@ class image {
      * \param stroke_width Width of the stroke in pixels.
      */
     constexpr void stroke_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col, int32_t stroke_width = 1) {
-        draw_line(x, y, x + w, y, col, stroke_width);
-        draw_line(x + w, y, x + w, y + h, col, stroke_width);
-        draw_line(x + w, y + h, x, y + h, col, stroke_width);
-        draw_line(x, y + h, x, y, col, stroke_width);
+        if ( w <= 0 || h <= 0) {
+            return;
+        }
+        stroke_width = std::min(abs(stroke_width), std::max(w, h)/2);
+        fill_rect(x, y, stroke_width, h, col);
+        fill_rect(x + stroke_width, y, w - stroke_width * 2, stroke_width, col);
+        fill_rect(x + w - stroke_width, y, stroke_width, h, col);
+        fill_rect(x + stroke_width, y + h - stroke_width, w - stroke_width * 2, stroke_width, col);
     }
 
     /**
