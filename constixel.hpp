@@ -498,24 +498,42 @@ struct rect {
     /// @brief intersects one rect with another
     /// @param other the other rectangle
     constexpr rect operator&(const rect &other) const {
-        T nax = std::max(x, other.x);
-        T nay = std::max(y, other.y);
-        T nix = std::min(x + w, other.x + other.w);
-        T niy = std::min(x + h, other.y + other.h);
-        return {nax, nay, nix - nax, niy - nay};
+        T x1 = std::max(x, other.x);
+        T y1 = std::max(y, other.y);
+        T x2 = std::min(x + w, other.x + other.w);
+        T y2 = std::min(y + h, other.y + other.h);
+
+        T nw = x2 - x1;
+        T nh = y2 - y1;
+
+        if (nw <= 0 || nh <= 0) {
+            return {T{0}, T{0}, T{0}, T{0}};
+        }
+
+        return {x1, y1, nw, nh};
     }
 
     /// @brief intersects one rect with another
     /// @param other the other rectangle
     constexpr rect &operator&=(const rect &other) {
-        T nax = std::max(x, other.x);
-        T nay = std::max(y, other.y);
-        T nix = std::min(x + w, other.x + other.w);
-        T niy = std::min(x + h, other.y + other.h);
-        x = nax;
-        y = nay;
-        w = nix - nax;
-        h = niy - nay;
+        T x1 = std::max(x, other.x);
+        T y1 = std::max(y, other.y);
+        T x2 = std::min(x + w, other.x + other.w);
+        T y2 = std::min(y + h, other.y + other.h);
+
+        T nw = x2 - x1;
+        T nh = y2 - y1;
+
+        if (nw <= 0 || nh <= 0) {
+            *this = {T{0}, T{0}, T{0}, T{0}};
+            return *this;
+        }
+
+        x = x1;
+        y = y1;
+        w = nw;
+        h = nh;
+
         return *this;
     }
 };
@@ -3349,9 +3367,9 @@ class image {
         int32_t x1 = cx;
         int32_t y1 = cy;
 
-        rect<int32_t> bounds{0, 0, W, H};
-        bounds &= rect<int32_t>{x0, y0, r * 2, r * 2};
-        if (bounds.w <= 0 || bounds.h <= 0) {
+        rect<int32_t> intersect_rect{0, 0, W, H};
+        intersect_rect &= rect<int32_t>{x0, y0, r * 2, r * 2};
+        if (intersect_rect.w <= 0 || intersect_rect.h <= 0) {
             return;
         }
 
@@ -3425,9 +3443,18 @@ class image {
     constexpr void draw_char_mono(int32_t x, int32_t y, const char_info<typename FONT::char_info_type> &ch,
                                   uint8_t col) {
         static_assert(FONT::mono == true, "Can't use an antialiased font to draw mono/pixelized text.");
+
         int32_t ch_data_off = static_cast<int32_t>(ch.y) * static_cast<int32_t>(FONT::glyph_bitmap_stride) +
                               static_cast<int32_t>(ch.x) / 8;
         if constexpr (ROTATION == DEGREE_0) {
+            stroke_rect({x + ch.xoffset, y + ch.yoffset, ch.width + 1, ch.height + 1}, 0);
+
+            rect<int32_t> intersect_rect{0, 0, W, H};
+            intersect_rect &= rect<int32_t>{x + ch.xoffset, y + ch.yoffset, ch.width + 1, ch.height + 1};
+            if (intersect_rect.w <= 0 || intersect_rect.h <= 0) {
+                return;
+            }
+
             x += ch.xoffset;
             y += ch.yoffset;
             const int32_t x2 = x + static_cast<int32_t>(ch.width);
@@ -3512,6 +3539,13 @@ class image {
     template <typename FONT, text_rotation ROTATION>
     constexpr void draw_char_aa(int32_t x, int32_t y, const char_info<typename FONT::char_info_type> &ch, uint8_t col) {
         static_assert(FONT::mono == false, "Can't use a mono font to draw antialiased text.");
+
+        rect<int32_t> intersect_rect{0, 0, W, H};
+        intersect_rect &= rect<int32_t>{x + ch.xoffset, y + ch.yoffset, ch.width + 1, ch.height + 1};
+        if (intersect_rect.w <= 0 || intersect_rect.h <= 0) {
+            return;
+        }
+
         int32_t ch_data_off = static_cast<int32_t>(ch.y) * static_cast<int32_t>(FONT::glyph_bitmap_stride) +
                               static_cast<int32_t>(ch.x) / 2;
         float Rl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 0);
