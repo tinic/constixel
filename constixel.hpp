@@ -3407,7 +3407,7 @@ class image {
         max_coord = std::max(max_coord, abs(y0));
         max_coord = std::max(max_coord, abs(y1));
         max_coord = std::max(max_coord, abs(r));
-        if (max_coord < ((std::numeric_limits<int16_t>::max() - 1) / 4)) {
+        if (max_coord < ((std::numeric_limits<int16_t>::max() - 1) / 2)) {
             for (int32_t y = y0; y <= y1; y++) {
                 for (int32_t x = x0; x <= x1; x++) {
                     int32_t dx = (x * 2 + 1) - (cx * 2);
