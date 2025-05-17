@@ -2572,9 +2572,7 @@ class image {
      */
     constexpr void fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col) {
 
-        rect<int32_t> intersect_rect{0, 0, W, H};
-        intersect_rect &= rect<int32_t>{x, y, w, h};
-        if (intersect_rect.w <= 0 || intersect_rect.h <= 0) {
+        if(check_not_in_bounds(x, y, w, h)) {
             return;
         }
 
@@ -3179,6 +3177,15 @@ class image {
 #ifndef __INTELLISENSE__
     /// @cond DOXYGEN_EXCLUDE
 
+    constexpr bool check_not_in_bounds(int32_t x, int32_t y, int32_t w, int32_t h) {
+        rect<int32_t> intersect_rect{0, 0, W, H};
+        intersect_rect &= rect<int32_t>{x, y, w, h};
+        if (intersect_rect.w <= 0 || intersect_rect.h <= 0) {
+            return true;
+        }
+        return false;
+    }
+
     constexpr bool clip_line(int32_t &x0, int32_t &y0, int32_t &x1, int32_t &y1, int32_t xmin, int32_t ymin,
                              int32_t xmax, int32_t ymax) {
         enum clip_code : uint32_t {
@@ -3374,9 +3381,7 @@ class image {
         int32_t x1 = x0 + r * 2 + ox;
         int32_t y1 = y0 + r * 2 + oy;
 
-        rect<int32_t> intersect_rect{0, 0, W, H};
-        intersect_rect &= rect<int32_t>{x0, y0, r * 2 + ox + 1, r * 2 + oy + 1};
-        if (intersect_rect.w <= 0 || intersect_rect.h <= 0) {
+        if(check_not_in_bounds(x0, y0, r * 2 + ox + 1, r * 2 + oy + 1)) {
             return;
         }
 
@@ -3456,9 +3461,7 @@ class image {
         int32_t x1 = x0 + r * 2 + ox;
         int32_t y1 = y0 + r * 2 + oy;
 
-        rect<int32_t> intersect_rect{0, 0, W, H};
-        intersect_rect &= rect<int32_t>{x0, y0, r * 2 + ox + 1, r * 2 + oy + 1};
-        if (intersect_rect.w <= 0 || intersect_rect.h <= 0) {
+        if(check_not_in_bounds(x0, y0, r * 2 + ox + 1, r * 2 + oy + 1)) {
             return;
         }
 
@@ -3539,9 +3542,7 @@ class image {
         int32_t ch_data_off = static_cast<int32_t>(ch.y) * static_cast<int32_t>(FONT::glyph_bitmap_stride) +
                               static_cast<int32_t>(ch.x) / 8;
         if constexpr (ROTATION == DEGREE_0) {
-            rect<int32_t> intersect_rect{0, 0, W, H};
-            intersect_rect &= rect<int32_t>{x + ch.xoffset, y + ch.yoffset, ch.width + 1, ch.height + 1};
-            if (intersect_rect.w <= 0 || intersect_rect.h <= 0) {
+            if(check_not_in_bounds(x + ch.xoffset, y + ch.yoffset, ch.width + 1, ch.height + 1)) {
                 return;
             }
 
@@ -3564,9 +3565,7 @@ class image {
                 ch_data_off += FONT::glyph_bitmap_stride;
             }
         } else if constexpr (ROTATION == DEGREE_180) {
-            rect<int32_t> intersect_rect{0, 0, W, H};
-            intersect_rect &= rect<int32_t>{x - ch.xoffset - ch.width, y - FONT::ascent, ch.width + 1, ch.height + 1};
-            if (intersect_rect.w <= 0 || intersect_rect.h <= 0) {
+            if(check_not_in_bounds(x - ch.xoffset - ch.width, y - FONT::ascent, ch.width + 1, ch.height + 1)) {
                 return;
             }
 
@@ -3589,9 +3588,7 @@ class image {
                 ch_data_off += FONT::glyph_bitmap_stride;
             }
         } else if constexpr (ROTATION == DEGREE_90) {
-            rect<int32_t> intersect_rect{0, 0, W, H};
-            intersect_rect &= rect<int32_t>{x - FONT::ascent, y, ch.height + 1, ch.width + 1};
-            if (intersect_rect.w <= 0 || intersect_rect.h <= 0) {
+            if(check_not_in_bounds(x - FONT::ascent, y, ch.height + 1, ch.width + 1)) {
                 return;
             }
 
@@ -3614,9 +3611,7 @@ class image {
                 ch_data_off += FONT::glyph_bitmap_stride;
             }
         } else if constexpr (ROTATION == DEGREE_270) {
-            rect<int32_t> intersect_rect{0, 0, W, H};
-            intersect_rect &= rect<int32_t>{x + ch.yoffset, y - ch.xoffset - ch.width, ch.height + 1, ch.width + 1};
-            if (intersect_rect.w <= 0 || intersect_rect.h <= 0) {
+            if(check_not_in_bounds(x + ch.yoffset, y - ch.xoffset - ch.width, ch.height + 1, ch.width + 1)) {
                 return;
             }
 
@@ -3654,9 +3649,7 @@ class image {
         float Gl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 1);
         float Bl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 2);
         if constexpr (ROTATION == DEGREE_0) {
-            rect<int32_t> intersect_rect{0, 0, W, H};
-            intersect_rect &= rect<int32_t>{x + ch.xoffset, y + ch.yoffset, ch.width + 1, ch.height + 1};
-            if (intersect_rect.w <= 0 || intersect_rect.h <= 0) {
+            if(check_not_in_bounds(x + ch.xoffset, y + ch.yoffset, ch.width + 1, ch.height + 1)) {
                 return;
             }
 
@@ -3684,9 +3677,7 @@ class image {
                 ch_data_off += FONT::glyph_bitmap_stride;
             }
         } else if constexpr (ROTATION == DEGREE_180) {
-            rect<int32_t> intersect_rect{0, 0, W, H};
-            intersect_rect &= rect<int32_t>{x - ch.xoffset - ch.width, y - FONT::ascent, ch.width + 1, ch.height + 1};
-            if (intersect_rect.w <= 0 || intersect_rect.h <= 0) {
+            if(check_not_in_bounds(x - ch.xoffset - ch.width, y - FONT::ascent, ch.width + 1, ch.height + 1)) {
                 return;
             }
 
@@ -3714,9 +3705,7 @@ class image {
                 ch_data_off += FONT::glyph_bitmap_stride;
             }
         } else if constexpr (ROTATION == DEGREE_90) {
-            rect<int32_t> intersect_rect{0, 0, W, H};
-            intersect_rect &= rect<int32_t>{x - FONT::ascent, y, ch.height + 1, ch.width + 1};
-            if (intersect_rect.w <= 0 || intersect_rect.h <= 0) {
+            if(check_not_in_bounds(x - FONT::ascent, y, ch.height + 1, ch.width + 1)) {
                 return;
             }
 
@@ -3744,10 +3733,7 @@ class image {
                 ch_data_off += FONT::glyph_bitmap_stride;
             }
         } else if constexpr (ROTATION == DEGREE_270) {
-
-            rect<int32_t> intersect_rect{0, 0, W, H};
-            intersect_rect &= rect<int32_t>{x + ch.yoffset, y - ch.xoffset - ch.width, ch.height + 1, ch.width + 1};
-            if (intersect_rect.w <= 0 || intersect_rect.h <= 0) {
+            if(check_not_in_bounds(x + ch.yoffset, y - ch.xoffset - ch.width, ch.height + 1, ch.width + 1)) {
                 return;
             }
 
