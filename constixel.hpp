@@ -3368,7 +3368,7 @@ class image {
         int32_t y1 = cy;
 
         rect<int32_t> intersect_rect{0, 0, W, H};
-        intersect_rect &= rect<int32_t>{x0, y0, r * 2, r * 2};
+        intersect_rect &= rect<int32_t>{x0, y0, r * 2 + ox, r * 2 + oy};
         if (intersect_rect.w <= 0 || intersect_rect.h <= 0) {
             return;
         }
