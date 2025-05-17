@@ -32,7 +32,7 @@ SOFTWARE.
 #include <string>
 #include <vector>
 
-#define SLOW_TESTS 0
+#define SLOW_TESTS 1
 #define MAINLINE_TESTS 1
 #define JP_TESTS 0
 
@@ -558,13 +558,13 @@ int main() {
     static_assert(test0().size() == 290);
     static_assert(test1().size() == 981);
     static_assert(test2().size() == 1714);
-    static_assert(test3().size() == 1748);
-    static_assert(test4().size() == 1722);
-    static_assert(test5().size() == 2264);
-    static_assert(test6().size() == 1390);
-    static_assert(test7().size() == 2325);
-    static_assert(test8().size() == 333);
-    static_assert(test9().size() == 5933);
+    static_assert(test3().size() == 1728);
+    static_assert(test4().size() == 1698);
+    static_assert(test5().size() == 2281);
+    static_assert(test6().size() == 1362);
+    static_assert(test7().size() == 2382);
+    static_assert(test8().size() == 387);
+    static_assert(test9().size() == 6040);
     static_assert(test10().size() == 12893);
     static_assert(test11().size() == 5677);
     static_assert(test12().size() == 4475);

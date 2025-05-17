@@ -2132,7 +2132,7 @@ class image {
      * \param stroke_width Width of the stroke in pixels.
      */
     constexpr void draw_line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, int32_t stroke_width = 1) {
-        if (!clip_line(x0, y0, x1, y1, -stroke_width, -stroke_width, W + stroke_width, H + stroke_width)) {
+        if (!clip_line(x0, y0, x1, y1, -stroke_width, -stroke_width, static_cast<int32_t>(W) + stroke_width, static_cast<int32_t>(H) + stroke_width)) {
             return;
         }
 
@@ -2650,10 +2650,7 @@ class image {
             fill_rect(cx - 1, cy - 1, 2, 2, col);
             return;
         }
-        fill_arc(cx, cy - 1, radius, 9, 0, col);
-        fill_arc(cx, cy, radius, 10, 0, col);
-        fill_arc(cx, cy - 1, radius, 1, -1, col);
-        fill_arc(cx, cy, radius, 2, -1, col);
+        fill_circle_int(cx, cy, radius, 0, 0, col);
     }
 
     /**
@@ -2691,10 +2688,7 @@ class image {
         int32_t cr = std::min((w) / 2, std::min((w) / 2, radius));
         int32_t dx = w - cr * 2;
         int32_t dy = h - cr * 2;
-        fill_arc(x + cr, y + h - cr - 1, cr, 9, 0, col);
-        fill_arc(x + cr, y + cr, cr, 10, 0, col);
-        fill_arc(x + w - cr, y + h - cr - 1, cr, 1, -1, col);
-        fill_arc(x + w - cr, y + cr, cr, 2, -1, col);
+        fill_circle_int(x + cr, y + cr, cr, dx, dy, col);
         fill_rect(x, y + cr, cr, dy, col);
         fill_rect(x + w - cr, y + cr, cr, dy, col);
         fill_rect(x + cr, y, dx, h, col);
@@ -3359,19 +3353,104 @@ class image {
     /**
      * @private
      */
+    constexpr void fill_circle_int(int32_t cx, int32_t cy, int32_t r, int32_t ox, int32_t oy, uint8_t col) {
+        r = abs(r);
+
+        int32_t x0 = cx - r - 1;
+        int32_t y0 = cy - r - 1;
+        int32_t x1 = x0 + r * 2 + ox;
+        int32_t y1 = y0 + r * 2 + oy;
+
+        rect<int32_t> intersect_rect{0, 0, W, H};
+        intersect_rect &= rect<int32_t>{x0, y0, r * 2 + ox + 1, r * 2 + oy + 1};
+        if (intersect_rect.w <= 0 || intersect_rect.h <= 0) {
+            return;
+        }
+
+        int32_t xpos = x0;
+        int32_t ypos = y0;
+
+        if (x0 < 0) {
+            x0 = 0;
+        }
+        if (y0 < 0) {
+            y0 = 0;
+        }
+        if (x1 >= static_cast<int32_t>(W)) {
+            x1 = static_cast<int32_t>(W);
+        }
+        if (y1 >= static_cast<int32_t>(H)) {
+            y1 = static_cast<int32_t>(H);
+        }
+
+        int32_t max_coord = std::numeric_limits<int32_t>::min();
+        max_coord = std::max(max_coord, abs(x0));
+        max_coord = std::max(max_coord, abs(x1));
+        max_coord = std::max(max_coord, abs(y0));
+        max_coord = std::max(max_coord, abs(y1));
+        max_coord = std::max(max_coord, abs(r));
+        if (max_coord < ((std::numeric_limits<int16_t>::max() - 1) / 4)) {
+            for (int32_t y = y0; y <= y1; y++) {
+                for (int32_t x = x0; x <= x1; x++) {
+                    int32_t dx = (x * 2 + 1) - (cx * 2);
+                    int32_t dy = (y * 2 + 1) - (cy * 2);
+                    int32_t dist_sq = dx * dx + dy * dy;
+                    if (dist_sq > (r * r * 4 - 3)) {
+                        continue;
+                    }
+                    int32_t lx = x;
+                    int32_t ly = y;
+                    int32_t rx = cx + (xpos - x) + r + ox;
+                    int32_t ry = cy + (ypos - y) + r + oy;
+                    plot(lx, ly, col);
+                    plot(rx, ly, col);
+                    plot(rx, ry, col);
+                    plot(lx, ry, col);
+                }
+            }
+        } else {
+            for (int32_t y = y0; y <= y1; y++) {
+                for (int32_t x = x0; x <= x1; x++) {
+                    int64_t dx =
+                        (static_cast<int64_t>(x) * int64_t{2} + int64_t{1}) - (static_cast<int64_t>(cx) * int64_t{2});
+                    int64_t dy =
+                        (static_cast<int64_t>(y) * int64_t{2} + int64_t{1}) - (static_cast<int64_t>(cy) * int64_t{2});
+                    int64_t dist_sq = dx * dx + dy * dy;
+                    if (dist_sq > (static_cast<int64_t>(r * r) * int64_t{4} - int64_t{3})) {
+                        continue;
+                    }
+                    int32_t lx = x;
+                    int32_t ly = y;
+                    int32_t rx = cx + (xpos - x) + r + ox;
+                    int32_t ry = cy + (ypos - y) + r + oy;
+                    plot(lx, ly, col);
+                    plot(rx, ly, col);
+                    plot(rx, ry, col);
+                    plot(lx, ry, col);
+                }
+            }
+        }
+    }
+
+    /**
+     * @private
+     */
     constexpr void fill_circle_aa_int(int32_t cx, int32_t cy, int32_t r, int32_t ox, int32_t oy, uint8_t col) {
         r = abs(r);
 
         int32_t x0 = cx - r - 1;
         int32_t y0 = cy - r - 1;
-        int32_t x1 = cx;
-        int32_t y1 = cy;
+        int32_t x1 = x0 + r * 2 + ox;
+        int32_t y1 = y0 + r * 2 + oy;
 
         rect<int32_t> intersect_rect{0, 0, W, H};
-        intersect_rect &= rect<int32_t>{x0, y0, r * 2 + ox, r * 2 + oy};
+        intersect_rect &= rect<int32_t>{x0, y0, r * 2 + ox + 1, r * 2 + oy + 1};
         if (intersect_rect.w <= 0 || intersect_rect.h <= 0) {
             return;
         }
+
+        int32_t xpos = x0;
+        int32_t ypos = y0;
 
         if (x0 < 0) {
             x0 = 0;
@@ -3400,8 +3479,8 @@ class image {
                 if (dist_sq < (static_cast<float>(r) - 0.5f) * (static_cast<float>(r) - 0.5f)) {
                     int32_t lx = x;
                     int32_t ly = y;
-                    int32_t rx = cx + (x0 - x) + r + ox;
-                    int32_t ry = cy + (y0 - y) + r + oy;
+                    int32_t rx = cx + (xpos - x) + r + ox;
+                    int32_t ry = cy + (ypos - y) + r + oy;
                     plot(lx, ly, col);
                     plot(rx, ly, col);
                     plot(rx, ry, col);
@@ -3418,8 +3497,8 @@ class image {
                 if (a >= hidden::epsilon_low) {
                     int32_t lx = x;
                     int32_t ly = y;
-                    int32_t rx = cx + (x0 - x) + r + ox;
-                    int32_t ry = cy + (y0 - y) + r + oy;
+                    int32_t rx = cx + (xpos - x) + r + ox;
+                    int32_t ry = cy + (ypos - y) + r + oy;
                     if (a >= hidden::epsilon_high) {
                         plot(lx, ly, col);
                         plot(rx, ly, col);
@@ -3447,8 +3526,6 @@ class image {
         int32_t ch_data_off = static_cast<int32_t>(ch.y) * static_cast<int32_t>(FONT::glyph_bitmap_stride) +
                               static_cast<int32_t>(ch.x) / 8;
         if constexpr (ROTATION == DEGREE_0) {
-            stroke_rect({x + ch.xoffset, y + ch.yoffset, ch.width + 1, ch.height + 1}, 0);
-
             rect<int32_t> intersect_rect{0, 0, W, H};
             intersect_rect &= rect<int32_t>{x + ch.xoffset, y + ch.yoffset, ch.width + 1, ch.height + 1};
             if (intersect_rect.w <= 0 || intersect_rect.h <= 0) {
@@ -3474,6 +3551,12 @@ class image {
                 ch_data_off += FONT::glyph_bitmap_stride;
             }
         } else if constexpr (ROTATION == DEGREE_180) {
+            rect<int32_t> intersect_rect{0, 0, W, H};
+            intersect_rect &= rect<int32_t>{x - ch.xoffset - ch.width, y - FONT::ascent, ch.width + 1, ch.height + 1};
+            if (intersect_rect.w <= 0 || intersect_rect.h <= 0) {
+                return;
+            }
+
             x -= ch.xoffset;
             y -= FONT::ascent;
             const int32_t x2 = x - static_cast<int32_t>(ch.width);
@@ -3493,6 +3576,12 @@ class image {
                 ch_data_off += FONT::glyph_bitmap_stride;
             }
         } else if constexpr (ROTATION == DEGREE_90) {
+            rect<int32_t> intersect_rect{0, 0, W, H};
+            intersect_rect &= rect<int32_t>{x - FONT::ascent, y, ch.height + 1, ch.width + 1};
+            if (intersect_rect.w <= 0 || intersect_rect.h <= 0) {
+                return;
+            }
+
             x -= FONT::ascent;
             y += ch.xoffset;
             const int32_t x2 = x + static_cast<int32_t>(ch.height);
@@ -3512,6 +3601,12 @@ class image {
                 ch_data_off += FONT::glyph_bitmap_stride;
             }
         } else if constexpr (ROTATION == DEGREE_270) {
+            rect<int32_t> intersect_rect{0, 0, W, H};
+            intersect_rect &= rect<int32_t>{x + ch.yoffset, y - ch.xoffset - ch.width, ch.height + 1, ch.width + 1};
+            if (intersect_rect.w <= 0 || intersect_rect.h <= 0) {
+                return;
+            }
+
             x += ch.yoffset;
             y -= ch.xoffset;
             const int32_t x2 = x + static_cast<int32_t>(ch.height);
@@ -3540,18 +3635,18 @@ class image {
     constexpr void draw_char_aa(int32_t x, int32_t y, const char_info<typename FONT::char_info_type> &ch, uint8_t col) {
         static_assert(FONT::mono == false, "Can't use a mono font to draw antialiased text.");
 
-        rect<int32_t> intersect_rect{0, 0, W, H};
-        intersect_rect &= rect<int32_t>{x + ch.xoffset, y + ch.yoffset, ch.width + 1, ch.height + 1};
-        if (intersect_rect.w <= 0 || intersect_rect.h <= 0) {
-            return;
-        }
-
         int32_t ch_data_off = static_cast<int32_t>(ch.y) * static_cast<int32_t>(FONT::glyph_bitmap_stride) +
                               static_cast<int32_t>(ch.x) / 2;
         float Rl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 0);
         float Gl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 1);
         float Bl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 2);
         if constexpr (ROTATION == DEGREE_0) {
+            rect<int32_t> intersect_rect{0, 0, W, H};
+            intersect_rect &= rect<int32_t>{x + ch.xoffset, y + ch.yoffset, ch.width + 1, ch.height + 1};
+            if (intersect_rect.w <= 0 || intersect_rect.h <= 0) {
+                return;
+            }
+
             x += ch.xoffset;
             y += ch.yoffset;
             const int32_t x2 = x + static_cast<int32_t>(ch.width);
@@ -3576,6 +3671,12 @@ class image {
                 ch_data_off += FONT::glyph_bitmap_stride;
             }
         } else if constexpr (ROTATION == DEGREE_180) {
+            rect<int32_t> intersect_rect{0, 0, W, H};
+            intersect_rect &= rect<int32_t>{x - ch.xoffset - ch.width, y - FONT::ascent, ch.width + 1, ch.height + 1};
+            if (intersect_rect.w <= 0 || intersect_rect.h <= 0) {
+                return;
+            }
+
             x -= ch.xoffset;
             y -= FONT::ascent;
             const int32_t x2 = x - static_cast<int32_t>(ch.width);
@@ -3600,6 +3701,12 @@ class image {
                 ch_data_off += FONT::glyph_bitmap_stride;
             }
         } else if constexpr (ROTATION == DEGREE_90) {
+            rect<int32_t> intersect_rect{0, 0, W, H};
+            intersect_rect &= rect<int32_t>{x - FONT::ascent, y, ch.height + 1, ch.width + 1};
+            if (intersect_rect.w <= 0 || intersect_rect.h <= 0) {
+                return;
+            }
+
             x -= FONT::ascent;
             y += ch.xoffset;
             const int32_t x2 = x + static_cast<int32_t>(ch.height);
@@ -3624,6 +3731,13 @@ class image {
                 ch_data_off += FONT::glyph_bitmap_stride;
             }
         } else if constexpr (ROTATION == DEGREE_270) {
+
+            rect<int32_t> intersect_rect{0, 0, W, H};
+            intersect_rect &= rect<int32_t>{x + ch.yoffset, y - ch.xoffset - ch.width, ch.height + 1, ch.width + 1};
+            if (intersect_rect.w <= 0 || intersect_rect.h <= 0) {
+                return;
+            }
+
             x += ch.yoffset;
             y -= ch.xoffset;
             const int32_t x2 = x + static_cast<int32_t>(ch.height);
@@ -3668,47 +3782,6 @@ class image {
         size_t _xr = static_cast<size_t>(x + w);
         size_t _y = static_cast<size_t>(y);
         T<W, H, GR>::span(data, _xl, _xr, _y, col);
-    }
-
-    /**
-     * @private
-     */
-    constexpr void fill_arc(int32_t x0, int32_t y0, int32_t r, uint8_t corners, int32_t delta, uint8_t col) {
-        r = abs(r);
-
-        int32_t f = 1 - r;
-        int32_t ddx = -2 * r;
-        int32_t ddy = 1;
-        int32_t x = r;
-        int32_t y = 0;
-        int32_t px = x;
-        int32_t py = y;
-        delta++;
-        int32_t hl = corners & 4 ? 2 : 1;
-        int32_t hr = corners & 8 ? 1 : 0;
-        while (y < x) {
-            if (f >= 0) {
-                x--;
-                ddx += 2;
-                f += ddx;
-            }
-            ddy += 2;
-            f += ddy;
-            if (++y < (x + 1)) {
-                if (corners & 1)
-                    span(x0 - hr * x, hl * x + delta, y0 + y, col);
-                if (corners & 2)
-                    span(x0 - hr * x, hl * x + delta, y0 - y, col);
-            }
-            if (x != px) {
-                if (corners & 1)
-                    span(x0 - hr * py, hl * py + delta, y0 + px, col);
-                if (corners & 2)
-                    span(x0 - hr * py, hl * py + delta, y0 - px, col);
-                px = x;
-            }
-            py = y;
-        }
     }
 
     /**
