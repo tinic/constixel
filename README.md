@@ -353,9 +353,11 @@ class image {
     void flip_hv();
 
     // Return a transposed version of this image
+    template <bool FLIP_H = false, bool FLIP_V = false>
     image<T, H, W, S, GR> transpose();
 
     // transpose this image into another
+    template <bool FLIP_H = false, bool FLIP_V = false>
     transpose(image<T, H, W, S, GR> &dst);
 
     // Blit an RGBA (little endian) buffer into this instance. Colors are quantizied to the internal palette. 
