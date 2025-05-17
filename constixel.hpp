@@ -21,8 +21,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#ifndef CONSTIXEL_H_
-#define CONSTIXEL_H_
+#ifndef CONSTIXEL_HPP_
+#define CONSTIXEL_HPP_
 
 #include <algorithm>
 #include <array>
@@ -1759,7 +1759,7 @@ class format_8bit : public format {
         } else
 #endif  // #if defined(__ARM_NEON)
 #if defined(__AVX2__)
-            if (!std::is_constant_evaluated()) {
+        if (!std::is_constant_evaluated()) {
             __m128 cola_v = _mm_set1_ps(cola);
             __m128 inv_cola_v = _mm_set1_ps(1.0f - cola);
             __m128 col_rgb = _mm_set_ps(0.0f, colb, colg, colr);
@@ -2132,7 +2132,8 @@ class image {
      * \param stroke_width Width of the stroke in pixels.
      */
     constexpr void draw_line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, int32_t stroke_width = 1) {
-        if (!clip_line(x0, y0, x1, y1, -stroke_width, -stroke_width, static_cast<int32_t>(W) + stroke_width, static_cast<int32_t>(H) + stroke_width)) {
+        if (!clip_line(x0, y0, x1, y1, -stroke_width, -stroke_width, static_cast<int32_t>(W) + stroke_width,
+                       static_cast<int32_t>(H) + stroke_width)) {
             return;
         }
 
@@ -2571,8 +2572,7 @@ class image {
      * \param col Color palette index to use.
      */
     constexpr void fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col) {
-
-        if(check_not_in_bounds(x, y, w, h)) {
+        if (check_not_in_bounds(x, y, w, h)) {
             return;
         }
 
@@ -2618,10 +2618,10 @@ class image {
      * \param stroke_width Width of the stroke in pixels.
      */
     constexpr void stroke_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col, int32_t stroke_width = 1) {
-        if ( w <= 0 || h <= 0) {
+        if (w <= 0 || h <= 0) {
             return;
         }
-        stroke_width = std::min(abs(stroke_width), std::max(w, h)/2);
+        stroke_width = std::min(abs(stroke_width), std::max(w, h) / 2);
         fill_rect(x, y, stroke_width, h, col);
         fill_rect(x + stroke_width, y, w - stroke_width * 2, stroke_width, col);
         fill_rect(x + w - stroke_width, y, stroke_width, h, col);
@@ -3381,7 +3381,7 @@ class image {
         int32_t x1 = x0 + r * 2 + ox;
         int32_t y1 = y0 + r * 2 + oy;
 
-        if(check_not_in_bounds(x0, y0, r * 2 + ox + 1, r * 2 + oy + 1)) {
+        if (check_not_in_bounds(x0, y0, r * 2 + ox + 1, r * 2 + oy + 1)) {
             return;
         }
 
@@ -3461,7 +3461,7 @@ class image {
         int32_t x1 = x0 + r * 2 + ox;
         int32_t y1 = y0 + r * 2 + oy;
 
-        if(check_not_in_bounds(x0, y0, r * 2 + ox + 1, r * 2 + oy + 1)) {
+        if (check_not_in_bounds(x0, y0, r * 2 + ox + 1, r * 2 + oy + 1)) {
             return;
         }
 
@@ -3542,7 +3542,7 @@ class image {
         int32_t ch_data_off = static_cast<int32_t>(ch.y) * static_cast<int32_t>(FONT::glyph_bitmap_stride) +
                               static_cast<int32_t>(ch.x) / 8;
         if constexpr (ROTATION == DEGREE_0) {
-            if(check_not_in_bounds(x + ch.xoffset, y + ch.yoffset, ch.width + 1, ch.height + 1)) {
+            if (check_not_in_bounds(x + ch.xoffset, y + ch.yoffset, ch.width + 1, ch.height + 1)) {
                 return;
             }
 
@@ -3565,7 +3565,7 @@ class image {
                 ch_data_off += FONT::glyph_bitmap_stride;
             }
         } else if constexpr (ROTATION == DEGREE_180) {
-            if(check_not_in_bounds(x - ch.xoffset - ch.width, y - FONT::ascent, ch.width + 1, ch.height + 1)) {
+            if (check_not_in_bounds(x - ch.xoffset - ch.width, y - FONT::ascent, ch.width + 1, ch.height + 1)) {
                 return;
             }
 
@@ -3588,7 +3588,7 @@ class image {
                 ch_data_off += FONT::glyph_bitmap_stride;
             }
         } else if constexpr (ROTATION == DEGREE_90) {
-            if(check_not_in_bounds(x - FONT::ascent, y, ch.height + 1, ch.width + 1)) {
+            if (check_not_in_bounds(x - FONT::ascent, y, ch.height + 1, ch.width + 1)) {
                 return;
             }
 
@@ -3611,7 +3611,7 @@ class image {
                 ch_data_off += FONT::glyph_bitmap_stride;
             }
         } else if constexpr (ROTATION == DEGREE_270) {
-            if(check_not_in_bounds(x + ch.yoffset, y - ch.xoffset - ch.width, ch.height + 1, ch.width + 1)) {
+            if (check_not_in_bounds(x + ch.yoffset, y - ch.xoffset - ch.width, ch.height + 1, ch.width + 1)) {
                 return;
             }
 
@@ -3649,7 +3649,7 @@ class image {
         float Gl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 1);
         float Bl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 2);
         if constexpr (ROTATION == DEGREE_0) {
-            if(check_not_in_bounds(x + ch.xoffset, y + ch.yoffset, ch.width + 1, ch.height + 1)) {
+            if (check_not_in_bounds(x + ch.xoffset, y + ch.yoffset, ch.width + 1, ch.height + 1)) {
                 return;
             }
 
@@ -3677,7 +3677,7 @@ class image {
                 ch_data_off += FONT::glyph_bitmap_stride;
             }
         } else if constexpr (ROTATION == DEGREE_180) {
-            if(check_not_in_bounds(x - ch.xoffset - ch.width, y - FONT::ascent, ch.width + 1, ch.height + 1)) {
+            if (check_not_in_bounds(x - ch.xoffset - ch.width, y - FONT::ascent, ch.width + 1, ch.height + 1)) {
                 return;
             }
 
@@ -3705,7 +3705,7 @@ class image {
                 ch_data_off += FONT::glyph_bitmap_stride;
             }
         } else if constexpr (ROTATION == DEGREE_90) {
-            if(check_not_in_bounds(x - FONT::ascent, y, ch.height + 1, ch.width + 1)) {
+            if (check_not_in_bounds(x - FONT::ascent, y, ch.height + 1, ch.width + 1)) {
                 return;
             }
 
@@ -3733,7 +3733,7 @@ class image {
                 ch_data_off += FONT::glyph_bitmap_stride;
             }
         } else if constexpr (ROTATION == DEGREE_270) {
-            if(check_not_in_bounds(x + ch.yoffset, y - ch.xoffset - ch.width, ch.height + 1, ch.width + 1)) {
+            if (check_not_in_bounds(x + ch.yoffset, y - ch.xoffset - ch.width, ch.height + 1, ch.width + 1)) {
                 return;
             }
 
@@ -3799,4 +3799,4 @@ class image {
 
 }  // namespace constixel
 
-#endif  // CONSTIXEL_H_
+#endif  // CONSTIXEL_HPP_
