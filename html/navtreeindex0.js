@@ -57,7 +57,7 @@ var NAVTREEINDEX0 =
 "classconstixel_1_1image.html#af9c69241ebc626eeaf1ffae7e4797c6e":[1,0,0,4,12],
 "classconstixel_1_1image.html#afb6d8f9dc44c780fd0a97b0448877c1d":[1,0,0,4,13],
 "classes.html":[1,1],
-"constixel_8h_source.html":[2,0,0],
+"constixel_8hpp_source.html":[2,0,0],
 "files.html":[2,0],
 "functions.html":[1,3,0],
 "functions_func.html":[1,3,1],
