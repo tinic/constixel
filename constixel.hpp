@@ -1744,6 +1744,7 @@ class format_8bit : public format {
 
     static constexpr void compose(std::array<uint8_t, image_size> &data, size_t x, size_t y, float cola, float colr,
                                   float colg, float colb) {
+        // clang-format off
 #if defined(__ARM_NEON)
         if (!std::is_constant_evaluated()) {
             size_t bg = static_cast<size_t>(data.data()[y * bytes_per_line + x]);
@@ -1779,6 +1780,7 @@ class format_8bit : public format {
             float Bl = colb * cola + quant.linear_palette().at(bg * 3 + 2) * (1.0f - cola);
             plot(data, x, y, quant.nearest_linear(Rl, Gl, Bl));
         }
+        // clang-format on
     }
 
     static constexpr void RGBA_uint32(std::array<uint32_t, W * H> &dst, const std::array<uint8_t, image_size> &src) {
@@ -2664,6 +2666,26 @@ class image {
     }
 
     /**
+     * \brief Stroke a circle with the specified radius and color. Example:
+     *
+     * \code{.cpp}
+     * image.stroke_circle(64, 64, 32, 4, constixel::color::WHITE);
+     * \endcode
+     *
+     * \param cx Center X-coordinate of the circle in pixels.
+     * \param cy Center Y-coordinate of the circle in pixels.
+     * \param radius radius of the circle in pixels.
+     * \param col Color palette index to use.
+     */
+    constexpr void stroke_circle(int32_t cx, int32_t cy, int32_t radius, uint8_t col, int32_t stroke_width = 1) {
+        if (radius == 1) {
+            fill_rect(cx - 1, cy - 1, 2, 2, col);
+            return;
+        }
+        stroke_circle_int(cx, cy, radius, 0, 0, col, stroke_width);
+    }
+
+    /**
      * \brief Fill a circle using antialiasing with the specified radius and color. Only format_8bit targets are
      * supported. Example:
      *
@@ -2695,13 +2717,39 @@ class image {
      * \param col Color palette index to use.
      */
     constexpr void fill_round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col) {
-        int32_t cr = std::min((w) / 2, std::min((w) / 2, radius));
+        int32_t cr = std::min((w) / 2, std::min((h) / 2, radius));
         int32_t dx = w - cr * 2;
         int32_t dy = h - cr * 2;
         fill_circle_int(x + cr, y + cr, cr, dx, dy, col);
         fill_rect(x, y + cr, cr, dy, col);
         fill_rect(x + w - cr, y + cr, cr, dy, col);
         fill_rect(x + cr, y, dx, h, col);
+    }
+
+    /**
+     * \brief Fill a rounded rectangle with the specified color. Example:
+     *
+     * \code{.cpp}
+     * image.fill_round_rect(0, 0, 200, 100, 15, constixel::color::WHITE);
+     * \endcode
+     *
+     * \param x Starting X-coordinate in pixels.
+     * \param y Starting Y-coordinate in pixels.
+     * \param w Width of the rectangle in pixels.
+     * \param h Height of the rectangle in pixels.
+     * \param radius Radius of the rounded corners in pixels.
+     * \param col Color palette index to use.
+     */
+    constexpr void stroke_round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col,
+                                     int32_t stroke_width = 1) {
+        int32_t cr = std::min((w) / 2, std::min((h) / 2, radius));
+        int32_t dx = w - cr * 2;
+        int32_t dy = h - cr * 2;
+        stroke_circle_int(x + cr, y + cr, cr, dx, dy, col, stroke_width);
+        fill_rect(x, y + cr, stroke_width, dy, col);
+        fill_rect(x + cr - stroke_width, y + cr, stroke_width, dy, col);
+        fill_rect(x + cr, y, w - cr, stroke_width, col);
+        fill_rect(x + cr, y + h - stroke_width, w - cr, stroke_width, col);
     }
 
     /**
@@ -3414,6 +3462,90 @@ class image {
                     int32_t dy = (y * 2 + 1) - (cy * 2);
                     int32_t dist_sq = dx * dx + dy * dy;
                     if (dist_sq > (r * r * 4 - 3)) {
+                        continue;
+                    }
+                    int32_t lx = x;
+                    int32_t ly = y;
+                    int32_t rx = cx + (xpos - x) + r + ox;
+                    int32_t ry = cy + (ypos - y) + r + oy;
+                    plot(lx, ly, col);
+                    plot(rx, ly, col);
+                    plot(rx, ry, col);
+                    plot(lx, ry, col);
+                }
+            }
+        } else {
+            for (int32_t y = y0; y <= y1; y++) {
+                for (int32_t x = x0; x <= x1; x++) {
+                    int64_t dx =
+                        (static_cast<int64_t>(x) * int64_t{2} + int64_t{1}) - (static_cast<int64_t>(cx) * int64_t{2});
+                    int64_t dy =
+                        (static_cast<int64_t>(y) * int64_t{2} + int64_t{1}) - (static_cast<int64_t>(cy) * int64_t{2});
+                    int64_t dist_sq = dx * dx + dy * dy;
+                    if (dist_sq > (static_cast<int64_t>(r * r) * int64_t{4} - int64_t{3})) {
+                        continue;
+                    }
+                    int32_t lx = x;
+                    int32_t ly = y;
+                    int32_t rx = cx + (xpos - x) + r + ox;
+                    int32_t ry = cy + (ypos - y) + r + oy;
+                    plot(lx, ly, col);
+                    plot(rx, ly, col);
+                    plot(rx, ry, col);
+                    plot(lx, ry, col);
+                }
+            }
+        }
+    }
+
+    /**
+     * @private
+     */
+    constexpr void stroke_circle_int(int32_t cx, int32_t cy, int32_t r, int32_t ox, int32_t oy, uint8_t col,
+                                     int32_t stroke_width) {
+        r = abs(r);
+
+        int32_t x0 = cx - r - 1;
+        int32_t y0 = cy - r - 1;
+        int32_t x1 = x0 + r * 2 + ox;
+        int32_t y1 = y0 + r * 2 + oy;
+
+        if (check_not_in_bounds(x0, y0, r * 2 + ox + 1, r * 2 + oy + 1)) {
+            return;
+        }
+
+        int32_t xpos = x0;
+        int32_t ypos = y0;
+
+        if (x0 < 0) {
+            x0 = 0;
+        }
+        if (y0 < 0) {
+            y0 = 0;
+        }
+        if (x1 >= static_cast<int32_t>(W)) {
+            x1 = static_cast<int32_t>(W);
+        }
+        if (y1 >= static_cast<int32_t>(H)) {
+            y1 = static_cast<int32_t>(H);
+        }
+
+        int32_t max_coord = std::numeric_limits<int32_t>::min();
+        max_coord = std::max(max_coord, abs(x0));
+        max_coord = std::max(max_coord, abs(x1));
+        max_coord = std::max(max_coord, abs(y0));
+        max_coord = std::max(max_coord, abs(y1));
+        max_coord = std::max(max_coord, abs(r));
+        if (max_coord < ((std::numeric_limits<int16_t>::max() - 1) / 2)) {
+            for (int32_t y = y0; y <= y1; y++) {
+                for (int32_t x = x0; x <= x1; x++) {
+                    int32_t dx = (x * 2 + 1) - (cx * 2);
+                    int32_t dy = (y * 2 + 1) - (cy * 2);
+                    int32_t dist_sq = dx * dx + dy * dy;
+                    if (dist_sq > (r * r * 4 - 3)) {
+                        continue;
+                    }
+                    if (dist_sq < ((r - stroke_width) * (r - stroke_width) * 4 - 3)) {
                         continue;
                     }
                     int32_t lx = x;
