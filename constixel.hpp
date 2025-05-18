@@ -3256,7 +3256,7 @@ class image {
             YMAX = 8
         };
 
-        auto calc_code = [=](int32_t x, int32_t y) {
+        auto calc_code = [&](int32_t x, int32_t y) {
             uint32_t code = INSIDE;
             if (x < xmin) {
                 code |= XMIN;
