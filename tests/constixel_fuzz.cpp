@@ -74,12 +74,16 @@ void fuzz_limits() {
         image.stroke_rect(random_limit(), random_limit(), random_limit(), random_int32(), static_cast<uint8_t>(random_limit()&0xFF));
         image.stroke_rect(random_limit(), random_limit(), random_limit(), random_int32(), static_cast<uint8_t>(random_limit()&0xFF), random_limit());
         image.fill_round_rect(random_limit(), random_limit(), random_limit(), random_limit(), random_limit(), static_cast<uint8_t>(random_limit()&0xFF));
+        image.stroke_circle(random_limit(), random_limit(), random_limit(), static_cast<uint8_t>(random_limit()&0xFF),  random_limit());
+        image.stroke_round_rect(random_limit(), random_limit(), random_limit(), random_limit(), random_limit(), static_cast<uint8_t>(random_limit()&0xFF), random_limit());
         image.plot(random_limit(), random_limit(), static_cast<uint8_t>(random_limit()&0xFF));
         image.template draw_string_mono<font>(random_limit(), random_limit(), "ABCabc", static_cast<uint8_t>(random_limit()&0xFF));
         image.template draw_string_mono<font, false, constixel::DEGREE_90>(random_limit(), random_limit(), "ABCabc", static_cast<uint8_t>(random_limit()&0xFF));
         image.template draw_string_mono<font, false, constixel::DEGREE_180>(random_limit(), random_limit(), "ABCabc", static_cast<uint8_t>(random_limit()&0xFF));
         image.template draw_string_mono<font, false, constixel::DEGREE_270>(random_limit(), random_limit(), "ABCabc", static_cast<uint8_t>(random_limit()&0xFF));
         if constexpr (AA) {
+            image.stroke_circle_aa(random_limit(), random_limit(), random_limit(), static_cast<uint8_t>(random_limit()&0xFF),  random_limit());
+            image.stroke_round_rect_aa(random_limit(), random_limit(), random_limit(), random_limit(), random_limit(), static_cast<uint8_t>(random_limit()&0xFF), random_limit());
             image.draw_line_aa(random_limit(),random_limit(),random_limit(),random_limit(),static_cast<uint8_t>(random_limit()&0xFF));
             image.fill_circle_aa(random_limit(), random_limit(), random_limit(), static_cast<uint8_t>(random_limit()&0xFF));
             image.fill_round_rect_aa(random_limit(), random_limit(), random_limit(), random_limit(), random_limit(), static_cast<uint8_t>(random_limit()&0xFF));
@@ -104,12 +108,16 @@ void fuzz_random() {
         image.stroke_rect(random_int32(), random_int32(), random_int32(), random_int32(), static_cast<uint8_t>(random_int32()&0xFF));
         image.stroke_rect(random_int32(), random_int32(), random_int32(), random_int32(), static_cast<uint8_t>(random_int32()&0xFF), random_int32());
         image.fill_round_rect(random_int32(), random_int32(), random_int32(), random_int32(), random_int32(), static_cast<uint8_t>(random_int32()&0xFF));
+        image.stroke_circle(random_int32(), random_int32(), random_int32(), static_cast<uint8_t>(random_int32()&0xFF),  random_int32());
+        image.stroke_round_rect(random_int32(), random_int32(), random_int32(), random_int32(), random_int32(), static_cast<uint8_t>(random_int32()&0xFF), random_int32());
         image.plot(random_int32(), random_int32(), static_cast<uint8_t>(random_int32()&0xFF));
         image.template draw_string_mono<font>(random_int32(), random_int32(), "ABCabc", static_cast<uint8_t>(random_int32()&0xFF));
         image.template draw_string_mono<font, false, constixel::DEGREE_90>(random_int32(), random_int32(), "ABCabc", static_cast<uint8_t>(random_int32()&0xFF));
         image.template draw_string_mono<font, false, constixel::DEGREE_180>(random_int32(), random_int32(), "ABCabc", static_cast<uint8_t>(random_int32()&0xFF));
         image.template draw_string_mono<font, false, constixel::DEGREE_270>(random_int32(), random_int32(), "ABCabc", static_cast<uint8_t>(random_int32()&0xFF));
         if constexpr (AA) {
+            image.stroke_circle_aa(random_int32(), random_int32(), random_int32(), static_cast<uint8_t>(random_int32()&0xFF),  random_int32());
+            image.stroke_round_rect_aa(random_int32(), random_int32(), random_int32(), random_int32(), random_int32(), static_cast<uint8_t>(random_int32()&0xFF), random_int32());
             image.draw_line_aa(random_int32(),random_int32(),random_int32(),random_int32(),static_cast<uint8_t>(random_int32()&0xFF));
             image.fill_circle_aa(random_int32(), random_int32(), random_int32(), static_cast<uint8_t>(random_int32()&0xFF));
             image.fill_round_rect_aa(random_int32(), random_int32(), random_int32(), random_int32(), random_int32(), static_cast<uint8_t>(random_int32()&0xFF));

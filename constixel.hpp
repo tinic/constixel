@@ -2690,6 +2690,31 @@ class image {
     }
 
     /**
+     * \brief Stroke a circle using antialiasing with the specified radius and color. Only format_8bit targets are
+     * supported. Example:
+     *
+     * \code{.cpp}
+     * image.stroke_circle_aa(64, 64, 32, 4, constixel::color::WHITE);
+     * \endcode
+     *
+     * \param cx Center X-coordinate of the circle in pixels.
+     * \param cy Center Y-coordinate of the circle in pixels.
+     * \param radius radius of the circle in pixels.
+     * \param col Color palette index to use.
+     */
+    constexpr void stroke_circle_aa(int32_t cx, int32_t cy, int32_t radius, uint8_t col, int32_t stroke_width = 1) {
+        if (radius == 1) {
+            fill_rect(cx - 1, cy - 1, 2, 2, col);
+            return;
+        }
+        if (stroke_width >= radius) {
+            fill_circle_aa_int(cx, cy, radius, 0, 0, col);
+            return;
+        }
+        stroke_circle_aa_int(cx, cy, radius, 0, 0, col, stroke_width);
+    }
+
+    /**
      * \brief Fill a circle using antialiasing with the specified radius and color. Only format_8bit targets are
      * supported. Example:
      *
@@ -2707,10 +2732,10 @@ class image {
     }
 
     /**
-     * \brief Fill a rounded rectangle with the specified color. Example:
+     * \brief Stroke a rounded rectangle with the specified color. Example:
      *
      * \code{.cpp}
-     * image.fill_round_rect(0, 0, 200, 100, 15, constixel::color::WHITE);
+     * image.stroke_round_rect(0, 0, 200, 100, 15, 2, constixel::color::WHITE);
      * \endcode
      *
      * \param x Starting X-coordinate in pixels.
@@ -2818,6 +2843,40 @@ class image {
      */
     constexpr void fill_round_rect_aa(const rect<int32_t> &rect, int32_t radius, uint8_t col) {
         fill_round_rect_aa(rect.x, rect.y, rect.w, rect.h, radius, col);
+    }
+
+    /**
+     * \brief Stroke a rounded rectangle with the specified color. Example:
+     *
+     * \code{.cpp}
+     * image.stroke_round_rect_aa(0, 0, 200, 100, 15, 2, constixel::color::WHITE);
+     * \endcode
+     *
+     * \param x Starting X-coordinate in pixels.
+     * \param y Starting Y-coordinate in pixels.
+     * \param w Width of the rectangle in pixels.
+     * \param h Height of the rectangle in pixels.
+     * \param radius Radius of the rounded corners in pixels.
+     * \param col Color palette index to use.
+     */
+    constexpr void stroke_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col,
+                                        int32_t stroke_width = 1) {
+        int32_t cr = std::min((w) / 2, std::min((h) / 2, radius));
+        int32_t dx = w - cr * 2;
+        int32_t dy = h - cr * 2;
+        if (radius == 0) {
+            stroke_rect(x, y, w, h, col, stroke_width);
+        } else {
+            if (radius > stroke_width) {
+                stroke_circle_aa_int(x + cr, y + cr, cr, dx, dy, col, stroke_width);
+            } else {
+                fill_circle_aa_int(x + cr, y + cr, cr, dx, dy, col);
+            }
+            fill_rect(x, y + cr, stroke_width, dy, col);
+            fill_rect(x + w - stroke_width, y + cr, stroke_width, dy, col);
+            fill_rect(x + cr, y, w - cr * 2, stroke_width, col);
+            fill_rect(x + cr, y + h - stroke_width, w - cr * 2, stroke_width, col);
+        }
     }
 
     /**
@@ -3435,6 +3494,10 @@ class image {
      */
     constexpr void fill_circle_int(int32_t cx, int32_t cy, int32_t r, int32_t ox, int32_t oy, uint8_t col) {
         r = abs(r);
+        
+        if ( r > std::numeric_limits<int32_t>::max() / 4) {
+            return;
+        }
 
         int32_t x0 = cx - r - 1;
         int32_t y0 = cy - r - 1;
@@ -3479,10 +3542,14 @@ class image {
                     }
                 }
             };
-            plot_arc(x0, y0, x0 + r, y0 + r, 0, 0);
-            plot_arc(x0 + r, y0, x0 + r * 2, y0 + r, ox, 0);
-            plot_arc(x0, y0 + r, x0 + r, y0 + r * 2, 0, oy);
-            plot_arc(x0 + r, y0 + r, x0 + r * 2, y0 + r * 2, ox, oy);
+            int32_t x0r = std::min(x0 + r, static_cast<int32_t>(W) - 1);
+            int32_t x0r2 = std::min(x0 + r * 2, static_cast<int32_t>(W) - 1);
+            int32_t y0r = std::min(y0 + r, static_cast<int32_t>(H) - 1);
+            int32_t y0r2 = std::min(y0 + r * 2, static_cast<int32_t>(H) - 1);
+            plot_arc(x0, y0, x0r, y0r, 0, 0);
+            plot_arc(x0r, y0, x0r2, y0r, ox, 0);
+            plot_arc(x0, y0r, x0r, y0r2, 0, oy);
+            plot_arc(x0r, y0r, x0r2, y0r2, ox, oy);
         } else {
             auto plot_arc = [&, this](int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
                                       int32_t y_off) {
@@ -3500,10 +3567,14 @@ class image {
                     }
                 }
             };
-            plot_arc(x0, y0, x0 + r, y0 + r, 0, 0);
-            plot_arc(x0 + r, y0, x0 + r * 2, y0 + r, ox, 0);
-            plot_arc(x0, y0 + r, x0 + r, y0 + r * 2, 0, oy);
-            plot_arc(x0 + r, y0 + r, x0 + r * 2, y0 + r * 2, ox, oy);
+            int32_t x0r = std::min(x0 + r, static_cast<int32_t>(W) - 1);
+            int32_t x0r2 = std::min(x0 + r * 2, static_cast<int32_t>(W) - 1);
+            int32_t y0r = std::min(y0 + r, static_cast<int32_t>(H) - 1);
+            int32_t y0r2 = std::min(y0 + r * 2, static_cast<int32_t>(H) - 1);
+            plot_arc(x0, y0, x0r, y0r, 0, 0);
+            plot_arc(x0r, y0, x0r2, y0r, ox, 0);
+            plot_arc(x0, y0r, x0r, y0r2, 0, oy);
+            plot_arc(x0r, y0r, x0r2, y0r2, ox, oy);
         }
     }
 
@@ -3513,6 +3584,10 @@ class image {
     constexpr void stroke_circle_int(int32_t cx, int32_t cy, int32_t r, int32_t ox, int32_t oy, uint8_t col,
                                      int32_t stroke_width) {
         r = abs(r);
+
+        if ( r > std::numeric_limits<int32_t>::max() / 4) {
+            return;
+        }
 
         int32_t x0 = cx - r - 1;
         int32_t y0 = cy - r - 1;
@@ -3560,10 +3635,14 @@ class image {
                     }
                 }
             };
-            plot_arc(x0, y0, x0 + r, y0 + r, 0, 0);
-            plot_arc(x0 + r, y0, x0 + r * 2, y0 + r, ox, 0);
-            plot_arc(x0, y0 + r, x0 + r, y0 + r * 2, 0, oy);
-            plot_arc(x0 + r, y0 + r, x0 + r * 2, y0 + r * 2, ox, oy);
+            int32_t x0r = std::min(x0 + r, static_cast<int32_t>(W) - 1);
+            int32_t x0r2 = std::min(x0 + r * 2, static_cast<int32_t>(W) - 1);
+            int32_t y0r = std::min(y0 + r, static_cast<int32_t>(H) - 1);
+            int32_t y0r2 = std::min(y0 + r * 2, static_cast<int32_t>(H) - 1);
+            plot_arc(x0, y0, x0r, y0r, 0, 0);
+            plot_arc(x0r, y0, x0r2, y0r, ox, 0);
+            plot_arc(x0, y0r, x0r, y0r2, 0, oy);
+            plot_arc(x0r, y0r, x0r2, y0r2, ox, oy);
         } else {
             auto plot_arc = [&, this](int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
                                       int32_t y_off) {
@@ -3581,10 +3660,14 @@ class image {
                     }
                 }
             };
-            plot_arc(x0, y0, x0 + r, y0 + r, 0, 0);
-            plot_arc(x0 + r, y0, x0 + r * 2, y0 + r, ox, 0);
-            plot_arc(x0, y0 + r, x0 + r, y0 + r * 2, 0, oy);
-            plot_arc(x0 + r, y0 + r, x0 + r * 2, y0 + r * 2, ox, oy);
+            int32_t x0r = std::min(x0 + r, static_cast<int32_t>(W) - 1);
+            int32_t x0r2 = std::min(x0 + r * 2, static_cast<int32_t>(W) - 1);
+            int32_t y0r = std::min(y0 + r, static_cast<int32_t>(H) - 1);
+            int32_t y0r2 = std::min(y0 + r * 2, static_cast<int32_t>(H) - 1);
+            plot_arc(x0, y0, x0r, y0r, 0, 0);
+            plot_arc(x0r, y0, x0r2, y0r, ox, 0);
+            plot_arc(x0, y0r, x0r, y0r2, 0, oy);
+            plot_arc(x0r, y0r, x0r2, y0r2, ox, oy);
         }
     }
 
@@ -3593,6 +3676,10 @@ class image {
      */
     constexpr void fill_circle_aa_int(int32_t cx, int32_t cy, int32_t r, int32_t ox, int32_t oy, uint8_t col) {
         r = abs(r);
+
+        if ( r > std::numeric_limits<int32_t>::max() / 4) {
+            return;
+        }
 
         int32_t x0 = cx - r - 1;
         int32_t y0 = cy - r - 1;
@@ -3649,10 +3736,111 @@ class image {
                 }
             }
         };
-        plot_arc(x0, y0, x0 + r, y0 + r, 0, 0);
-        plot_arc(x0 + r, y0, x0 + r * 2, y0 + r, ox, 0);
-        plot_arc(x0, y0 + r, x0 + r, y0 + r * 2, 0, oy);
-        plot_arc(x0 + r, y0 + r, x0 + r * 2, y0 + r * 2, ox, oy);
+        int32_t x0r = std::min(x0 + r, static_cast<int32_t>(W) - 1);
+        int32_t x0r2 = std::min(x0 + r * 2, static_cast<int32_t>(W) - 1);
+        int32_t y0r = std::min(y0 + r, static_cast<int32_t>(H) - 1);
+        int32_t y0r2 = std::min(y0 + r * 2, static_cast<int32_t>(H) - 1);
+        plot_arc(x0, y0, x0r, y0r, 0, 0);
+        plot_arc(x0r, y0, x0r2, y0r, ox, 0);
+        plot_arc(x0, y0r, x0r, y0r2, 0, oy);
+        plot_arc(x0r, y0r, x0r2, y0r2, ox, oy);
+    }
+
+    /**
+     * @private
+     */
+    constexpr void stroke_circle_aa_int(int32_t cx, int32_t cy, int32_t r, int32_t ox, int32_t oy, uint8_t col,
+                                        int32_t stroke_width) {
+        r = abs(r);
+
+        if ( r > std::numeric_limits<int32_t>::max() / 4) {
+            return;
+        }
+
+        const float rF = static_cast<float>(r);
+        const float rsF = static_cast<float>(r - stroke_width);
+
+        int32_t x0 = cx - r - 1;
+        int32_t y0 = cy - r - 1;
+        int32_t x1 = x0 + r * 2 + ox;
+        int32_t y1 = y0 + r * 2 + oy;
+
+        if (check_not_in_bounds(x0, y0, r * 2 + ox + 1, r * 2 + oy + 1)) {
+            return;
+        }
+
+        if (x0 < 0) {
+            x0 = 0;
+        }
+        if (y0 < 0) {
+            y0 = 0;
+        }
+        if (x1 >= static_cast<int32_t>(W)) {
+            x1 = static_cast<int32_t>(W);
+        }
+        if (y1 >= static_cast<int32_t>(H)) {
+            y1 = static_cast<int32_t>(H);
+        }
+
+        float Rl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 0);
+        float Gl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 1);
+        float Bl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 2);
+        auto plot_arc = [&, this](int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off, int32_t y_off) {
+            for (int32_t y = yy0; y <= yy1; y++) {
+                for (int32_t x = xx0; x <= xx1; x++) {
+                    float dx = (static_cast<float>(x) + 0.5f) - static_cast<float>(cx);
+                    float dy = (static_cast<float>(y) + 0.5f) - static_cast<float>(cy);
+                    float dist_sq = dx * dx + dy * dy;
+                    if (dist_sq > ((rF + 0.5f) * (rF + 0.5f))) {
+                        continue;
+                    }
+                    if (dist_sq < ((rsF - 0.5f) * (rsF - 0.5f))) {
+                        continue;
+                    }
+                    if (dist_sq < ((rsF) * (rsF))) {
+                        float a = rsF;
+                        if (std::is_constant_evaluated()) {
+                            a -= hidden::fast_sqrtf(dist_sq);
+                        } else {
+                            a -= std::sqrt(dist_sq);
+                        }
+                        a = 1.0f - std::clamp(a + 0.5f, 0.0f, 1.0f);
+                        if (a >= hidden::epsilon_low) {
+                            if (a >= hidden::epsilon_high) {
+                                plot(x + x_off, y + y_off, col);
+                            } else {
+                                compose(x + x_off, y + y_off, a, Rl, Gl, Bl);
+                            }
+                        } else {
+                            plot(x + x_off, y + y_off, 4);
+                        }
+                    } else {
+                        float a = rF;
+                        if (std::is_constant_evaluated()) {
+                            a -= hidden::fast_sqrtf(dist_sq);
+                        } else {
+                            a -= std::sqrt(dist_sq);
+                        }
+                        a = std::clamp(a + 0.5f, 0.0f, 1.0f);
+                        if (a >= hidden::epsilon_low) {
+                            if (a >= hidden::epsilon_high) {
+                                plot(x + x_off, y + y_off, col);
+                            } else {
+                                compose(x + x_off, y + y_off, a, Rl, Gl, Bl);
+                            }
+                        }
+                    }
+                }
+            }
+        };
+        int32_t x0r = std::min(x0 + r, static_cast<int32_t>(W) - 1);
+        int32_t x0r2 = std::min(x0 + r * 2, static_cast<int32_t>(W) - 1);
+        int32_t y0r = std::min(y0 + r, static_cast<int32_t>(H) - 1);
+        int32_t y0r2 = std::min(y0 + r * 2, static_cast<int32_t>(H) - 1);
+        plot_arc(x0, y0, x0r, y0r, 0, 0);
+        plot_arc(x0r, y0, x0r2, y0r, ox, 0);
+        plot_arc(x0, y0r, x0r, y0r2, 0, oy);
+        plot_arc(x0r, y0r, x0r2, y0r2, ox, oy);
     }
 
     /**

@@ -966,7 +966,7 @@ int main() {
 
         static image<format_8bit, 192, 300> i;
 
-        auto draw_bg_for_rotate_test = [=]<typename FONT>(const char *str, int32_t x_pos, int32_t y_pos) mutable {
+        auto draw_bg_for_rotate_test = [&]<typename FONT>(const char *str, int32_t x_pos, int32_t y_pos) mutable {
             int32_t s_wdh = i.string_width<FONT>(str);
 
             i.fill_rect(x_pos, y_pos, s_wdh, FONT::line_height, 2);
