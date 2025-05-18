@@ -3505,24 +3505,28 @@ class image {
         int32_t y0 = std::max(cy - r - 1, int32_t{0});
         int32_t x1 = std::min(x0 + r * 2 + ox, static_cast<int32_t>(W));
         int32_t y1 = std::min(y0 + r * 2 + oy, static_cast<int32_t>(W));
-        int32_t x0r = std::min(x0 + r, static_cast<int32_t>(W) - 1);
-        int32_t x0r2 = std::min(x0 + r * 2, static_cast<int32_t>(W) - 1);
-        int32_t y0r = std::min(y0 + r, static_cast<int32_t>(H) - 1);
-        int32_t y0r2 = std::min(y0 + r * 2, static_cast<int32_t>(H) - 1);
 
         if (check_not_in_bounds(x0, y0, r * 2 + ox + 1, r * 2 + oy + 1)) {
             return;
         }
 
+        int32_t x0r = std::min(x0 + r, static_cast<int32_t>(W) - 1);
+        int32_t x0r2 = std::min(x0 + r * 2, static_cast<int32_t>(W) - 1);
+        int32_t y0r = std::min(y0 + r, static_cast<int32_t>(H) - 1);
+        int32_t y0r2 = std::min(y0 + r * 2, static_cast<int32_t>(H) - 1);
+
+        auto for_each_quadrant = [&](auto &&plot_arc) {
+            plot_arc(x0, y0, x0r, y0r, 0, 0);
+            plot_arc(x0r, y0, x0r2, y0r, ox, 0);
+            plot_arc(x0, y0r, x0r, y0r2, 0, oy);
+            plot_arc(x0r, y0r, x0r2, y0r2, ox, oy);
+        };
+
         if constexpr (!AA) {
-            int32_t max_coord = std::numeric_limits<int32_t>::min();
-            max_coord = std::max(max_coord, abs(x0));
-            max_coord = std::max(max_coord, abs(x1));
-            max_coord = std::max(max_coord, abs(y0));
-            max_coord = std::max(max_coord, abs(y1));
-            max_coord = std::max(max_coord, abs(r));
+            const int32_t max_coord = std::max({abs(x0), abs(x1), abs(y0), abs(y1), r});
+            const bool use_int64 = max_coord >= ((std::numeric_limits<int16_t>::max() - 1) / 2);
             if constexpr (!STROKE) {
-                if (max_coord < ((std::numeric_limits<int16_t>::max() - 1) / 2)) {
+                if (!use_int64) {
                     auto plot_arc = [&, this](int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
                                               int32_t y_off) {
                         for (int32_t y = yy0; y <= yy1; y++) {
@@ -3537,10 +3541,7 @@ class image {
                             }
                         }
                     };
-                    plot_arc(x0, y0, x0r, y0r, 0, 0);
-                    plot_arc(x0r, y0, x0r2, y0r, ox, 0);
-                    plot_arc(x0, y0r, x0r, y0r2, 0, oy);
-                    plot_arc(x0r, y0r, x0r2, y0r2, ox, oy);
+                    for_each_quadrant(plot_arc);
                 } else {
                     auto plot_arc = [&, this](int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
                                               int32_t y_off) {
@@ -3559,13 +3560,10 @@ class image {
                             }
                         }
                     };
-                    plot_arc(x0, y0, x0r, y0r, 0, 0);
-                    plot_arc(x0r, y0, x0r2, y0r, ox, 0);
-                    plot_arc(x0, y0r, x0r, y0r2, 0, oy);
-                    plot_arc(x0r, y0r, x0r2, y0r2, ox, oy);
+                    for_each_quadrant(plot_arc);
                 }
             } else {
-                if (max_coord < ((std::numeric_limits<int16_t>::max() - 1) / 2)) {
+                if (!use_int64) {
                     auto plot_arc = [&, this](int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
                                               int32_t y_off) {
                         for (int32_t y = yy0; y <= yy1; y++) {
@@ -3583,10 +3581,7 @@ class image {
                             }
                         }
                     };
-                    plot_arc(x0, y0, x0r, y0r, 0, 0);
-                    plot_arc(x0r, y0, x0r2, y0r, ox, 0);
-                    plot_arc(x0, y0r, x0r, y0r2, 0, oy);
-                    plot_arc(x0r, y0r, x0r2, y0r2, ox, oy);
+                    for_each_quadrant(plot_arc);
                 } else {
                     auto plot_arc = [&, this](int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
                                               int32_t y_off) {
@@ -3610,10 +3605,7 @@ class image {
                             }
                         }
                     };
-                    plot_arc(x0, y0, x0r, y0r, 0, 0);
-                    plot_arc(x0r, y0, x0r2, y0r, ox, 0);
-                    plot_arc(x0, y0r, x0r, y0r2, 0, oy);
-                    plot_arc(x0r, y0r, x0r2, y0r2, ox, oy);
+                    for_each_quadrant(plot_arc);
                 }
             }
         } else {
@@ -3653,10 +3645,7 @@ class image {
                         }
                     }
                 };
-                plot_arc(x0, y0, x0r, y0r, 0, 0);
-                plot_arc(x0r, y0, x0r2, y0r, ox, 0);
-                plot_arc(x0, y0r, x0r, y0r2, 0, oy);
-                plot_arc(x0r, y0r, x0r2, y0r2, ox, oy);
+                for_each_quadrant(plot_arc);
             } else {
                 const float rsF = static_cast<float>(r - stroke_width);
                 float Rl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 0);
@@ -3711,10 +3700,7 @@ class image {
                         }
                     }
                 };
-                plot_arc(x0, y0, x0r, y0r, 0, 0);
-                plot_arc(x0r, y0, x0r2, y0r, ox, 0);
-                plot_arc(x0, y0r, x0r, y0r2, 0, oy);
-                plot_arc(x0r, y0r, x0r2, y0r2, ox, oy);
+                for_each_quadrant(plot_arc);
             }
         }
     }
