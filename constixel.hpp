@@ -2682,6 +2682,10 @@ class image {
             fill_rect(cx - 1, cy - 1, 2, 2, col);
             return;
         }
+        if (stroke_width >= radius) {
+            fill_circle_int(cx, cy, radius, 0, 0, col);
+            return;
+        }
         stroke_circle_int(cx, cy, radius, 0, 0, col, stroke_width);
     }
 
@@ -3545,7 +3549,7 @@ class image {
                     if (dist_sq > (r * r * 4 - 3)) {
                         continue;
                     }
-                    if (dist_sq < ((r - stroke_width) * (r - stroke_width) * 4 - 3)) {
+                    if (dist_sq < ((r - stroke_width) * (r - stroke_width) * 4)) {
                         continue;
                     }
                     int32_t lx = x;
