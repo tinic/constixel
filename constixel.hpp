@@ -2720,14 +2720,16 @@ class image {
      * \param radius Radius of the rounded corners in pixels.
      * \param col Color palette index to use.
      */
-    constexpr void fill_round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col) {
+    constexpr void stroke_round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col,
+                                     int32_t stroke_width = 1) {
         int32_t cr = std::min((w) / 2, std::min((h) / 2, radius));
         int32_t dx = w - cr * 2;
         int32_t dy = h - cr * 2;
-        fill_circle_int(x + cr, y + cr, cr, dx, dy, col);
-        fill_rect(x, y + cr, cr, dy, col);
-        fill_rect(x + w - cr, y + cr, cr, dy, col);
-        fill_rect(x + cr, y, dx, h, col);
+        stroke_circle_int(x + cr, y + cr, cr, dx, dy, col, stroke_width);
+        fill_rect(x, y + cr, stroke_width, dy, col);
+        fill_rect(x + w - stroke_width, y + cr, stroke_width, dy, col);
+        fill_rect(x + cr, y, w - cr * 2, stroke_width, col);
+        fill_rect(x + cr, y + h - stroke_width, w - cr * 2, stroke_width, col);
     }
 
     /**
@@ -2744,16 +2746,14 @@ class image {
      * \param radius Radius of the rounded corners in pixels.
      * \param col Color palette index to use.
      */
-    constexpr void stroke_round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col,
-                                     int32_t stroke_width = 1) {
+    constexpr void fill_round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col) {
         int32_t cr = std::min((w) / 2, std::min((h) / 2, radius));
         int32_t dx = w - cr * 2;
         int32_t dy = h - cr * 2;
-        stroke_circle_int(x + cr, y + cr, cr, dx, dy, col, stroke_width);
-        fill_rect(x, y + cr, stroke_width, dy, col);
-        fill_rect(x + cr - stroke_width, y + cr, stroke_width, dy, col);
-        fill_rect(x + cr, y, w - cr, stroke_width, col);
-        fill_rect(x + cr, y + h - stroke_width, w - cr, stroke_width, col);
+        fill_circle_int(x + cr, y + cr, cr, dx, dy, col);
+        fill_rect(x, y + cr, cr, dy, col);
+        fill_rect(x + w - cr, y + cr, cr, dy, col);
+        fill_rect(x + cr, y, dx, h, col);
     }
 
     /**
@@ -2768,7 +2768,7 @@ class image {
      * \param col Color palette index to use.
      */
     constexpr void fill_round_rect(const rect<int32_t> &rect, int32_t radius, uint8_t col) {
-        stroke_rect(rect.x, rect.y, rect.w, rect.h, radius, col);
+        fill_round_rect(rect.x, rect.y, rect.w, rect.h, radius, col);
     }
 
     /**
