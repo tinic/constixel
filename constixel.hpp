@@ -3521,6 +3521,11 @@ class image {
             y1 = static_cast<int32_t>(H);
         }
 
+        int32_t x0r = std::min(x0 + r, static_cast<int32_t>(W) - 1);
+        int32_t x0r2 = std::min(x0 + r * 2, static_cast<int32_t>(W) - 1);
+        int32_t y0r = std::min(y0 + r, static_cast<int32_t>(H) - 1);
+        int32_t y0r2 = std::min(y0 + r * 2, static_cast<int32_t>(H) - 1);
+
         int32_t max_coord = std::numeric_limits<int32_t>::min();
         max_coord = std::max(max_coord, abs(x0));
         max_coord = std::max(max_coord, abs(x1));
@@ -3542,10 +3547,6 @@ class image {
                     }
                 }
             };
-            int32_t x0r = std::min(x0 + r, static_cast<int32_t>(W) - 1);
-            int32_t x0r2 = std::min(x0 + r * 2, static_cast<int32_t>(W) - 1);
-            int32_t y0r = std::min(y0 + r, static_cast<int32_t>(H) - 1);
-            int32_t y0r2 = std::min(y0 + r * 2, static_cast<int32_t>(H) - 1);
             plot_arc(x0, y0, x0r, y0r, 0, 0);
             plot_arc(x0r, y0, x0r2, y0r, ox, 0);
             plot_arc(x0, y0r, x0r, y0r2, 0, oy);
@@ -3567,10 +3568,6 @@ class image {
                     }
                 }
             };
-            int32_t x0r = std::min(x0 + r, static_cast<int32_t>(W) - 1);
-            int32_t x0r2 = std::min(x0 + r * 2, static_cast<int32_t>(W) - 1);
-            int32_t y0r = std::min(y0 + r, static_cast<int32_t>(H) - 1);
-            int32_t y0r2 = std::min(y0 + r * 2, static_cast<int32_t>(H) - 1);
             plot_arc(x0, y0, x0r, y0r, 0, 0);
             plot_arc(x0r, y0, x0r2, y0r, ox, 0);
             plot_arc(x0, y0r, x0r, y0r2, 0, oy);
@@ -3611,6 +3608,11 @@ class image {
             y1 = static_cast<int32_t>(H);
         }
 
+        int32_t x0r = std::min(x0 + r, static_cast<int32_t>(W) - 1);
+        int32_t x0r2 = std::min(x0 + r * 2, static_cast<int32_t>(W) - 1);
+        int32_t y0r = std::min(y0 + r, static_cast<int32_t>(H) - 1);
+        int32_t y0r2 = std::min(y0 + r * 2, static_cast<int32_t>(H) - 1);
+
         int32_t max_coord = std::numeric_limits<int32_t>::min();
         max_coord = std::max(max_coord, abs(x0));
         max_coord = std::max(max_coord, abs(x1));
@@ -3635,10 +3637,6 @@ class image {
                     }
                 }
             };
-            int32_t x0r = std::min(x0 + r, static_cast<int32_t>(W) - 1);
-            int32_t x0r2 = std::min(x0 + r * 2, static_cast<int32_t>(W) - 1);
-            int32_t y0r = std::min(y0 + r, static_cast<int32_t>(H) - 1);
-            int32_t y0r2 = std::min(y0 + r * 2, static_cast<int32_t>(H) - 1);
             plot_arc(x0, y0, x0r, y0r, 0, 0);
             plot_arc(x0r, y0, x0r2, y0r, ox, 0);
             plot_arc(x0, y0r, x0r, y0r2, 0, oy);
@@ -3660,10 +3658,6 @@ class image {
                     }
                 }
             };
-            int32_t x0r = std::min(x0 + r, static_cast<int32_t>(W) - 1);
-            int32_t x0r2 = std::min(x0 + r * 2, static_cast<int32_t>(W) - 1);
-            int32_t y0r = std::min(y0 + r, static_cast<int32_t>(H) - 1);
-            int32_t y0r2 = std::min(y0 + r * 2, static_cast<int32_t>(H) - 1);
             plot_arc(x0, y0, x0r, y0r, 0, 0);
             plot_arc(x0r, y0, x0r2, y0r, ox, 0);
             plot_arc(x0, y0r, x0r, y0r2, 0, oy);
