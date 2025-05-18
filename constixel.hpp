@@ -3494,7 +3494,7 @@ class image {
      */
     constexpr void fill_circle_int(int32_t cx, int32_t cy, int32_t r, int32_t ox, int32_t oy, uint8_t col) {
         r = abs(r);
-        
+
         if ( r > std::numeric_limits<int32_t>::max() / 4) {
             return;
         }
