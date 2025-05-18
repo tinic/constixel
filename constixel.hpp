@@ -3307,7 +3307,7 @@ class image {
 
     constexpr bool clip_line(int32_t &x0, int32_t &y0, int32_t &x1, int32_t &y1, int32_t xmin, int32_t ymin,
                              int32_t xmax, int32_t ymax) {
-        enum clip_code : uint32_t {
+        enum : uint32_t {
             INSIDE = 0,
             XMIN = 1,
             XMAX = 2,
@@ -3430,26 +3430,27 @@ class image {
      * @private
      */
     constexpr const char *get_next_utf32(const char *str, uint32_t *utf32) const {
-        *utf32 = 0;
-        uint32_t lead = static_cast<uint32_t>(*str) & 0xFF;
+        uint32_t lead = static_cast<uint32_t>(str[0]) & 0xFF;
         if (lead < 0x80) {
             *utf32 = lead;
-            str += 1;
-        } else if ((lead >> 5) == 0x06 && str[1] != 0) {
+            return str + 1;
+        }
+        if ((lead >> 5) == 0x06 && str[1] != char{0}) {
             *utf32 = ((lead & 0x1F) << 6) | (static_cast<uint32_t>(str[1]) & 0x3F);
-            str += 2;
-        } else if ((lead >> 4) == 0x0E && str[1] != 0 && str[2] != 0) {
+            return str + 2;
+        }
+        if ((lead >> 4) == 0x0E && str[1] != char{0} && str[2] != char{0}) {
             *utf32 = ((lead & 0x0F) << 12) | ((static_cast<uint32_t>(str[1]) & 0x3F) << 6) |
                      (static_cast<uint32_t>(str[2]) & 0x3F);
-            str += 3;
-        } else if ((lead >> 3) == 0x1E && str[1] != 0 && str[2] != 0 && str[3] != 0) {
+            return str + 3;
+        } 
+        if ((lead >> 3) == 0x1E && str[1] != char{0} && str[2] != char{0} && str[3] != char{0}) {
             *utf32 = ((lead & 0x07) << 18) | ((static_cast<uint32_t>(str[1]) & 0x3F) << 12) |
                      ((static_cast<uint32_t>(str[2]) & 0x3F) << 6) | (static_cast<uint32_t>(str[3]) & 0x3F);
-            str += 4;
-        } else {
-            str += 1;
+            return str + 4;
         }
-        return str;
+        *utf32 = 0;
+        return str + 1;
     }
 
     /**
