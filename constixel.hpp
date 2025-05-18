@@ -3492,12 +3492,12 @@ class image {
     /**
      * @private
      */
-    template<bool AA, bool STROKE>
+    template <bool AA, bool STROKE>
     constexpr void circle_int(int32_t cx, int32_t cy, int32_t r, int32_t ox, int32_t oy, uint8_t col,
-                                     int32_t stroke_width) {
+                              int32_t stroke_width) {
         r = abs(r);
 
-        if ( r > std::numeric_limits<int32_t>::max() / 4) {
+        if (r > std::numeric_limits<int32_t>::max() / 4) {
             return;
         }
 
@@ -3524,7 +3524,7 @@ class image {
             if constexpr (!STROKE) {
                 if (max_coord < ((std::numeric_limits<int16_t>::max() - 1) / 2)) {
                     auto plot_arc = [&, this](int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
-                                            int32_t y_off) {
+                                              int32_t y_off) {
                         for (int32_t y = yy0; y <= yy1; y++) {
                             for (int32_t x = xx0; x <= xx1; x++) {
                                 int32_t dx = (x * 2 + 1) - (cx * 2);
@@ -3543,15 +3543,16 @@ class image {
                     plot_arc(x0r, y0r, x0r2, y0r2, ox, oy);
                 } else {
                     auto plot_arc = [&, this](int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
-                                            int32_t y_off) {
+                                              int32_t y_off) {
                         for (int32_t y = yy0; y <= yy1; y++) {
                             for (int32_t x = xx0; x <= xx1; x++) {
                                 int64_t dx = (static_cast<int64_t>(x) * int64_t{2} + int64_t{1}) -
-                                            (static_cast<int64_t>(cx) * int64_t{2});
+                                             (static_cast<int64_t>(cx) * int64_t{2});
                                 int64_t dy = (static_cast<int64_t>(y) * int64_t{2} + int64_t{1}) -
-                                            (static_cast<int64_t>(cy) * int64_t{2});
+                                             (static_cast<int64_t>(cy) * int64_t{2});
                                 int64_t dist_sq = dx * dx + dy * dy;
-                                if (dist_sq > (static_cast<int64_t>(r * r) * int64_t{4} - int64_t{3})) {
+                                if (dist_sq >
+                                    (static_cast<int64_t>(r) * static_cast<int64_t>(r) * int64_t{4} - int64_t{3})) {
                                     continue;
                                 }
                                 plot(x + x_off, y + y_off, col);
@@ -3566,7 +3567,7 @@ class image {
             } else {
                 if (max_coord < ((std::numeric_limits<int16_t>::max() - 1) / 2)) {
                     auto plot_arc = [&, this](int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
-                                            int32_t y_off) {
+                                              int32_t y_off) {
                         for (int32_t y = yy0; y <= yy1; y++) {
                             for (int32_t x = xx0; x <= xx1; x++) {
                                 int32_t dx = (x * 2 + 1) - (cx * 2);
@@ -3588,15 +3589,21 @@ class image {
                     plot_arc(x0r, y0r, x0r2, y0r2, ox, oy);
                 } else {
                     auto plot_arc = [&, this](int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
-                                            int32_t y_off) {
+                                              int32_t y_off) {
                         for (int32_t y = yy0; y <= yy1; y++) {
                             for (int32_t x = xx0; x <= xx1; x++) {
                                 int64_t dx = (static_cast<int64_t>(x) * int64_t{2} + int64_t{1}) -
-                                            (static_cast<int64_t>(cx) * int64_t{2});
+                                             (static_cast<int64_t>(cx) * int64_t{2});
                                 int64_t dy = (static_cast<int64_t>(y) * int64_t{2} + int64_t{1}) -
-                                            (static_cast<int64_t>(cy) * int64_t{2});
+                                             (static_cast<int64_t>(cy) * int64_t{2});
                                 int64_t dist_sq = dx * dx + dy * dy;
-                                if (dist_sq > (static_cast<int64_t>(r * r) * int64_t{4} - int64_t{3})) {
+                                if (dist_sq >
+                                    (static_cast<int64_t>(r) * static_cast<int64_t>(r) * int64_t{4} - int64_t{3})) {
+                                    continue;
+                                }
+                                if (dist_sq > (static_cast<int64_t>(r - stroke_width) *
+                                                   static_cast<int64_t>(r - stroke_width) * int64_t{4} -
+                                               int64_t{3})) {
                                     continue;
                                 }
                                 plot(x + x_off, y + y_off, col);
@@ -3615,7 +3622,8 @@ class image {
                 float Rl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 0);
                 float Gl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 1);
                 float Bl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 2);
-                auto plot_arc = [&, this](int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off, int32_t y_off) {
+                auto plot_arc = [&, this](int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
+                                          int32_t y_off) {
                     for (int32_t y = yy0; y <= yy1; y++) {
                         for (int32_t x = xx0; x <= xx1; x++) {
                             float dx = (static_cast<float>(x) + 0.5f) - static_cast<float>(cx);
@@ -3654,7 +3662,8 @@ class image {
                 float Rl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 0);
                 float Gl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 1);
                 float Bl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 2);
-                auto plot_arc = [&, this](int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off, int32_t y_off) {
+                auto plot_arc = [&, this](int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
+                                          int32_t y_off) {
                     for (int32_t y = yy0; y <= yy1; y++) {
                         for (int32_t x = xx0; x <= xx1; x++) {
                             float dx = (static_cast<float>(x) + 0.5f) - static_cast<float>(cx);
