@@ -182,16 +182,6 @@ static consteval auto gen_a2al_4bit_consteval() {
 
 static constexpr const std::array<float, 16> a2al_4bit = gen_a2al_4bit_consteval();
 
-static consteval auto gen_a2al_8bit_consteval() {
-    std::array<float, 256> a2al{};
-    for (size_t c = 0; c < 16; c++) {
-        a2al[c] = srgb_to_linear(static_cast<float>(c) * (1.0f / 255.0f));
-    }
-    return a2al;
-}
-
-static constexpr const std::array<float, 256> a2al_8bit = gen_a2al_8bit_consteval();
-
 template <size_t S>
 class quantize {
     static constexpr size_t palette_size = S;
@@ -688,8 +678,8 @@ class format {
 
             size_t adlersum32_start_pos = i;
             header.at(i++) = 0;
-            for (size_t c = 0; c < bytes_to_copy; c++) {
-                header.at(i++) = line[c];
+            for (size_t d = 0; d < bytes_to_copy; d++) {
+                header.at(i++) = line[d];
             }
             adler32_sum = adler32(&header[adlersum32_start_pos], i - adlersum32_start_pos, adler32_sum);
 
