@@ -240,7 +240,7 @@ The following image formats are available. [Width] is the width in pixels, [Heig
     constixel::image<constixel::format_8bit, [Width], [Height], [Grayscale=false]>
 ```
 
-A quick overview of some functionality of image, otherwise refer to the (full documention here)[https://constixel.dev]:
+A quick overview of some functionality of image, otherwise refer to the [full documention here](https://constixel.dev):
 
 ```c++
 // Colors in the fixed internal palette
