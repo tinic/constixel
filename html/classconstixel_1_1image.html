@@ -134,24 +134,27 @@ constexpr void&#160;</td><td class="memItemRight" valign="bottom"><b>clear</b> (
 <tr class="memitem:a63caeb9e9659c029b0f7c380efacb368"><td class="memTemplItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a63caeb9e9659c029b0f7c380efacb368">copy</a> (const uint8_t *src)</td></tr>
 <tr class="memdesc:a63caeb9e9659c029b0f7c380efacb368"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy raw source data into this instance. No compositing occurs.  <br /></td></tr>
 <tr class="separator:a63caeb9e9659c029b0f7c380efacb368"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1282c4d236c44b8c8b3786cc3a34a20f" id="r_a1282c4d236c44b8c8b3786cc3a34a20f"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1282c4d236c44b8c8b3786cc3a34a20f">draw_line</a> (int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, int32_t stroke_width=1)</td></tr>
-<tr class="memdesc:a1282c4d236c44b8c8b3786cc3a34a20f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw a line with the specified color and thickness. Example:  <br /></td></tr>
-<tr class="separator:a1282c4d236c44b8c8b3786cc3a34a20f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afb6d8f9dc44c780fd0a97b0448877c1d" id="r_afb6d8f9dc44c780fd0a97b0448877c1d"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afb6d8f9dc44c780fd0a97b0448877c1d">draw_line</a> (const <a class="el" href="structconstixel_1_1rect.html">rect</a>&lt; int32_t &gt; &amp;<a class="el" href="structconstixel_1_1rect.html">rect</a>, uint8_t col, int32_t stroke_width=1)</td></tr>
-<tr class="memdesc:afb6d8f9dc44c780fd0a97b0448877c1d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw a line with the specified color and thickness. Example:  <br /></td></tr>
-<tr class="separator:afb6d8f9dc44c780fd0a97b0448877c1d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab797c984e7fcece5fcf78a0c92f4606a" id="r_ab797c984e7fcece5fcf78a0c92f4606a"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab797c984e7fcece5fcf78a0c92f4606a">draw_line_aa</a> (int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col)</td></tr>
-<tr class="memdesc:ab797c984e7fcece5fcf78a0c92f4606a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw a 1-pixel wide antialiased line with the specified color. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported. Example:  <br /></td></tr>
-<tr class="separator:ab797c984e7fcece5fcf78a0c92f4606a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac720766f316e52d5acf50c736537b37c" id="r_ac720766f316e52d5acf50c736537b37c"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac720766f316e52d5acf50c736537b37c">draw_line_aa</a> (const <a class="el" href="structconstixel_1_1rect.html">rect</a>&lt; int32_t &gt; &amp;<a class="el" href="structconstixel_1_1rect.html">rect</a>, uint8_t col)</td></tr>
-<tr class="memdesc:ac720766f316e52d5acf50c736537b37c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw a 1-pixel wide antialiased line with the specified color. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported. Example:  <br /></td></tr>
-<tr class="separator:ac720766f316e52d5acf50c736537b37c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a49a3b2bc8cc5638be32156c504ea43b4" id="r_a49a3b2bc8cc5638be32156c504ea43b4"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a49a3b2bc8cc5638be32156c504ea43b4">plot</a> (int32_t x, int32_t y, uint8_t col)</td></tr>
-<tr class="memdesc:a49a3b2bc8cc5638be32156c504ea43b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Plot a single pixel at the specified coordinates using the supplied color.  <br /></td></tr>
-<tr class="separator:a49a3b2bc8cc5638be32156c504ea43b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abc1e6059a20d269f9e15a477fba37fef" id="r_abc1e6059a20d269f9e15a477fba37fef"><td class="memItemLeft" align="right" valign="top">constexpr uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abc1e6059a20d269f9e15a477fba37fef">get_nearest_color</a> (uint8_t r, uint8_t g, uint8_t b) const</td></tr>
 <tr class="memdesc:abc1e6059a20d269f9e15a477fba37fef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return closest match in the color palette based on the supplied red, green and blue values.  <br /></td></tr>
 <tr class="separator:abc1e6059a20d269f9e15a477fba37fef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a49a3b2bc8cc5638be32156c504ea43b4" id="r_a49a3b2bc8cc5638be32156c504ea43b4"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a49a3b2bc8cc5638be32156c504ea43b4">plot</a> (int32_t x, int32_t y, uint8_t col)</td></tr>
+<tr class="memdesc:a49a3b2bc8cc5638be32156c504ea43b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Plot a single pixel at the specified coordinates using the supplied color.  <br /></td></tr>
+<tr class="separator:a49a3b2bc8cc5638be32156c504ea43b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae2703a3be2cac7bbb6a384e85a75bec9" id="r_ae2703a3be2cac7bbb6a384e85a75bec9"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae2703a3be2cac7bbb6a384e85a75bec9">plot</a> (const struct <a class="el" href="structconstixel_1_1plot.html">plot</a> &amp;p)</td></tr>
+<tr class="memdesc:ae2703a3be2cac7bbb6a384e85a75bec9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Plot a single pixel at the specified coordinates using the supplied color.  <br /></td></tr>
+<tr class="separator:ae2703a3be2cac7bbb6a384e85a75bec9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1282c4d236c44b8c8b3786cc3a34a20f" id="r_a1282c4d236c44b8c8b3786cc3a34a20f"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1282c4d236c44b8c8b3786cc3a34a20f">draw_line</a> (int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, int32_t stroke_width=1)</td></tr>
+<tr class="memdesc:a1282c4d236c44b8c8b3786cc3a34a20f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw a line with the specified color and thickness. Example:  <br /></td></tr>
+<tr class="separator:a1282c4d236c44b8c8b3786cc3a34a20f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6ad104784fd2b7f95b2dec3c5f237669" id="r_a6ad104784fd2b7f95b2dec3c5f237669"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6ad104784fd2b7f95b2dec3c5f237669">draw_line</a> (const struct <a class="el" href="structconstixel_1_1draw__line.html">draw_line</a> &amp;d)</td></tr>
+<tr class="memdesc:a6ad104784fd2b7f95b2dec3c5f237669"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw a line with the specified color and thickness. Example:  <br /></td></tr>
+<tr class="separator:a6ad104784fd2b7f95b2dec3c5f237669"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab797c984e7fcece5fcf78a0c92f4606a" id="r_ab797c984e7fcece5fcf78a0c92f4606a"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab797c984e7fcece5fcf78a0c92f4606a">draw_line_aa</a> (int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col)</td></tr>
+<tr class="memdesc:ab797c984e7fcece5fcf78a0c92f4606a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw a 1-pixel wide antialiased line with the specified color. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported. Example:  <br /></td></tr>
+<tr class="separator:ab797c984e7fcece5fcf78a0c92f4606a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a15a87dd5c5ee15dbe477762853ab3471" id="r_a15a87dd5c5ee15dbe477762853ab3471"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a15a87dd5c5ee15dbe477762853ab3471">draw_line_aa</a> (const struct <a class="el" href="structconstixel_1_1draw__line.html">draw_line</a> &amp;d)</td></tr>
+<tr class="memdesc:a15a87dd5c5ee15dbe477762853ab3471"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw a 1-pixel wide antialiased line with the specified color. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported. Example:  <br /></td></tr>
+<tr class="separator:a15a87dd5c5ee15dbe477762853ab3471"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8cb11d537b5e60b0b8c7c52fbc97538a" id="r_a8cb11d537b5e60b0b8c7c52fbc97538a"><td class="memTemplParams" colspan="2">template&lt;typename FONT, bool KERNING = false&gt; </td></tr>
 <tr class="memitem:a8cb11d537b5e60b0b8c7c52fbc97538a"><td class="memTemplItemLeft" align="right" valign="top">constexpr int32_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a8cb11d537b5e60b0b8c7c52fbc97538a">string_width</a> (const char *str, size_t character_count=std::numeric_limits&lt; size_t &gt;::max(), size_t *character_actual=nullptr)</td></tr>
 <tr class="memdesc:a8cb11d537b5e60b0b8c7c52fbc97538a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the width of a string using the specified font in the template parameter. Typical use:  <br /></td></tr>
@@ -160,66 +163,86 @@ constexpr void&#160;</td><td class="memItemRight" valign="bottom"><b>clear</b> (
 <tr class="memitem:a141cedc84e879226b491ce9bea9694ba"><td class="memTemplItemLeft" align="right" valign="top">constexpr int32_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a141cedc84e879226b491ce9bea9694ba">draw_string_mono</a> (int32_t x, int32_t y, const char *str, uint8_t col, size_t character_count=std::numeric_limits&lt; size_t &gt;::max(), size_t *character_actual=nullptr)</td></tr>
 <tr class="memdesc:a141cedc84e879226b491ce9bea9694ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw text at the specified coordinate. The template parameter selects which mono font to use. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported.  <br /></td></tr>
 <tr class="separator:a141cedc84e879226b491ce9bea9694ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aca74a40147ddcb012aa51132e4686952" id="r_aca74a40147ddcb012aa51132e4686952"><td class="memTemplParams" colspan="2">template&lt;typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0&gt; </td></tr>
-<tr class="memitem:aca74a40147ddcb012aa51132e4686952"><td class="memTemplItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#aca74a40147ddcb012aa51132e4686952">draw_string_centered_mono</a> (int32_t cx, int32_t y, const char *str, uint8_t col)</td></tr>
-<tr class="memdesc:aca74a40147ddcb012aa51132e4686952"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw text centered at the specified coordinate. The template parameter selects which mono font to use. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported.  <br /></td></tr>
-<tr class="separator:aca74a40147ddcb012aa51132e4686952"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7a0d4f6cfe30f2ff63086ab88beb5826" id="r_a7a0d4f6cfe30f2ff63086ab88beb5826"><td class="memTemplParams" colspan="2">template&lt;typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0&gt; </td></tr>
+<tr class="memitem:a7a0d4f6cfe30f2ff63086ab88beb5826"><td class="memTemplItemLeft" align="right" valign="top">constexpr int32_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a7a0d4f6cfe30f2ff63086ab88beb5826">draw_string_mono</a> (const struct <a class="el" href="structconstixel_1_1draw__string.html">draw_string</a> &amp;d, size_t character_count=std::numeric_limits&lt; size_t &gt;::max(), size_t *character_actual=nullptr)</td></tr>
+<tr class="memdesc:a7a0d4f6cfe30f2ff63086ab88beb5826"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw text at the specified coordinate. The template parameter selects which mono font to use. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported.  <br /></td></tr>
+<tr class="separator:a7a0d4f6cfe30f2ff63086ab88beb5826"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aea54a704f9d91677947174e915280e1a" id="r_aea54a704f9d91677947174e915280e1a"><td class="memTemplParams" colspan="2">template&lt;typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0&gt; </td></tr>
+<tr class="memitem:aea54a704f9d91677947174e915280e1a"><td class="memTemplItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#aea54a704f9d91677947174e915280e1a">draw_string_centered_mono</a> (int32_t x, int32_t y, const char *str, uint8_t col)</td></tr>
+<tr class="memdesc:aea54a704f9d91677947174e915280e1a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw text centered at the specified coordinate. The template parameter selects which mono font to use. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported.  <br /></td></tr>
+<tr class="separator:aea54a704f9d91677947174e915280e1a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4f8ddcd6734ef36f4a1db13cd0419d3a" id="r_a4f8ddcd6734ef36f4a1db13cd0419d3a"><td class="memTemplParams" colspan="2">template&lt;typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0&gt; </td></tr>
 <tr class="memitem:a4f8ddcd6734ef36f4a1db13cd0419d3a"><td class="memTemplItemLeft" align="right" valign="top">constexpr int32_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a4f8ddcd6734ef36f4a1db13cd0419d3a">draw_string_aa</a> (int32_t x, int32_t y, const char *str, uint8_t col, size_t character_count=std::numeric_limits&lt; size_t &gt;::max(), size_t *character_actual=nullptr)</td></tr>
 <tr class="memdesc:a4f8ddcd6734ef36f4a1db13cd0419d3a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw antialiased text at the specified coordinate. The template parameter selects which antialiased font to use. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported. Typical use:  <br /></td></tr>
 <tr class="separator:a4f8ddcd6734ef36f4a1db13cd0419d3a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a92bf9df0db783006b81cc58c0e309b33" id="r_a92bf9df0db783006b81cc58c0e309b33"><td class="memTemplParams" colspan="2">template&lt;typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0&gt; </td></tr>
-<tr class="memitem:a92bf9df0db783006b81cc58c0e309b33"><td class="memTemplItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a92bf9df0db783006b81cc58c0e309b33">draw_string_centered_aa</a> (int32_t cx, int32_t y, const char *str, uint8_t col)</td></tr>
-<tr class="memdesc:a92bf9df0db783006b81cc58c0e309b33"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw antialiased text centered at the specified coordinate. The template parameter selects which antialiased font to use. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported. Typical use.  <br /></td></tr>
-<tr class="separator:a92bf9df0db783006b81cc58c0e309b33"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a730fd1a0fda73a21c4605aee562acf03" id="r_a730fd1a0fda73a21c4605aee562acf03"><td class="memTemplParams" colspan="2">template&lt;typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0&gt; </td></tr>
+<tr class="memitem:a730fd1a0fda73a21c4605aee562acf03"><td class="memTemplItemLeft" align="right" valign="top">constexpr int32_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a730fd1a0fda73a21c4605aee562acf03">draw_string_aa</a> (const struct <a class="el" href="structconstixel_1_1draw__string.html">draw_string</a> &amp;d, size_t character_count=std::numeric_limits&lt; size_t &gt;::max(), size_t *character_actual=nullptr)</td></tr>
+<tr class="memdesc:a730fd1a0fda73a21c4605aee562acf03"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw antialiased text at the specified coordinate. The template parameter selects which antialiased font to use. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported. Typical use:  <br /></td></tr>
+<tr class="separator:a730fd1a0fda73a21c4605aee562acf03"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3c24333fbaf26c5fa7932dcfc42d16d4" id="r_a3c24333fbaf26c5fa7932dcfc42d16d4"><td class="memTemplParams" colspan="2">template&lt;typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0&gt; </td></tr>
+<tr class="memitem:a3c24333fbaf26c5fa7932dcfc42d16d4"><td class="memTemplItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a3c24333fbaf26c5fa7932dcfc42d16d4">draw_string_centered_aa</a> (int32_t x, int32_t y, const char *str, uint8_t col)</td></tr>
+<tr class="memdesc:a3c24333fbaf26c5fa7932dcfc42d16d4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw antialiased text centered at the specified coordinate. The template parameter selects which antialiased font to use. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported. Typical use.  <br /></td></tr>
+<tr class="separator:a3c24333fbaf26c5fa7932dcfc42d16d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2e0999de3b387eaeeccf90f8f39d1321" id="r_a2e0999de3b387eaeeccf90f8f39d1321"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2e0999de3b387eaeeccf90f8f39d1321">fill_rect</a> (int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col)</td></tr>
 <tr class="memdesc:a2e0999de3b387eaeeccf90f8f39d1321"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill a rectangle with the specified color. Example:  <br /></td></tr>
 <tr class="separator:a2e0999de3b387eaeeccf90f8f39d1321"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0c1f024bceac5e280aef80485f00062b" id="r_a0c1f024bceac5e280aef80485f00062b"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0c1f024bceac5e280aef80485f00062b">fill_rect</a> (const <a class="el" href="structconstixel_1_1rect.html">rect</a>&lt; int32_t &gt; &amp;<a class="el" href="structconstixel_1_1rect.html">rect</a>, uint8_t col)</td></tr>
-<tr class="memdesc:a0c1f024bceac5e280aef80485f00062b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill a rectangle with the specified color. Example:  <br /></td></tr>
-<tr class="separator:a0c1f024bceac5e280aef80485f00062b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a10cc886545bd2190370fc29e578bf837" id="r_a10cc886545bd2190370fc29e578bf837"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a10cc886545bd2190370fc29e578bf837">fill_rect</a> (const struct <a class="el" href="structconstixel_1_1draw__rect.html">draw_rect</a> &amp;d)</td></tr>
+<tr class="memdesc:a10cc886545bd2190370fc29e578bf837"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill a rectangle with the specified color. Example:  <br /></td></tr>
+<tr class="separator:a10cc886545bd2190370fc29e578bf837"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa3240172e706ce7dbfff173324f8ad84" id="r_aa3240172e706ce7dbfff173324f8ad84"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa3240172e706ce7dbfff173324f8ad84">stroke_rect</a> (int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col, int32_t stroke_width=1)</td></tr>
 <tr class="memdesc:aa3240172e706ce7dbfff173324f8ad84"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw a stroked rectangle with the specified color and stroke width. Example:  <br /></td></tr>
 <tr class="separator:aa3240172e706ce7dbfff173324f8ad84"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a201d038bdad17258ba0352d77bee93b1" id="r_a201d038bdad17258ba0352d77bee93b1"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a201d038bdad17258ba0352d77bee93b1">stroke_rect</a> (const <a class="el" href="structconstixel_1_1rect.html">rect</a>&lt; int32_t &gt; &amp;<a class="el" href="structconstixel_1_1rect.html">rect</a>, uint8_t col, int32_t stroke_width=1)</td></tr>
-<tr class="memdesc:a201d038bdad17258ba0352d77bee93b1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw a stroked rectangle with the specified color and stroke width. Example:  <br /></td></tr>
-<tr class="separator:a201d038bdad17258ba0352d77bee93b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a38c1919d6860ff88f0f026e18631f7ed" id="r_a38c1919d6860ff88f0f026e18631f7ed"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a38c1919d6860ff88f0f026e18631f7ed">stroke_rect</a> (const struct <a class="el" href="structconstixel_1_1draw__rect.html">draw_rect</a> &amp;d)</td></tr>
+<tr class="memdesc:a38c1919d6860ff88f0f026e18631f7ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw a stroked rectangle with the specified color and stroke width. Example:  <br /></td></tr>
+<tr class="separator:a38c1919d6860ff88f0f026e18631f7ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a896308f9df33678e03c0d665ba46920b" id="r_a896308f9df33678e03c0d665ba46920b"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a896308f9df33678e03c0d665ba46920b">fill_circle</a> (int32_t cx, int32_t cy, int32_t radius, uint8_t col)</td></tr>
 <tr class="memdesc:a896308f9df33678e03c0d665ba46920b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill a circle with the specified radius and color. Example:  <br /></td></tr>
 <tr class="separator:a896308f9df33678e03c0d665ba46920b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8ba8b0798a3cadac65a2129099796a3c" id="r_a8ba8b0798a3cadac65a2129099796a3c"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8ba8b0798a3cadac65a2129099796a3c">fill_circle</a> (const struct <a class="el" href="structconstixel_1_1draw__circle.html">draw_circle</a> &amp;d)</td></tr>
+<tr class="memdesc:a8ba8b0798a3cadac65a2129099796a3c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill a circle with the specified radius and color. Example:  <br /></td></tr>
+<tr class="separator:a8ba8b0798a3cadac65a2129099796a3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9e07a568848d68505fdab42af56cdc4b" id="r_a9e07a568848d68505fdab42af56cdc4b"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9e07a568848d68505fdab42af56cdc4b">stroke_circle</a> (int32_t cx, int32_t cy, int32_t radius, uint8_t col, int32_t stroke_width=1)</td></tr>
 <tr class="memdesc:a9e07a568848d68505fdab42af56cdc4b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stroke a circle with the specified radius and color. Example:  <br /></td></tr>
 <tr class="separator:a9e07a568848d68505fdab42af56cdc4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa8a3006272ac6ec0c3a04c92d294a1f6" id="r_aa8a3006272ac6ec0c3a04c92d294a1f6"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa8a3006272ac6ec0c3a04c92d294a1f6">stroke_circle</a> (const struct <a class="el" href="structconstixel_1_1draw__circle.html">draw_circle</a> &amp;d)</td></tr>
+<tr class="memdesc:aa8a3006272ac6ec0c3a04c92d294a1f6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stroke a circle with the specified radius and color. Example:  <br /></td></tr>
+<tr class="separator:aa8a3006272ac6ec0c3a04c92d294a1f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac5cdc7a541640ed3cd54da06af19ada0" id="r_ac5cdc7a541640ed3cd54da06af19ada0"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac5cdc7a541640ed3cd54da06af19ada0">stroke_circle_aa</a> (int32_t cx, int32_t cy, int32_t radius, uint8_t col, int32_t stroke_width=1)</td></tr>
 <tr class="memdesc:ac5cdc7a541640ed3cd54da06af19ada0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stroke a circle using antialiasing with the specified radius and color. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported. Example:  <br /></td></tr>
 <tr class="separator:ac5cdc7a541640ed3cd54da06af19ada0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8dd80e8e9ac9405acce5dc83c424bf85" id="r_a8dd80e8e9ac9405acce5dc83c424bf85"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8dd80e8e9ac9405acce5dc83c424bf85">stroke_circle_aa</a> (const struct <a class="el" href="structconstixel_1_1draw__circle.html">draw_circle</a> &amp;d)</td></tr>
+<tr class="memdesc:a8dd80e8e9ac9405acce5dc83c424bf85"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stroke a circle using antialiasing with the specified radius and color. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported. Example:  <br /></td></tr>
+<tr class="separator:a8dd80e8e9ac9405acce5dc83c424bf85"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a27c14861e015d5f4d35f084d06843a39" id="r_a27c14861e015d5f4d35f084d06843a39"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a27c14861e015d5f4d35f084d06843a39">fill_circle_aa</a> (int32_t cx, int32_t cy, int32_t radius, uint8_t col)</td></tr>
 <tr class="memdesc:a27c14861e015d5f4d35f084d06843a39"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill a circle using antialiasing with the specified radius and color. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported. Example:  <br /></td></tr>
 <tr class="separator:a27c14861e015d5f4d35f084d06843a39"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6f64bf1f57cb5b5aeee6765d23b09e12" id="r_a6f64bf1f57cb5b5aeee6765d23b09e12"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6f64bf1f57cb5b5aeee6765d23b09e12">fill_circle_aa</a> (const struct <a class="el" href="structconstixel_1_1draw__circle.html">draw_circle</a> &amp;d)</td></tr>
+<tr class="memdesc:a6f64bf1f57cb5b5aeee6765d23b09e12"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill a circle using antialiasing with the specified radius and color. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported. Example:  <br /></td></tr>
+<tr class="separator:a6f64bf1f57cb5b5aeee6765d23b09e12"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a55ed74acbf447e1a4e43dfbe344764a0" id="r_a55ed74acbf447e1a4e43dfbe344764a0"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a55ed74acbf447e1a4e43dfbe344764a0">stroke_round_rect</a> (int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col, int32_t stroke_width=1)</td></tr>
 <tr class="memdesc:a55ed74acbf447e1a4e43dfbe344764a0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stroke a rounded rectangle with the specified color. Example:  <br /></td></tr>
 <tr class="separator:a55ed74acbf447e1a4e43dfbe344764a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abada67634f5ba3f574c12551092859c4" id="r_abada67634f5ba3f574c12551092859c4"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abada67634f5ba3f574c12551092859c4">stroke_round_rect</a> (const <a class="el" href="structconstixel_1_1rect.html">rect</a>&lt; int32_t &gt; &amp;<a class="el" href="structconstixel_1_1rect.html">rect</a>, int32_t radius, uint8_t col, int32_t stroke_width=1)</td></tr>
-<tr class="memdesc:abada67634f5ba3f574c12551092859c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stroke a rounded rectangle with the specified color. Example:  <br /></td></tr>
-<tr class="separator:abada67634f5ba3f574c12551092859c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4b22830705c2e2945fb58b704f93e9cc" id="r_a4b22830705c2e2945fb58b704f93e9cc"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4b22830705c2e2945fb58b704f93e9cc">stroke_round_rect</a> (const struct <a class="el" href="structconstixel_1_1draw__round__rect.html">draw_round_rect</a> &amp;d)</td></tr>
+<tr class="memdesc:a4b22830705c2e2945fb58b704f93e9cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stroke a rounded rectangle with the specified color. Example:  <br /></td></tr>
+<tr class="separator:a4b22830705c2e2945fb58b704f93e9cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a02772d62ea9d1565a55ff08a1c492b42" id="r_a02772d62ea9d1565a55ff08a1c492b42"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a02772d62ea9d1565a55ff08a1c492b42">fill_round_rect</a> (int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col)</td></tr>
 <tr class="memdesc:a02772d62ea9d1565a55ff08a1c492b42"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill a rounded rectangle with the specified color. Example:  <br /></td></tr>
 <tr class="separator:a02772d62ea9d1565a55ff08a1c492b42"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a341b2854efc4a73ecf118ae6ca762061" id="r_a341b2854efc4a73ecf118ae6ca762061"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a341b2854efc4a73ecf118ae6ca762061">fill_round_rect</a> (const <a class="el" href="structconstixel_1_1rect.html">rect</a>&lt; int32_t &gt; &amp;<a class="el" href="structconstixel_1_1rect.html">rect</a>, int32_t radius, uint8_t col)</td></tr>
-<tr class="memdesc:a341b2854efc4a73ecf118ae6ca762061"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill a rounded rectangle with the specified color. Example:  <br /></td></tr>
-<tr class="separator:a341b2854efc4a73ecf118ae6ca762061"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af5b7a5f0bfbb04ab4193751b7a11397f" id="r_af5b7a5f0bfbb04ab4193751b7a11397f"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af5b7a5f0bfbb04ab4193751b7a11397f">fill_round_rect</a> (const struct <a class="el" href="structconstixel_1_1draw__round__rect.html">draw_round_rect</a> &amp;d)</td></tr>
+<tr class="memdesc:af5b7a5f0bfbb04ab4193751b7a11397f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill a rounded rectangle with the specified color. Example:  <br /></td></tr>
+<tr class="separator:af5b7a5f0bfbb04ab4193751b7a11397f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae4cd116554f8d0645351fcb48cdba199" id="r_ae4cd116554f8d0645351fcb48cdba199"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae4cd116554f8d0645351fcb48cdba199">fill_round_rect_aa</a> (int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col)</td></tr>
 <tr class="memdesc:ae4cd116554f8d0645351fcb48cdba199"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill a rounded rectangle using antialiasing with the specified color. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported. Example:  <br /></td></tr>
 <tr class="separator:ae4cd116554f8d0645351fcb48cdba199"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2e110e98bb296ce45e8a3a516c90258e" id="r_a2e110e98bb296ce45e8a3a516c90258e"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2e110e98bb296ce45e8a3a516c90258e">fill_round_rect_aa</a> (const <a class="el" href="structconstixel_1_1rect.html">rect</a>&lt; int32_t &gt; &amp;<a class="el" href="structconstixel_1_1rect.html">rect</a>, int32_t radius, uint8_t col)</td></tr>
-<tr class="memdesc:a2e110e98bb296ce45e8a3a516c90258e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill a rounded rectangle using antialiasing with the specified color. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported.  <br /></td></tr>
-<tr class="separator:a2e110e98bb296ce45e8a3a516c90258e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aae4eb04749a064295c79fd7d0ddb2f62" id="r_aae4eb04749a064295c79fd7d0ddb2f62"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aae4eb04749a064295c79fd7d0ddb2f62">fill_round_rect_aa</a> (const struct <a class="el" href="structconstixel_1_1draw__round__rect.html">draw_round_rect</a> &amp;d)</td></tr>
+<tr class="memdesc:aae4eb04749a064295c79fd7d0ddb2f62"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill a rounded rectangle using antialiasing with the specified color. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported.  <br /></td></tr>
+<tr class="separator:aae4eb04749a064295c79fd7d0ddb2f62"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acab1b5123086adfbdb50693fe8f507d4" id="r_acab1b5123086adfbdb50693fe8f507d4"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acab1b5123086adfbdb50693fe8f507d4">stroke_round_rect_aa</a> (int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col, int32_t stroke_width=1)</td></tr>
 <tr class="memdesc:acab1b5123086adfbdb50693fe8f507d4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stroke a rounded rectangle using antialiasing with the specified color. Example:  <br /></td></tr>
 <tr class="separator:acab1b5123086adfbdb50693fe8f507d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abd5642977c08824f89731c8b67c26b02" id="r_abd5642977c08824f89731c8b67c26b02"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abd5642977c08824f89731c8b67c26b02">stroke_round_rect_aa</a> (const <a class="el" href="structconstixel_1_1rect.html">rect</a>&lt; int32_t &gt; &amp;<a class="el" href="structconstixel_1_1rect.html">rect</a>, int32_t radius, uint8_t col, int32_t stroke_width=1)</td></tr>
-<tr class="memdesc:abd5642977c08824f89731c8b67c26b02"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stroke a rounded rectangle using antialiasing with the specified color. Example:  <br /></td></tr>
-<tr class="separator:abd5642977c08824f89731c8b67c26b02"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a207d3aa3f7adba6850e62a7564739204" id="r_a207d3aa3f7adba6850e62a7564739204"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a207d3aa3f7adba6850e62a7564739204">stroke_round_rect_aa</a> (const struct <a class="el" href="structconstixel_1_1draw__round__rect.html">draw_round_rect</a> &amp;d)</td></tr>
+<tr class="memdesc:a207d3aa3f7adba6850e62a7564739204"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stroke a rounded rectangle using antialiasing with the specified color. Example:  <br /></td></tr>
+<tr class="separator:a207d3aa3f7adba6850e62a7564739204"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af8be75300446c74f87046eca86399af2" id="r_af8be75300446c74f87046eca86399af2"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af8be75300446c74f87046eca86399af2">RGBA_uint32</a> (std::array&lt; uint32_t, W *H &gt; &amp;dst) const</td></tr>
 <tr class="memdesc:af8be75300446c74f87046eca86399af2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert this instance to an equivalent RGBA8 data array.  <br /></td></tr>
 <tr class="separator:af8be75300446c74f87046eca86399af2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -330,7 +353,7 @@ Static Public Member Functions</h2></td></tr>
 <div class="textblock"><div class="compoundTemplParams">template&lt;template&lt; size_t, size_t, bool &gt; class T, size_t W, size_t H, bool GR = false&gt;<br />
 class constixel::image&lt; T, W, H, GR &gt;</div><p>Core class of constixel. Holds a buffer of an image width a certain size and format. Typical use: </p>
 <div class="fragment"><div class="line"><a class="code hl_class" href="classconstixel_1_1image.html">constixel::image&lt;constixel::format_8bit, 640, 480&gt;</a> <a class="code hl_class" href="classconstixel_1_1image.html">image</a>;</div>
-<div class="ttc" id="aclassconstixel_1_1image_html"><div class="ttname"><a href="classconstixel_1_1image.html">constixel::image</a></div><div class="ttdoc">Core class of constixel. Holds a buffer of an image width a certain size and format....</div><div class="ttdef"><b>Definition</b> constixel.hpp:2023</div></div>
+<div class="ttc" id="aclassconstixel_1_1image_html"><div class="ttname"><a href="classconstixel_1_1image.html">constixel::image</a></div><div class="ttdoc">Core class of constixel. Holds a buffer of an image width a certain size and format....</div><div class="ttdef"><b>Definition</b> constixel.hpp:2080</div></div>
 </div><!-- fragment --><dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">T</td><td>Type of the image buffer. One of <a class="el" href="classconstixel_1_1format__1bit.html" title="1-bit format, just b/w. Use as template parameter for image. Example:">format_1bit</a>, <a class="el" href="classconstixel_1_1format__2bit.html" title="2-bit color format, 4 colors total. Use as template parameter for image.">format_2bit</a>, <a class="el" href="classconstixel_1_1format__4bit.html" title="4-bit color format, 16 colors total. Use as template parameter for image.">format_4bit</a> or <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a>. </td></tr>
@@ -984,8 +1007,8 @@ template&lt;template&lt; size_t, size_t, bool &gt; class T, size_t W, size_t H, 
 
 </div>
 </div>
-<a id="afb6d8f9dc44c780fd0a97b0448877c1d" name="afb6d8f9dc44c780fd0a97b0448877c1d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afb6d8f9dc44c780fd0a97b0448877c1d">&#9670;&#160;</a></span>draw_line() <span class="overload">[1/2]</span></h2>
+<a id="a6ad104784fd2b7f95b2dec3c5f237669" name="a6ad104784fd2b7f95b2dec3c5f237669"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6ad104784fd2b7f95b2dec3c5f237669">&#9670;&#160;</a></span>draw_line() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -998,17 +1021,8 @@ template&lt;template&lt; size_t, size_t, bool &gt; class T, size_t W, size_t H, 
         <tr>
           <td class="memname">void <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, GR &gt;::draw_line </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="structconstixel_1_1rect.html">rect</a>&lt; int32_t &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rect</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramtype">const struct <a class="el" href="structconstixel_1_1draw__line.html">draw_line</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>d</em></span></td><td>)</td>
           <td></td>
-          <td class="paramtype">uint8_t</td>          <td class="paramname"><span class="paramname"><em>col</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>stroke_width</em></span><span class="paramdefsep"> = </span><span class="paramdefval">1</span>&#160;)</td>
         </tr>
       </table>
   </td>
@@ -1019,13 +1033,11 @@ template&lt;template&lt; size_t, size_t, bool &gt; class T, size_t W, size_t H, 
 </div><div class="memdoc">
 
 <p>Draw a line with the specified color and thickness. Example: </p>
-<div class="fragment"><div class="line"><a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#a1282c4d236c44b8c8b3786cc3a34a20f">draw_line</a>({.x=0, .y=0, .w=200, .h=100}, constixel::color::WHITE, 2);</div>
-<div class="ttc" id="aclassconstixel_1_1image_html_a1282c4d236c44b8c8b3786cc3a34a20f"><div class="ttname"><a href="#a1282c4d236c44b8c8b3786cc3a34a20f">constixel::image::draw_line</a></div><div class="ttdeci">constexpr void draw_line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, int32_t stroke_width=1)</div><div class="ttdoc">Draw a line with the specified color and thickness. Example:</div><div class="ttdef"><b>Definition</b> constixel.hpp:2136</div></div>
+<div class="fragment"><div class="line"><a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#a1282c4d236c44b8c8b3786cc3a34a20f">draw_line</a>({.x0=0, .y0=0, .x1=200, .y1=100, .col=color::WHITE, .sw=2});</div>
+<div class="ttc" id="aclassconstixel_1_1image_html_a1282c4d236c44b8c8b3786cc3a34a20f"><div class="ttname"><a href="#a1282c4d236c44b8c8b3786cc3a34a20f">constixel::image::draw_line</a></div><div class="ttdeci">constexpr void draw_line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, int32_t stroke_width=1)</div><div class="ttdoc">Draw a line with the specified color and thickness. Example:</div><div class="ttdef"><b>Definition</b> constixel.hpp:2227</div></div>
 </div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">rect</td><td>Rectangle containing the line coordinates in pixels. </td></tr>
-    <tr><td class="paramname">col</td><td>Color palette index to use. </td></tr>
-    <tr><td class="paramname">stroke_width</td><td>Width of the stroke in pixels. </td></tr>
+    <tr><td class="paramname">d</td><td><a class="el" href="structconstixel_1_1draw__line.html">draw_line</a> initializer struct </td></tr>
   </table>
   </dd>
 </dl>
@@ -1097,8 +1109,8 @@ template&lt;template&lt; size_t, size_t, bool &gt; class T, size_t W, size_t H, 
 
 </div>
 </div>
-<a id="ac720766f316e52d5acf50c736537b37c" name="ac720766f316e52d5acf50c736537b37c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac720766f316e52d5acf50c736537b37c">&#9670;&#160;</a></span>draw_line_aa() <span class="overload">[1/2]</span></h2>
+<a id="a15a87dd5c5ee15dbe477762853ab3471" name="a15a87dd5c5ee15dbe477762853ab3471"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a15a87dd5c5ee15dbe477762853ab3471">&#9670;&#160;</a></span>draw_line_aa() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1111,12 +1123,8 @@ template&lt;template&lt; size_t, size_t, bool &gt; class T, size_t W, size_t H, 
         <tr>
           <td class="memname">void <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, GR &gt;::draw_line_aa </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="structconstixel_1_1rect.html">rect</a>&lt; int32_t &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rect</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramtype">const struct <a class="el" href="structconstixel_1_1draw__line.html">draw_line</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>d</em></span></td><td>)</td>
           <td></td>
-          <td class="paramtype">uint8_t</td>          <td class="paramname"><span class="paramname"><em>col</em></span>&#160;)</td>
         </tr>
       </table>
   </td>
@@ -1127,12 +1135,11 @@ template&lt;template&lt; size_t, size_t, bool &gt; class T, size_t W, size_t H, 
 </div><div class="memdoc">
 
 <p>Draw a 1-pixel wide antialiased line with the specified color. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported. Example: </p>
-<div class="fragment"><div class="line"><a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#ab797c984e7fcece5fcf78a0c92f4606a">draw_line_aa</a>({.x=0, .y=0, .w=200, .h=100}, constixel::color::WHITE, 2);</div>
-<div class="ttc" id="aclassconstixel_1_1image_html_ab797c984e7fcece5fcf78a0c92f4606a"><div class="ttname"><a href="#ab797c984e7fcece5fcf78a0c92f4606a">constixel::image::draw_line_aa</a></div><div class="ttdeci">constexpr void draw_line_aa(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col)</div><div class="ttdoc">Draw a 1-pixel wide antialiased line with the specified color. Only format_8bit targets are supported...</div><div class="ttdef"><b>Definition</b> constixel.hpp:2225</div></div>
+<div class="fragment"><div class="line"><a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#ab797c984e7fcece5fcf78a0c92f4606a">draw_line_aa</a>({.x0=0, .y0=0, .x1=200, .y1=100, .col=color::WHITE});</div>
+<div class="ttc" id="aclassconstixel_1_1image_html_ab797c984e7fcece5fcf78a0c92f4606a"><div class="ttname"><a href="#ab797c984e7fcece5fcf78a0c92f4606a">constixel::image::draw_line_aa</a></div><div class="ttdeci">constexpr void draw_line_aa(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col)</div><div class="ttdoc">Draw a 1-pixel wide antialiased line with the specified color. Only format_8bit targets are supported...</div><div class="ttdef"><b>Definition</b> constixel.hpp:2314</div></div>
 </div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">rect</td><td>Rectangle containing the line coordinates in pixels. </td></tr>
-    <tr><td class="paramname">col</td><td>Color palette index to use. </td></tr>
+    <tr><td class="paramname">d</td><td><a class="el" href="structconstixel_1_1draw__line.html">draw_line</a> initializer struct </td></tr>
   </table>
   </dd>
 </dl>
@@ -1198,8 +1205,70 @@ template&lt;template&lt; size_t, size_t, bool &gt; class T, size_t W, size_t H, 
 
 </div>
 </div>
+<a id="a730fd1a0fda73a21c4605aee562acf03" name="a730fd1a0fda73a21c4605aee562acf03"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a730fd1a0fda73a21c4605aee562acf03">&#9670;&#160;</a></span>draw_string_aa() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;template&lt; size_t, size_t, bool &gt; class T, size_t W, size_t H, bool GR = false&gt; </div>
+<div class="memtemplate">
+template&lt;typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int32_t <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, GR &gt;::draw_string_aa </td>
+          <td>(</td>
+          <td class="paramtype">const struct <a class="el" href="structconstixel_1_1draw__string.html">draw_string</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>d</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>character_count</em></span><span class="paramdefsep"> = </span><span class="paramdefval">std::numeric_limits&lt;size_t&gt;::max()</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *</td>          <td class="paramname"><span class="paramname"><em>character_actual</em></span><span class="paramdefsep"> = </span><span class="paramdefval">nullptr</span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Draw antialiased text at the specified coordinate. The template parameter selects which antialiased font to use. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported. Typical use: </p>
+<div class="fragment"><div class="line"><span class="preprocessor">#include &quot;some_font_aa.h&quot;</span></div>
+<div class="line">...</div>
+<div class="line">    <a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#a4f8ddcd6734ef36f4a1db13cd0419d3a">draw_string_aa</a>&lt;constixel::some_font_aa&gt;({.x=0, .y=0, .str=<span class="stringliteral">&quot;MyText&quot;</span>, .col=constixel::color::WHITE});</div>
+<div class="line">...</div>
+<div class="ttc" id="aclassconstixel_1_1image_html_a4f8ddcd6734ef36f4a1db13cd0419d3a"><div class="ttname"><a href="#a4f8ddcd6734ef36f4a1db13cd0419d3a">constixel::image::draw_string_aa</a></div><div class="ttdeci">constexpr int32_t draw_string_aa(int32_t x, int32_t y, const char *str, uint8_t col, size_t character_count=std::numeric_limits&lt; size_t &gt;::max(), size_t *character_actual=nullptr)</div><div class="ttdoc">Draw antialiased text at the specified coordinate. The template parameter selects which antialiased f...</div><div class="ttdef"><b>Definition</b> constixel.hpp:2610</div></div>
+</div><!-- fragment --><dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">FONT</td><td>The font struct name. </td></tr>
+    <tr><td class="paramname">KERNING</td><td>Boolean, use kerning information if available. Default to false. </td></tr>
+    <tr><td class="paramname">ROTATION</td><td>Rotation around the x/y coordinate. Can be text_rotation::DEGREE_0, text_rotation::DEGREE_90, text_rotation::DEGREE_180 or text_rotation::DEGREE_270 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">d</td><td><a class="el" href="structconstixel_1_1draw__string.html">draw_string</a> initializer struct. </td></tr>
+    <tr><td class="paramname">character_count</td><td>How many utf32 characters in the string should be drawn. </td></tr>
+    <tr><td class="paramname">character_actual</td><td>How many utf32 characters in the string were drawn. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns the new caret X-coordinate position. Pass this value to the next <a class="el" href="structconstixel_1_1draw__string.html">draw_string</a> call to get continious text. </dd></dl>
+
+</div>
+</div>
 <a id="a4f8ddcd6734ef36f4a1db13cd0419d3a" name="a4f8ddcd6734ef36f4a1db13cd0419d3a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4f8ddcd6734ef36f4a1db13cd0419d3a">&#9670;&#160;</a></span>draw_string_aa()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a4f8ddcd6734ef36f4a1db13cd0419d3a">&#9670;&#160;</a></span>draw_string_aa() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1252,9 +1321,8 @@ template&lt;typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE
 <p>Draw antialiased text at the specified coordinate. The template parameter selects which antialiased font to use. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported. Typical use: </p>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &quot;some_font_aa.h&quot;</span></div>
 <div class="line">...</div>
-<div class="line">    <a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#a4f8ddcd6734ef36f4a1db13cd0419d3a">draw_string_aa</a>&lt;constixel::some_font_aa&gt;(0, 0, <span class="stringliteral">&quot;MyText&quot;</span>);</div>
+<div class="line">    <a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#a4f8ddcd6734ef36f4a1db13cd0419d3a">draw_string_aa</a>&lt;constixel::some_font_aa&gt;(0, 0, <span class="stringliteral">&quot;MyText&quot;</span>, constixel::color::WHITE);</div>
 <div class="line">...</div>
-<div class="ttc" id="aclassconstixel_1_1image_html_a4f8ddcd6734ef36f4a1db13cd0419d3a"><div class="ttname"><a href="#a4f8ddcd6734ef36f4a1db13cd0419d3a">constixel::image::draw_string_aa</a></div><div class="ttdeci">constexpr int32_t draw_string_aa(int32_t x, int32_t y, const char *str, uint8_t col, size_t character_count=std::numeric_limits&lt; size_t &gt;::max(), size_t *character_actual=nullptr)</div><div class="ttdoc">Draw antialiased text at the specified coordinate. The template parameter selects which antialiased f...</div><div class="ttdef"><b>Definition</b> constixel.hpp:2516</div></div>
 </div><!-- fragment --><dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">FONT</td><td>The font struct name. </td></tr>
@@ -1274,12 +1342,12 @@ template&lt;typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Returns the new caret X-coordinate position. Pass this value to the next draw_string call to get continious text. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns the new caret X-coordinate position. Pass this value to the next <a class="el" href="structconstixel_1_1draw__string.html">draw_string</a> call to get continious text. </dd></dl>
 
 </div>
 </div>
-<a id="a92bf9df0db783006b81cc58c0e309b33" name="a92bf9df0db783006b81cc58c0e309b33"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a92bf9df0db783006b81cc58c0e309b33">&#9670;&#160;</a></span>draw_string_centered_aa()</h2>
+<a id="a3c24333fbaf26c5fa7932dcfc42d16d4" name="a3c24333fbaf26c5fa7932dcfc42d16d4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3c24333fbaf26c5fa7932dcfc42d16d4">&#9670;&#160;</a></span>draw_string_centered_aa()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1294,7 +1362,7 @@ template&lt;typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE
         <tr>
           <td class="memname">void <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, GR &gt;::draw_string_centered_aa </td>
           <td>(</td>
-          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>cx</em></span>, </td>
+          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>x</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1330,8 +1398,8 @@ template&lt;typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE
 </dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">cx</td><td>Senter X-coordinate in pixels. </td></tr>
-    <tr><td class="paramname">y</td><td>Starting Y-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">x</td><td>Center/Starting X-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">y</td><td>Center/Starting Y-coordinate in pixels. </td></tr>
     <tr><td class="paramname">str</td><td>UTF-8 string. </td></tr>
     <tr><td class="paramname">col</td><td>Color palette index to use. </td></tr>
   </table>
@@ -1340,8 +1408,8 @@ template&lt;typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE
 
 </div>
 </div>
-<a id="aca74a40147ddcb012aa51132e4686952" name="aca74a40147ddcb012aa51132e4686952"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aca74a40147ddcb012aa51132e4686952">&#9670;&#160;</a></span>draw_string_centered_mono()</h2>
+<a id="aea54a704f9d91677947174e915280e1a" name="aea54a704f9d91677947174e915280e1a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aea54a704f9d91677947174e915280e1a">&#9670;&#160;</a></span>draw_string_centered_mono()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1356,7 +1424,7 @@ template&lt;typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE
         <tr>
           <td class="memname">void <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, GR &gt;::draw_string_centered_mono </td>
           <td>(</td>
-          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>cx</em></span>, </td>
+          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>x</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1392,8 +1460,8 @@ template&lt;typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE
 </dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">cx</td><td>Center X-coordinate in pixels. </td></tr>
-    <tr><td class="paramname">y</td><td>Starting Y-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">x</td><td>Center/Starting X-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">y</td><td>Center/Starting Y-coordinate in pixels. </td></tr>
     <tr><td class="paramname">str</td><td>UTF-8 string. </td></tr>
     <tr><td class="paramname">col</td><td>Color palette index to use. </td></tr>
   </table>
@@ -1402,8 +1470,70 @@ template&lt;typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE
 
 </div>
 </div>
+<a id="a7a0d4f6cfe30f2ff63086ab88beb5826" name="a7a0d4f6cfe30f2ff63086ab88beb5826"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7a0d4f6cfe30f2ff63086ab88beb5826">&#9670;&#160;</a></span>draw_string_mono() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;template&lt; size_t, size_t, bool &gt; class T, size_t W, size_t H, bool GR = false&gt; </div>
+<div class="memtemplate">
+template&lt;typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int32_t <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, GR &gt;::draw_string_mono </td>
+          <td>(</td>
+          <td class="paramtype">const struct <a class="el" href="structconstixel_1_1draw__string.html">draw_string</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>d</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>character_count</em></span><span class="paramdefsep"> = </span><span class="paramdefval">std::numeric_limits&lt;size_t&gt;::max()</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *</td>          <td class="paramname"><span class="paramname"><em>character_actual</em></span><span class="paramdefsep"> = </span><span class="paramdefval">nullptr</span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Draw text at the specified coordinate. The template parameter selects which mono font to use. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported. </p>
+<div class="fragment"><div class="line"><span class="preprocessor">#include &quot;some_font_mono.h&quot;</span></div>
+<div class="line">...</div>
+<div class="line">    <a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#a141cedc84e879226b491ce9bea9694ba">draw_string_mono</a>&lt;constixel::some_font_mono&gt;({.x=0, .y=0, .str=<span class="stringliteral">&quot;MyText&quot;</span>, .col=constixel::color::WHITE});</div>
+<div class="line">...</div>
+<div class="ttc" id="aclassconstixel_1_1image_html_a141cedc84e879226b491ce9bea9694ba"><div class="ttname"><a href="#a141cedc84e879226b491ce9bea9694ba">constixel::image::draw_string_mono</a></div><div class="ttdeci">constexpr int32_t draw_string_mono(int32_t x, int32_t y, const char *str, uint8_t col, size_t character_count=std::numeric_limits&lt; size_t &gt;::max(), size_t *character_actual=nullptr)</div><div class="ttdoc">Draw text at the specified coordinate. The template parameter selects which mono font to use....</div><div class="ttdef"><b>Definition</b> constixel.hpp:2484</div></div>
+</div><!-- fragment --><dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">FONT</td><td>The font struct name. </td></tr>
+    <tr><td class="paramname">KERNING</td><td>Boolean, use kerning information if available. Default to false. </td></tr>
+    <tr><td class="paramname">ROTATION</td><td>Rotation around the x/y coordinate. Defaults to text_rotation::DEGREE_0. Can be text_rotation::DEGREE_0, text_rotation::DEGREE_90, text_rotation::DEGREE_180 or text_rotation::DEGREE_270 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">d</td><td><a class="el" href="structconstixel_1_1draw__string.html">draw_string</a> initializer struct. </td></tr>
+    <tr><td class="paramname">character_count</td><td>How many utf32 characters in the string should be drawn. </td></tr>
+    <tr><td class="paramname">character_actual</td><td>How many utf32 characters in the string were drawn. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns the new caret X-coordinate position. Pass this value to the next <a class="el" href="structconstixel_1_1draw__string.html">draw_string</a> call to get continious text. </dd></dl>
+
+</div>
+</div>
 <a id="a141cedc84e879226b491ce9bea9694ba" name="a141cedc84e879226b491ce9bea9694ba"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a141cedc84e879226b491ce9bea9694ba">&#9670;&#160;</a></span>draw_string_mono()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a141cedc84e879226b491ce9bea9694ba">&#9670;&#160;</a></span>draw_string_mono() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1456,9 +1586,8 @@ template&lt;typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE
 <p>Draw text at the specified coordinate. The template parameter selects which mono font to use. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported. </p>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &quot;some_font_mono.h&quot;</span></div>
 <div class="line">...</div>
-<div class="line">    <a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#a141cedc84e879226b491ce9bea9694ba">draw_string_mono</a>&lt;constixel::some_font_mono&gt;(0, 0, <span class="stringliteral">&quot;MyText&quot;</span>);</div>
+<div class="line">    <a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#a141cedc84e879226b491ce9bea9694ba">draw_string_mono</a>&lt;constixel::some_font_mono&gt;(0, 0, <span class="stringliteral">&quot;MyText&quot;</span>, constixel::color::WHITE);</div>
 <div class="line">...</div>
-<div class="ttc" id="aclassconstixel_1_1image_html_a141cedc84e879226b491ce9bea9694ba"><div class="ttname"><a href="#a141cedc84e879226b491ce9bea9694ba">constixel::image::draw_string_mono</a></div><div class="ttdeci">constexpr int32_t draw_string_mono(int32_t x, int32_t y, const char *str, uint8_t col, size_t character_count=std::numeric_limits&lt; size_t &gt;::max(), size_t *character_actual=nullptr)</div><div class="ttdoc">Draw text at the specified coordinate. The template parameter selects which mono font to use....</div><div class="ttdef"><b>Definition</b> constixel.hpp:2421</div></div>
 </div><!-- fragment --><dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">FONT</td><td>The font struct name. </td></tr>
@@ -1478,12 +1607,49 @@ template&lt;typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Returns the new caret X-coordinate position. Pass this value to the next draw_string call to get continious text. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns the new caret X-coordinate position. Pass this value to the next <a class="el" href="structconstixel_1_1draw__string.html">draw_string</a> call to get continious text. </dd></dl>
+
+</div>
+</div>
+<a id="a8ba8b0798a3cadac65a2129099796a3c" name="a8ba8b0798a3cadac65a2129099796a3c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8ba8b0798a3cadac65a2129099796a3c">&#9670;&#160;</a></span>fill_circle() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;template&lt; size_t, size_t, bool &gt; class T, size_t W, size_t H, bool GR = false&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, GR &gt;::fill_circle </td>
+          <td>(</td>
+          <td class="paramtype">const struct <a class="el" href="structconstixel_1_1draw__circle.html">draw_circle</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>d</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Fill a circle with the specified radius and color. Example: </p>
+<div class="fragment"><div class="line"><a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#a896308f9df33678e03c0d665ba46920b">fill_circle</a>({.x=64, .y=64, .r=32, .col=constixel::color::WHITE});</div>
+<div class="ttc" id="aclassconstixel_1_1image_html_a896308f9df33678e03c0d665ba46920b"><div class="ttname"><a href="#a896308f9df33678e03c0d665ba46920b">constixel::image::fill_circle</a></div><div class="ttdeci">constexpr void fill_circle(int32_t cx, int32_t cy, int32_t radius, uint8_t col)</div><div class="ttdoc">Fill a circle with the specified radius and color. Example:</div><div class="ttdef"><b>Definition</b> constixel.hpp:2806</div></div>
+</div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">d</td><td><a class="el" href="structconstixel_1_1draw__circle.html">draw_circle</a> initializer struct </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
 <a id="a896308f9df33678e03c0d665ba46920b" name="a896308f9df33678e03c0d665ba46920b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a896308f9df33678e03c0d665ba46920b">&#9670;&#160;</a></span>fill_circle()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a896308f9df33678e03c0d665ba46920b">&#9670;&#160;</a></span>fill_circle() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1523,7 +1689,6 @@ template&lt;template&lt; size_t, size_t, bool &gt; class T, size_t W, size_t H, 
 
 <p>Fill a circle with the specified radius and color. Example: </p>
 <div class="fragment"><div class="line"><a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#a896308f9df33678e03c0d665ba46920b">fill_circle</a>(64, 64, 32, constixel::color::WHITE);</div>
-<div class="ttc" id="aclassconstixel_1_1image_html_a896308f9df33678e03c0d665ba46920b"><div class="ttname"><a href="#a896308f9df33678e03c0d665ba46920b">constixel::image::fill_circle</a></div><div class="ttdeci">constexpr void fill_circle(int32_t cx, int32_t cy, int32_t radius, uint8_t col)</div><div class="ttdoc">Fill a circle with the specified radius and color. Example:</div><div class="ttdef"><b>Definition</b> constixel.hpp:2684</div></div>
 </div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">cx</td><td>Center X-coordinate of the circle in pixels. </td></tr>
@@ -1536,8 +1701,45 @@ template&lt;template&lt; size_t, size_t, bool &gt; class T, size_t W, size_t H, 
 
 </div>
 </div>
+<a id="a6f64bf1f57cb5b5aeee6765d23b09e12" name="a6f64bf1f57cb5b5aeee6765d23b09e12"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6f64bf1f57cb5b5aeee6765d23b09e12">&#9670;&#160;</a></span>fill_circle_aa() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;template&lt; size_t, size_t, bool &gt; class T, size_t W, size_t H, bool GR = false&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, GR &gt;::fill_circle_aa </td>
+          <td>(</td>
+          <td class="paramtype">const struct <a class="el" href="structconstixel_1_1draw__circle.html">draw_circle</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>d</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Fill a circle using antialiasing with the specified radius and color. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported. Example: </p>
+<div class="fragment"><div class="line"><a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#a27c14861e015d5f4d35f084d06843a39">fill_circle_aa</a>({.x=64, .y=64, .r=32, .col=constixel::color::WHITE});</div>
+<div class="ttc" id="aclassconstixel_1_1image_html_a27c14861e015d5f4d35f084d06843a39"><div class="ttname"><a href="#a27c14861e015d5f4d35f084d06843a39">constixel::image::fill_circle_aa</a></div><div class="ttdeci">constexpr void fill_circle_aa(int32_t cx, int32_t cy, int32_t radius, uint8_t col)</div><div class="ttdoc">Fill a circle using antialiasing with the specified radius and color. Only format_8bit targets are su...</div><div class="ttdef"><b>Definition</b> constixel.hpp:2918</div></div>
+</div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">d</td><td><a class="el" href="structconstixel_1_1draw__circle.html">draw_circle</a> initializer struct </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a27c14861e015d5f4d35f084d06843a39" name="a27c14861e015d5f4d35f084d06843a39"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a27c14861e015d5f4d35f084d06843a39">&#9670;&#160;</a></span>fill_circle_aa()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a27c14861e015d5f4d35f084d06843a39">&#9670;&#160;</a></span>fill_circle_aa() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1577,7 +1779,6 @@ template&lt;template&lt; size_t, size_t, bool &gt; class T, size_t W, size_t H, 
 
 <p>Fill a circle using antialiasing with the specified radius and color. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported. Example: </p>
 <div class="fragment"><div class="line"><a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#a27c14861e015d5f4d35f084d06843a39">fill_circle_aa</a>(64, 64, 32, constixel::color::WHITE);</div>
-<div class="ttc" id="aclassconstixel_1_1image_html_a27c14861e015d5f4d35f084d06843a39"><div class="ttname"><a href="#a27c14861e015d5f4d35f084d06843a39">constixel::image::fill_circle_aa</a></div><div class="ttdeci">constexpr void fill_circle_aa(int32_t cx, int32_t cy, int32_t radius, uint8_t col)</div><div class="ttdoc">Fill a circle using antialiasing with the specified radius and color. Only format_8bit targets are su...</div><div class="ttdef"><b>Definition</b> constixel.hpp:2756</div></div>
 </div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">cx</td><td>Center X-coordinate of the circle in pixels. </td></tr>
@@ -1590,8 +1791,8 @@ template&lt;template&lt; size_t, size_t, bool &gt; class T, size_t W, size_t H, 
 
 </div>
 </div>
-<a id="a0c1f024bceac5e280aef80485f00062b" name="a0c1f024bceac5e280aef80485f00062b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0c1f024bceac5e280aef80485f00062b">&#9670;&#160;</a></span>fill_rect() <span class="overload">[1/2]</span></h2>
+<a id="a10cc886545bd2190370fc29e578bf837" name="a10cc886545bd2190370fc29e578bf837"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a10cc886545bd2190370fc29e578bf837">&#9670;&#160;</a></span>fill_rect() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1604,12 +1805,8 @@ template&lt;template&lt; size_t, size_t, bool &gt; class T, size_t W, size_t H, 
         <tr>
           <td class="memname">void <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, GR &gt;::fill_rect </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="structconstixel_1_1rect.html">rect</a>&lt; int32_t &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rect</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramtype">const struct <a class="el" href="structconstixel_1_1draw__rect.html">draw_rect</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>d</em></span></td><td>)</td>
           <td></td>
-          <td class="paramtype">uint8_t</td>          <td class="paramname"><span class="paramname"><em>col</em></span>&#160;)</td>
         </tr>
       </table>
   </td>
@@ -1620,12 +1817,11 @@ template&lt;template&lt; size_t, size_t, bool &gt; class T, size_t W, size_t H, 
 </div><div class="memdoc">
 
 <p>Fill a rectangle with the specified color. Example: </p>
-<div class="fragment"><div class="line"><a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#a2e0999de3b387eaeeccf90f8f39d1321">fill_rect</a>({.x=0, .y=0, .w=320, .h=240}, constixel::color::WHITE, 2);</div>
-<div class="ttc" id="aclassconstixel_1_1image_html_a2e0999de3b387eaeeccf90f8f39d1321"><div class="ttname"><a href="#a2e0999de3b387eaeeccf90f8f39d1321">constixel::image::fill_rect</a></div><div class="ttdeci">constexpr void fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col)</div><div class="ttdoc">Fill a rectangle with the specified color. Example:</div><div class="ttdef"><b>Definition</b> constixel.hpp:2600</div></div>
+<div class="fragment"><div class="line"><a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#a2e0999de3b387eaeeccf90f8f39d1321">fill_rect</a>({.x=0, .y=0, .w=320, .h=240, .col=constixel::color::WHITE});</div>
+<div class="ttc" id="aclassconstixel_1_1image_html_a2e0999de3b387eaeeccf90f8f39d1321"><div class="ttname"><a href="#a2e0999de3b387eaeeccf90f8f39d1321">constixel::image::fill_rect</a></div><div class="ttdeci">constexpr void fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col)</div><div class="ttdoc">Fill a rectangle with the specified color. Example:</div><div class="ttdef"><b>Definition</b> constixel.hpp:2725</div></div>
 </div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">rect</td><td>Rectangle containing the line coordinates in pixels. </td></tr>
-    <tr><td class="paramname">col</td><td>Color palette index to use. </td></tr>
+    <tr><td class="paramname">d</td><td><a class="el" href="structconstixel_1_1draw__rect.html">draw_rect</a> initializer struct </td></tr>
   </table>
   </dd>
 </dl>
@@ -1682,8 +1878,8 @@ template&lt;template&lt; size_t, size_t, bool &gt; class T, size_t W, size_t H, 
   <table class="params">
     <tr><td class="paramname">x</td><td>Starting X-coordinate in pixels. </td></tr>
     <tr><td class="paramname">y</td><td>Starting Y-coordinate in pixels. </td></tr>
-    <tr><td class="paramname">w</td><td>Sidth of the rectangle in pixels. </td></tr>
-    <tr><td class="paramname">h</td><td>Seight of the rectangle in pixels. </td></tr>
+    <tr><td class="paramname">w</td><td>Width of the rectangle in pixels. </td></tr>
+    <tr><td class="paramname">h</td><td>Height of the rectangle in pixels. </td></tr>
     <tr><td class="paramname">col</td><td>Color palette index to use. </td></tr>
   </table>
   </dd>
@@ -1691,8 +1887,8 @@ template&lt;template&lt; size_t, size_t, bool &gt; class T, size_t W, size_t H, 
 
 </div>
 </div>
-<a id="a341b2854efc4a73ecf118ae6ca762061" name="a341b2854efc4a73ecf118ae6ca762061"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a341b2854efc4a73ecf118ae6ca762061">&#9670;&#160;</a></span>fill_round_rect() <span class="overload">[1/2]</span></h2>
+<a id="af5b7a5f0bfbb04ab4193751b7a11397f" name="af5b7a5f0bfbb04ab4193751b7a11397f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af5b7a5f0bfbb04ab4193751b7a11397f">&#9670;&#160;</a></span>fill_round_rect() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1705,17 +1901,8 @@ template&lt;template&lt; size_t, size_t, bool &gt; class T, size_t W, size_t H, 
         <tr>
           <td class="memname">void <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, GR &gt;::fill_round_rect </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="structconstixel_1_1rect.html">rect</a>&lt; int32_t &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rect</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramtype">const struct <a class="el" href="structconstixel_1_1draw__round__rect.html">draw_round_rect</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>d</em></span></td><td>)</td>
           <td></td>
-          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>radius</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint8_t</td>          <td class="paramname"><span class="paramname"><em>col</em></span>&#160;)</td>
         </tr>
       </table>
   </td>
@@ -1726,13 +1913,11 @@ template&lt;template&lt; size_t, size_t, bool &gt; class T, size_t W, size_t H, 
 </div><div class="memdoc">
 
 <p>Fill a rounded rectangle with the specified color. Example: </p>
-<div class="fragment"><div class="line"><a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#a02772d62ea9d1565a55ff08a1c492b42">fill_round_rect</a>({.x=0, .y=0, .w=200, .h=100}, 15, constixel::color::WHITE);</div>
-<div class="ttc" id="aclassconstixel_1_1image_html_a02772d62ea9d1565a55ff08a1c492b42"><div class="ttname"><a href="#a02772d62ea9d1565a55ff08a1c492b42">constixel::image::fill_round_rect</a></div><div class="ttdeci">constexpr void fill_round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col)</div><div class="ttdoc">Fill a rounded rectangle with the specified color. Example:</div><div class="ttdef"><b>Definition</b> constixel.hpp:2825</div></div>
+<div class="fragment"><div class="line"><a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#a02772d62ea9d1565a55ff08a1c492b42">fill_round_rect</a>({.x=0, .y=0, .w=200, .h=100, .r=15, .col=constixel::color::WHITE});</div>
+<div class="ttc" id="aclassconstixel_1_1image_html_a02772d62ea9d1565a55ff08a1c492b42"><div class="ttname"><a href="#a02772d62ea9d1565a55ff08a1c492b42">constixel::image::fill_round_rect</a></div><div class="ttdeci">constexpr void fill_round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col)</div><div class="ttdoc">Fill a rounded rectangle with the specified color. Example:</div><div class="ttdef"><b>Definition</b> constixel.hpp:2998</div></div>
 </div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">rect</td><td>Rectangle containing the line coordinates in pixels. </td></tr>
-    <tr><td class="paramname">radius</td><td>Radius of the rounded corners. </td></tr>
-    <tr><td class="paramname">col</td><td>Color palette index to use. </td></tr>
+    <tr><td class="paramname">d</td><td><a class="el" href="structconstixel_1_1draw__round__rect.html">draw_round_rect</a> initializer struct </td></tr>
   </table>
   </dd>
 </dl>
@@ -1804,8 +1989,8 @@ template&lt;template&lt; size_t, size_t, bool &gt; class T, size_t W, size_t H, 
 
 </div>
 </div>
-<a id="a2e110e98bb296ce45e8a3a516c90258e" name="a2e110e98bb296ce45e8a3a516c90258e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2e110e98bb296ce45e8a3a516c90258e">&#9670;&#160;</a></span>fill_round_rect_aa() <span class="overload">[1/2]</span></h2>
+<a id="aae4eb04749a064295c79fd7d0ddb2f62" name="aae4eb04749a064295c79fd7d0ddb2f62"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aae4eb04749a064295c79fd7d0ddb2f62">&#9670;&#160;</a></span>fill_round_rect_aa() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1818,17 +2003,8 @@ template&lt;template&lt; size_t, size_t, bool &gt; class T, size_t W, size_t H, 
         <tr>
           <td class="memname">void <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, GR &gt;::fill_round_rect_aa </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="structconstixel_1_1rect.html">rect</a>&lt; int32_t &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rect</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramtype">const struct <a class="el" href="structconstixel_1_1draw__round__rect.html">draw_round_rect</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>d</em></span></td><td>)</td>
           <td></td>
-          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>radius</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint8_t</td>          <td class="paramname"><span class="paramname"><em>col</em></span>&#160;)</td>
         </tr>
       </table>
   </td>
@@ -1839,13 +2015,11 @@ template&lt;template&lt; size_t, size_t, bool &gt; class T, size_t W, size_t H, 
 </div><div class="memdoc">
 
 <p>Fill a rounded rectangle using antialiasing with the specified color. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported. </p>
-<div class="fragment"><div class="line"><a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#ae4cd116554f8d0645351fcb48cdba199">fill_round_rect_aa</a>({.x=0, .y=0, .w=200, .h=100}, 15, constixel::color::WHITE);</div>
-<div class="ttc" id="aclassconstixel_1_1image_html_ae4cd116554f8d0645351fcb48cdba199"><div class="ttname"><a href="#ae4cd116554f8d0645351fcb48cdba199">constixel::image::fill_round_rect_aa</a></div><div class="ttdeci">constexpr void fill_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col)</div><div class="ttdoc">Fill a rounded rectangle using antialiasing with the specified color. Only format_8bit targets are su...</div><div class="ttdef"><b>Definition</b> constixel.hpp:2865</div></div>
+<div class="fragment"><div class="line"><a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#ae4cd116554f8d0645351fcb48cdba199">fill_round_rect_aa</a>({.x=0, .y=0, .w=200, .h=100, .r=15, .col=constixel::color::WHITE, .sw=8});</div>
+<div class="ttc" id="aclassconstixel_1_1image_html_ae4cd116554f8d0645351fcb48cdba199"><div class="ttname"><a href="#ae4cd116554f8d0645351fcb48cdba199">constixel::image::fill_round_rect_aa</a></div><div class="ttdeci">constexpr void fill_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col)</div><div class="ttdoc">Fill a rounded rectangle using antialiasing with the specified color. Only format_8bit targets are su...</div><div class="ttdef"><b>Definition</b> constixel.hpp:3036</div></div>
 </div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">rect</td><td>Rectangle containing the line coordinates in pixels. </td></tr>
-    <tr><td class="paramname">radius</td><td>Radius of the rounded corners. </td></tr>
-    <tr><td class="paramname">col</td><td>Color palette index to use. </td></tr>
+    <tr><td class="paramname">d</td><td><a class="el" href="structconstixel_1_1draw__round__rect.html">draw_round_rect</a> initializer struct </td></tr>
   </table>
   </dd>
 </dl>
@@ -2024,8 +2198,43 @@ template&lt;template&lt; size_t, size_t, bool &gt; class T, size_t W, size_t H, 
 
 </div>
 </div>
+<a id="ae2703a3be2cac7bbb6a384e85a75bec9" name="ae2703a3be2cac7bbb6a384e85a75bec9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae2703a3be2cac7bbb6a384e85a75bec9">&#9670;&#160;</a></span>plot() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;template&lt; size_t, size_t, bool &gt; class T, size_t W, size_t H, bool GR = false&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, GR &gt;::plot </td>
+          <td>(</td>
+          <td class="paramtype">const struct <a class="el" href="structconstixel_1_1plot.html">plot</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>p</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Plot a single pixel at the specified coordinates using the supplied color. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">p</td><td><a class="el" href="structconstixel_1_1plot.html">plot</a> initializer struct </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a49a3b2bc8cc5638be32156c504ea43b4" name="a49a3b2bc8cc5638be32156c504ea43b4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a49a3b2bc8cc5638be32156c504ea43b4">&#9670;&#160;</a></span>plot()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a49a3b2bc8cc5638be32156c504ea43b4">&#9670;&#160;</a></span>plot() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2102,7 +2311,7 @@ template&lt;typename F&gt; </div>
 <div class="line"><a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#a3dc0f83153adf9419b9fbd62a0ef3851">png</a>([=](<span class="keywordtype">char</span> ch) <span class="keyword">mutable</span> {</div>
 <div class="line">   some_container.push_back(ch);</div>
 <div class="line">});</div>
-<div class="ttc" id="aclassconstixel_1_1image_html_a3dc0f83153adf9419b9fbd62a0ef3851"><div class="ttname"><a href="#a3dc0f83153adf9419b9fbd62a0ef3851">constixel::image::png</a></div><div class="ttdeci">constexpr void png(F &amp;&amp;char_out) const</div><div class="ttdoc">Convert the current instance into a png image. Typically an implementation looks like this:</div><div class="ttdef"><b>Definition</b> constixel.hpp:3171</div></div>
+<div class="ttc" id="aclassconstixel_1_1image_html_a3dc0f83153adf9419b9fbd62a0ef3851"><div class="ttname"><a href="#a3dc0f83153adf9419b9fbd62a0ef3851">constixel::image::png</a></div><div class="ttdeci">constexpr void png(F &amp;&amp;char_out) const</div><div class="ttdoc">Convert the current instance into a png image. Typically an implementation looks like this:</div><div class="ttdef"><b>Definition</b> constixel.hpp:3336</div></div>
 </div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">char_out</td><td>A lambda function which consumes the png image data one byte at a time. </td></tr>
@@ -2214,7 +2423,7 @@ template&lt;size_t S = 1, typename F&gt; </div>
 <div class="line"><a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#a84609d68930d86392cd25336f7f8edf6">sixel</a>([=](<span class="keywordtype">char</span> ch) <span class="keyword">mutable</span> {</div>
 <div class="line">   some_container.push_back(ch);</div>
 <div class="line">});</div>
-<div class="ttc" id="aclassconstixel_1_1image_html_a84609d68930d86392cd25336f7f8edf6"><div class="ttname"><a href="#a84609d68930d86392cd25336f7f8edf6">constixel::image::sixel</a></div><div class="ttdeci">constexpr void sixel(F &amp;&amp;char_out) const</div><div class="ttdoc">Convert the current instance into a sixel stream. Typically an implementation looks like this:</div><div class="ttdef"><b>Definition</b> constixel.hpp:3189</div></div>
+<div class="ttc" id="aclassconstixel_1_1image_html_a84609d68930d86392cd25336f7f8edf6"><div class="ttname"><a href="#a84609d68930d86392cd25336f7f8edf6">constixel::image::sixel</a></div><div class="ttdeci">constexpr void sixel(F &amp;&amp;char_out) const</div><div class="ttdoc">Convert the current instance into a sixel stream. Typically an implementation looks like this:</div><div class="ttdef"><b>Definition</b> constixel.hpp:3354</div></div>
 </div><!-- fragment --><dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">S</td><td>scale of sixel output. </td></tr>
@@ -2390,8 +2599,8 @@ template&lt;typename FONT, bool KERNING = false&gt; </div>
 <div class="line">...</div>
 <div class="line">    int32_t <a class="code hl_function" href="#a1af7c7e3f6c42e9adefbcb2845628fd5">width</a> = <a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#a8cb11d537b5e60b0b8c7c52fbc97538a">string_width</a>&lt;constixel::some_font_aa&gt;();</div>
 <div class="line">...</div>
-<div class="ttc" id="aclassconstixel_1_1image_html_a1af7c7e3f6c42e9adefbcb2845628fd5"><div class="ttname"><a href="#a1af7c7e3f6c42e9adefbcb2845628fd5">constixel::image::width</a></div><div class="ttdeci">static constexpr int32_t width()</div><div class="ttdoc">Width in pixels of the image.</div><div class="ttdef"><b>Definition</b> constixel.hpp:2067</div></div>
-<div class="ttc" id="aclassconstixel_1_1image_html_a8cb11d537b5e60b0b8c7c52fbc97538a"><div class="ttname"><a href="#a8cb11d537b5e60b0b8c7c52fbc97538a">constixel::image::string_width</a></div><div class="ttdeci">constexpr int32_t string_width(const char *str, size_t character_count=std::numeric_limits&lt; size_t &gt;::max(), size_t *character_actual=nullptr)</div><div class="ttdoc">Return the width of a string using the specified font in the template parameter. Typical use:</div><div class="ttdef"><b>Definition</b> constixel.hpp:2369</div></div>
+<div class="ttc" id="aclassconstixel_1_1image_html_a1af7c7e3f6c42e9adefbcb2845628fd5"><div class="ttname"><a href="#a1af7c7e3f6c42e9adefbcb2845628fd5">constixel::image::width</a></div><div class="ttdeci">static constexpr int32_t width()</div><div class="ttdoc">Width in pixels of the image.</div><div class="ttdef"><b>Definition</b> constixel.hpp:2124</div></div>
+<div class="ttc" id="aclassconstixel_1_1image_html_a8cb11d537b5e60b0b8c7c52fbc97538a"><div class="ttname"><a href="#a8cb11d537b5e60b0b8c7c52fbc97538a">constixel::image::string_width</a></div><div class="ttdeci">constexpr int32_t string_width(const char *str, size_t character_count=std::numeric_limits&lt; size_t &gt;::max(), size_t *character_actual=nullptr)</div><div class="ttdoc">Return the width of a string using the specified font in the template parameter. Typical use:</div><div class="ttdef"><b>Definition</b> constixel.hpp:2432</div></div>
 </div><!-- fragment --><dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">FONT</td><td>The font struct name. </td></tr>
@@ -2411,8 +2620,45 @@ template&lt;typename FONT, bool KERNING = false&gt; </div>
 
 </div>
 </div>
+<a id="aa8a3006272ac6ec0c3a04c92d294a1f6" name="aa8a3006272ac6ec0c3a04c92d294a1f6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa8a3006272ac6ec0c3a04c92d294a1f6">&#9670;&#160;</a></span>stroke_circle() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;template&lt; size_t, size_t, bool &gt; class T, size_t W, size_t H, bool GR = false&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, GR &gt;::stroke_circle </td>
+          <td>(</td>
+          <td class="paramtype">const struct <a class="el" href="structconstixel_1_1draw__circle.html">draw_circle</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>d</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Stroke a circle with the specified radius and color. Example: </p>
+<div class="fragment"><div class="line"><a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#a9e07a568848d68505fdab42af56cdc4b">stroke_circle</a>({.x=64, .y=64, .r=32, .col=constixel::color::WHITE, .sw=2});</div>
+<div class="ttc" id="aclassconstixel_1_1image_html_a9e07a568848d68505fdab42af56cdc4b"><div class="ttname"><a href="#a9e07a568848d68505fdab42af56cdc4b">constixel::image::stroke_circle</a></div><div class="ttdeci">constexpr void stroke_circle(int32_t cx, int32_t cy, int32_t radius, uint8_t col, int32_t stroke_width=1)</div><div class="ttdoc">Stroke a circle with the specified radius and color. Example:</div><div class="ttdef"><b>Definition</b> constixel.hpp:2840</div></div>
+</div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">d</td><td><a class="el" href="structconstixel_1_1draw__circle.html">draw_circle</a> initializer struct </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a9e07a568848d68505fdab42af56cdc4b" name="a9e07a568848d68505fdab42af56cdc4b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9e07a568848d68505fdab42af56cdc4b">&#9670;&#160;</a></span>stroke_circle()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a9e07a568848d68505fdab42af56cdc4b">&#9670;&#160;</a></span>stroke_circle() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2457,7 +2703,6 @@ template&lt;template&lt; size_t, size_t, bool &gt; class T, size_t W, size_t H, 
 
 <p>Stroke a circle with the specified radius and color. Example: </p>
 <div class="fragment"><div class="line"><a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#a9e07a568848d68505fdab42af56cdc4b">stroke_circle</a>(64, 64, 32, 4, constixel::color::WHITE);</div>
-<div class="ttc" id="aclassconstixel_1_1image_html_a9e07a568848d68505fdab42af56cdc4b"><div class="ttname"><a href="#a9e07a568848d68505fdab42af56cdc4b">constixel::image::stroke_circle</a></div><div class="ttdeci">constexpr void stroke_circle(int32_t cx, int32_t cy, int32_t radius, uint8_t col, int32_t stroke_width=1)</div><div class="ttdoc">Stroke a circle with the specified radius and color. Example:</div><div class="ttdef"><b>Definition</b> constixel.hpp:2705</div></div>
 </div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">cx</td><td>Center X-coordinate of the circle in pixels. </td></tr>
@@ -2471,8 +2716,45 @@ template&lt;template&lt; size_t, size_t, bool &gt; class T, size_t W, size_t H, 
 
 </div>
 </div>
+<a id="a8dd80e8e9ac9405acce5dc83c424bf85" name="a8dd80e8e9ac9405acce5dc83c424bf85"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8dd80e8e9ac9405acce5dc83c424bf85">&#9670;&#160;</a></span>stroke_circle_aa() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;template&lt; size_t, size_t, bool &gt; class T, size_t W, size_t H, bool GR = false&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, GR &gt;::stroke_circle_aa </td>
+          <td>(</td>
+          <td class="paramtype">const struct <a class="el" href="structconstixel_1_1draw__circle.html">draw_circle</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>d</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Stroke a circle using antialiasing with the specified radius and color. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported. Example: </p>
+<div class="fragment"><div class="line"><a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#ac5cdc7a541640ed3cd54da06af19ada0">stroke_circle_aa</a>({.x=64, .y=64, .r=32, .col=constixel::color::WHITE, .sw=2});</div>
+<div class="ttc" id="aclassconstixel_1_1image_html_ac5cdc7a541640ed3cd54da06af19ada0"><div class="ttname"><a href="#ac5cdc7a541640ed3cd54da06af19ada0">constixel::image::stroke_circle_aa</a></div><div class="ttdeci">constexpr void stroke_circle_aa(int32_t cx, int32_t cy, int32_t radius, uint8_t col, int32_t stroke_width=1)</div><div class="ttdoc">Stroke a circle using antialiasing with the specified radius and color. Only format_8bit targets are ...</div><div class="ttdef"><b>Definition</b> constixel.hpp:2879</div></div>
+</div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">d</td><td><a class="el" href="structconstixel_1_1draw__circle.html">draw_circle</a> initializer struct </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="ac5cdc7a541640ed3cd54da06af19ada0" name="ac5cdc7a541640ed3cd54da06af19ada0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac5cdc7a541640ed3cd54da06af19ada0">&#9670;&#160;</a></span>stroke_circle_aa()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ac5cdc7a541640ed3cd54da06af19ada0">&#9670;&#160;</a></span>stroke_circle_aa() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2516,8 +2798,7 @@ template&lt;template&lt; size_t, size_t, bool &gt; class T, size_t W, size_t H, 
 </div><div class="memdoc">
 
 <p>Stroke a circle using antialiasing with the specified radius and color. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported. Example: </p>
-<div class="fragment"><div class="line"><a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#ac5cdc7a541640ed3cd54da06af19ada0">stroke_circle_aa</a>(64, 64, 32, 4, constixel::color::WHITE);</div>
-<div class="ttc" id="aclassconstixel_1_1image_html_ac5cdc7a541640ed3cd54da06af19ada0"><div class="ttname"><a href="#ac5cdc7a541640ed3cd54da06af19ada0">constixel::image::stroke_circle_aa</a></div><div class="ttdeci">constexpr void stroke_circle_aa(int32_t cx, int32_t cy, int32_t radius, uint8_t col, int32_t stroke_width=1)</div><div class="ttdoc">Stroke a circle using antialiasing with the specified radius and color. Only format_8bit targets are ...</div><div class="ttdef"><b>Definition</b> constixel.hpp:2731</div></div>
+<div class="fragment"><div class="line"><a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#ac5cdc7a541640ed3cd54da06af19ada0">stroke_circle_aa</a>(64, 64, 32, constixel::color::WHITE, 2);</div>
 </div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">cx</td><td>Center X-coordinate of the circle in pixels. </td></tr>
@@ -2531,8 +2812,8 @@ template&lt;template&lt; size_t, size_t, bool &gt; class T, size_t W, size_t H, 
 
 </div>
 </div>
-<a id="a201d038bdad17258ba0352d77bee93b1" name="a201d038bdad17258ba0352d77bee93b1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a201d038bdad17258ba0352d77bee93b1">&#9670;&#160;</a></span>stroke_rect() <span class="overload">[1/2]</span></h2>
+<a id="a38c1919d6860ff88f0f026e18631f7ed" name="a38c1919d6860ff88f0f026e18631f7ed"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a38c1919d6860ff88f0f026e18631f7ed">&#9670;&#160;</a></span>stroke_rect() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2545,17 +2826,8 @@ template&lt;template&lt; size_t, size_t, bool &gt; class T, size_t W, size_t H, 
         <tr>
           <td class="memname">void <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, GR &gt;::stroke_rect </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="structconstixel_1_1rect.html">rect</a>&lt; int32_t &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rect</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramtype">const struct <a class="el" href="structconstixel_1_1draw__rect.html">draw_rect</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>d</em></span></td><td>)</td>
           <td></td>
-          <td class="paramtype">uint8_t</td>          <td class="paramname"><span class="paramname"><em>col</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>stroke_width</em></span><span class="paramdefsep"> = </span><span class="paramdefval">1</span>&#160;)</td>
         </tr>
       </table>
   </td>
@@ -2566,13 +2838,11 @@ template&lt;template&lt; size_t, size_t, bool &gt; class T, size_t W, size_t H, 
 </div><div class="memdoc">
 
 <p>Draw a stroked rectangle with the specified color and stroke width. Example: </p>
-<div class="fragment"><div class="line"><a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#aa3240172e706ce7dbfff173324f8ad84">stroke_rect</a>({.x=0, .y=0, .w=320, .h=240}, constixel::color::WHITE, 2);</div>
-<div class="ttc" id="aclassconstixel_1_1image_html_aa3240172e706ce7dbfff173324f8ad84"><div class="ttname"><a href="#aa3240172e706ce7dbfff173324f8ad84">constixel::image::stroke_rect</a></div><div class="ttdeci">constexpr void stroke_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col, int32_t stroke_width=1)</div><div class="ttdoc">Draw a stroked rectangle with the specified color and stroke width. Example:</div><div class="ttdef"><b>Definition</b> constixel.hpp:2646</div></div>
+<div class="fragment"><div class="line"><a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#aa3240172e706ce7dbfff173324f8ad84">stroke_rect</a>({.x=0, .y=0, .w=320, .h=240, .col=constixel::color::WHITE, .sw=2});</div>
+<div class="ttc" id="aclassconstixel_1_1image_html_aa3240172e706ce7dbfff173324f8ad84"><div class="ttname"><a href="#aa3240172e706ce7dbfff173324f8ad84">constixel::image::stroke_rect</a></div><div class="ttdeci">constexpr void stroke_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col, int32_t stroke_width=1)</div><div class="ttdoc">Draw a stroked rectangle with the specified color and stroke width. Example:</div><div class="ttdef"><b>Definition</b> constixel.hpp:2770</div></div>
 </div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">rect</td><td>Rectangle containing the line coordinates in pixels. </td></tr>
-    <tr><td class="paramname">col</td><td>Color palette index to use. </td></tr>
-    <tr><td class="paramname">stroke_width</td><td>Width of the stroke in pixels. </td></tr>
+    <tr><td class="paramname">d</td><td><a class="el" href="structconstixel_1_1draw__rect.html">draw_rect</a> initializer struct </td></tr>
   </table>
   </dd>
 </dl>
@@ -2644,8 +2914,8 @@ template&lt;template&lt; size_t, size_t, bool &gt; class T, size_t W, size_t H, 
 
 </div>
 </div>
-<a id="abada67634f5ba3f574c12551092859c4" name="abada67634f5ba3f574c12551092859c4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abada67634f5ba3f574c12551092859c4">&#9670;&#160;</a></span>stroke_round_rect() <span class="overload">[1/2]</span></h2>
+<a id="a4b22830705c2e2945fb58b704f93e9cc" name="a4b22830705c2e2945fb58b704f93e9cc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4b22830705c2e2945fb58b704f93e9cc">&#9670;&#160;</a></span>stroke_round_rect() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2658,22 +2928,8 @@ template&lt;template&lt; size_t, size_t, bool &gt; class T, size_t W, size_t H, 
         <tr>
           <td class="memname">void <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, GR &gt;::stroke_round_rect </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="structconstixel_1_1rect.html">rect</a>&lt; int32_t &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rect</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramtype">const struct <a class="el" href="structconstixel_1_1draw__round__rect.html">draw_round_rect</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>d</em></span></td><td>)</td>
           <td></td>
-          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>radius</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint8_t</td>          <td class="paramname"><span class="paramname"><em>col</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>stroke_width</em></span><span class="paramdefsep"> = </span><span class="paramdefval">1</span>&#160;)</td>
         </tr>
       </table>
   </td>
@@ -2684,14 +2940,11 @@ template&lt;template&lt; size_t, size_t, bool &gt; class T, size_t W, size_t H, 
 </div><div class="memdoc">
 
 <p>Stroke a rounded rectangle with the specified color. Example: </p>
-<div class="fragment"><div class="line"><a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#a55ed74acbf447e1a4e43dfbe344764a0">stroke_round_rect</a>({.x=0, .y=0, .w=200, .h=100}, 15, constixel::color::WHITE);</div>
-<div class="ttc" id="aclassconstixel_1_1image_html_a55ed74acbf447e1a4e43dfbe344764a0"><div class="ttname"><a href="#a55ed74acbf447e1a4e43dfbe344764a0">constixel::image::stroke_round_rect</a></div><div class="ttdeci">constexpr void stroke_round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col, int32_t stroke_width=1)</div><div class="ttdoc">Stroke a rounded rectangle with the specified color. Example:</div><div class="ttdef"><b>Definition</b> constixel.hpp:2775</div></div>
+<div class="fragment"><div class="line"><a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#a55ed74acbf447e1a4e43dfbe344764a0">stroke_round_rect</a>({.x=0, .y=0, .w=200, .h=100, .r=15, .col=constixel::color::WHITE, .sw=8});</div>
+<div class="ttc" id="aclassconstixel_1_1image_html_a55ed74acbf447e1a4e43dfbe344764a0"><div class="ttname"><a href="#a55ed74acbf447e1a4e43dfbe344764a0">constixel::image::stroke_round_rect</a></div><div class="ttdeci">constexpr void stroke_round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col, int32_t stroke_width=1)</div><div class="ttdoc">Stroke a rounded rectangle with the specified color. Example:</div><div class="ttdef"><b>Definition</b> constixel.hpp:2951</div></div>
 </div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">rect</td><td>Rectangle containing the line coordinates in pixels. </td></tr>
-    <tr><td class="paramname">radius</td><td>Radius of the rounded corners in pixels. </td></tr>
-    <tr><td class="paramname">col</td><td>Color palette index to use. </td></tr>
-    <tr><td class="paramname">stroke_width</td><td>Width of the stroke in pixels. </td></tr>
+    <tr><td class="paramname">d</td><td><a class="el" href="structconstixel_1_1draw__round__rect.html">draw_round_rect</a> initializer struct </td></tr>
   </table>
   </dd>
 </dl>
@@ -2769,8 +3022,8 @@ template&lt;template&lt; size_t, size_t, bool &gt; class T, size_t W, size_t H, 
 
 </div>
 </div>
-<a id="abd5642977c08824f89731c8b67c26b02" name="abd5642977c08824f89731c8b67c26b02"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abd5642977c08824f89731c8b67c26b02">&#9670;&#160;</a></span>stroke_round_rect_aa() <span class="overload">[1/2]</span></h2>
+<a id="a207d3aa3f7adba6850e62a7564739204" name="a207d3aa3f7adba6850e62a7564739204"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a207d3aa3f7adba6850e62a7564739204">&#9670;&#160;</a></span>stroke_round_rect_aa() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2783,22 +3036,8 @@ template&lt;template&lt; size_t, size_t, bool &gt; class T, size_t W, size_t H, 
         <tr>
           <td class="memname">void <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, GR &gt;::stroke_round_rect_aa </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="structconstixel_1_1rect.html">rect</a>&lt; int32_t &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rect</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramtype">const struct <a class="el" href="structconstixel_1_1draw__round__rect.html">draw_round_rect</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>d</em></span></td><td>)</td>
           <td></td>
-          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>radius</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint8_t</td>          <td class="paramname"><span class="paramname"><em>col</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>stroke_width</em></span><span class="paramdefsep"> = </span><span class="paramdefval">1</span>&#160;)</td>
         </tr>
       </table>
   </td>
@@ -2809,14 +3048,11 @@ template&lt;template&lt; size_t, size_t, bool &gt; class T, size_t W, size_t H, 
 </div><div class="memdoc">
 
 <p>Stroke a rounded rectangle using antialiasing with the specified color. Example: </p>
-<div class="fragment"><div class="line"><a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#acab1b5123086adfbdb50693fe8f507d4">stroke_round_rect_aa</a>({.x=0, .y=0, .w=200, .h=100}, 15, constixel::color::WHITE);</div>
-<div class="ttc" id="aclassconstixel_1_1image_html_acab1b5123086adfbdb50693fe8f507d4"><div class="ttname"><a href="#acab1b5123086adfbdb50693fe8f507d4">constixel::image::stroke_round_rect_aa</a></div><div class="ttdeci">constexpr void stroke_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col, int32_t stroke_width=1)</div><div class="ttdoc">Stroke a rounded rectangle using antialiasing with the specified color. Example:</div><div class="ttdef"><b>Definition</b> constixel.hpp:2906</div></div>
+<div class="fragment"><div class="line"><a class="code hl_class" href="classconstixel_1_1image.html">image</a>.<a class="code hl_function" href="#acab1b5123086adfbdb50693fe8f507d4">stroke_round_rect_aa</a>({.x=0, .y=0, .w=200, .h=100, .r=15, .col=constixel::color::WHITE, .sw=8});</div>
+<div class="ttc" id="aclassconstixel_1_1image_html_acab1b5123086adfbdb50693fe8f507d4"><div class="ttname"><a href="#acab1b5123086adfbdb50693fe8f507d4">constixel::image::stroke_round_rect_aa</a></div><div class="ttdeci">constexpr void stroke_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col, int32_t stroke_width=1)</div><div class="ttdoc">Stroke a rounded rectangle using antialiasing with the specified color. Example:</div><div class="ttdef"><b>Definition</b> constixel.hpp:3075</div></div>
 </div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">rect</td><td>Rectangle containing the line coordinates in pixels. </td></tr>
-    <tr><td class="paramname">radius</td><td>Radius of the rounded corners in pixels. </td></tr>
-    <tr><td class="paramname">col</td><td>Color palette index to use. </td></tr>
-    <tr><td class="paramname">stroke_width</td><td>Width of the stroke in pixels. </td></tr>
+    <tr><td class="paramname">d</td><td><a class="el" href="structconstixel_1_1draw__round__rect.html">draw_round_rect</a> initializer struct </td></tr>
   </table>
   </dd>
 </dl>

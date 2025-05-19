@@ -102,7 +102,8 @@
         "xstring": "cpp",
         "xtr1common": "cpp",
         "xtree": "cpp",
-        "xutility": "cpp"
+        "xutility": "cpp",
+        "__config": "cpp"
     },
     "cmake.sourceDirectory": "C:/git/constixel",
     "editor.autoClosingBrackets": "never",

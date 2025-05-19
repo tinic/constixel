@@ -1995,6 +1995,74 @@ enum device_format {
 };
 
 /**
+ * A struct which can be passed to: plot().
+ */
+struct plot {
+    int32_t x;                  /**< X coordinate in pixels. */
+    int32_t y;                  /**< Y coordinate in pixels. */
+    uint8_t col = color::WHITE; /**< Color palette index to use. */
+};
+
+/**
+ * A struct which can be passed to: draw_line(), draw_line_aa().
+ */
+struct draw_line {
+    int32_t x0;                 /**< First X coordinate in pixels. */
+    int32_t y0;                 /**< First Y coordinate in pixels. */
+    int32_t x1;                 /**< Second X coordinate in pixels. */
+    int32_t y1;                 /**< Second Y coordinate in pixels. */
+    uint8_t col = color::WHITE; /**< Color palette index to use. */
+    int32_t sw = 1;             /**< Width of the stroke in pixels. */
+};
+
+/**
+ * A struct which can be passed to: fill_rect(), stroke_rect(), .
+ */
+struct draw_rect {
+    int32_t x;                  /**< X coordinate in pixels. */
+    int32_t y;                  /**< Y coordinate in pixels. */
+    int32_t w;                  /**< Width in pixels. */
+    int32_t h;                  /**< Height in pixels. */
+    uint8_t col = color::WHITE; /**< Color palette index to use. */
+    int32_t sw = 1;             /**< Width of the stroke in pixels. */
+};
+
+/**
+ * A struct which can be passed to: fill_circle(), stroke_circle(), fill_circle_aa(), stroke_circle_aa().
+ */
+struct draw_circle {
+    int32_t x;                  /**< Center X coordinate in pixels. */
+    int32_t y;                  /**< Center Y coordinate in pixels. */
+    int32_t r;                  /**< Radius of the circle in pixels. */
+    uint8_t col = color::WHITE; /**< Color palette index to use. */
+    int32_t sw = 1;             /**< Width of the stroke in pixels. */
+};
+
+/**
+ * A struct which can be passed to: fill_round_rect(), stroke_round_rect(), fill_round_rect_aa(),
+ * stroke_round_rect_aa().
+ */
+struct draw_round_rect {
+    int32_t x;                  /**< X coordinate in pixels. */
+    int32_t y;                  /**< Y coordinate in pixels. */
+    int32_t w;                  /**< Width in pixels. */
+    int32_t h;                  /**< Height in pixels. */
+    int32_t r;                  /**< Radius of the corners in pixels. */
+    uint8_t col = color::WHITE; /**< Color palette index to use. */
+    int32_t sw = 1;             /**< Width of the stroke in pixels. */
+};
+
+/**
+ * A struct which can be passed to: draw_string_mono(), draw_string_centered_mono().
+ */
+struct draw_string {
+    int32_t x;                  /**< X coordinate in pixels. */
+    int32_t y;                  /**< Y coordinate in pixels. */
+    const char *str = nullptr;  /**< UTF8 string */
+    uint8_t col = color::WHITE; /**< Color palette index to use. */
+};
+
+/**
  * @class image
  * @brief Core class of constixel. Holds a buffer of an image width a certain size and format. Typical use:
  *
@@ -2109,6 +2177,40 @@ class image {
     }
 
     /**
+     * \brief Return closest match in the color palette based on the supplied red, green and blue values.
+     * \param r Red value (0-255)
+     * \param g Green value (0-255)
+     * \param b Blue value (0-255)
+     * \return The closest matching color palette index.
+     */
+    [[nodiscard]] constexpr uint8_t get_nearest_color(uint8_t r, uint8_t g, uint8_t b) const {
+        return format.quant.nearest(r, g, b);
+    }
+
+    /**
+     * \brief Plot a single pixel at the specified coordinates using the supplied color.
+     * \param x X-coordinate in pixels.
+     * \param y Y-coordinate in pixels.
+     * \param col Color palette index to use.
+     */
+    constexpr void plot(int32_t x, int32_t y, uint8_t col) {
+        if (static_cast<uint32_t>(x) >= static_cast<uint32_t>(W) ||
+            static_cast<uint32_t>(y) >= static_cast<uint32_t>(H)) {
+            return;
+        }
+        T<W, H, GR>::plot(data, static_cast<uint32_t>(x), static_cast<uint32_t>(y), col);
+    }
+
+    /**
+     * \brief Plot a single pixel at the specified coordinates using the supplied color.
+     *
+     * \param p \ref plot initializer struct
+     */
+    constexpr void plot(const struct plot &p) {
+        plot(p.x, p.y, p.col);
+    }
+
+    /**
      * \brief Draw a line with the specified color and thickness. Example:
      *
      * \code{.cpp}
@@ -2186,15 +2288,13 @@ class image {
      * \brief Draw a line with the specified color and thickness. Example:
      *
      * \code{.cpp}
-     * image.draw_line({.x=0, .y=0, .w=200, .h=100}, constixel::color::WHITE, 2);
+     * image.draw_line({.x0=0, .y0=0, .x1=200, .y1=100, .col=color::WHITE, .sw=2});
      * \endcode
      *
-     * \param rect Rectangle containing the line coordinates in pixels.
-     * \param col Color palette index to use.
-     * \param stroke_width Width of the stroke in pixels.
+     * \param d \ref draw_line initializer struct
      */
-    constexpr void draw_line(const rect<int32_t> &rect, uint8_t col, int32_t stroke_width = 1) {
-        draw_line(rect.x, rect.y, rect.x + rect.w, rect.y + rect.h, col, stroke_width);
+    constexpr void draw_line(const struct draw_line &d) {
+        draw_line(d.x0, d.y0, d.x1, d.y1, d.col, d.sw);
     }
 
     /**
@@ -2302,39 +2402,13 @@ class image {
      * Example:
      *
      * \code{.cpp}
-     * image.draw_line_aa({.x=0, .y=0, .w=200, .h=100}, constixel::color::WHITE, 2);
+     * image.draw_line_aa({.x0=0, .y0=0, .x1=200, .y1=100, .col=color::WHITE});
      * \endcode
      *
-     * \param rect Rectangle containing the line coordinates in pixels.
-     * \param col Color palette index to use.
+     * \param d \ref draw_line initializer struct
      */
-    constexpr void draw_line_aa(const rect<int32_t> &rect, uint8_t col) {
-        draw_line_aa(rect.x, rect.y, rect.x + rect.w, rect.y + rect.h, col);
-    }
-
-    /**
-     * \brief Plot a single pixel at the specified coordinates using the supplied color.
-     * \param x X-coordinate in pixels.
-     * \param y Y-coordinate in pixels.
-     * \param col Color palette index to use.
-     */
-    constexpr void plot(int32_t x, int32_t y, uint8_t col) {
-        if (static_cast<uint32_t>(x) >= static_cast<uint32_t>(W) ||
-            static_cast<uint32_t>(y) >= static_cast<uint32_t>(H)) {
-            return;
-        }
-        T<W, H, GR>::plot(data, static_cast<uint32_t>(x), static_cast<uint32_t>(y), col);
-    }
-
-    /**
-     * \brief Return closest match in the color palette based on the supplied red, green and blue values.
-     * \param r Red value (0-255)
-     * \param g Green value (0-255)
-     * \param b Blue value (0-255)
-     * \return The closest matching color palette index.
-     */
-    [[nodiscard]] constexpr uint8_t get_nearest_color(uint8_t r, uint8_t g, uint8_t b) const {
-        return format.quant.nearest(r, g, b);
+    constexpr void draw_line_aa(const struct draw_line &d) {
+        draw_line_aa(d.x0, d.y0, d.x1, d.y1, d.col);
     }
 
     /**
@@ -2411,6 +2485,9 @@ class image {
                                        size_t character_count = std::numeric_limits<size_t>::max(),
                                        size_t *character_actual = nullptr) {
         static_assert(FONT::mono == true, "Can't use an antialiased font to draw mono/pixelized text.");
+        if (str == nullptr) {
+            return 0;
+        }
         size_t count = 0;
         while (*str != 0 && count++ < character_count) {
             uint32_t utf32 = 0;
@@ -2450,6 +2527,34 @@ class image {
         } else {
             return x;
         }
+    }
+
+    /**
+     * \brief Draw text at the specified coordinate. The template parameter selects which mono font to use. Only
+     * format_8bit targets are supported.
+
+     * \code{.cpp}
+     * #include "some_font_mono.h"
+     * ...
+     *     image.draw_string_mono<constixel::some_font_mono>({.x=0, .y=0, .str="MyText", .col=constixel::color::WHITE});
+     * ...
+     * \endcode
+     *
+     * \tparam FONT The font struct name.
+     * \tparam KERNING Boolean, use kerning information if available. Default to false.
+     * \tparam ROTATION Rotation around the x/y coordinate. Defaults to text_rotation::DEGREE_0. Can be
+     * text_rotation::DEGREE_0, text_rotation::DEGREE_90, text_rotation::DEGREE_180 or text_rotation::DEGREE_270
+     * \param d \ref draw_string initializer struct.
+     * \param character_count How many utf32 characters in the string should be drawn.
+     * \param character_actual How many utf32 characters in the string were drawn.
+     * \return Returns the new caret X-coordinate position. Pass this value to the next draw_string call to get
+     * continious text.
+     */
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+    constexpr int32_t draw_string_mono(const struct draw_string &d,
+                                       size_t character_count = std::numeric_limits<size_t>::max(),
+                                       size_t *character_actual = nullptr) {
+        draw_string_mono(d.x, d.y, d.str, d.col, character_count, character_actual);
     }
 
     /**
@@ -2506,6 +2611,9 @@ class image {
                                      size_t character_count = std::numeric_limits<size_t>::max(),
                                      size_t *character_actual = nullptr) {
         static_assert(FONT::mono == false, "Can't use a mono font to draw antialiased text.");
+        if (str == nullptr) {
+            return 0;
+        }
         size_t count = 0;
         while (*str != 0 && count++ < character_count) {
             uint32_t utf32 = 0;
@@ -2548,6 +2656,34 @@ class image {
     }
 
     /**
+     * \brief Draw antialiased text at the specified coordinate. The template parameter selects which antialiased font
+     * to use. Only format_8bit targets are supported. Typical use:
+     *
+     * \code{.cpp}
+     * #include "some_font_aa.h"
+     * ...
+     *     image.draw_string_aa<constixel::some_font_aa>({.x=0, .y=0, .str="MyText", .col=constixel::color::WHITE});
+     * ...
+     * \endcode
+     *
+     * \tparam FONT The font struct name.
+     * \tparam KERNING Boolean, use kerning information if available. Default to false.
+     * \tparam ROTATION Rotation around the x/y coordinate. Can be text_rotation::DEGREE_0, text_rotation::DEGREE_90,
+     * text_rotation::DEGREE_180 or text_rotation::DEGREE_270
+     * \param d \ref draw_string initializer struct.
+     * \param character_count How many utf32 characters in the string should be drawn.
+     * \param character_actual How many utf32 characters in the string were drawn.
+     * \return Returns the new caret X-coordinate position. Pass this value to the next draw_string call to get
+     * continious text.
+     */
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+    constexpr int32_t draw_string_aa(const struct draw_string &d,
+                                     size_t character_count = std::numeric_limits<size_t>::max(),
+                                     size_t *character_actual = nullptr) {
+        return draw_string_aa(d.x, d.y, d.str, d.col, character_count, character_actual);
+    }
+
+    /**
      * \brief Draw antialiased text centered at the specified coordinate. The template parameter selects which
      * antialiased font to use. Only format_8bit targets are supported. Typical use
      *
@@ -2582,8 +2718,8 @@ class image {
      *
      * \param x Starting X-coordinate in pixels.
      * \param y Starting Y-coordinate in pixels.
-     * \param w Sidth of the rectangle in pixels.
-     * \param h Seight of the rectangle in pixels.
+     * \param w Width of the rectangle in pixels.
+     * \param h Height of the rectangle in pixels.
      * \param col Color palette index to use.
      */
     constexpr void fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col) {
@@ -2608,14 +2744,13 @@ class image {
      * \brief Fill a rectangle with the specified color. Example:
      *
      * \code{.cpp}
-     * image.fill_rect({.x=0, .y=0, .w=320, .h=240}, constixel::color::WHITE, 2);
+     * image.fill_rect({.x=0, .y=0, .w=320, .h=240, .col=constixel::color::WHITE});
      * \endcode
      *
-     * \param rect Rectangle containing the line coordinates in pixels.
-     * \param col Color palette index to use.
+     * \param d \ref draw_rect initializer struct
      */
-    constexpr void fill_rect(const rect<int32_t> &rect, uint8_t col) {
-        fill_rect(rect.x, rect.y, rect.w, rect.h, col);
+    constexpr void fill_rect(const struct draw_rect &d) {
+        fill_rect(d.x, d.y, d.w, d.h, d.col);
     }
 
     /**
@@ -2647,15 +2782,13 @@ class image {
      * \brief Draw a stroked rectangle with the specified color and stroke width. Example:
      *
      * \code{.cpp}
-     * image.stroke_rect({.x=0, .y=0, .w=320, .h=240}, constixel::color::WHITE, 2);
+     * image.stroke_rect({.x=0, .y=0, .w=320, .h=240, .col=constixel::color::WHITE, .sw=2});
      * \endcode
      *
-     * \param rect Rectangle containing the line coordinates in pixels.
-     * \param col Color palette index to use.
-     * \param stroke_width Width of the stroke in pixels.
+     * \param d \ref draw_rect initializer struct
      */
-    constexpr void stroke_rect(const rect<int32_t> &rect, uint8_t col, int32_t stroke_width = 1) {
-        stroke_rect(rect.x, rect.y, rect.w, rect.h, col, stroke_width);
+    constexpr void stroke_rect(const struct draw_rect &d) {
+        stroke_rect(d.x, d.y, d.w, d.h, d.col, d.sw);
     }
 
     /**
@@ -2676,6 +2809,19 @@ class image {
             return;
         }
         circle_int<false, false>(cx, cy, radius, 0, 0, col, 0);
+    }
+
+    /**
+     * \brief Fill a circle with the specified radius and color. Example:
+     *
+     * \code{.cpp}
+     * image.fill_circle({.x=64, .y=64, .r=32, .col=constixel::color::WHITE});
+     * \endcode
+     *
+     * \param d \ref draw_circle initializer struct
+     */
+    constexpr void fill_circle(const struct draw_circle &d) {
+        fill_circle(d.x, d.y, d.r, d.col);
     }
 
     /**
@@ -2704,11 +2850,24 @@ class image {
     }
 
     /**
+     * \brief Stroke a circle with the specified radius and color. Example:
+     *
+     * \code{.cpp}
+     * image.stroke_circle({.x=64, .y=64, .r=32, .col=constixel::color::WHITE, .sw=2});
+     * \endcode
+     *
+     * \param d \ref draw_circle initializer struct
+     */
+    constexpr void stroke_circle(const struct draw_circle &d) {
+        stroke_circle(d.x, d.y, d.r, d.col, d.sw);
+    }
+
+    /**
      * \brief Stroke a circle using antialiasing with the specified radius and color. Only format_8bit targets are
      * supported. Example:
      *
      * \code{.cpp}
-     * image.stroke_circle_aa(64, 64, 32, 4, constixel::color::WHITE);
+     * image.stroke_circle_aa(64, 64, 32, constixel::color::WHITE, 2);
      * \endcode
      *
      * \param cx Center X-coordinate of the circle in pixels.
@@ -2730,6 +2889,20 @@ class image {
     }
 
     /**
+     * \brief Stroke a circle using antialiasing with the specified radius and color. Only format_8bit targets are
+     * supported. Example:
+     *
+     * \code{.cpp}
+     * image.stroke_circle_aa({.x=64, .y=64, .r=32, .col=constixel::color::WHITE, .sw=2});
+     * \endcode
+     *
+     * \param d \ref draw_circle initializer struct
+     */
+    constexpr void stroke_circle_aa(const struct draw_circle &d) {
+        stroke_circle_aa(d.x, d.y, d.r, d.col, d.sw);
+    }
+
+    /**
      * \brief Fill a circle using antialiasing with the specified radius and color. Only format_8bit targets are
      * supported. Example:
      *
@@ -2744,6 +2917,20 @@ class image {
      */
     constexpr void fill_circle_aa(int32_t cx, int32_t cy, int32_t radius, uint8_t col) {
         circle_int<true, false>(cx, cy, radius, 0, 0, col, 0);
+    }
+
+    /**
+     * \brief Fill a circle using antialiasing with the specified radius and color. Only format_8bit targets are
+     * supported. Example:
+     *
+     * \code{.cpp}
+     * image.fill_circle_aa({.x=64, .y=64, .r=32, .col=constixel::color::WHITE});
+     * \endcode
+     *
+     * \param d \ref draw_circle initializer struct
+     */
+    constexpr void fill_circle_aa(const struct draw_circle &d) {
+        fill_circle_aa(d.x, d.y, d.r, d.col);
     }
 
     /**
@@ -2785,16 +2972,13 @@ class image {
      * \brief Stroke a rounded rectangle with the specified color. Example:
      *
      * \code{.cpp}
-     * image.stroke_round_rect({.x=0, .y=0, .w=200, .h=100}, 15, constixel::color::WHITE);
+     * image.stroke_round_rect({.x=0, .y=0, .w=200, .h=100, .r=15, .col=constixel::color::WHITE, .sw=8});
      * \endcode
      *
-     * \param rect Rectangle containing the line coordinates in pixels.
-     * \param radius Radius of the rounded corners in pixels.
-     * \param col Color palette index to use.
-     * \param stroke_width Width of the stroke in pixels.
+     * \param d \ref draw_round_rect initializer struct
      */
-    constexpr void stroke_round_rect(const rect<int32_t> &rect, int32_t radius, uint8_t col, int32_t stroke_width = 1) {
-        stroke_round_rect(rect.x, rect.y, rect.w, rect.h, radius, col, stroke_width);
+    constexpr void stroke_round_rect(const struct draw_round_rect &d) {
+        stroke_round_rect(d.x, d.y, d.w, d.h, d.r, d.col, d.sw);
     }
 
     /**
@@ -2825,15 +3009,13 @@ class image {
      * \brief Fill a rounded rectangle with the specified color. Example:
      *
      * \code{.cpp}
-     * image.fill_round_rect({.x=0, .y=0, .w=200, .h=100}, 15, constixel::color::WHITE);
+     * image.fill_round_rect({.x=0, .y=0, .w=200, .h=100, .r=15, .col=constixel::color::WHITE});
      * \endcode
      *
-     * \param rect Rectangle containing the line coordinates in pixels.
-     * \param radius Radius of the rounded corners.
-     * \param col Color palette index to use.
+     * \param d \ref draw_round_rect initializer struct
      */
-    constexpr void fill_round_rect(const rect<int32_t> &rect, int32_t radius, uint8_t col) {
-        fill_round_rect(rect.x, rect.y, rect.w, rect.h, radius, col);
+    constexpr void fill_round_rect(const struct draw_round_rect &d) {
+        fill_round_rect(d.x, d.y, d.w, d.h, d.r, d.col);
     }
 
     /**
@@ -2866,15 +3048,13 @@ class image {
      * supported.
      *
      * \code{.cpp}
-     * image.fill_round_rect_aa({.x=0, .y=0, .w=200, .h=100}, 15, constixel::color::WHITE);
+     * image.fill_round_rect_aa({.x=0, .y=0, .w=200, .h=100, .r=15, .col=constixel::color::WHITE, .sw=8});
      * \endcode
      *
-     * \param rect Rectangle containing the line coordinates in pixels.
-     * \param radius Radius of the rounded corners.
-     * \param col Color palette index to use.
+     * \param d \ref draw_round_rect initializer struct
      */
-    constexpr void fill_round_rect_aa(const rect<int32_t> &rect, int32_t radius, uint8_t col) {
-        fill_round_rect_aa(rect.x, rect.y, rect.w, rect.h, radius, col);
+    constexpr void fill_round_rect_aa(const struct draw_round_rect &d) {
+        fill_round_rect_aa(d.x, d.y, d.w, d.h, d.r, d.col);
     }
 
     /**
@@ -2916,17 +3096,13 @@ class image {
      * \brief Stroke a rounded rectangle using antialiasing with the specified color. Example:
      *
      * \code{.cpp}
-     * image.stroke_round_rect_aa({.x=0, .y=0, .w=200, .h=100}, 15, constixel::color::WHITE);
+     * image.stroke_round_rect_aa({.x=0, .y=0, .w=200, .h=100, .r=15, .col=constixel::color::WHITE, .sw=8});
      * \endcode
      *
-     * \param rect Rectangle containing the line coordinates in pixels.
-     * \param radius Radius of the rounded corners in pixels.
-     * \param col Color palette index to use.
-     * \param stroke_width Width of the stroke in pixels.
+     * \param d \ref draw_round_rect initializer struct
      */
-    constexpr void stroke_round_rect_aa(const rect<int32_t> &rect, int32_t radius, uint8_t col,
-                                        int32_t stroke_width = 1) {
-        stroke_round_rect_aa(rect.x, rect.y, rect.w, rect.h, radius, col, stroke_width);
+    constexpr void stroke_round_rect_aa(const struct draw_round_rect &d) {
+        stroke_round_rect_aa(d.x, d.y, d.w, d.h, d.r, d.col, d.sw);
     }
 
     /**
