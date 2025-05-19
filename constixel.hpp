@@ -2361,12 +2361,17 @@ class image {
      * \tparam FONT The font struct name.
      * \tparam KERNING Boolean, use kerning information if available.
      * \param str UTF-8 string.
+     * \param character_count How many utf32 characters in the string should be measured.
+     * \param character_actual How many utf32 characters in the string were measured.
      * \return Width of the string in pixels.
      */
     template <typename FONT, bool KERNING = false>
-    [[nodiscard]] constexpr int32_t string_width(const char *str) {
+    [[nodiscard]] constexpr int32_t string_width(const char *str,
+                                                 size_t character_count = std::numeric_limits<size_t>::max(),
+                                                 size_t *character_actual = nullptr) {
         int32_t x = 0;
-        while (*str != 0) {
+        size_t count = 0;
+        while (*str != 0 && count++ < character_count) {
             uint32_t utf32 = 0;
             str = get_next_utf32(str, &utf32);
             size_t index = 0;
@@ -2381,6 +2386,9 @@ class image {
                     }
                 }
             }
+        }
+        if (character_actual) {
+            *character_actual = count;
         }
         return x;
     }
@@ -2404,13 +2412,18 @@ class image {
      * \param y Starting Y-coordinate in pixels.
      * \param str UTF-8 string.
      * \param col Color palette index to use.
+     * \param character_count How many utf32 characters in the string should be drawn.
+     * \param character_actual How many utf32 characters in the string were drawn.
      * \return Returns the new caret X-coordinate position. Pass this value to the next draw_string call to get
      * continious text.
      */
     template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr int32_t draw_string_mono(int32_t x, int32_t y, const char *str, uint8_t col) {
+    constexpr int32_t draw_string_mono(int32_t x, int32_t y, const char *str, uint8_t col,
+                                       size_t character_count = std::numeric_limits<size_t>::max(),
+                                       size_t *character_actual = nullptr) {
         static_assert(FONT::mono == true, "Can't use an antialiased font to draw mono/pixelized text.");
-        while (*str != 0) {
+        size_t count = 0;
+        while (*str != 0 && count++ < character_count) {
             uint32_t utf32 = 0;
             str = get_next_utf32(str, &utf32);
             size_t index = 0;
@@ -2439,6 +2452,9 @@ class image {
                     }
                 }
             }
+        }
+        if (character_actual) {
+            *character_actual = count;
         }
         if constexpr (ROTATION == DEGREE_90 || ROTATION == DEGREE_270) {
             return y;
@@ -2491,13 +2507,18 @@ class image {
      * \param y Starting Y-coordinate in pixels.
      * \param str UTF-8 string.
      * \param col Color palette index to use.
+     * \param character_count How many utf32 characters in the string should be drawn.
+     * \param character_actual How many utf32 characters in the string were drawn.
      * \return Returns the new caret X-coordinate position. Pass this value to the next draw_string call to get
      * continious text.
      */
     template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr int32_t draw_string_aa(int32_t x, int32_t y, const char *str, uint8_t col) {
+    constexpr int32_t draw_string_aa(int32_t x, int32_t y, const char *str, uint8_t col,
+                                     size_t character_count = std::numeric_limits<size_t>::max(),
+                                     size_t *character_actual = nullptr) {
         static_assert(FONT::mono == false, "Can't use a mono font to draw antialiased text.");
-        while (*str != 0) {
+        size_t count = 0;
+        while (*str != 0 && count++ < character_count) {
             uint32_t utf32 = 0;
             str = get_next_utf32(str, &utf32);
             size_t index = 0;
@@ -2526,6 +2547,9 @@ class image {
                     }
                 }
             }
+        }
+        if (character_actual) {
+            *character_actual = count;
         }
         if constexpr (ROTATION == DEGREE_90 || ROTATION == DEGREE_270) {
             return y;
@@ -3258,39 +3282,15 @@ class image {
     }
 
     /**
-     * \brief Convert the current instance into a byte stream formatted for embedded displays. This function will write
-     * chunk_length of data into dst and update chunk_index on each call. You should pass chunk_index = 0 at the
-     * beginnig of the sequence. Returns true of there is more data, or false if there is no data left. This function is
-     * typically used to drive interrupt driven DMA transfers.
-     * \tparam dst_format The desired data format.
-     * \param dst The buffer the data will be written to.
-     * \param chunk_size The requested chunk size in bytes. This value has to be kept the same during a full conversion
-     * sequence.
-     * \param chunk_actual The actual amount of bytes which were written into ptr during this call of the function.
-     * \param chunk_index This value will increment after each call of the function. Has to be set to 0 on the first
-     * call.
-     * \return true if there is more data to convert, false if we reached the end.
-     */
-    template <device_format dst_format>
-    bool convert_chunk(char *dst, size_t chunk_size, size_t &chunk_actual, size_t &chunk_index) {
-        (void)dst;
-        (void)chunk_size;
-        (void)chunk_actual;
-        (void)chunk_index;
-        (void)dst_format;
-        return false;
-    }
-
-    /**
      * \brief Convert the current instance into a byte stream formatted for embedded displays.
      * \tparam dst_format The desired data format.
-     * \param char_out A lambda function which consumes the data stream one byte at a time.
+     * \param uint8_out A lambda function which consumes the data stream one byte at a time.
      */
     template <device_format dst_format, typename F>
-    constexpr void convert(F &&char_out) {
+    constexpr void convert(F &&uint8_out) {
         if constexpr (dst_format == STRAIGHT_THROUGH) {
             for (auto c : data) {
-                char_out(static_cast<char>(c));
+                uint8_out(static_cast<uint8_t>(c));
             }
         } else if constexpr (dst_format == RGB565_8BIT_SERIAL) {
             const uint8_t *ptr = data.data();
@@ -3299,8 +3299,8 @@ class image {
                     const uint32_t col = format.get_col(ptr, x);
                     const uint32_t a = ((((col >> 16) & 0xff) >> 3) << 3) | ((((col >> 8) & 0xff) >> 2) >> 3);
                     const uint32_t b = (((((col >> 8) & 0xff) >> 2) & 0x7) << 5) | ((col & 0xff) >> 3);
-                    char_out(static_cast<char>(a));
-                    char_out(static_cast<char>(b));
+                    uint8_out(static_cast<uint8_t>(a));
+                    uint8_out(static_cast<uint8_t>(b));
                 }
                 ptr += format.bytes_per_line;
             }
@@ -3309,9 +3309,9 @@ class image {
             for (size_t y = 0; y < H; y++) {
                 for (size_t x = 0; x < W; x++) {
                     const uint32_t col = format.get_col(ptr, x);
-                    char_out(static_cast<char>(((col >> 16) & 0xff) >> 2));
-                    char_out(static_cast<char>(((col >> 8) & 0xff) >> 2));
-                    char_out(static_cast<char>(((col >> 0) & 0xff) >> 2));
+                    uint8_out(static_cast<uint8_t>(((col >> 16) & 0xff) >> 2));
+                    uint8_out(static_cast<uint8_t>(((col >> 8) & 0xff) >> 2));
+                    uint8_out(static_cast<uint8_t>(((col >> 0) & 0xff) >> 2));
                 }
                 ptr += format.bytes_per_line;
             }
@@ -3320,9 +3320,9 @@ class image {
             for (size_t y = 0; y < H; y++) {
                 for (size_t x = 0; x < W; x++) {
                     const uint32_t col = format.get_col(ptr, x);
-                    char_out(static_cast<char>(((col >> 16) & 0xff) >> 2) << 2);
-                    char_out(static_cast<char>(((col >> 8) & 0xff) >> 2) << 2);
-                    char_out(static_cast<char>(((col >> 0) & 0xff) >> 2) << 2);
+                    uint8_out(static_cast<uint8_t>(((col >> 16) & 0xff) >> 2) << 2);
+                    uint8_out(static_cast<uint8_t>(((col >> 8) & 0xff) >> 2) << 2);
+                    uint8_out(static_cast<uint8_t>(((col >> 0) & 0xff) >> 2) << 2);
                 }
                 ptr += format.bytes_per_line;
             }
