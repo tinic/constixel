@@ -563,8 +563,7 @@ class format {
     static constexpr void png_write_crc32(F &&char_out, const A &array, size_t bytes) {
         size_t idx = 0;
         uint32_t crc = 0xFFFFFFFF;
-        size_t len = bytes;
-        while (len--) {
+        for (size_t c = 0; c < bytes; c++) {
             uint8_t d = static_cast<uint8_t>(array.at(idx++));
             crc ^= d;
             for (int i = 0; i < 8; ++i) {
@@ -3542,19 +3541,19 @@ class image {
             return;
         }
 
-        const int32_t x0 = std::max(cx - r - 1, int32_t{0});
-        const int32_t y0 = std::max(cy - r - 1, int32_t{0});
-        const int32_t x1 = std::min(x0 + r * 2 + ox, static_cast<int32_t>(W));
-        const int32_t y1 = std::min(y0 + r * 2 + oy, static_cast<int32_t>(W));
+        const int32_t x0 = std::max(cx - r - int32_t{1}, int32_t{0});
+        const int32_t y0 = std::max(cy - r - int32_t{1}, int32_t{0});
+        const int32_t x1 = std::min(x0 + r * int32_t{2} + ox, static_cast<int32_t>(W));
+        const int32_t y1 = std::min(y0 + r * int32_t{2} + oy, static_cast<int32_t>(W));
 
-        if (check_not_in_bounds(x0, y0, r * 2 + ox + 1, r * 2 + oy + 1)) {
+        if (check_not_in_bounds(x0, y0, r * int32_t{2} + ox + int32_t{1}, r * int32_t{2} + oy + int32_t{1})) {
             return;
         }
 
-        const int32_t x0r = std::min(x0 + r, static_cast<int32_t>(W) - 1);
-        const int32_t x0r2 = std::min(x0 + r * 2, static_cast<int32_t>(W) - 1);
-        const int32_t y0r = std::min(y0 + r, static_cast<int32_t>(H) - 1);
-        const int32_t y0r2 = std::min(y0 + r * 2, static_cast<int32_t>(H) - 1);
+        const int32_t x0r = std::min(x0 + r, static_cast<int32_t>(W) - int32_t{1});
+        const int32_t x0r2 = std::min(x0 + r * int32_t{2}, static_cast<int32_t>(W) - int32_t{1});
+        const int32_t y0r = std::min(y0 + r, static_cast<int32_t>(H) - int32_t{1});
+        const int32_t y0r2 = std::min(y0 + r * int32_t{2}, static_cast<int32_t>(H) - int32_t{1});
 
         auto for_each_quadrant = [&](auto &&plot_arc) {
             plot_arc(x0, y0, x0r, y0r, 0, 0);
@@ -3565,17 +3564,17 @@ class image {
 
         if constexpr (!AA) {
             const int32_t max_coord = std::max({abs(x0), abs(x1), abs(y0), abs(y1), r});
-            const bool use_int64 = max_coord >= ((std::numeric_limits<int16_t>::max() - 1) / 2);
+            const bool use_int64 = max_coord >= ((std::numeric_limits<int16_t>::max() - int16_t{1}) / int32_t{2});
             if constexpr (!STROKE) {
                 if (!use_int64) {
                     auto plot_arc = [&, this](int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
                                               int32_t y_off) {
                         for (int32_t y = yy0; y <= yy1; y++) {
                             for (int32_t x = xx0; x <= xx1; x++) {
-                                const int32_t dx = (x * 2 + 1) - (cx * 2);
-                                const int32_t dy = (y * 2 + 1) - (cy * 2);
+                                const int32_t dx = (x * int32_t{2} + int32_t{1}) - (cx * int32_t{2});
+                                const int32_t dy = (y * int32_t{2} + int32_t{1}) - (cy * int32_t{2});
                                 const int32_t dist_sq = dx * dx + dy * dy;
-                                if (dist_sq > (r * r * 4 - 3)) {
+                                if (dist_sq > (r * r * int32_t{4} - int32_t{3})) {
                                     continue;
                                 }
                                 plot(x + x_off, y + y_off, col);
@@ -3609,13 +3608,13 @@ class image {
                                               int32_t y_off) {
                         for (int32_t y = yy0; y <= yy1; y++) {
                             for (int32_t x = xx0; x <= xx1; x++) {
-                                const int32_t dx = (x * 2 + 1) - (cx * 2);
-                                const int32_t dy = (y * 2 + 1) - (cy * 2);
+                                const int32_t dx = (x * int32_t{2} + int32_t{1}) - (cx * int32_t{2});
+                                const int32_t dy = (y * int32_t{2} + int32_t{1}) - (cy * int32_t{2});
                                 const int32_t dist_sq = dx * dx + dy * dy;
-                                if (dist_sq > (r * r * 4 - 3)) {
+                                if (dist_sq > (r * r * int32_t{4} - int32_t{3})) {
                                     continue;
                                 }
-                                if (dist_sq < ((r - stroke_width) * (r - stroke_width) * 4)) {
+                                if (dist_sq < ((r - stroke_width) * (r - stroke_width) * int32_t{4})) {
                                     continue;
                                 }
                                 plot(x + x_off, y + y_off, col);
