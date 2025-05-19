@@ -2554,7 +2554,7 @@ class image {
     constexpr int32_t draw_string_mono(const struct draw_string &d,
                                        size_t character_count = std::numeric_limits<size_t>::max(),
                                        size_t *character_actual = nullptr) {
-        draw_string_mono(d.x, d.y, d.str, d.col, character_count, character_actual);
+        return draw_string_mono(d.x, d.y, d.str, d.col, character_count, character_actual);
     }
 
     /**
