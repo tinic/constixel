@@ -18,7 +18,7 @@ using monofontsmall = constixel::ibmplexsans_bold_18_mono;
 int main() {
     using namespace constixel;
 
-    static image<format_8bit, 1024, 384> image;
+    static image<format_8bit, 1024, 600> image;
 
     int32_t x_pos = 20;
     int32_t y_pos = 20;
@@ -56,6 +56,23 @@ int main() {
 
     x_pos = 20;
     y_pos += 100;
+    image.stroke_circle(x_pos + 64, y_pos + 32, 32, color::WHITE, 8);
+    image.draw_string_centered_mono<myfont>(x_pos+64,70+y_pos,"stroke_circle",color::WHITE);
+
+    x_pos += 200;
+    image.stroke_circle_aa(x_pos + 64, y_pos + 32, 32, color::WHITE, 8);
+    image.draw_string_centered_mono<myfont>(x_pos+64,70+y_pos,"stroke_circle_aa",color::WHITE);
+
+    x_pos += 200;
+    image.stroke_round_rect(x_pos, y_pos, 128, 64, 24, color::YELLOW, 6);
+    image.draw_string_centered_mono<myfont>(x_pos+64,70+y_pos,"stroke_round_rect",color::WHITE);
+
+    x_pos += 200;
+    image.stroke_round_rect_aa(x_pos, y_pos, 128, 64, 24, color::YELLOW, 6);
+    image.draw_string_centered_mono<myfont>(x_pos+64,70+y_pos,"stroke_round_rect_aa",color::WHITE);
+
+    x_pos = 20;
+    y_pos += 200;
     image.draw_string_mono<monofont, true>(x_pos, y_pos + 20, "ABCabcAVA", color::GRAY_20);
     image.draw_string_centered_mono<myfont>(x_pos+80,70+y_pos,"draw_string_mono",color::WHITE);
 
@@ -73,5 +90,9 @@ int main() {
     image.draw_string_aa<aafontsmall, true, DEGREE_180>(900, y_pos + 20, "ABCabcAVA", color::GRAY_20);
     image.draw_string_centered_mono<myfont>(900,130+y_pos,"draw_string_aa",color::WHITE);
     
-    image.sixel_to_cout();
+    image.sixel_to_cout<
+#ifdef __APPLE__
+    2
+#endif  // #ifdef __APPLE__
+    >();
 }
