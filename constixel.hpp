@@ -3979,20 +3979,12 @@ class image {
      * @private
      */
     constexpr void span(int32_t x, int32_t w, int32_t y, uint8_t col) {
-        if (x < 0) {
-            w += x;
-            x = 0;
-        }
-        if ((x >= static_cast<int32_t>(W)) || (x + w < 0) || (y >= static_cast<int32_t>(H)) || (y < 0)) {
+        if (w <= 0 || y < 0 || y >= static_cast<int32_t>(H) || x + w <= 0 || x >= static_cast<int32_t>(W)) {
             return;
         }
-        if (x + w >= static_cast<int32_t>(W)) {
-            w = static_cast<int32_t>(W) - x;
-        }
-        const size_t _xl = static_cast<size_t>(x);
-        const size_t _xr = static_cast<size_t>(x + w);
-        const size_t _y = static_cast<size_t>(y);
-        T<W, H, GR>::span(data, _xl, _xr, _y, col);
+        int32_t x0 = std::max(x, 0);
+        int32_t x1 = std::min(x + w, static_cast<int32_t>(W));
+        T<W, H, GR>::span(data, static_cast<size_t>(x0), static_cast<size_t>(x1), static_cast<size_t>(y), col);
     }
 
     /**
