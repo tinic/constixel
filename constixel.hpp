@@ -672,7 +672,7 @@ class format {
         const size_t extra_data = size_t{24};
         const size_t max_stack_use = max_data_use + extra_data;
         std::array<uint8_t, max_stack_use> header;
-        while (bytes > 0) {
+        for (size_t c = 0 ; c < bytes; c++) {
             size_t i = 0;
             header.at(i++) = 'I';
             header.at(i++) = 'D';
@@ -3519,11 +3519,14 @@ class image {
                 output.push_back(base64_chars[(buffer >> bits_collected) & 0x3F]);
             }
             return [&output]() mutable {
-                if (output.capacity() == 0)
+                if (output.capacity() == 0) {
                     return;
+                }
                 if (output.size() % 4) {
-                    size_t padding = 4 - output.size() % 4;
-                    while (padding--) output.push_back('=');
+                    const size_t padding = 4 - output.size() % 4;
+                    for (size_t c = 0; c < padding; c++) {
+                        output.push_back('=');
+                    }
                 }
             };
         });
