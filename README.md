@@ -42,7 +42,13 @@ constixel is a single header minimalistic constexpr C++20 2D graphics palette ba
 - Programmatically render static graphical assets.
 - Help debug dynamic memory handling issues in complex C++ projects.
 - ...
-  
+
+## Why Sixel
+
+Yes, VT330/VT340/Sixel is a horrendous format, but it's the best we got at this point. If better protocols come online this library can be easily adjusted to use them. iTerm's PNG support is unfortunately not very performant right now. 
+
+There are plenty of other uses for this library.
+
 ## Requirements
 
 - C++20, i.e. gcc 13.3 or newer, clang 16 or newer, MSVC 17 or newer
