@@ -39,27 +39,27 @@ SOFTWARE.
 #include "constixel.hpp"
 
 #if MAINLINE_TESTS
-#include "fonts/ibmplexmono_bold_48_aa.h"
-#include "fonts/ibmplexmono_bold_48_mono.h"
-#include "fonts/ibmplexmono_regular_18_mono.h"
-#include "fonts/ibmplexsans_bold_12_aa.h"
-#include "fonts/ibmplexsans_bold_12_mono.h"
-#include "fonts/ibmplexsans_bold_32_mono.h"
-#include "fonts/ibmplexsans_bold_48_aa.h"
-#include "fonts/ibmplexsans_bold_48_mono.h"
-#include "fonts/ibmplexsans_medium_48_aa.h"
-#include "fonts/ibmplexsans_medium_48_mono.h"
+#include "fonts/ibmplexmono_bold_48_aa.hpp"
+#include "fonts/ibmplexmono_bold_48_mono.hpp"
+#include "fonts/ibmplexmono_regular_18_mono.hpp"
+#include "fonts/ibmplexsans_bold_12_aa.hpp"
+#include "fonts/ibmplexsans_bold_12_mono.hpp"
+#include "fonts/ibmplexsans_bold_32_mono.hpp"
+#include "fonts/ibmplexsans_bold_48_aa.hpp"
+#include "fonts/ibmplexsans_bold_48_mono.hpp"
+#include "fonts/ibmplexsans_medium_48_aa.hpp"
+#include "fonts/ibmplexsans_medium_48_mono.hpp"
 #endif  // #if MAINLINE_TESTS
 
 #if JP_TESTS
-#include "fonts/notosansjp_black_jp_24_aa.h"
-#include "fonts/notosansjp_black_jp_24_mono.h"
-#include "fonts/notosansjp_regular_jp_24_aa.h"
-#include "fonts/notosansjp_regular_jp_24_mono.h"
-#include "fonts/notosansjp_regular_jp_48_aa.h"
-#include "fonts/notosansjp_regular_jp_48_mono.h"
-#include "fonts/notosansjp_thin_jp_24_aa.h"
-#include "fonts/notosansjp_thin_jp_24_mono.h"
+#include "fonts/notosansjp_black_jp_24_aa.hpp"
+#include "fonts/notosansjp_black_jp_24_mono.hpp"
+#include "fonts/notosansjp_regular_jp_24_aa.hpp"
+#include "fonts/notosansjp_regular_jp_24_mono.hpp"
+#include "fonts/notosansjp_regular_jp_48_aa.hpp"
+#include "fonts/notosansjp_regular_jp_48_mono.hpp"
+#include "fonts/notosansjp_thin_jp_24_aa.hpp"
+#include "fonts/notosansjp_thin_jp_24_mono.hpp"
 #endif  // #ifdef JP_TESTS
 
 #ifdef _MSC_VER

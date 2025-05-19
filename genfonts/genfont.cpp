@@ -10,7 +10,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "../constixel.h"
+#include "../constixel.hpp"
 #include "fontbm/src/external/cxxopts.hpp"
 #include "fontbm/src/external/lodepng/lodepng.h"
 
@@ -383,7 +383,7 @@ int main(int argc, char* argv[]) {
             // std::cout << ss.str();
 
             std::filesystem::path dir = config.out_dir;
-            std::filesystem::path file = std::format("{}.h", name);
+            std::filesystem::path file = std::format("{}.hpp", name);
 
             std::ofstream out(dir / file);
             out << ss.str();

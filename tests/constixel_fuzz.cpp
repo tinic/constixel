@@ -1,9 +1,9 @@
 #include "constixel.hpp"
 
-#include "fonts/fipps_regular_mono.h"
+#include "fonts/fipps_regular_mono.hpp"
 using font = constixel::fipps_regular_mono;
 
-#include "fonts/ibmplexmono_bold_24_aa.h"
+#include "fonts/ibmplexmono_bold_24_aa.hpp"
 using fontaa = constixel::ibmplexmono_bold_24_aa;
 
 #include <cstdio>

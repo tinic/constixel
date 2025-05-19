@@ -1,6 +1,6 @@
 #include "constixel.hpp"
 
-#include "fonts/ibmplexsans_bold_48_aa.h"
+#include "fonts/ibmplexsans_bold_48_aa.hpp"
 using myfont = constixel::ibmplexsans_bold_48_aa;
 
 static consteval auto create_static_panel_image() {

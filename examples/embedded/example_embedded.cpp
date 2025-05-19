@@ -3,7 +3,7 @@
 #include <string>
 #include <stdio.h>
 
-#include "fonts/ibmplexsans_regular_18_mono.h"
+#include "fonts/ibmplexsans_regular_18_mono.hpp"
 using font = constixel::ibmplexsans_regular_18_mono;
 
 //

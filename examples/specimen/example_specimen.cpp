@@ -6,7 +6,7 @@
 // Font to show a specimen of
 //
 // clang-format off
-#include "fonts/cd_iconspc_mono.h"
+#include "fonts/cd_iconspc_mono.hpp"
 using font = constixel::cd_iconspc_mono;
 // clang-format on
 
@@ -14,7 +14,7 @@ using font = constixel::cd_iconspc_mono;
 
 // For for label
 // clang-format off
-#include "fonts/px437_hp_100lx_6x8_mono.h"
+#include "fonts/px437_hp_100lx_6x8_mono.hpp"
 using label = constixel::px437_hp_100lx_6x8_mono;
 // clang-format on
 

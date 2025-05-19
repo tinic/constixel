@@ -1,8 +1,8 @@
 #include "constixel.hpp"
 
-#include "fonts/ibmplexsans_semibold_24_aa.h"
+#include "fonts/ibmplexsans_semibold_24_aa.hpp"
 using large_font = constixel::ibmplexsans_semibold_24_aa;
-#include "fonts/ibmplexsans_semibold_18_aa.h"
+#include "fonts/ibmplexsans_semibold_18_aa.hpp"
 using small_font = constixel::ibmplexsans_semibold_18_aa;
 
 #include <iomanip>

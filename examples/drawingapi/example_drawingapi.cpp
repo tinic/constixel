@@ -1,18 +1,18 @@
 #include "constixel.hpp"
 
-#include "fonts/pxplus_toshibasat_9x16_mono.h"
+#include "fonts/pxplus_toshibasat_9x16_mono.hpp"
 using myfont = constixel::pxplus_toshibasat_9x16_mono;
 
-#include "fonts/ibmplexsans_bold_32_aa.h"
+#include "fonts/ibmplexsans_bold_32_aa.hpp"
 using aafont = constixel::ibmplexsans_bold_32_aa;
 
-#include "fonts/ibmplexsans_bold_32_mono.h"
+#include "fonts/ibmplexsans_bold_32_mono.hpp"
 using monofont = constixel::ibmplexsans_bold_32_mono;
 
-#include "fonts/ibmplexsans_bold_18_aa.h"
+#include "fonts/ibmplexsans_bold_18_aa.hpp"
 using aafontsmall = constixel::ibmplexsans_bold_18_aa;
 
-#include "fonts/ibmplexsans_bold_18_mono.h"
+#include "fonts/ibmplexsans_bold_18_mono.hpp"
 using monofontsmall = constixel::ibmplexsans_bold_18_mono;
 
 int main() {

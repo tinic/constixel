@@ -50,7 +50,7 @@ endforeach()
 # ----- FONTS -------------------------------------------------------------------------
 
 set(HEADER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../fonts")   # adjust as needed
-file(GLOB HDRS "${HEADER_DIR}/*.h")                     # or *.hpp
+file(GLOB HDRS "${HEADER_DIR}/*.hpp")                    # or *.hpp
 
 # --- split into _aa and _mono ------------------------------------------------
 set(HDRS_AA   "")
@@ -65,7 +65,7 @@ foreach(hdr IN LISTS HDRS)
 endforeach()
 
 # --- generate header ---------------------------------------------------------
-set(GENERATED_HDR "${CMAKE_BINARY_DIR}/fontslist.h")
+set(GENERATED_HDR "${CMAKE_BINARY_DIR}/fontslist.hpp")
 
 set(_includes_aa   "")
 set(_includes_mono "")
