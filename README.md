@@ -229,6 +229,8 @@ int main() {
 
 ## API
 
+Doxygen generated API docs are at [constixel.dev](https://constixel.dev)
+
 The following image formats are available. [Width] is the width in pixels, [Height] is the height in pixels. [Grayscale] will set the palette to a grayscale palette with black being the first entry in the palette and white being the last entry in the palette.
 
 ```c++
