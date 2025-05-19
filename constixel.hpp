@@ -2389,7 +2389,7 @@ class image {
      * \code{.cpp}
      * #include "some_font_mono.h"
      * ...
-     *     image.draw_string_mono<constixel::some_font_mono>(0, 0, "MyText");
+     *     image.draw_string_mono<constixel::some_font_mono>(0, 0, "MyText", constixel::color::WHITE);
      * ...
      * \endcode
      *
@@ -2484,7 +2484,7 @@ class image {
      * \code{.cpp}
      * #include "some_font_aa.h"
      * ...
-     *     image.draw_string_aa<constixel::some_font_aa>(0, 0, "MyText");
+     *     image.draw_string_aa<constixel::some_font_aa>(0, 0, "MyText", constixel::color::WHITE);
      * ...
      * \endcode
      *
