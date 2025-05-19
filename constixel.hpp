@@ -662,7 +662,7 @@ class format {
         const size_t extra_data = size_t{24};
         const size_t max_stack_use = max_data_use + extra_data;
         std::array<uint8_t, max_stack_use> header;
-        for (size_t c = 0 ; c < bytes; c++) {
+        for (size_t c = 0; c < bytes; c++) {
             size_t i = 0;
             header.at(i++) = 'I';
             header.at(i++) = 'D';
@@ -3548,97 +3548,59 @@ class image {
         const int32_t y0r = std::min(y0 + r, static_cast<int32_t>(H) - int32_t{1});
         const int32_t y0r2 = std::min(y0 + r * int32_t{2}, static_cast<int32_t>(H) - int32_t{1});
 
-        auto for_each_quadrant = [&](auto &&plot_arc) {
-            plot_arc(x0, y0, x0r, y0r, 0, 0);
-            plot_arc(x0r, y0, x0r2, y0r, ox, 0);
-            plot_arc(x0, y0r, x0r, y0r2, 0, oy);
-            plot_arc(x0r, y0r, x0r2, y0r2, ox, oy);
+        auto for_each_quadrant = [&]<typename I>(auto &&plot_arc) {
+            plot_arc.template operator()<I>(x0, y0, x0r, y0r, 0, 0);
+            plot_arc.template operator()<I>(x0r, y0, x0r2, y0r, ox, 0);
+            plot_arc.template operator()<I>(x0, y0r, x0r, y0r2, 0, oy);
+            plot_arc.template operator()<I>(x0r, y0r, x0r2, y0r2, ox, oy);
         };
 
         if constexpr (!AA) {
             const int32_t max_coord = std::max({abs(x0), abs(x1), abs(y0), abs(y1), r});
             const bool use_int64 = max_coord >= ((std::numeric_limits<int16_t>::max() - int16_t{1}) / int32_t{2});
             if constexpr (!STROKE) {
+                auto plot_arc = [&, this]<typename I>(int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
+                                                      int32_t y_off) {
+                    for (int32_t y = yy0; y <= yy1; y++) {
+                        for (int32_t x = xx0; x <= xx1; x++) {
+                            const I dx = (static_cast<I>(x) * I{2} + I{1}) - (static_cast<I>(cx) * I{2});
+                            const I dy = (static_cast<I>(y) * I{2} + I{1}) - (static_cast<I>(cy) * I{2});
+                            const I dist_sq = dx * dx + dy * dy;
+                            if (dist_sq > (static_cast<I>(r) * static_cast<I>(r) * I{4} - I{3})) {
+                                continue;
+                            }
+                            plot(x + x_off, y + y_off, col);
+                        }
+                    }
+                };
                 if (!use_int64) {
-                    auto plot_arc = [&, this](int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
-                                              int32_t y_off) {
-                        for (int32_t y = yy0; y <= yy1; y++) {
-                            for (int32_t x = xx0; x <= xx1; x++) {
-                                const int32_t dx = (x * int32_t{2} + int32_t{1}) - (cx * int32_t{2});
-                                const int32_t dy = (y * int32_t{2} + int32_t{1}) - (cy * int32_t{2});
-                                const int32_t dist_sq = dx * dx + dy * dy;
-                                if (dist_sq > (r * r * int32_t{4} - int32_t{3})) {
-                                    continue;
-                                }
-                                plot(x + x_off, y + y_off, col);
-                            }
-                        }
-                    };
-                    for_each_quadrant(plot_arc);
+                    for_each_quadrant.template operator()<int32_t>(plot_arc);
                 } else {
-                    auto plot_arc = [&, this](int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
-                                              int32_t y_off) {
-                        for (int32_t y = yy0; y <= yy1; y++) {
-                            for (int32_t x = xx0; x <= xx1; x++) {
-                                const int64_t dx = (static_cast<int64_t>(x) * int64_t{2} + int64_t{1}) -
-                                                   (static_cast<int64_t>(cx) * int64_t{2});
-                                const int64_t dy = (static_cast<int64_t>(y) * int64_t{2} + int64_t{1}) -
-                                                   (static_cast<int64_t>(cy) * int64_t{2});
-                                const int64_t dist_sq = dx * dx + dy * dy;
-                                if (dist_sq >
-                                    (static_cast<int64_t>(r) * static_cast<int64_t>(r) * int64_t{4} - int64_t{3})) {
-                                    continue;
-                                }
-                                plot(x + x_off, y + y_off, col);
-                            }
-                        }
-                    };
-                    for_each_quadrant(plot_arc);
+                    for_each_quadrant.template operator()<int64_t>(plot_arc);
                 }
             } else {
+                auto plot_arc = [&, this]<typename I>(int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
+                                                      int32_t y_off) {
+                    for (int32_t y = yy0; y <= yy1; y++) {
+                        for (int32_t x = xx0; x <= xx1; x++) {
+                            const I dx = (static_cast<I>(x) * I{2} + I{1}) - (static_cast<I>(cx) * I{2});
+                            const I dy = (static_cast<I>(y) * I{2} + I{1}) - (static_cast<I>(cy) * I{2});
+                            const I dist_sq = dx * dx + dy * dy;
+                            if (dist_sq > (static_cast<I>(r) * static_cast<I>(r) * I{4} - I{3})) {
+                                continue;
+                            }
+                            if (dist_sq <
+                                (static_cast<I>(r - stroke_width) * static_cast<I>(r - stroke_width) * I{4} - I{3})) {
+                                continue;
+                            }
+                            plot(x + x_off, y + y_off, col);
+                        }
+                    }
+                };
                 if (!use_int64) {
-                    auto plot_arc = [&, this](int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
-                                              int32_t y_off) {
-                        for (int32_t y = yy0; y <= yy1; y++) {
-                            for (int32_t x = xx0; x <= xx1; x++) {
-                                const int32_t dx = (x * int32_t{2} + int32_t{1}) - (cx * int32_t{2});
-                                const int32_t dy = (y * int32_t{2} + int32_t{1}) - (cy * int32_t{2});
-                                const int32_t dist_sq = dx * dx + dy * dy;
-                                if (dist_sq > (r * r * int32_t{4} - int32_t{3})) {
-                                    continue;
-                                }
-                                if (dist_sq < ((r - stroke_width) * (r - stroke_width) * int32_t{4})) {
-                                    continue;
-                                }
-                                plot(x + x_off, y + y_off, col);
-                            }
-                        }
-                    };
-                    for_each_quadrant(plot_arc);
+                    for_each_quadrant.template operator()<int32_t>(plot_arc);
                 } else {
-                    auto plot_arc = [&, this](int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
-                                              int32_t y_off) {
-                        for (int32_t y = yy0; y <= yy1; y++) {
-                            for (int32_t x = xx0; x <= xx1; x++) {
-                                const int64_t dx = (static_cast<int64_t>(x) * int64_t{2} + int64_t{1}) -
-                                                   (static_cast<int64_t>(cx) * int64_t{2});
-                                const int64_t dy = (static_cast<int64_t>(y) * int64_t{2} + int64_t{1}) -
-                                                   (static_cast<int64_t>(cy) * int64_t{2});
-                                const int64_t dist_sq = dx * dx + dy * dy;
-                                if (dist_sq >
-                                    (static_cast<int64_t>(r) * static_cast<int64_t>(r) * int64_t{4} - int64_t{3})) {
-                                    continue;
-                                }
-                                if (dist_sq > (static_cast<int64_t>(r - stroke_width) *
-                                                   static_cast<int64_t>(r - stroke_width) * int64_t{4} -
-                                               int64_t{3})) {
-                                    continue;
-                                }
-                                plot(x + x_off, y + y_off, col);
-                            }
-                        }
-                    };
-                    for_each_quadrant(plot_arc);
+                    for_each_quadrant.template operator()<int64_t>(plot_arc);
                 }
             }
         } else {
@@ -3647,8 +3609,8 @@ class image {
             const float Gl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 1);
             const float Bl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 2);
             if constexpr (!STROKE) {
-                auto plot_arc = [&, this](int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
-                                          int32_t y_off) {
+                auto plot_arc = [&, this]<typename I>(int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
+                                                      int32_t y_off) {
                     for (int32_t y = yy0; y <= yy1; y++) {
                         for (int32_t x = xx0; x <= xx1; x++) {
                             const float dx = (static_cast<float>(x) + 0.5f) - static_cast<float>(cx);
@@ -3678,11 +3640,11 @@ class image {
                         }
                     }
                 };
-                for_each_quadrant(plot_arc);
+                for_each_quadrant.template operator()<float>(plot_arc);
             } else {
                 const float rsF = static_cast<float>(r - stroke_width);
-                auto plot_arc = [&, this](int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
-                                          int32_t y_off) {
+                auto plot_arc = [&, this]<typename I>(int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
+                                                      int32_t y_off) {
                     for (int32_t y = yy0; y <= yy1; y++) {
                         for (int32_t x = xx0; x <= xx1; x++) {
                             const float dx = (static_cast<float>(x) + 0.5f) - static_cast<float>(cx);
@@ -3730,7 +3692,7 @@ class image {
                         }
                     }
                 };
-                for_each_quadrant(plot_arc);
+                for_each_quadrant.template operator()<float>(plot_arc);
             }
         }
     }
