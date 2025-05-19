@@ -3665,7 +3665,7 @@ class image {
                             if (dist_sq < ((rsF - 0.5f) * (rsF - 0.5f))) {
                                 continue;
                             }
-                            if (dist_sq < ((rsF) * (rsF))) {
+                            if (dist_sq < ((rsF + 0.5f) * (rsF + 0.5f))) {
                                 float a = rsF;
                                 if (std::is_constant_evaluated()) {
                                     a -= hidden::fast_sqrtf(dist_sq);
@@ -3680,7 +3680,7 @@ class image {
                                         compose(x + x_off, y + y_off, a, Rl, Gl, Bl);
                                     }
                                 } else {
-                                    plot(x + x_off, y + y_off, 4);
+                                    plot(x + x_off, y + y_off, col);
                                 }
                             } else {
                                 float a = rF;
