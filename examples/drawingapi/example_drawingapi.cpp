@@ -1,7 +1,7 @@
 #include "constixel.hpp"
 
-#include "fonts/pixeloperator_bold_mono.h"
-using myfont = constixel::pixeloperator_bold_mono;
+#include "fonts/pxplus_toshibasat_9x16_mono.h"
+using myfont = constixel::pxplus_toshibasat_9x16_mono;
 
 #include "fonts/ibmplexsans_bold_32_aa.h"
 using aafont = constixel::ibmplexsans_bold_32_aa;
