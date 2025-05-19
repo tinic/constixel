@@ -2676,6 +2676,7 @@ class image {
      * \param cy Center Y-coordinate of the circle in pixels.
      * \param radius radius of the circle in pixels.
      * \param col Color palette index to use.
+     * \param stroke_width Width of the stroke in pixels.
      */
     constexpr void stroke_circle(int32_t cx, int32_t cy, int32_t radius, uint8_t col, int32_t stroke_width = 1) {
         if (radius == 1) {
@@ -2701,6 +2702,7 @@ class image {
      * \param cy Center Y-coordinate of the circle in pixels.
      * \param radius radius of the circle in pixels.
      * \param col Color palette index to use.
+     * \param stroke_width Width of the stroke in pixels.
      */
     constexpr void stroke_circle_aa(int32_t cx, int32_t cy, int32_t radius, uint8_t col, int32_t stroke_width = 1) {
         if (radius == 1) {
@@ -2735,7 +2737,7 @@ class image {
      * \brief Stroke a rounded rectangle with the specified color. Example:
      *
      * \code{.cpp}
-     * image.stroke_round_rect(0, 0, 200, 100, 15, 2, constixel::color::WHITE);
+     * image.stroke_round_rect(0, 0, 200, 100, 15, constixel::color::WHITE);
      * \endcode
      *
      * \param x Starting X-coordinate in pixels.
@@ -2744,6 +2746,7 @@ class image {
      * \param h Height of the rectangle in pixels.
      * \param radius Radius of the rounded corners in pixels.
      * \param col Color palette index to use.
+     * \param stroke_width Width of the stroke in pixels.
      */
     constexpr void stroke_round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col,
                                      int32_t stroke_width = 1) {
@@ -2763,6 +2766,22 @@ class image {
             fill_rect(x + cr, y, w - cr * 2, stroke_width, col);
             fill_rect(x + cr, y + h - stroke_width, w - cr * 2, stroke_width, col);
         }
+    }
+
+    /**
+     * \brief Stroke a rounded rectangle with the specified color. Example:
+     *
+     * \code{.cpp}
+     * image.stroke_round_rect({.x=0, .y=0, .w=200, .h=100}, 15, constixel::color::WHITE);
+     * \endcode
+     *
+     * \param rect Rectangle containing the line coordinates in pixels.
+     * \param radius Radius of the rounded corners in pixels.
+     * \param col Color palette index to use.
+     * \param stroke_width Width of the stroke in pixels.
+     */
+    constexpr void stroke_round_rect(const rect<int32_t> &rect, int32_t radius, uint8_t col, int32_t stroke_width = 1) {
+        stroke_round_rect(rect.x, rect.y, rect.w, rect.h, radius, col, stroke_width);
     }
 
     /**
@@ -2846,10 +2865,10 @@ class image {
     }
 
     /**
-     * \brief Stroke a rounded rectangle with the specified color. Example:
+     * \brief Stroke a rounded rectangle using antialiasing with the specified color. Example:
      *
      * \code{.cpp}
-     * image.stroke_round_rect_aa(0, 0, 200, 100, 15, 2, constixel::color::WHITE);
+     * image.stroke_round_rect_aa(0, 0, 200, 100, 15, constixel::color::WHITE);
      * \endcode
      *
      * \param x Starting X-coordinate in pixels.
@@ -2858,6 +2877,7 @@ class image {
      * \param h Height of the rectangle in pixels.
      * \param radius Radius of the rounded corners in pixels.
      * \param col Color palette index to use.
+     * \param stroke_width Width of the stroke in pixels.
      */
     constexpr void stroke_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col,
                                         int32_t stroke_width = 1) {
@@ -2877,6 +2897,23 @@ class image {
             fill_rect(x + cr, y, w - cr * 2, stroke_width, col);
             fill_rect(x + cr, y + h - stroke_width, w - cr * 2, stroke_width, col);
         }
+    }
+
+    /**
+     * \brief Stroke a rounded rectangle using antialiasing with the specified color. Example:
+     *
+     * \code{.cpp}
+     * image.stroke_round_rect_aa({.x=0, .y=0, .w=200, .h=100}, 15, constixel::color::WHITE);
+     * \endcode
+     *
+     * \param rect Rectangle containing the line coordinates in pixels.
+     * \param radius Radius of the rounded corners in pixels.
+     * \param col Color palette index to use.
+     * \param stroke_width Width of the stroke in pixels.
+     */
+    constexpr void stroke_round_rect_aa(const rect<int32_t> &rect, int32_t radius, uint8_t col,
+                                        int32_t stroke_width = 1) {
+        stroke_round_rect_aa(rect.x, rect.y, rect.w, rect.h, radius, col, stroke_width);
     }
 
     /**
