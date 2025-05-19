@@ -3393,6 +3393,9 @@ class image {
      */
     template <typename FONT>
     constexpr bool lookup_glyph(uint32_t utf32, size_t *glyph_index) {
+        if (utf32 >= static_cast<uint32_t>(std::numeric_limits<typename FONT::lookup_type>::max()) - 1) {
+            return false;
+        }
         auto index = FONT::glyph_tree.lookup(static_cast<FONT::lookup_type>(utf32));
         if (index == FONT::glyph_tree.invalid) {
             index = FONT::glyph_tree.lookup(static_cast<FONT::lookup_type>(0xFFFD));
@@ -3443,7 +3446,7 @@ class image {
             *utf32 = ((lead & 0x0F) << 12) | ((static_cast<uint32_t>(str[1]) & 0x3F) << 6) |
                      (static_cast<uint32_t>(str[2]) & 0x3F);
             return str + 3;
-        } 
+        }
         if ((lead >> 3) == 0x1E && str[1] != char{0} && str[2] != char{0} && str[3] != char{0}) {
             *utf32 = ((lead & 0x07) << 18) | ((static_cast<uint32_t>(str[1]) & 0x3F) << 12) |
                      ((static_cast<uint32_t>(str[2]) & 0x3F) << 6) | (static_cast<uint32_t>(str[3]) & 0x3F);
