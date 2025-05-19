@@ -229,7 +229,7 @@ int main() {
 
 ## API
 
-Doxygen generated API docs are at [constixel.dev](https://constixel.dev)
+Full doxygen generated API docs are at [constixel.dev](https://constixel.dev)
 
 The following image formats are available. [Width] is the width in pixels, [Height] is the height in pixels. [Grayscale] will set the palette to a grayscale palette with black being the first entry in the palette and white being the last entry in the palette.
 
@@ -240,7 +240,7 @@ The following image formats are available. [Width] is the width in pixels, [Heig
     constixel::image<constixel::format_8bit, [Width], [Height], [Grayscale=false]>
 ```
 
-The most important member function of image:
+A quick overviedw of some member functions of image, refer to the (full documention here)[https://constixel.dev]:
 
 ```c++
 // Colors in the fixed internal palette
@@ -305,29 +305,30 @@ class image {
 
     // Draw a line
     void draw_line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, uint32_t stroke_width = 1);
-    void draw_line(constixel::rect<int32_t> &l, uint8_t col, uint32_t stroke_width = 1);
 
     // Draw an 1-pixel wide antialiased line with the specified color and thickness.
     // NOTE: This only works with constixel::format_8bit images
     void draw_line_aa(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col);
-    void draw_line_aa(const rect<int32_t> &rect, uint8_t col);
 
     // Draw a filled rectangle
     void fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col);
-    void fill_rect(constixel::rect<int32_t> &r, uint8_t col);
+
+    // Draw a stroked rectangle
+    void stroke_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col, int32_t stroke_width = 1);
 
     // Draw a rounded rectangle
     void fill_round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col);
-    void fill_round_rect(const rect<int32_t> &r, int32_t radius, uint8_t col);
+
+    // Draw a stroked rounded rectangle
+    void stroke_round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col, int32_t stroke_width = 1);
 
     // Draw a rounded rectangle with antialiasing
     // NOTE: This only works with constixel::format_8bit images
     void fill_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col);
-    void fill_round_rect_aa(const rect<int32_t> &r, int32_t radius, uint8_t col);
 
-    // Draw a stroked rectangle
-    void stroke_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col, uint32_t stroke_width = 1);
-    void stroke_rect(constixel::rect<int32_t> &r, uint8_t col, uint32_t stroke_width = 1);
+    // Draw a stroked rounded rectangle
+    // NOTE: This only works with constixel::format_8bit images
+    void stroke_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col, int32_t stroke_width = 1);
 
     // Draw a filled circle
     void fill_circle(int32_t x, int32_t y, int32_t radius, uint8_t col);
