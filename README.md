@@ -109,7 +109,7 @@ int main() {
     for (size_t i = 0; i < strings.size(); i++) { 
         uint8_t col = color::GRAY_RAMP_STOP - static_cast<uint8_t>(i * 3);
 
-        image.draw_string_mono<large_font>(16, 48 * static_cast<int32_t>(i) + 16, strings.at(i), col);
+        image.draw_string_mono<large_font>({.x = 16, .y = 48 * static_cast<int32_t>(i) + 16, .str = strings.at(i), .col = col});
     }
 
     image.sixel_to_cout();
@@ -240,7 +240,7 @@ The following image formats are available. [Width] is the width in pixels, [Heig
     constixel::image<constixel::format_8bit, [Width], [Height], [Grayscale=false]>
 ```
 
-A quick overviedw of some member functions of image, refer to the (full documention here)[https://constixel.dev]:
+A quick overview of some functionality of image, otherwise refer to the (full documention here)[https://constixel.dev]:
 
 ```c++
 // Colors in the fixed internal palette
