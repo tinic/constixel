@@ -36,7 +36,7 @@ constixel is a single header minimalistic constexpr C++20 2D graphics palette ba
 
 ## Applications
 
-- Interface rendering on embedded devices.
+- Interface rendering on embedded devices. Perfect to target monochrome or grayscale OLED screens or just to save memory when rendering to full RGB OLED screens.
 - Send graphical data to your terminal through a serial or ssh connections from embedded or remote devices.
 - Add graphical output to unit tests.
 - Programmatically render static graphical assets.
