@@ -2459,21 +2459,21 @@ class image {
      * \tparam KERNING Boolean, use kerning information if available. Default to false.
      * \tparam ROTATION Rotation around the x/y coordinate. Can be text_rotation::DEGREE_0, text_rotation::DEGREE_90,
      * text_rotation::DEGREE_180 or text_rotation::DEGREE_270
-     * \param cx Center X-coordinate in pixels.
-     * \param y Starting Y-coordinate in pixels.
+     * \param x Center/Starting X-coordinate in pixels.
+     * \param y Center/Starting Y-coordinate in pixels.
      * \param str UTF-8 string.
      * \param col Color palette index to use.
      */
     template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr void draw_string_centered_mono(int32_t cx, int32_t y, const char *str, uint8_t col) {
+    constexpr void draw_string_centered_mono(int32_t x, int32_t y, const char *str, uint8_t col) {
         if constexpr (ROTATION == DEGREE_0) {
-            draw_string_mono<FONT, KERNING, ROTATION>(cx - string_width<FONT, KERNING>(str) / 2, y, str, col);
+            draw_string_mono<FONT, KERNING, ROTATION>(x - string_width<FONT, KERNING>(str) / 2, y, str, col);
         } else if constexpr (ROTATION == DEGREE_180) {
-            draw_string_mono<FONT, KERNING, ROTATION>(cx + string_width<FONT, KERNING>(str) / 2, y, str, col);
+            draw_string_mono<FONT, KERNING, ROTATION>(x + string_width<FONT, KERNING>(str) / 2, y, str, col);
         } else if constexpr (ROTATION == DEGREE_90) {
-            draw_string_mono<FONT, KERNING, ROTATION>(cx, y + string_width<FONT, KERNING>(str) / 2, str, col);
+            draw_string_mono<FONT, KERNING, ROTATION>(x, y + string_width<FONT, KERNING>(str) / 2, str, col);
         } else if constexpr (ROTATION == DEGREE_270) {
-            draw_string_mono<FONT, KERNING, ROTATION>(cx, y - string_width<FONT, KERNING>(str) / 2, str, col);
+            draw_string_mono<FONT, KERNING, ROTATION>(x, y - string_width<FONT, KERNING>(str) / 2, str, col);
         }
     }
 
@@ -2555,21 +2555,21 @@ class image {
      * \tparam KERNING Boolean, use kerning information if available. Default to false.
      * \tparam ROTATION Rotation around the x/y coordinate. Can be text_rotation::DEGREE_0, text_rotation::DEGREE_90,
      * text_rotation::DEGREE_180 or text_rotation::DEGREE_270
-     * \param cx Senter X-coordinate in pixels.
-     * \param y Starting Y-coordinate in pixels.
+     * \param x Center/Starting X-coordinate in pixels.
+     * \param y Center/Starting Y-coordinate in pixels.
      * \param str UTF-8 string.
      * \param col Color palette index to use.
      */
     template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr void draw_string_centered_aa(int32_t cx, int32_t y, const char *str, uint8_t col) {
+    constexpr void draw_string_centered_aa(int32_t x, int32_t y, const char *str, uint8_t col) {
         if constexpr (ROTATION == DEGREE_0) {
-            draw_string_aa<FONT, KERNING, ROTATION>(cx - string_width<FONT, KERNING>(str) / 2, y, str, col);
+            draw_string_aa<FONT, KERNING, ROTATION>(x - string_width<FONT, KERNING>(str) / 2, y, str, col);
         } else if constexpr (ROTATION == DEGREE_180) {
-            draw_string_aa<FONT, KERNING, ROTATION>(cx + string_width<FONT, KERNING>(str) / 2, y, str, col);
+            draw_string_aa<FONT, KERNING, ROTATION>(x + string_width<FONT, KERNING>(str) / 2, y, str, col);
         } else if constexpr (ROTATION == DEGREE_90) {
-            draw_string_aa<FONT, KERNING, ROTATION>(cx, y + string_width<FONT, KERNING>(str) / 2, str, col);
+            draw_string_aa<FONT, KERNING, ROTATION>(x, y + string_width<FONT, KERNING>(str) / 2, str, col);
         } else if constexpr (ROTATION == DEGREE_270) {
-            draw_string_aa<FONT, KERNING, ROTATION>(cx, y - string_width<FONT, KERNING>(str) / 2, str, col);
+            draw_string_aa<FONT, KERNING, ROTATION>(x, y - string_width<FONT, KERNING>(str) / 2, str, col);
         }
     }
 
