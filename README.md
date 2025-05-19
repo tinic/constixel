@@ -28,7 +28,7 @@ constixel is a single header minimalistic constexpr C++20 2D graphics palette ba
 - Blit raw 32-bit RGBA image buffers into the palette backed back buffer (with or without dithering). Also convert back into a RGBA buffer when needed.
 - Code is cpplint compliant, passes cppcheck and is of course consteval runnable.
 - Code compiles with "-Wall -Wextra -Wpedantic -Weffc++ -Werror" on so it can be easily used in any existing C++ project without creating noise.
-- Resistance to unbound behavior when passing unreasonable values (right now it will not pass ubsan due to integer overflows (only) but nothing 'bad' will happen as everything is bounds checked before committing to the back buffer).
+- Resistance to unbound behavior when passing unreasonable values (right now it will not pass ubsan when the API is fuzzed due to integer overflows (only) but nothing 'bad' will happen as everything is bounds checked before committing to the back buffer).
 - Various other simple image manipulation operations.
 
 > [!NOTE]
