@@ -1,6 +1,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <memory>
 
 #if __cplusplus >= 202302L
 #include <format>
@@ -10,7 +11,7 @@
 #include "constixel.hpp"
 #include "fontslist.hpp"
 
-static constixel::image<constixel::format_8bit, 1024, 2048> fonts;
+//#define PNG_OUTPUT
 
 // -----------------------------------------------------------------------------
 // for_each_type: invokes F::operator()<Idx, T>() for every Ts...
@@ -27,6 +28,13 @@ constexpr void for_each_type(F&& f) {
 
 // ------------------------------------------------------------
 int main() {
+
+#ifdef PNG_OUTPUT
+    auto fonts = std::make_unique<constixel::image<constixel::format_8bit, 1024, 14000>> ();
+#else // #ifdef PNG_OUTPUT
+    auto fonts = std::make_unique<constixel::image<constixel::format_8bit, 1024, 2048>> ();
+#endif // #ifdef PNG_OUTPUT
+
     using namespace constixel;
     // compile‑time index
     //    for_each_type<ALL_FONTS>(print_with_index{});
@@ -44,13 +52,15 @@ int main() {
         text.append(size);
         text.append(" ");
         text.append("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567890!@#$%^&*()");
-        fonts.draw_string_aa<T, true>(0, y_pos, text.c_str(), 1);
+        fonts->draw_string_aa<T, true>(0, y_pos, text.c_str(), 1);
         y_pos += T::total_height;
-        if (y_pos + 100 > fonts.height()) {
-            fonts.sixel_to_cout();
-            fonts.clear();
+#ifndef PNG_OUTPUT
+        if (y_pos + 100 > fonts->height()) {
+            fonts->sixel_to_cout();
+            fonts->clear();
             y_pos = 0;
         }
+#endif  // #ifndef PNG_OUTPUT
     });
 
     for_each_type<MONO_HEADERS>([&]<std::size_t, typename T>() {
@@ -63,16 +73,28 @@ int main() {
         text.append(size);
         text.append(" ");
         text.append("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567890!@#$%^&*()░▒▓███▚▚╚═╝");
-        fonts.draw_string_mono<T, true>(0, y_pos, text.c_str(), 1);
+        fonts->draw_string_mono<T, true>(0, y_pos, text.c_str(), 1);
         y_pos += T::total_height;
-        if (y_pos + 100 > fonts.height()) {
-            fonts.sixel_to_cout();
-            fonts.clear();
+#ifndef PNG_OUTPUT
+        if (y_pos + 100 > fonts->height()) {
+            fonts->sixel_to_cout();
+            fonts->clear();
             y_pos = 0;
         }
+#endif  // #ifndef PNG_OUTPUT
     });
 
-    fonts.sixel_to_cout();
+#ifdef PNG_OUTPUT
+    std::vector<char> out{};
+    fonts->png([&out](char ch) mutable {
+        out.push_back(ch);
+    });
+
+    std::ofstream file("constixel_fonts.png", std::ios::binary);
+    file.write(reinterpret_cast<const char*>(out.data()), static_cast<std::streamsize>(out.size()));
+#else  // #ifdef PNG_OUTPUT
+    fonts->sixel_to_cout();
+#endif  // #ifdef PNG_OUTPUT
 
 #if __cplusplus >= 202302L
     for_each_type<AA_HEADERS>([&]<std::size_t, typename T>() {

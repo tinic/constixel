@@ -51,15 +51,17 @@ endforeach()
 
 set(HEADER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../fonts")   # adjust as needed
 file(GLOB HDRS "${HEADER_DIR}/*.hpp")                    # or *.hpp
+list(SORT HDRS)
+list(REVERSE HDRS)
 
 # --- split into _aa and _mono ------------------------------------------------
 set(HDRS_AA   "")
 set(HDRS_MONO "")
 foreach(hdr IN LISTS HDRS)
     get_filename_component(name "${hdr}" NAME)            # e.g. foo_aa.h
-    if(name MATCHES "_aa\\.h$")
+    if(name MATCHES "_aa\\.hpp$")
         list(APPEND HDRS_AA   "${hdr}")
-    elseif(name MATCHES "_mono\\.h$")
+    elseif(name MATCHES "_mono\\.hpp$")
         list(APPEND HDRS_MONO "${hdr}")
     endif()
 endforeach()
