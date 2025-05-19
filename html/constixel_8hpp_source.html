@@ -3538,33 +3538,25 @@ $(function(){initNavTree('constixel_8hpp_source.html',''); initResizable(true); 
 <div class="line"><a id="l03976" name="l03976"></a><span class="lineno"> 3976</span>    }</div>
 <div class="line"><a id="l03977" name="l03977"></a><span class="lineno"> 3977</span></div>
 <div class="line"><a id="l03981" name="l03981"></a><span class="lineno"> 3981</span>    <span class="keyword">constexpr</span> <span class="keywordtype">void</span> span(int32_t x, int32_t w, int32_t y, uint8_t col) {</div>
-<div class="line"><a id="l03982" name="l03982"></a><span class="lineno"> 3982</span>        <span class="keywordflow">if</span> (x &lt; 0) {</div>
-<div class="line"><a id="l03983" name="l03983"></a><span class="lineno"> 3983</span>            w += x;</div>
-<div class="line"><a id="l03984" name="l03984"></a><span class="lineno"> 3984</span>            x = 0;</div>
-<div class="line"><a id="l03985" name="l03985"></a><span class="lineno"> 3985</span>        }</div>
-<div class="line"><a id="l03986" name="l03986"></a><span class="lineno"> 3986</span>        <span class="keywordflow">if</span> ((x &gt;= <span class="keyword">static_cast&lt;</span>int32_t<span class="keyword">&gt;</span>(W)) || (x + w &lt; 0) || (y &gt;= <span class="keyword">static_cast&lt;</span>int32_t<span class="keyword">&gt;</span>(H)) || (y &lt; 0)) {</div>
-<div class="line"><a id="l03987" name="l03987"></a><span class="lineno"> 3987</span>            <span class="keywordflow">return</span>;</div>
-<div class="line"><a id="l03988" name="l03988"></a><span class="lineno"> 3988</span>        }</div>
-<div class="line"><a id="l03989" name="l03989"></a><span class="lineno"> 3989</span>        <span class="keywordflow">if</span> (x + w &gt;= <span class="keyword">static_cast&lt;</span>int32_t<span class="keyword">&gt;</span>(W)) {</div>
-<div class="line"><a id="l03990" name="l03990"></a><span class="lineno"> 3990</span>            w = <span class="keyword">static_cast&lt;</span>int32_t<span class="keyword">&gt;</span>(W) - x;</div>
-<div class="line"><a id="l03991" name="l03991"></a><span class="lineno"> 3991</span>        }</div>
-<div class="line"><a id="l03992" name="l03992"></a><span class="lineno"> 3992</span>        <span class="keyword">const</span> <span class="keywordtype">size_t</span> _xl = <span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(x);</div>
-<div class="line"><a id="l03993" name="l03993"></a><span class="lineno"> 3993</span>        <span class="keyword">const</span> <span class="keywordtype">size_t</span> _xr = <span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(x + w);</div>
-<div class="line"><a id="l03994" name="l03994"></a><span class="lineno"> 3994</span>        <span class="keyword">const</span> <span class="keywordtype">size_t</span> _y = <span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(y);</div>
-<div class="line"><a id="l03995" name="l03995"></a><span class="lineno"> 3995</span>        T&lt;W, H, GR&gt;::span(data, _xl, _xr, _y, col);</div>
-<div class="line"><a id="l03996" name="l03996"></a><span class="lineno"> 3996</span>    }</div>
-<div class="line"><a id="l03997" name="l03997"></a><span class="lineno"> 3997</span></div>
-<div class="line"><a id="l04001" name="l04001"></a><span class="lineno"> 4001</span>    std::array&lt;uint8_t, T&lt;W, H, GR&gt;::image_size&gt; data{};</div>
-<div class="line"><a id="l04002" name="l04002"></a><span class="lineno"> 4002</span></div>
-<div class="line"><a id="l04006" name="l04006"></a><span class="lineno"> 4006</span>    T&lt;W, H, GR&gt; format{};</div>
-<div class="line"><a id="l04007" name="l04007"></a><span class="lineno"> 4007</span></div>
-<div class="line"><a id="l04009" name="l04009"></a><span class="lineno"> 4009</span><span class="preprocessor">#endif  </span><span class="comment">// #ifndef __INTELLISENSE__</span></div>
-<div class="line"><a id="l04010" name="l04010"></a><span class="lineno"> 4010</span>};</div>
+<div class="line"><a id="l03982" name="l03982"></a><span class="lineno"> 3982</span>        <span class="keywordflow">if</span> (w &lt;= 0 || y &lt; 0 || y &gt;= <span class="keyword">static_cast&lt;</span>int32_t<span class="keyword">&gt;</span>(H) || x + w &lt;= 0 || x &gt;= <span class="keyword">static_cast&lt;</span>int32_t<span class="keyword">&gt;</span>(W)) {</div>
+<div class="line"><a id="l03983" name="l03983"></a><span class="lineno"> 3983</span>            <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l03984" name="l03984"></a><span class="lineno"> 3984</span>        }</div>
+<div class="line"><a id="l03985" name="l03985"></a><span class="lineno"> 3985</span>        int32_t x0 = std::max(x, 0);</div>
+<div class="line"><a id="l03986" name="l03986"></a><span class="lineno"> 3986</span>        int32_t x1 = std::min(x + w, <span class="keyword">static_cast&lt;</span>int32_t<span class="keyword">&gt;</span>(W));</div>
+<div class="line"><a id="l03987" name="l03987"></a><span class="lineno"> 3987</span>        T&lt;W, H, GR&gt;::span(data, <span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(x0), <span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(x1), <span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(y), col);</div>
+<div class="line"><a id="l03988" name="l03988"></a><span class="lineno"> 3988</span>    }</div>
+<div class="line"><a id="l03989" name="l03989"></a><span class="lineno"> 3989</span></div>
+<div class="line"><a id="l03993" name="l03993"></a><span class="lineno"> 3993</span>    std::array&lt;uint8_t, T&lt;W, H, GR&gt;::image_size&gt; data{};</div>
+<div class="line"><a id="l03994" name="l03994"></a><span class="lineno"> 3994</span></div>
+<div class="line"><a id="l03998" name="l03998"></a><span class="lineno"> 3998</span>    T&lt;W, H, GR&gt; format{};</div>
+<div class="line"><a id="l03999" name="l03999"></a><span class="lineno"> 3999</span></div>
+<div class="line"><a id="l04001" name="l04001"></a><span class="lineno"> 4001</span><span class="preprocessor">#endif  </span><span class="comment">// #ifndef __INTELLISENSE__</span></div>
+<div class="line"><a id="l04002" name="l04002"></a><span class="lineno"> 4002</span>};</div>
 </div>
-<div class="line"><a id="l04011" name="l04011"></a><span class="lineno"> 4011</span> </div>
-<div class="line"><a id="l04012" name="l04012"></a><span class="lineno"> 4012</span>}  <span class="comment">// namespace constixel</span></div>
-<div class="line"><a id="l04013" name="l04013"></a><span class="lineno"> 4013</span> </div>
-<div class="line"><a id="l04014" name="l04014"></a><span class="lineno"> 4014</span><span class="preprocessor">#endif  </span><span class="comment">// CONSTIXEL_HPP_</span></div>
+<div class="line"><a id="l04003" name="l04003"></a><span class="lineno"> 4003</span> </div>
+<div class="line"><a id="l04004" name="l04004"></a><span class="lineno"> 4004</span>}  <span class="comment">// namespace constixel</span></div>
+<div class="line"><a id="l04005" name="l04005"></a><span class="lineno"> 4005</span> </div>
+<div class="line"><a id="l04006" name="l04006"></a><span class="lineno"> 4006</span><span class="preprocessor">#endif  </span><span class="comment">// CONSTIXEL_HPP_</span></div>
 <div class="ttc" id="aclassconstixel_1_1format__1bit_html"><div class="ttname"><a href="classconstixel_1_1format__1bit.html">constixel::format_1bit</a></div><div class="ttdoc">1-bit format, just b/w. Use as template parameter for image. Example:</div><div class="ttdef"><b>Definition</b> constixel.hpp:892</div></div>
 <div class="ttc" id="aclassconstixel_1_1format__2bit_html"><div class="ttname"><a href="classconstixel_1_1format__2bit.html">constixel::format_2bit</a></div><div class="ttdoc">2-bit color format, 4 colors total. Use as template parameter for image.</div><div class="ttdef"><b>Definition</b> constixel.hpp:1168</div></div>
 <div class="ttc" id="aclassconstixel_1_1format__4bit_html"><div class="ttname"><a href="classconstixel_1_1format__4bit.html">constixel::format_4bit</a></div><div class="ttdoc">4-bit color format, 16 colors total. Use as template parameter for image.</div><div class="ttdef"><b>Definition</b> constixel.hpp:1396</div></div>
