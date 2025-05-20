@@ -9,7 +9,6 @@ Checks: "*,
 
         -misc-non-private-member-variables-in-classes,
         
-        -readability-static-accessed-through-instance,
         -readability-magic-numbers,
         -readability-function-cognitive-complexity,
         -readability-uppercase-literal-suffix,
