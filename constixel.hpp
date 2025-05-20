@@ -974,7 +974,8 @@ class format_1bit : public format {
         }
     }
 
-    static constexpr void compose(std::array<uint8_t, image_size> &, size_t, size_t, float, float, float, float) {
+    static constexpr void compose(std::array<uint8_t, image_size> & /*data*/, size_t /*x*/, size_t /*y*/,
+                                  float /*cola*/, float /*colr*/, float /*colg*/, float /*colb*/) {
 #ifndef _MSC_VER
         static_assert(false, "composing not supported on 1-bit format, use a mono font.");
 #endif  // #ifndef _MSC_VER
@@ -1193,13 +1194,14 @@ class format_2bit : public format {
     }
 
     template <bool FLIP_H = false, bool FLIP_V = false>
-    static constexpr void transpose(const uint8_t *, uint8_t *) {
+    static constexpr void transpose(const uint8_t * /*src*/, uint8_t * /*dst*/) {
 #ifndef _MSC_VER
         static_assert(false, "Not implemented yet.");
 #endif  // #ifndef _MSC_VER
     }
 
-    static constexpr void compose(std::array<uint8_t, image_size> &, size_t, size_t, float, float, float, float) {
+    static constexpr void compose(std::array<uint8_t, image_size> & /*data*/, size_t /*x*/, size_t /*y*/,
+                                  float /*cola*/, float /*colr*/, float /*colg*/, float /*colb*/) {
 #ifndef _MSC_VER
         static_assert(false, "composing not supported on 2-bit format, use a mono font.");
 #endif  // #ifndef _MSC_VER
@@ -1425,7 +1427,7 @@ class format_4bit : public format {
     }
 
     template <bool FLIP_H = false, bool FLIP_V = false>
-    static constexpr void transpose(const uint8_t *, uint8_t *) {
+    static constexpr void transpose(const uint8_t * /*src*/, uint8_t * /*dst*/) {
 #ifndef _MSC_VER
         static_assert(false, "Not implemented yet.");
 #endif  // #ifndef _MSC_VER
