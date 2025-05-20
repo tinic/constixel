@@ -109,7 +109,7 @@ int main() {
 
 ## Text drawing example
 
-Include a text font and pass the struct name as a template parameter to the draw_string function. The pre-made available fonts in this repo are viewable [here](./tests/constixel_fonts.png "Fonts") More can be easily added/modified, for instance if you need more than just ASCII character ranges.
+Include a text font and pass the struct name as a template parameter to the draw_string function. The pre-made available fonts in this repo are viewable [here](./tests/constixel_fonts.png "Fonts") More can be easily added/modified, for instance if you need more than just ASCII character ranges or want symbols/icons.
 
 ```c++
 #include "constixel.hpp"
