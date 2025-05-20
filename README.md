@@ -71,7 +71,7 @@ add_subdirectory(constixel)
 target_link_libraries([your target name] PRIVATE constixel::constixel)
 ```
 
-After that you can simple do:
+After that you can simply do this:
 
 ```
 #include "constixel/constixel.hpp"
