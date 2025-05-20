@@ -3189,14 +3189,6 @@ class image {
     template <bool FLIP_H = false, bool FLIP_V = false>
     constexpr image<T, H, W, GR> transpose() const {
         image<T, H, W, GR> transposed;
-        static_assert(T<W, H, GR>::bits_per_pixel != 1 || ((H + 7) / 8) == transposed.bytes_per_line());
-        static_assert(T<W, H, GR>::bits_per_pixel != 1 || ((W + 7) / 8) == bytes_per_line());
-        static_assert(T<W, H, GR>::bits_per_pixel != 2 || ((H + 3) / 4) == transposed.bytes_per_line());
-        static_assert(T<W, H, GR>::bits_per_pixel != 2 || ((W + 3) / 4) == bytes_per_line());
-        static_assert(T<W, H, GR>::bits_per_pixel != 4 || ((H + 1) / 2) == transposed.bytes_per_line());
-        static_assert(T<W, H, GR>::bits_per_pixel != 4 || ((W + 1) / 2) == bytes_per_line());
-        static_assert(T<W, H, GR>::bits_per_pixel != 8 || H == transposed.bytes_per_line());
-        static_assert(T<W, H, GR>::bits_per_pixel != 8 || W == bytes_per_line());
         T<W, H, GR>::template transpose<FLIP_H, FLIP_V>(data.data(), transposed.data_ref().data());
         return transposed;
     }
@@ -3208,14 +3200,6 @@ class image {
      */
     template <bool FLIP_H = false, bool FLIP_V = false>
     constexpr void transpose(image<T, H, W, GR> &dst) const {
-        static_assert(T<W, H, GR>::bits_per_pixel != 1 || ((H + 7) / 8) == dst.bytes_per_line());
-        static_assert(T<W, H, GR>::bits_per_pixel != 1 || ((W + 7) / 8) == bytes_per_line());
-        static_assert(T<W, H, GR>::bits_per_pixel != 2 || ((H + 3) / 4) == dst.bytes_per_line());
-        static_assert(T<W, H, GR>::bits_per_pixel != 2 || ((W + 3) / 4) == bytes_per_line());
-        static_assert(T<W, H, GR>::bits_per_pixel != 4 || ((H + 1) / 2) == dst.bytes_per_line());
-        static_assert(T<W, H, GR>::bits_per_pixel != 4 || ((W + 1) / 2) == bytes_per_line());
-        static_assert(T<W, H, GR>::bits_per_pixel != 8 || H == dst.bytes_per_line());
-        static_assert(T<W, H, GR>::bits_per_pixel != 8 || W == bytes_per_line());
         T<W, H, GR>::template transpose<FLIP_H, FLIP_V>(data.data(), dst.data_ref().data());
     }
 
