@@ -13,15 +13,14 @@ using fontaa = constixel::ibmplexmono_bold_24_aa;
 #include <algorithm>
 
 static int32_t random_int32() {
-    static std::random_device rd;
-    static std::mt19937 gen(rd());
+    static std::mt19937 gen(0xDEADBEEF);
     static std::uniform_int_distribution<int> dist(std::numeric_limits<int32_t>::min(),
                                                    std::numeric_limits<int32_t>::max());
     return dist(gen);
 }
 
 static int32_t random_limit() {
-    static std::vector<int32_t> limits = {
+    static constexpr const std::array<int32_t, 34> limits {
 
         0,
         0,
