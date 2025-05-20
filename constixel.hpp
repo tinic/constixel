@@ -171,8 +171,8 @@ struct srgb {
 }
 
 [[nodiscard]] static consteval oklab oklch_to_oklab_consteval(const oklch &oklch) {
-    return {oklch.l, oklch.c * consteval_cos(oklch.h * std::numbers::pi / 180.0),
-            oklch.c * consteval_sin(oklch.h * std::numbers::pi / 180.0)};
+    return {oklch.l, oklch.c * consteval_cos(oklch.h * 3.14159265358979323846 / 180.0),
+            oklch.c * consteval_sin(oklch.h * 3.14159265358979323846 / 180.0)};
 }
 
 static constexpr const float epsilon_low = srgb_to_linear(0.5f / 255.0f);
