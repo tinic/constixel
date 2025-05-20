@@ -18,12 +18,9 @@
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
-<script type="text/javascript">
-/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
-  $(function() { init_search(); });
-/* @license-end */
-</script>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only.css" rel="stylesheet" type="text/css"/>
 </head>
 <body>
 <div id="top"><!-- do not remove this div, it is closed by doxygen! -->
@@ -35,18 +32,6 @@
    <div id="projectname">constixel
    </div>
   </td>
-    <td>        <div id="MSearchBox" class="MSearchBoxInactive">
-        <span class="left">
-          <span id="MSearchSelect"                onmouseover="return searchBox.OnSearchSelectShow()"                onmouseout="return searchBox.OnSearchSelectHide()">&#160;</span>
-          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"
-               onfocus="searchBox.OnSearchFieldFocus(true)" 
-               onblur="searchBox.OnSearchFieldFocus(false)" 
-               onkeyup="searchBox.OnSearchFieldChange(event)"/>
-          </span><span class="right">
-            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.svg" alt=""/></a>
-          </span>
-        </div>
-</td>
  </tr>
  </tbody>
 </table>
@@ -63,6 +48,17 @@ var searchBox = new SearchBox("searchBox", "search/",'.html');
 $(function() { codefold.init(0); });
 /* @license-end */
 </script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','Search',true);
+  $(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
 </div><!-- top -->
 <div id="side-nav" class="ui-resizable side-nav-resizable">
   <div id="nav-tree">
@@ -105,7 +101,7 @@ $(function(){initNavTree('functions_vars.html',''); initResizable(true); });
 <div class="textblock">Here is a list of all documented variables with links to the class documentation for each member:</div>
 
 <h3><a id="index_c" name="index_c"></a>- c -</h3><ul>
-<li>col&#160;:&#160;<a class="el" href="structconstixel_1_1draw__circle.html#a791a0735868a9a694de875aacfa9645a">constixel::draw_circle</a>, <a class="el" href="structconstixel_1_1draw__line.html#a4c88a47b5340678c83e69d7407ce560a">constixel::draw_line</a>, <a class="el" href="structconstixel_1_1draw__rect.html#a9e659c6727af3f70d0e87d7376419372">constixel::draw_rect</a>, <a class="el" href="structconstixel_1_1draw__round__rect.html#a55006a156d2db8dceee658581299d5b4">constixel::draw_round_rect</a>, <a class="el" href="structconstixel_1_1draw__string.html#a1ff5c8136a0d920df0dc74a783932fe5">constixel::draw_string</a>, <a class="el" href="structconstixel_1_1plot.html#a45c1fef78b868a05932661d183d2d599">constixel::plot</a></li>
+<li>col&#160;:&#160;<a class="el" href="structconstixel_1_1draw__circle.html#abba2a10fdfddcdcd89c6cad0a51a8361">constixel::draw_circle</a>, <a class="el" href="structconstixel_1_1draw__line.html#a20e6e6d4b624ddc2f69fcce420ec144f">constixel::draw_line</a>, <a class="el" href="structconstixel_1_1draw__rect.html#af7e2bc7b92723a27009b88d21a647e83">constixel::draw_rect</a>, <a class="el" href="structconstixel_1_1draw__round__rect.html#ad6d3cb7e3a4d8a1e833b9664ec273606">constixel::draw_round_rect</a>, <a class="el" href="structconstixel_1_1draw__string.html#a9527571feeabc51bf73ce2bc6c5970ac">constixel::draw_string</a>, <a class="el" href="structconstixel_1_1plot.html#ab11d4a345864a98f9992450661b1280f">constixel::plot</a></li>
 </ul>
 
 

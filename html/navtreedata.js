@@ -28,14 +28,15 @@ var NAVTREE =
     [ "constixel", "md__r_e_a_d_m_e.html", [
       [ "Primary features and goals", "md__r_e_a_d_m_e.html#autotoc_md2", null ],
       [ "Applications", "md__r_e_a_d_m_e.html#autotoc_md3", null ],
-      [ "Requirements", "md__r_e_a_d_m_e.html#autotoc_md4", null ],
-      [ "Usage", "md__r_e_a_d_m_e.html#autotoc_md5", null ],
-      [ "Minimal example", "md__r_e_a_d_m_e.html#autotoc_md6", null ],
-      [ "Text drawing example", "md__r_e_a_d_m_e.html#autotoc_md7", null ],
-      [ "Consteval sixel example", "md__r_e_a_d_m_e.html#autotoc_md8", null ],
-      [ "Consteval embedded image data example", "md__r_e_a_d_m_e.html#autotoc_md9", null ],
-      [ "Saving a PNG to disk example", "md__r_e_a_d_m_e.html#autotoc_md10", null ],
-      [ "API", "md__r_e_a_d_m_e.html#autotoc_md11", null ]
+      [ "Why Sixel", "md__r_e_a_d_m_e.html#autotoc_md4", null ],
+      [ "Requirements", "md__r_e_a_d_m_e.html#autotoc_md5", null ],
+      [ "Usage", "md__r_e_a_d_m_e.html#autotoc_md6", null ],
+      [ "Minimal example", "md__r_e_a_d_m_e.html#autotoc_md7", null ],
+      [ "Text drawing example", "md__r_e_a_d_m_e.html#autotoc_md8", null ],
+      [ "Consteval sixel example", "md__r_e_a_d_m_e.html#autotoc_md9", null ],
+      [ "Consteval embedded image data example", "md__r_e_a_d_m_e.html#autotoc_md10", null ],
+      [ "Saving a PNG to disk example", "md__r_e_a_d_m_e.html#autotoc_md11", null ],
+      [ "API", "md__r_e_a_d_m_e.html#autotoc_md12", null ]
     ] ],
     [ "Classes", "annotated.html", [
       [ "Class List", "annotated.html", "annotated_dup" ],

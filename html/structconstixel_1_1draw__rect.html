@@ -18,12 +18,9 @@
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
-<script type="text/javascript">
-/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
-  $(function() { init_search(); });
-/* @license-end */
-</script>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only.css" rel="stylesheet" type="text/css"/>
 </head>
 <body>
 <div id="top"><!-- do not remove this div, it is closed by doxygen! -->
@@ -35,18 +32,6 @@
    <div id="projectname">constixel
    </div>
   </td>
-    <td>        <div id="MSearchBox" class="MSearchBoxInactive">
-        <span class="left">
-          <span id="MSearchSelect"                onmouseover="return searchBox.OnSearchSelectShow()"                onmouseout="return searchBox.OnSearchSelectHide()">&#160;</span>
-          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"
-               onfocus="searchBox.OnSearchFieldFocus(true)" 
-               onblur="searchBox.OnSearchFieldFocus(false)" 
-               onkeyup="searchBox.OnSearchFieldChange(event)"/>
-          </span><span class="right">
-            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.svg" alt=""/></a>
-          </span>
-        </div>
-</td>
  </tr>
  </tbody>
 </table>
@@ -63,6 +48,17 @@ var searchBox = new SearchBox("searchBox", "search/",'.html');
 $(function() { codefold.init(0); });
 /* @license-end */
 </script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','Search',true);
+  $(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
 </div><!-- top -->
 <div id="side-nav" class="ui-resizable side-nav-resizable">
   <div id="nav-tree">
@@ -113,30 +109,30 @@ $(function(){initNavTree('structconstixel_1_1draw__rect.html',''); initResizable
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a491104d55205020e01c285d91cc94537" id="r_a491104d55205020e01c285d91cc94537"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a491104d55205020e01c285d91cc94537">x</a></td></tr>
+<tr class="memitem:a491104d55205020e01c285d91cc94537" id="r_a491104d55205020e01c285d91cc94537"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a491104d55205020e01c285d91cc94537">x</a> = 0</td></tr>
 <tr class="separator:a491104d55205020e01c285d91cc94537"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae9ed63ed2c22d2a4794d0ff636cc5c7d" id="r_ae9ed63ed2c22d2a4794d0ff636cc5c7d"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae9ed63ed2c22d2a4794d0ff636cc5c7d">y</a></td></tr>
+<tr class="memitem:ae9ed63ed2c22d2a4794d0ff636cc5c7d" id="r_ae9ed63ed2c22d2a4794d0ff636cc5c7d"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae9ed63ed2c22d2a4794d0ff636cc5c7d">y</a> = 0</td></tr>
 <tr class="separator:ae9ed63ed2c22d2a4794d0ff636cc5c7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a49df3570c5d5b019e141640a27bda653" id="r_a49df3570c5d5b019e141640a27bda653"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a49df3570c5d5b019e141640a27bda653">w</a></td></tr>
+<tr class="memitem:a49df3570c5d5b019e141640a27bda653" id="r_a49df3570c5d5b019e141640a27bda653"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a49df3570c5d5b019e141640a27bda653">w</a> = 0</td></tr>
 <tr class="separator:a49df3570c5d5b019e141640a27bda653"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7156418f3424049e90891c81032f91b0" id="r_a7156418f3424049e90891c81032f91b0"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7156418f3424049e90891c81032f91b0">h</a></td></tr>
+<tr class="memitem:a7156418f3424049e90891c81032f91b0" id="r_a7156418f3424049e90891c81032f91b0"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7156418f3424049e90891c81032f91b0">h</a> = 0</td></tr>
 <tr class="separator:a7156418f3424049e90891c81032f91b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9e659c6727af3f70d0e87d7376419372" id="r_a9e659c6727af3f70d0e87d7376419372"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9e659c6727af3f70d0e87d7376419372">col</a> = color::WHITE</td></tr>
-<tr class="separator:a9e659c6727af3f70d0e87d7376419372"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af7e2bc7b92723a27009b88d21a647e83" id="r_af7e2bc7b92723a27009b88d21a647e83"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af7e2bc7b92723a27009b88d21a647e83">col</a> = color::WHITE</td></tr>
+<tr class="separator:af7e2bc7b92723a27009b88d21a647e83"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2006db9b59630d3b0529517ecc83795e" id="r_a2006db9b59630d3b0529517ecc83795e"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2006db9b59630d3b0529517ecc83795e">sw</a> = 1</td></tr>
 <tr class="separator:a2006db9b59630d3b0529517ecc83795e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>A struct which can be passed to: fill_rect(), stroke_rect(), . </p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
-<a id="a9e659c6727af3f70d0e87d7376419372" name="a9e659c6727af3f70d0e87d7376419372"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9e659c6727af3f70d0e87d7376419372">&#9670;&#160;</a></span>col</h2>
+<a id="af7e2bc7b92723a27009b88d21a647e83" name="af7e2bc7b92723a27009b88d21a647e83"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af7e2bc7b92723a27009b88d21a647e83">&#9670;&#160;</a></span>col</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">uint8_t constixel::draw_rect::col = color::WHITE</td>
+          <td class="memname">uint32_t constixel::draw_rect::col = color::WHITE</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -151,7 +147,7 @@ Public Attributes</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">int32_t constixel::draw_rect::h</td>
+          <td class="memname">int32_t constixel::draw_rect::h = 0</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -181,7 +177,7 @@ Public Attributes</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">int32_t constixel::draw_rect::w</td>
+          <td class="memname">int32_t constixel::draw_rect::w = 0</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -196,7 +192,7 @@ Public Attributes</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">int32_t constixel::draw_rect::x</td>
+          <td class="memname">int32_t constixel::draw_rect::x = 0</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -211,7 +207,7 @@ Public Attributes</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">int32_t constixel::draw_rect::y</td>
+          <td class="memname">int32_t constixel::draw_rect::y = 0</td>
         </tr>
       </table>
 </div><div class="memdoc">
