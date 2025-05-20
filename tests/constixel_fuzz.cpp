@@ -20,7 +20,7 @@ static int32_t random_int32() {
 }
 
 static int32_t random_limit() {
-    static constexpr const std::array<int32_t, 34> limits {
+    static constexpr const std::array<int32_t, 34> limits {{
 
         0,
         0,
@@ -58,7 +58,7 @@ static int32_t random_limit() {
         std::numeric_limits<uint16_t>::max()-1,
         std::numeric_limits<uint8_t>::min()+1,
         std::numeric_limits<uint8_t>::max()-1,
-    };
+    }};
 
     return limits[static_cast<size_t>(random_int32()) % limits.size()];
 }
