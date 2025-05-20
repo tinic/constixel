@@ -26,7 +26,7 @@ constixel is a single header minimalistic constexpr C++20 2D graphics palette ba
 - Render proportional text, optionally with kerning, using fonts genenerated by a custom version of fontbm. Repository includes a set of pre-made fonts which are trivial to use. UTF-8 is supported.
 - A uncompressed png encoder is included to reduce dependencies.
 - Blit raw 32-bit RGBA image buffers into the palette based back buffer (with or without dithering). Also convert back into a RGBA buffer when needed.
-- Code is cpplint compliant, passes cppcheck and is of course consteval runnable.
+- Code is cpplint compliant, has a .clang-tidy profile, passes cppcheck and is of course consteval runnable.
 - Code compiles with "-Wall -Wextra -Wpedantic -Weffc++ -Werror" on so it can be easily used in any existing C++ project without creating noise.
 - Resistance to unbound behavior (i.e. potential for DoS) when passing unreasonable values. Right now it will not pass UBSan (-fno-sanitize=undefined) when the API is fuzzed due to integer overflows (only) but nothing 'bad' will happen as everything is bounds checked before committing to the back buffer. WIP.
 - Various other simple image manipulation operations.
