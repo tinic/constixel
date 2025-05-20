@@ -2044,8 +2044,8 @@ struct draw_rect {
  * A struct which can be passed to: fill_circle(), stroke_circle(), fill_circle_aa(), stroke_circle_aa().
  */
 struct draw_circle {
-    int32_t x = 0;               /**< Center X coordinate in pixels. */
-    int32_t y = 0;               /**< Center Y coordinate in pixels. */
+    int32_t cx = 0;               /**< Center X coordinate in pixels. */
+    int32_t cy = 0;               /**< Center Y coordinate in pixels. */
     int32_t r = 0;               /**< Radius of the circle in pixels. */
     uint32_t col = color::WHITE; /**< Color palette index to use. */
     int32_t sw = 1;              /**< Width of the stroke in pixels. */
@@ -2831,7 +2831,7 @@ class image {
      * \param d \ref draw_circle initializer struct
      */
     constexpr void fill_circle(const struct draw_circle &d) {
-        fill_circle(d.x, d.y, d.r, d.col);
+        fill_circle(d.cx, d.cy, d.r, d.col);
     }
 
     /**
@@ -2869,7 +2869,7 @@ class image {
      * \param d \ref draw_circle initializer struct
      */
     constexpr void stroke_circle(const struct draw_circle &d) {
-        stroke_circle(d.x, d.y, d.r, d.col, d.sw);
+        stroke_circle(d.cx, d.cy, d.r, d.col, d.sw);
     }
 
     /**
@@ -2909,7 +2909,7 @@ class image {
      * \param d \ref draw_circle initializer struct
      */
     constexpr void stroke_circle_aa(const struct draw_circle &d) {
-        stroke_circle_aa(d.x, d.y, d.r, d.col, d.sw);
+        stroke_circle_aa(d.cx, d.cy, d.r, d.col, d.sw);
     }
 
     /**
@@ -2940,7 +2940,7 @@ class image {
      * \param d \ref draw_circle initializer struct
      */
     constexpr void fill_circle_aa(const struct draw_circle &d) {
-        fill_circle_aa(d.x, d.y, d.r, d.col);
+        fill_circle_aa(d.cx, d.cy, d.r, d.col);
     }
 
     /**

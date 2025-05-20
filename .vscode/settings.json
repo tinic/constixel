@@ -105,7 +105,7 @@
         "xutility": "cpp",
         "__config": "cpp"
     },
-    "cmake.sourceDirectory": "/root/constixel",
+    "cmake.sourceDirectory": "/Users/turo/constixel",
     "editor.autoClosingBrackets": "never",
     "terminal.integrated.enableImages": true,
     "C_Cpp.dimInactiveRegions": false
