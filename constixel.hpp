@@ -57,16 +57,16 @@ namespace hidden {
 }
 
 [[nodiscard]] static constexpr float fast_log2(const float x) {
-    uint32_t xi = std::bit_cast<uint32_t>(x);
-    float xf = std::bit_cast<float>((xi & 0x007FFFFF) | 0x3f000000);
+    const uint32_t xi = std::bit_cast<uint32_t>(x);
+    const float xf = std::bit_cast<float>((xi & 0x007FFFFF) | 0x3f000000);
     const float y = static_cast<float>(xi) * 1.1920928955078125e-7f;
     return y - 124.22551499f - 1.498030302f * xf - 1.72587999f / (0.3520887068f + xf);
 }
 
 static constexpr float fast_sqrtf(const float x) {
-    int32_t i = std::bit_cast<int>(x);
+    int32_t i = std::bit_cast<int32_t>(x);
     const int k = i & 0x00800000;
-    float y;
+    float y = 0.0f;
     if (k != 0) {
         i = 0x5ed9d098 - (i >> 1);
         y = std::bit_cast<float>(i);
@@ -76,8 +76,8 @@ static constexpr float fast_sqrtf(const float x) {
         y = std::bit_cast<float>(i);
         y = 0.82420468f * y * ((-x * y * y) + 2.14996147f);
     }
-    float c = x * y;
-    float r = ((y * -c) + 1.0f);
+    const float c = x * y;
+    const float r = ((y * -c) + 1.0f);
     y = ((0.5f * c * r) + c);
     return y;
 }
@@ -91,7 +91,7 @@ static constexpr double m_pi_d = 3.14159265358979323846;
 [[nodiscard]] static consteval double consteval_cos(double x, int32_t terms = 10) {
     x = x - 6.283185307179586 * static_cast<int32_t>(x / 6.283185307179586);  // wrap x to [0, 2π)
     double res = 1.0, term = 1.0;
-    double x2 = x * x;
+    const double x2 = x * x;
     for (int32_t i = 1; i < terms; ++i) {
         term *= -x2 / ((2 * i - 1) * (2 * i));
         res += term;
@@ -102,7 +102,7 @@ static constexpr double m_pi_d = 3.14159265358979323846;
 [[nodiscard]] static consteval double consteval_sin(double x, int32_t terms = 10) {
     x = x - 6.283185307179586 * static_cast<int32_t>(x / 6.283185307179586);  // wrap x to [0, 2π)
     double res = x, term = x;
-    double x2 = x * x;
+    const double x2 = x * x;
     for (int32_t i = 1; i < terms; ++i) {
         term *= -x2 / ((2 * i) * (2 * i + 1));
         res += term;
@@ -354,10 +354,10 @@ class quantize {
         size_t best = 0;
         float bestd = 100.0f;
         for (size_t i = 0; i < pal.size(); ++i) {
-            float dr = r - linearpal.at(i * 3 + 0);
-            float dg = g - linearpal.at(i * 3 + 1);
-            float db = b - linearpal.at(i * 3 + 2);
-            float d = dr * dr + dg * dg + db * db;
+            const float dr = r - linearpal.at(i * 3 + 0);
+            const float dg = g - linearpal.at(i * 3 + 1);
+            const float db = b - linearpal.at(i * 3 + 2);
+            const float d = dr * dr + dg * dg + db * db;
             if (d < bestd) {
                 bestd = d;
                 best = i;
@@ -670,13 +670,13 @@ class format {
             header.at(i++) = 'T';
             header.at(i++) = 0x00;
 
-            size_t bytes_to_copy = std::min(max_data_use, bytes);
+            const size_t bytes_to_copy = std::min(max_data_use, bytes);
             header.at(i++) = (((bytes_to_copy + 1) >> 0) & 0xFF);
             header.at(i++) = (((bytes_to_copy + 1) >> 8) & 0xFF);
             header.at(i++) = ((((bytes_to_copy + 1) ^ 0xffff) >> 0) & 0xFF);
             header.at(i++) = ((((bytes_to_copy + 1) ^ 0xffff) >> 8) & 0xFF);
 
-            size_t adlersum32_start_pos = i;
+            const size_t adlersum32_start_pos = i;
             header.at(i++) = 0;
             for (size_t d = 0; d < bytes_to_copy; d++) {
                 header.at(i++) = line[d];
@@ -1129,7 +1129,7 @@ class format_1bit : public format {
                     if ((y + y6) < H * S) {
                         for (size_t xx = 0; xx < (w + S - 1) / S; xx++) {
                             const uint8_t *ptr = &data_raw[((y + y6) / S) * bytes_per_line + (xx + x) / 8];
-                            size_t x8 = (xx + x) % 8;
+                            const size_t x8 = (xx + x) % 8;
                             set.mark(static_cast<uint8_t>(((*ptr) >> (7 - x8)) & 1));
                         }
                         if (++inc >= S) {
@@ -1357,7 +1357,7 @@ class format_2bit : public format {
                     if ((y + y6) < H * S) {
                         for (size_t xx = 0; xx < (w + S - 1) / S; xx++) {
                             const uint8_t *ptr = &data_raw[((y + y6) / S) * bytes_per_line + (xx + x) / 4];
-                            size_t x4 = (xx + x) % 4;
+                            const size_t x4 = (xx + x) % 4;
                             set.mark(static_cast<uint8_t>(((*ptr) >> (6 - x4 * 2)) & 3));
                         }
                         if (++inc >= S) {
@@ -1599,7 +1599,7 @@ class format_4bit : public format {
                     if ((y + y6) < H * S) {
                         for (size_t xx = 0; xx < (w + S - 1) / S; xx++) {
                             const uint8_t *ptr = &data_raw[((y + y6) / S) * bytes_per_line + (xx + x) / 2];
-                            size_t x2 = (xx + x) % 2;
+                            const size_t x2 = (xx + x) % 2;
                             set.mark(static_cast<uint8_t>(((*ptr) >> (4 - x2 * 4)) & 0xF));
                         }
                         if (++inc >= S) {
@@ -1676,8 +1676,8 @@ class format_8bit : public format {
                 pal[0x70 + c + 8] = (255 << 16) | (x << 8) | (255 << 0);
             }
             for (size_t c = 0; c < 8; c++) {
-                hidden::oklab lft{static_cast<double>(c) / 7 - 0.2, 0.2, 0.0};
-                hidden::oklab rgh{static_cast<double>(c) / 7 - 0.2, 0.2, 337.5};
+                const hidden::oklab lft{static_cast<double>(c) / 7 - 0.2, 0.2, 0.0};
+                const hidden::oklab rgh{static_cast<double>(c) / 7 - 0.2, 0.2, 337.5};
                 for (size_t d = 0; d < 16; d++) {
                     auto res = hidden::oklab_to_srgb_consteval(hidden::oklch_to_oklab_consteval(hidden::oklch{
                         std::lerp(lft.l, rgh.l, static_cast<double>(d) / 15.0),
@@ -3438,7 +3438,7 @@ class image {
                 output.append("\033_G");
             }
             output.append(base64.length() <= 4096 ? "m=0;" : "m=1;");
-            size_t bytes_to_append = std::min(base64.length(), static_cast<size_t>(4096));
+            const size_t bytes_to_append = std::min(base64.length(), static_cast<size_t>(4096));
             output.append(base64.substr(0, bytes_to_append));
             base64.erase(0, bytes_to_append);
             output.append("\033\\");
@@ -3635,7 +3635,7 @@ class image {
      * @private
      */
     constexpr const char *get_next_utf32(const char *str, uint32_t *utf32) const {
-        uint32_t lead = static_cast<uint32_t>(str[0]) & 0xFF;
+        const uint32_t lead = static_cast<uint32_t>(str[0]) & 0xFF;
         if (lead < 0x80) {
             *utf32 = lead;
             return str + 1;
@@ -4112,8 +4112,8 @@ class image {
         if (w <= 0 || y < 0 || y >= static_cast<int32_t>(H) || x + w <= 0 || x >= static_cast<int32_t>(W)) {
             return;
         }
-        int32_t x0 = std::max(x, int32_t{0});
-        int32_t x1 = std::min(x + w, static_cast<int32_t>(W));
+        const int32_t x0 = std::max(x, int32_t{0});
+        const int32_t x1 = std::min(x + w, static_cast<int32_t>(W));
         T<W, H, GR>::span(data, static_cast<size_t>(x0), static_cast<size_t>(x1), static_cast<size_t>(y), col);
     }
 
