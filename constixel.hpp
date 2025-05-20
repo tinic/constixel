@@ -111,15 +111,21 @@ static constexpr float fast_sqrtf(const float x) {
 }
 
 struct oklch {
-    double l, c, h;
+    double l = 0.0;
+    double c = 0.0;
+    double h = 0.0;
 };
 
 struct oklab {
-    double l, a, b;
+    double l = 0.0;
+    double a = 0.0;
+    double b = 0.0;
 };
 
 struct srgb {
-    double r, g, b;
+    double r = 0.0;
+    double g = 0.0;
+    double b = 0.0;
 };
 
 [[nodiscard]] static constexpr float linear_to_srgb(float c) {
@@ -464,13 +470,13 @@ class hextree {
 /// @cond PRIVATE_CLASS
 template <typename T>
 struct char_info {
-    T x;
-    T y;
-    T width;
-    T height;
-    T xadvance;
-    T xoffset;
-    T yoffset;
+    T x = 0;
+    T y = 0;
+    T width = 0;
+    T height = 0;
+    T xadvance = 0;
+    T xoffset = 0;
+    T yoffset = 0;
 };
 /// @endcond // PRIVATE_CLASS
 
@@ -1059,7 +1065,8 @@ class format_1bit : public format {
                 const int32_t V = (R * 2 + G * 3 + B * 1) + err;
                 const uint8_t n = V > 768 ? 1 : 0;
                 plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
-                err = std::clamp(V - ((n != 0) ? int32_t{0xFF * 6} : int32_t{0x00}), int32_t{-0xFF * 6}, int32_t{0xFF * 6});
+                err = std::clamp(V - ((n != 0) ? int32_t{0xFF * 6} : int32_t{0x00}), int32_t{-0xFF * 6},
+                                 int32_t{0xFF * 6});
             }
         }
     }
