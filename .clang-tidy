@@ -15,6 +15,8 @@ Checks: "*,
         -readability-uppercase-literal-suffix,
         -readability-identifier-length,
         -readability-simplify-boolean-expr,
+        -readability-math-missing-parentheses,
+        -readability-isolate-declaration,
 
         -cppcoreguidelines-avoid-magic-numbers,
         -cppcoreguidelines-pro-bounds-pointer-arithmetic,
@@ -22,6 +24,8 @@ Checks: "*,
 
         -modernize-use-trailing-return-type,
         -modernize-use-std-numbers,
+        -modernize-use-integer-sign-comparison,
+        -modernize-use-designated-initializers,
 
         -performance-enum-size,        
         

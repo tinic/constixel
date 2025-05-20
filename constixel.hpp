@@ -278,18 +278,18 @@ class quantize {
             std::size_t bestIdx = 0;
 
             for (size_t i = 0; i < pal.size(); i += 4) {
-                float32x4_t dr = vsubq_f32(vld1q_f32(&linearpal_neon[i * 3]), vR);
-                float32x4_t dg = vsubq_f32(vld1q_f32(&linearpal_neon[i * 3 + 4]), vG);
-                float32x4_t db = vsubq_f32(vld1q_f32(&linearpal_neon[i * 3 + 8]), vB);
+                const float32x4_t dr = vsubq_f32(vld1q_f32(&linearpal_neon[i * 3]), vR);
+                const float32x4_t dg = vsubq_f32(vld1q_f32(&linearpal_neon[i * 3 + 4]), vG);
+                const float32x4_t db = vsubq_f32(vld1q_f32(&linearpal_neon[i * 3 + 8]), vB);
 
 #if defined(__aarch64__) && defined(__ARM_FEATURE_FMA)
-                float32x4_t dist = vfmaq_f32(vfmaq_f32(vmulq_f32(dr, dr), dg, dg), db, db);
+                const float32x4_t dist = vfmaq_f32(vfmaq_f32(vmulq_f32(dr, dr), dg, dg), db, db);
 #else
-                float32x4_t dist = vaddq_f32(vaddq_f32(vmulq_f32(dr, dr), vmulq_f32(dg, dg)), vmulq_f32(db, db));
+                const float32x4_t dist = vaddq_f32(vaddq_f32(vmulq_f32(dr, dr), vmulq_f32(dg, dg)), vmulq_f32(db, db));
 #endif
 
-                float32x2_t lo = vget_low_f32(dist), hi = vget_high_f32(dist);
-                float d0 = vget_lane_f32(lo, 0);
+                const float32x2_t lo = vget_low_f32(dist), hi = vget_high_f32(dist);
+                const float d0 = vget_lane_f32(lo, 0);
                 if (d0 < best) {
                     best = d0;
                     bestIdx = i;
@@ -297,7 +297,7 @@ class quantize {
                         break;
                     }
                 }
-                float d1 = vget_lane_f32(lo, 1);
+                const float d1 = vget_lane_f32(lo, 1);
                 if (d1 < best) {
                     best = d1;
                     bestIdx = i + 1;
@@ -305,7 +305,7 @@ class quantize {
                         break;
                     }
                 }
-                float d2 = vget_lane_f32(hi, 0);
+                const float d2 = vget_lane_f32(hi, 0);
                 if (d2 < best) {
                     best = d2;
                     bestIdx = i + 2;
@@ -313,7 +313,7 @@ class quantize {
                         break;
                     }
                 }
-                float d3 = vget_lane_f32(hi, 1);
+                const float d3 = vget_lane_f32(hi, 1);
                 if (d3 < best) {
                     best = d3;
                     bestIdx = i + 3;
@@ -1750,14 +1750,14 @@ class format_8bit : public format {
 #if defined(__ARM_NEON)
         if (!std::is_constant_evaluated()) {
             auto bg = static_cast<size_t>(data.data()[y * bytes_per_line + x]);
-            float32x4_t cola_v = vdupq_n_f32(cola);
-            float32x4_t inv_cola_v = vdupq_n_f32(1.0f - cola);
-            float32x4_t col_rgb = {colr, colg, colb, 0.0f};
+            const float32x4_t cola_v = vdupq_n_f32(cola);
+            const float32x4_t inv_cola_v = vdupq_n_f32(1.0f - cola);
+            const float32x4_t col_rgb = {colr, colg, colb, 0.0f};
             // Note: this reads 1 float into linearpal_neon
-            float32x4_t bg_rgb = vld1q_f32(&quant.linear_palette()[bg * 3]);
-            float32x4_t result_rgb = vaddq_f32(vmulq_f32(col_rgb, cola_v), vmulq_f32(bg_rgb, inv_cola_v));
-            alignas(16) float result[4];
-            vst1q_f32(result, result_rgb);
+            const float32x4_t bg_rgb = vld1q_f32(&quant.linear_palette()[bg * 3]);
+            const float32x4_t result_rgb = vaddq_f32(vmulq_f32(col_rgb, cola_v), vmulq_f32(bg_rgb, inv_cola_v));
+            alignas(16) std::array<float, 4> result{};
+            vst1q_f32(result.data(), result_rgb);
             plot(data, x, y, quant.nearest_linear(result[0], result[1], result[2]));
         } else
 #endif  // #if defined(__ARM_NEON)
@@ -2044,8 +2044,8 @@ struct draw_rect {
  * A struct which can be passed to: fill_circle(), stroke_circle(), fill_circle_aa(), stroke_circle_aa().
  */
 struct draw_circle {
-    int32_t cx = 0;               /**< Center X coordinate in pixels. */
-    int32_t cy = 0;               /**< Center Y coordinate in pixels. */
+    int32_t cx = 0;              /**< Center X coordinate in pixels. */
+    int32_t cy = 0;              /**< Center Y coordinate in pixels. */
     int32_t r = 0;               /**< Radius of the circle in pixels. */
     uint32_t col = color::WHITE; /**< Color palette index to use. */
     int32_t sw = 1;              /**< Width of the stroke in pixels. */
@@ -2960,7 +2960,7 @@ class image {
      */
     constexpr void stroke_round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col,
                                      int32_t stroke_width = 1) {
-        const int32_t cr = std::min((w) / 2, std::min((h) / 2, radius));
+        const int32_t cr = std::min({w / 2, h / 2, radius});
         const int32_t dx = w - cr * 2;
         const int32_t dy = h - cr * 2;
         if (radius == 0) {
@@ -3006,7 +3006,7 @@ class image {
      * \param col Color palette index to use.
      */
     constexpr void fill_round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col) {
-        const int32_t cr = std::min((w) / 2, std::min((h) / 2, radius));
+        const int32_t cr = std::min({w / 2, h / 2, radius});
         const int32_t dx = w - cr * 2;
         const int32_t dy = h - cr * 2;
         circle_int<false, false>(x + cr, y + cr, cr, dx, dy, col, 0);
@@ -3044,7 +3044,7 @@ class image {
      * \param col Color palette index to use.
      */
     constexpr void fill_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col) {
-        int32_t cr = std::min((w) / 2, std::min((h) / 2, radius));
+        int32_t cr = std::min({w / 2, h / 2, radius});
         int32_t dx = w - cr * 2;
         int32_t dy = h - cr * 2;
         circle_int<true, false>(x + cr, y + cr, cr, dx, dy, col, 0);
@@ -3084,7 +3084,7 @@ class image {
      */
     constexpr void stroke_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col,
                                         int32_t stroke_width = 1) {
-        const int32_t cr = std::min((w) / 2, std::min((h) / 2, radius));
+        const int32_t cr = std::min({w / 2, h / 2, radius});
         const int32_t dx = w - cr * 2;
         const int32_t dy = h - cr * 2;
         if (radius == 0) {
