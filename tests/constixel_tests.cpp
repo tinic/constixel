@@ -127,8 +127,7 @@ static constexpr void hexdump(const uint8_t* data, std::size_t len) {
 
 #if MAINLINE_TESTS
 static constexpr std::string test0() {
-    std::string out{};
-    out.reserve(1UL << 18);
+    std::string out;
     constixel::image<constixel::format_1bit, 32, 31> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
@@ -141,8 +140,7 @@ static constexpr std::string test0() {
 }
 
 static constexpr std::string test1() {
-    std::string out{};
-    out.reserve(1UL << 18);
+    std::string out;
     constixel::image<constixel::format_2bit, 112, 64> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
@@ -155,8 +153,7 @@ static constexpr std::string test1() {
 }
 
 constexpr std::string test2() {
-    std::string out{};
-    out.reserve(1UL << 18);
+    std::string out;
     constixel::image<constixel::format_4bit, 128, 127> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
@@ -169,8 +166,7 @@ constexpr std::string test2() {
 }
 
 static constexpr std::string test3() {
-    std::string out{};
-    out.reserve(1UL << 18);
+    std::string out;
     constixel::image<constixel::format_1bit, 127, 101> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
@@ -183,8 +179,7 @@ static constexpr std::string test3() {
 }
 
 static constexpr std::string test4() {
-    std::string out{};
-    out.reserve(1UL << 18);
+    std::string out;
     constixel::image<constixel::format_2bit, 111, 95> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
@@ -197,8 +192,7 @@ static constexpr std::string test4() {
 }
 
 static constexpr std::string test5() {
-    std::string out{};
-    out.reserve(1UL << 18);
+    std::string out;
     constixel::image<constixel::format_4bit, 7, 128> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
@@ -211,8 +205,7 @@ static constexpr std::string test5() {
 }
 
 static constexpr std::string test6() {
-    std::string out{};
-    out.reserve(1UL << 18);
+    std::string out;
     constixel::image<constixel::format_1bit, 127, 101> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
@@ -225,8 +218,7 @@ static constexpr std::string test6() {
 }
 
 static constexpr std::string test7() {
-    std::string out{};
-    out.reserve(1UL << 18);
+    std::string out;
     constixel::image<constixel::format_2bit, 111, 95> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
@@ -239,8 +231,7 @@ static constexpr std::string test7() {
 }
 
 static constexpr std::string test8() {
-    std::string out{};
-    out.reserve(1UL << 18);
+    std::string out;
     constixel::image<constixel::format_4bit, 7, 7> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
@@ -253,8 +244,7 @@ static constexpr std::string test8() {
 }
 
 static constexpr std::string test9() {
-    std::string out{};
-    out.reserve(1UL << 18);
+    std::string out;
     constixel::image<constixel::format_8bit, 64, 64> image;
     image.clear();
     for (int32_t c = 0; c < 16; c++) {
@@ -269,8 +259,7 @@ static constexpr std::string test9() {
 static constexpr std::string test10() {
     constixel::image<constixel::format_1bit, 256, 256> image;
     image.fill_rect(0, 0, 256, 256, 2);
-    std::string out{};
-    out.reserve(1UL << 18);
+    std::string out;
     image.png([&out](char ch) mutable {
         out.push_back(ch);
     });
@@ -280,8 +269,7 @@ static constexpr std::string test10() {
 static constexpr std::string test11() {
     constixel::image<constixel::format_8bit, 64, 64> image;
     image.draw_string_aa<constixel::ibmplexsans_medium_48_aa>(0, 0, "ABCDEFGHIKLMNO", 1);
-    std::string out{};
-    out.reserve(1UL << 18);
+    std::string out;
     image.sixel([&out](char ch) mutable {
         out.push_back(ch);
     });
@@ -291,8 +279,7 @@ static constexpr std::string test11() {
 static constexpr std::string test12() {
     constixel::image<constixel::format_8bit, 64, 64> image;
     image.draw_string_mono<constixel::ibmplexsans_medium_48_mono>(0, 0, "ABCDEFGHIKLMNO", 1);
-    std::string out{};
-    out.reserve(1UL << 18);
+    std::string out;
     image.sixel([&out](char ch) mutable {
         out.push_back(ch);
     });
@@ -302,8 +289,7 @@ static constexpr std::string test12() {
 static constexpr std::string test13() {
     constixel::image<constixel::format_4bit, 64, 64> image;
     image.draw_string_aa<constixel::ibmplexsans_medium_48_aa>(0, 0, "ABCDEFGHIKLMNO", 1);
-    std::string out{};
-    out.reserve(1UL << 18);
+    std::string out;
     image.sixel([&out](char ch) mutable {
         out.push_back(ch);
     });
@@ -313,8 +299,7 @@ static constexpr std::string test13() {
 static constexpr std::string test14() {
     constixel::image<constixel::format_1bit, 64, 64> image;
     image.draw_string_mono<constixel::ibmplexsans_medium_48_mono>(0, 0, "ABCDEFGHIKLMNO", 1);
-    std::string out{};
-    out.reserve(1UL << 18);
+    std::string out;
     image.sixel([&out](char ch) mutable {
         out.push_back(ch);
     });
@@ -324,8 +309,7 @@ static constexpr std::string test14() {
 static constexpr std::string test15() {
     constixel::image<constixel::format_2bit, 64, 64> image;
     image.draw_string_mono<constixel::ibmplexsans_medium_48_mono>(0, 0, "ABCDEFGHIKLMNO", 1);
-    std::string out{};
-    out.reserve(1UL << 18);
+    std::string out;
     image.sixel([&out](char ch) mutable {
         out.push_back(ch);
     });
@@ -387,7 +371,6 @@ void draw_palette() {
         }
     }
     std::string out;
-    out.reserve(1UL << 18);
     image.template sixel<32>([&out](char ch) mutable {
         out.push_back(ch);
     });
@@ -468,7 +451,6 @@ void draw_functions() {
         image.fill_rect(16 + c * 37, c * 32, 128, 128, static_cast<uint8_t>(c));
         image.vt100_home();
         std::string out;
-        out.reserve(1UL << 18);
         image.sixel([&out](char ch) mutable {
             out.push_back(ch);
         });
@@ -480,7 +462,6 @@ void draw_functions() {
         image.draw_line(16, 16, 64 + c * 42, 700, static_cast<uint8_t>(c), static_cast<uint8_t>(c));
         image.vt100_home();
         std::string out;
-        out.reserve(1UL << 18);
         image.sixel([&out](char ch) mutable {
             out.push_back(ch);
         });
@@ -492,7 +473,6 @@ void draw_functions() {
         image.fill_circle(600, 384, 256 - c * 16, static_cast<uint8_t>(c));
         image.vt100_home();
         std::string out;
-        out.reserve(1UL << 18);
         image.sixel([&out](char ch) mutable {
             out.push_back(ch);
         });
@@ -511,7 +491,6 @@ void draw_functions_aa() {
         image.fill_rect(16 + c * 37, c * 32, 128, 128, static_cast<uint8_t>(c));
         image.vt100_home();
         std::string out;
-        out.reserve(1UL << 18);
         image.sixel([&out](char ch) mutable {
             out.push_back(ch);
         });
@@ -523,7 +502,6 @@ void draw_functions_aa() {
         image.draw_line_aa(16, 16, 64 + c * 42, 700, static_cast<uint8_t>(c));
         image.vt100_home();
         std::string out;
-        out.reserve(1UL << 18);
         image.sixel([&out](char ch) mutable {
             out.push_back(ch);
         });
@@ -535,7 +513,6 @@ void draw_functions_aa() {
         image.fill_circle_aa(600, 384, 256 - c * 16, static_cast<uint8_t>(c));
         image.vt100_home();
         std::string out;
-        out.reserve(1UL << 18);
         image.sixel([&out](char ch) mutable {
             out.push_back(ch);
         });
@@ -714,8 +691,7 @@ int main() {
             uint8_t col = constixel::color::GRAY_RAMP_STOP - static_cast<uint8_t>(i * 3);
             image.draw_string_mono<constixel::ibmplexsans_bold_48_mono>(16, 48 * static_cast<int32_t>(i) + 16, strings.at(i), col);
         }
-        std::vector<char> out{};
-        out.reserve(1UL << 18);
+        std::vector<char> out;
         image.png([&out](char ch) mutable {
             out.push_back(ch);
         });
