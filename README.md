@@ -67,8 +67,11 @@ Option 1: Simply copy the header file to your project and include it. Optionally
 Option 2: If you prefer you can add this git repo as a cmake library:
 
 ```find_package(constixel REQUIRED)
+...
 add_subdirectory(constixel)
+...
 target_link_libraries([your target name] PRIVATE constixel::constixel)
+...
 ```
 
 After that you can simply do this:
