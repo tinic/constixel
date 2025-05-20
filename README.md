@@ -67,13 +67,21 @@ Option 1: Simply copy the header file to your project and include it. Optionally
 Option 2: If you prefer you can add this git repo as a cmake library:
 
 ```find_package(constixel REQUIRED)
-target_link_libraries(MyTarget PRIVATE constixel::constixel)
+add_subdirectory(constixel)
+target_link_libraries([your target name] PRIVATE constixel::constixel)
+```
+
+After that you can simple do:
+
+```
+#include "constixel/constixel.hpp"
+#include "constixel/fonts/[whatever font you want].hpp"
 ```
 
 Don't forget to enable C++20/23:
 
 ```
-g++ -std=C++20 [...]
+set(CMAKE_CXX_STANDARD 20)
 ```
 
 ## Minimal example
