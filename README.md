@@ -3,7 +3,7 @@
 [![CMake on multiple platforms](https://github.com/tinic/constixel/actions/workflows/cmake-multi-platform.yml/badge.svg)](https://github.com/tinic/constixel/actions/workflows/cmake-multi-platform.yml)
 [![CodeQL Advanced](https://github.com/tinic/constixel/actions/workflows/codeql.yml/badge.svg)](https://github.com/tinic/constixel/actions/workflows/codeql.yml)
 
-constixel is a single header minimalistic constexpr C++20 2D graphics palette based rendering library with the ability to output to a sixel image stream which can be viewed in most modern terminals.
+constixel is a single header minimalistic constexpr C++20 2D graphics palette based rendering library with the ability to output to a sixel image stream which can be viewed in a modern terminal like Windows Terminal.
 
 ##### Table of Contents  
 [Primary features and goals](#primary-features-and-goals)  
@@ -36,17 +36,23 @@ constixel is a single header minimalistic constexpr C++20 2D graphics palette ba
 
 ## Applications
 
-- Interface rendering on embedded devices.
+- Interface rendering on embedded devices. Perfect to target monochrome or grayscale OLED screens or just to save memory when rendering to full RGB OLED screens.
 - Send graphical data to your terminal through a serial or ssh connections from embedded or remote devices.
 - Add graphical output to unit tests.
 - Programmatically render static graphical assets.
 - Help debug dynamic memory handling issues in complex C++ projects.
 - ...
-  
+
+## Why Sixel
+
+Yes, VT330/VT340/Sixel is a horrendous format, but it's the best we got at this point. If better protocols come online this library can be easily adjusted to use them. iTerm's PNG support is unfortunately not very performant right now. 
+
+There are plenty of other uses for this library.
+
 ## Requirements
 
 - C++20, i.e. gcc 13.3 or newer, clang 16 or newer, MSVC 17 or newer
-- For viewing the sixel image you will need a sixel capable terminal. Windows Terminal, iTerm2 on MacOS and [some](https://www.arewesixelyet.com/) Linux terminals will work. In Visual Studio Code sixel rendering can be enabled for all terminals using the ```"terminal.integrated.enableImages": true``` setting. There is also an option to output to a [kitty](https://sw.kovidgoyal.net/kitty/graphics-protocol/) graphics enabled terminal.
+- For viewing the sixel image you will need a sixel capable terminal. Windows Terminal, iTerm2 on MacOS and [some](https://www.arewesixelyet.com/) Linux terminals will work. In Visual Studio Code sixel rendering can be enabled for all terminals using the ```"terminal.integrated.enableImages": true``` setting (Seems to be broken on Windows as of 4/2025, but works on MacOS and Linux). There is also an option to output to a [kitty](https://sw.kovidgoyal.net/kitty/graphics-protocol/) graphics enabled terminal.
 
 > [!NOTE]
 > The Terminal app on MacOS does not support sixel, please use iTerm2.
