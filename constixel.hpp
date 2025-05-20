@@ -392,7 +392,7 @@ class hextree {
     static constexpr size_t child_nodes_n_mask = child_nodes_n - 1;
 
     struct node {
-        T child[child_nodes_n]{};
+        std::array<T, child_nodes_n> child{};
         constexpr node() {
             for (auto &c : child) {
                 c = invalid;
@@ -777,7 +777,8 @@ class format {
         std::forward<F>(char_out)('2');
         std::forward<F>(char_out)(';');
         for (size_t c = 0; c < 3; c++) {
-            sixel_number(std::forward<F>(char_out), static_cast<uint16_t>((((col >> (8 * (2 - c))) & 0xFF) * 100) / 255));
+            sixel_number(std::forward<F>(char_out),
+                         static_cast<uint16_t>((((col >> (8 * (2 - c))) & 0xFF) * 100) / 255));
             std::forward<F>(char_out)(';');
         }
     }
@@ -995,24 +996,24 @@ class format_1bit : public format {
         const size_t xs8 = xr8 - xl8;
         const auto c8 =
             static_cast<uint8_t>(col << 7 | col << 6 | col << 5 | col << 4 | col << 3 | col << 2 | col << 1 | col << 0);
-        constexpr uint8_t ml[] = {0b11111111, 0b01111111, 0b00111111, 0b00011111,
-                                  0b00001111, 0b00000111, 0b00000011, 0b00000001};
-        constexpr uint8_t mr[] = {0b00000000, 0b10000000, 0b11000000, 0b11100000,
-                                  0b11110000, 0b11111000, 0b11111100, 0b11111110};
+        constexpr std::array<uint8_t, 8> ml = {
+            {0b11111111, 0b01111111, 0b00111111, 0b00011111, 0b00001111, 0b00000111, 0b00000011, 0b00000001}};
+        constexpr std::array<uint8_t, 8> mr = {
+            {0b00000000, 0b10000000, 0b11000000, 0b11100000, 0b11110000, 0b11111000, 0b11111100, 0b11111110}};
         uint8_t *yptr = &data.data()[y * bytes_per_line];
         if (xs8 > 0) {
-            yptr[xl8] &= ~ml[xl0];
-            yptr[xl8] |= ml[xl0] & c8;
+            yptr[xl8] &= static_cast<uint8_t>(~ml[xl0]);
+            yptr[xl8] |= static_cast<uint8_t>(ml[xl0] & c8);
             for (size_t x = xl8 + 1; x < xr8; x++) {
                 yptr[x] = c8;
             }
             if (xr0 != 0) {
-                yptr[xr8] &= ~mr[xr0];
-                yptr[xr8] |= mr[xr0] & c8;
+                yptr[xr8] &= static_cast<uint8_t>(~mr[xr0]);
+                yptr[xr8] |= static_cast<uint8_t>(mr[xr0] & c8);
             }
         } else {
-            yptr[xl8] &= ~(ml[xl0] & mr[xr0]);
-            yptr[xl8] |= (ml[xl0] & mr[xr0] & c8);
+            yptr[xl8] &= static_cast<uint8_t>(~(ml[xl0] & mr[xr0]));
+            yptr[xl8] |= static_cast<uint8_t>((ml[xl0] & mr[xr0] & c8));
         }
     }
 
@@ -1219,22 +1220,22 @@ class format_2bit : public format {
         xr0 %= 4;
         const size_t xs4 = xr4 - xl4;
         const auto c4 = static_cast<uint8_t>(col << 6 | col << 4 | col << 2 | col << 0);
-        constexpr uint8_t ml[] = {0b11111111, 0b00111111, 0b00001111, 0b00000011};
-        constexpr uint8_t mr[] = {0b00000000, 0b11000000, 0b11110000, 0b11111100};
+        constexpr std::array<uint8_t, 4> ml = {{0b11111111, 0b00111111, 0b00001111, 0b00000011}};
+        constexpr std::array<uint8_t, 4> mr = {{0b00000000, 0b11000000, 0b11110000, 0b11111100}};
         uint8_t *yptr = &data.data()[y * bytes_per_line];
         if (xs4 > 0) {
-            yptr[xl4] &= ~ml[xl0];
-            yptr[xl4] |= ml[xl0] & c4;
+            yptr[xl4] &= static_cast<uint8_t>(~ml[xl0]);
+            yptr[xl4] |= static_cast<uint8_t>(ml[xl0] & c4);
             for (size_t x = xl4 + 1; x < xr4; x++) {
                 yptr[x] = c4;
             }
             if (xr0 != 0) {
-                yptr[xr4] &= ~mr[xr0];
-                yptr[xr4] |= mr[xr0] & c4;
+                yptr[xr4] &= static_cast<uint8_t>(~mr[xr0]);
+                yptr[xr4] |= static_cast<uint8_t>(mr[xr0] & c4);
             }
         } else {
-            yptr[xl4] &= ~(ml[xl0] & mr[xr0]);
-            yptr[xl4] |= (ml[xl0] & mr[xr0] & c4);
+            yptr[xl4] &= static_cast<uint8_t>(~(ml[xl0] & mr[xr0]));
+            yptr[xl4] |= static_cast<uint8_t>(ml[xl0] & mr[xr0] & c4);
         }
     }
 
@@ -1411,7 +1412,7 @@ class format_4bit : public format {
         }
         return std::array<uint32_t, (1UL << bits_per_pixel)>(
             {{0x000000, 0xffffff, 0xff0000, 0x00ff00, 0x0000ff, 0xffff00, 0x00ffff, 0xff00ff, 0x333333, 0x666666,
-                0x999999, 0xcccccc, 0x7f0000, 0x007f00, 0x00007f, 0x7f7f00}});
+              0x999999, 0xcccccc, 0x7f0000, 0x007f00, 0x00007f, 0x7f7f00}});
     }
     static constexpr const auto quant = hidden::quantize<1UL << bits_per_pixel>(gen_palette_consteval());
 
@@ -1453,22 +1454,22 @@ class format_4bit : public format {
         xr0 %= 2;
         const size_t xs2 = xr2 - xl2;
         const auto c2 = static_cast<uint8_t>(col << 4 | col << 0);
-        constexpr uint8_t ml[] = {0b11111111, 0b00001111};
-        constexpr uint8_t mr[] = {0b00000000, 0b11110000};
+        constexpr std::array<uint8_t, 2> ml = {{0b11111111, 0b00001111}};
+        constexpr std::array<uint8_t, 2> mr = {{0b00000000, 0b11110000}};
         uint8_t *yptr = &data.data()[y * bytes_per_line];
         if (xs2 > 0) {
-            yptr[xl2] &= ~ml[xl0];
-            yptr[xl2] |= ml[xl0] & c2;
+            yptr[xl2] &= static_cast<uint8_t>(~ml[xl0]);
+            yptr[xl2] |= static_cast<uint8_t>(ml[xl0] & c2);
             for (size_t x = xl2 + 1; x < xr2; x++) {
                 yptr[x] = c2;
             }
             if (xr0 != 0) {
-                yptr[xr2] &= ~mr[xr0];
-                yptr[xr2] |= mr[xr0] & c2;
+                yptr[xr2] &= static_cast<uint8_t>(~mr[xr0]);
+                yptr[xr2] |= static_cast<uint8_t>(mr[xr0] & c2);
             }
         } else {
-            yptr[xl2] &= ~(ml[xl0] & mr[xr0]);
-            yptr[xl2] |= (ml[xl0] & mr[xr0] & c2);
+            yptr[xl2] &= static_cast<uint8_t>(~(ml[xl0] & mr[xr0]));
+            yptr[xl2] |= static_cast<uint8_t>(ml[xl0] & mr[xr0] & c2);
         }
     }
 
