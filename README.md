@@ -113,7 +113,7 @@ Include a text font and pass the struct name as a template parameter to the draw
 
 ```c++
 #include "constixel.hpp"
-#include "fonts/ibmplexsans_medium_48_mono.h"
+#include "fonts/ibmplexsans_medium_48_mono.hpp"
 using large_font = constixel::ibmplexsans_medium_48_mono;
 
 int main() {
