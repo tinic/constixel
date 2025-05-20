@@ -133,25 +133,21 @@ struct srgb {
 [[nodiscard]] static constexpr float linear_to_srgb(float c) {
     if (c <= 0.0031308f) {
         return 12.92f * c;
-    } else {
-        if (std::is_constant_evaluated()) {
-            return 1.055f * fast_pow(c, 1.0f / 2.4f) - 0.055f;
-        } else {
-            return 1.055f * std::pow(c, 1.0f / 2.4f) - 0.055f;
-        }
     }
+    if (std::is_constant_evaluated()) {
+        return 1.055f * fast_pow(c, 1.0f / 2.4f) - 0.055f;
+    }
+    return 1.055f * std::pow(c, 1.0f / 2.4f) - 0.055f;
 }
 
 [[nodiscard]] static constexpr float srgb_to_linear(float s) {
     if (s <= 0.040449936f) {
         return s / 12.92f;
-    } else {
-        if (std::is_constant_evaluated()) {
-            return fast_pow((s + 0.055f) / 1.055f, 2.4f);
-        } else {
-            return std::pow((s + 0.055f) / 1.055f, 2.4f);
-        }
     }
+    if (std::is_constant_evaluated()) {
+        return fast_pow((s + 0.055f) / 1.055f, 2.4f);
+    }
+    return std::pow((s + 0.055f) / 1.055f, 2.4f);
 }
 
 [[nodiscard]] static consteval srgb oklab_to_srgb_consteval(const oklab &oklab) {
@@ -1181,9 +1177,8 @@ class format_2bit : public format {
     static consteval auto gen_palette_consteval() {
         if (GR) {
             return std::array<uint32_t, (1UL << bits_per_pixel)>({{0x000000, 0x444444, 0x888888, 0xffffff}});
-        } else {
-            return std::array<uint32_t, (1UL << bits_per_pixel)>({{0x000000, 0xffffff, 0xff0000, 0x0077ff}});
         }
+        return std::array<uint32_t, (1UL << bits_per_pixel)>({{0x000000, 0xffffff, 0xff0000, 0x0077ff}});
     }
     static constexpr const auto quant = hidden::quantize<1UL << bits_per_pixel>(gen_palette_consteval());
 
@@ -1413,11 +1408,10 @@ class format_4bit : public format {
             return std::array<uint32_t, (1UL << bits_per_pixel)>(
                 {{0x000000, 0x111111, 0x222222, 0x333333, 0x444444, 0x555555, 0x666666, 0x777777, 0x888888, 0x999999,
                   0xaaaaaa, 0xbbbbbb, 0xcccccc, 0xdddddd, 0xeeeeee, 0xffffff}});
-        } else {
-            return std::array<uint32_t, (1UL << bits_per_pixel)>(
-                {{0x000000, 0xffffff, 0xff0000, 0x00ff00, 0x0000ff, 0xffff00, 0x00ffff, 0xff00ff, 0x333333, 0x666666,
-                  0x999999, 0xcccccc, 0x7f0000, 0x007f00, 0x00007f, 0x7f7f00}});
         }
+        return std::array<uint32_t, (1UL << bits_per_pixel)>(
+            {{0x000000, 0xffffff, 0xff0000, 0x00ff00, 0x0000ff, 0xffff00, 0x00ffff, 0xff00ff, 0x333333, 0x666666,
+                0x999999, 0xcccccc, 0x7f0000, 0x007f00, 0x00007f, 0x7f7f00}});
     }
     static constexpr const auto quant = hidden::quantize<1UL << bits_per_pixel>(gen_palette_consteval());
 
@@ -2351,7 +2345,8 @@ class image {
         auto color_compose = [&](int32_t x, int32_t y, float a) {
             if (a < hidden::epsilon_low) {
                 return;
-            } else if (a >= hidden::epsilon_high) {
+            }
+            if (a >= hidden::epsilon_high) {
                 plot(x, y, col);
             } else {
                 compose(x, y, a, Rl, Gl, Bl);
@@ -3552,46 +3547,46 @@ class image {
         for (size_t i = 0; i < 4; i++) {
             if ((outcode0 | outcode1) == INSIDE) {
                 return true;
-            } else if ((outcode0 & outcode1) != 0) {
+            }
+            if ((outcode0 & outcode1) != 0) {
                 return false;
+            }
+            uint32_t outcode_out = outcode1 > outcode0 ? outcode1 : outcode0;
+            int32_t x = 0;
+            int32_t y = 0;
+            if ((outcode_out & YMAX) != 0) {
+                const auto x1x0 = static_cast<int64_t>(x1 - x0);
+                const auto w1y0 = static_cast<int64_t>(ymax - y0);
+                const auto y1y0 = static_cast<int64_t>(y1 - y0);
+                x = x0 + static_cast<int32_t>((x1x0 * w1y0) / y1y0);
+                y = ymax;
+            } else if ((outcode_out & YMIN) != 0) {
+                const auto x1x0 = static_cast<int64_t>(x1 - x0);
+                const auto ymy0 = static_cast<int64_t>(ymin - y0);
+                const auto y1y0 = static_cast<int64_t>(y1 - y0);
+                x = x0 + static_cast<int32_t>((x1x0 * ymy0) / y1y0);
+                y = ymin;
+            } else if ((outcode_out & XMAX) != 0) {
+                const auto y1y0 = static_cast<int64_t>(y1 - y0);
+                const auto w1x0 = static_cast<int64_t>(xmax - x0);
+                const auto x1x0 = static_cast<int64_t>(x1 - x0);
+                y = y0 + static_cast<int32_t>((y1y0 * w1x0) / x1x0);
+                x = xmax;
             } else {
-                uint32_t outcode_out = outcode1 > outcode0 ? outcode1 : outcode0;
-                int32_t x = 0;
-                int32_t y = 0;
-                if ((outcode_out & YMAX) != 0) {
-                    const auto x1x0 = static_cast<int64_t>(x1 - x0);
-                    const auto w1y0 = static_cast<int64_t>(ymax - y0);
-                    const auto y1y0 = static_cast<int64_t>(y1 - y0);
-                    x = x0 + static_cast<int32_t>((x1x0 * w1y0) / y1y0);
-                    y = ymax;
-                } else if ((outcode_out & YMIN) != 0) {
-                    const auto x1x0 = static_cast<int64_t>(x1 - x0);
-                    const auto ymy0 = static_cast<int64_t>(ymin - y0);
-                    const auto y1y0 = static_cast<int64_t>(y1 - y0);
-                    x = x0 + static_cast<int32_t>((x1x0 * ymy0) / y1y0);
-                    y = ymin;
-                } else if ((outcode_out & XMAX) != 0) {
-                    const auto y1y0 = static_cast<int64_t>(y1 - y0);
-                    const auto w1x0 = static_cast<int64_t>(xmax - x0);
-                    const auto x1x0 = static_cast<int64_t>(x1 - x0);
-                    y = y0 + static_cast<int32_t>((y1y0 * w1x0) / x1x0);
-                    x = xmax;
-                } else {
-                    const auto y1y0 = static_cast<int64_t>(y1 - y0);
-                    const auto xmx0 = static_cast<int64_t>(xmin - x0);
-                    const auto x1x0 = static_cast<int64_t>(x1 - x0);
-                    y = y0 + static_cast<int32_t>((y1y0 * xmx0) / x1x0);
-                    x = xmin;
-                }
-                if (outcode_out == outcode0) {
-                    x0 = x;
-                    y0 = y;
-                    outcode0 = calc_code(x0, y0);
-                } else {
-                    x1 = x;
-                    y1 = y;
-                    outcode1 = calc_code(x1, y1);
-                }
+                const auto y1y0 = static_cast<int64_t>(y1 - y0);
+                const auto xmx0 = static_cast<int64_t>(xmin - x0);
+                const auto x1x0 = static_cast<int64_t>(x1 - x0);
+                y = y0 + static_cast<int32_t>((y1y0 * xmx0) / x1x0);
+                x = xmin;
+            }
+            if (outcode_out == outcode0) {
+                x0 = x;
+                y0 = y;
+                outcode0 = calc_code(x0, y0);
+            } else {
+                x1 = x;
+                y1 = y;
+                outcode1 = calc_code(x1, y1);
             }
         }
         return false;
