@@ -845,7 +845,7 @@ class format {
         palette_bitset<PBT, std::max(32UL, 1UL << PBS)> pset{};
         for (int32_t y = r.y; y < (r.y + r.h); y += 6) {
             pset.clear();
-            set6(data, static_cast<size_t>(r.x), static_cast<size_t>(r.w), y, pset);
+            set6(data, static_cast<size_t>(r.x), static_cast<size_t>(r.w), static_cast<size_t>(y), pset);
             const size_t stack_count = pset.genstack(stack);
             for (size_t s = 0; s < stack_count; s++) {
                 const PBT col = stack[s];
@@ -855,7 +855,7 @@ class format {
                 std::forward<F>(char_out)('#');
                 sixel_number(std::forward<F>(char_out), static_cast<uint16_t>(col));
                 for (int32_t x = r.x; x < (r.x + r.w); x++) {
-                    PBT bits6 = collect6(data, x, col, static_cast<size_t>(y));
+                    PBT bits6 = collect6(data, static_cast<size_t>(x), col, static_cast<size_t>(y));
                     uint16_t repeat_count = 0;
                     for (int32_t xr = x + 1; xr < (std::min(x + int32_t{255}, static_cast<int32_t>(W * S))); xr++) {
                         if (bits6 == collect6(data, static_cast<size_t>(xr), col, static_cast<size_t>(y))) {
