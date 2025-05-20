@@ -3206,7 +3206,7 @@ class image {
         static_assert(T<W, H, GR>::bits_per_pixel != 4 || ((W + 1) / 2) == bytes_per_line());
         static_assert(T<W, H, GR>::bits_per_pixel != 8 || H == dst.bytes_per_line());
         static_assert(T<W, H, GR>::bits_per_pixel != 8 || W == bytes_per_line());
-        T<W, H, GR>::template transpose<FLIP_H, FLIP_V>(data, dst.data);
+        T<W, H, GR>::template transpose<FLIP_H, FLIP_V>(data.data(), dst.data_ref().data());
     }
 
     /**
@@ -4112,7 +4112,7 @@ class image {
         if (w <= 0 || y < 0 || y >= static_cast<int32_t>(H) || x + w <= 0 || x >= static_cast<int32_t>(W)) {
             return;
         }
-        int32_t x0 = std::max(x, 0);
+        int32_t x0 = std::max(x, int32_t{0});
         int32_t x1 = std::min(x + w, static_cast<int32_t>(W));
         T<W, H, GR>::span(data, static_cast<size_t>(x0), static_cast<size_t>(x1), static_cast<size_t>(y), col);
     }
