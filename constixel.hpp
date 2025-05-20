@@ -558,10 +558,10 @@ class format {
 
     template <typename F>
     static constexpr void png_write_be(F &&char_out, uint32_t value) {
-        char_out(static_cast<char>((value >> 24) & 0xFF));
-        char_out(static_cast<char>((value >> 16) & 0xFF));
-        char_out(static_cast<char>((value >> 8) & 0xFF));
-        char_out(static_cast<char>((value >> 0) & 0xFF));
+        std::forward<F>(char_out)(static_cast<char>((value >> 24) & 0xFF));
+        std::forward<F>(char_out)(static_cast<char>((value >> 16) & 0xFF));
+        std::forward<F>(char_out)(static_cast<char>((value >> 8) & 0xFF));
+        std::forward<F>(char_out)(static_cast<char>((value >> 0) & 0xFF));
     }
 
     template <typename F, typename A>
@@ -575,26 +575,26 @@ class format {
                 crc = (crc & 1) ? (crc >> 1) ^ 0xEDB88320u : crc >> 1;
             }
         }
-        png_write_be(char_out, crc ^ 0xFFFFFFFF);
+        png_write_be(std::forward<F>(char_out), crc ^ 0xFFFFFFFF);
     }
 
     template <typename F, typename A>
     static constexpr void png_write_array(F &&char_out, const A &array, size_t bytes) {
         for (size_t c = 0; c < bytes; c++) {
-            char_out(static_cast<char>(array.at(c)));
+            std::forward<F>(char_out)(static_cast<char>(array.at(c)));
         }
     }
 
     template <typename F>
     static constexpr void png_marker(F &&char_out) {
-        char_out(static_cast<char>(0x89));
-        char_out(0x50);
-        char_out(0x4E);
-        char_out(0x47);
-        char_out(0x0D);
-        char_out(0x0A);
-        char_out(0x1A);
-        char_out(0x0A);
+        std::forward<F>(char_out)(static_cast<char>(0x89));
+        std::forward<F>(char_out)(0x50);
+        std::forward<F>(char_out)(0x4E);
+        std::forward<F>(char_out)(0x47);
+        std::forward<F>(char_out)(0x0D);
+        std::forward<F>(char_out)(0x0A);
+        std::forward<F>(char_out)(0x1A);
+        std::forward<F>(char_out)(0x0A);
     }
 
     template <typename F>
@@ -619,9 +619,9 @@ class format {
         header.at(i++) = 0;
         header.at(i++) = 0;
         header.at(i++) = 0;
-        png_write_be(char_out, static_cast<uint32_t>(i - 4));
-        png_write_array(char_out, header, i);
-        png_write_crc32(char_out, header, i);
+        png_write_be(std::forward<F>(char_out), static_cast<uint32_t>(i - 4));
+        png_write_array(std::forward<F>(char_out), header, i);
+        png_write_crc32(std::forward<F>(char_out), header, i);
     }
 
     template <typename F, typename P>
@@ -637,9 +637,9 @@ class format {
             header.at(i++) = static_cast<char>((palette[c] >> 8) & 0xFF);
             header.at(i++) = static_cast<char>((palette[c] >> 0) & 0xFF);
         }
-        png_write_be(char_out, static_cast<uint32_t>(i - 4));
-        png_write_array(char_out, header, i);
-        png_write_crc32(char_out, header, i);
+        png_write_be(std::forward<F>(char_out), static_cast<uint32_t>(i - 4));
+        png_write_array(std::forward<F>(char_out), header, i);
+        png_write_crc32(std::forward<F>(char_out), header, i);
     }
 
     template <typename F>
@@ -650,9 +650,9 @@ class format {
         header.at(i++) = 'E';
         header.at(i++) = 'N';
         header.at(i++) = 'D';
-        png_write_be(char_out, static_cast<uint32_t>(i - 4));
-        png_write_array(char_out, header, i);
-        png_write_crc32(char_out, header, i);
+        png_write_be(std::forward<F>(char_out), static_cast<uint32_t>(i - 4));
+        png_write_array(std::forward<F>(char_out), header, i);
+        png_write_crc32(std::forward<F>(char_out), header, i);
     }
 
     template <typename F>
@@ -665,9 +665,9 @@ class format {
         header.at(i++) = 'T';
         header.at(i++) = 0x78;
         header.at(i++) = 0x01;
-        png_write_be(char_out, static_cast<uint32_t>(i - 4));
-        png_write_array(char_out, header, i);
-        png_write_crc32(char_out, header, i);
+        png_write_be(std::forward<F>(char_out), static_cast<uint32_t>(i - 4));
+        png_write_array(std::forward<F>(char_out), header, i);
+        png_write_crc32(std::forward<F>(char_out), header, i);
     }
 
     template <typename F>
@@ -698,9 +698,9 @@ class format {
             }
             adler32_sum = adler32(&header[adlersum32_start_pos], i - adlersum32_start_pos, adler32_sum);
 
-            png_write_be(char_out, static_cast<uint32_t>(i - 4));
-            png_write_array(char_out, header, i);
-            png_write_crc32(char_out, header, i);
+            png_write_be(std::forward<F>(char_out), static_cast<uint32_t>(i - 4));
+            png_write_array(std::forward<F>(char_out), header, i);
+            png_write_crc32(std::forward<F>(char_out), header, i);
 
             bytes -= bytes_to_copy;
         }
@@ -719,77 +719,77 @@ class format {
         header.at(i++) = static_cast<char>((adler32_sum >> 16) & 0xFF);
         header.at(i++) = static_cast<char>((adler32_sum >> 8) & 0xFF);
         header.at(i++) = static_cast<char>((adler32_sum >> 0) & 0xFF);
-        png_write_be(char_out, static_cast<uint32_t>(i - 4));
-        png_write_array(char_out, header, i);
-        png_write_crc32(char_out, header, i);
+        png_write_be(std::forward<F>(char_out), static_cast<uint32_t>(i - 4));
+        png_write_array(std::forward<F>(char_out), header, i);
+        png_write_crc32(std::forward<F>(char_out), header, i);
     }
 
     template <typename F>
     static constexpr void sixel_header(F &&char_out) {
-        char_out(0x1b);
-        char_out('P');
-        char_out('0');
-        char_out(';');
-        char_out('1');
-        char_out(';');
-        char_out('0');
-        char_out('q');
+        std::forward<F>(char_out)(0x1b);
+        std::forward<F>(char_out)('P');
+        std::forward<F>(char_out)('0');
+        std::forward<F>(char_out)(';');
+        std::forward<F>(char_out)('1');
+        std::forward<F>(char_out)(';');
+        std::forward<F>(char_out)('0');
+        std::forward<F>(char_out)('q');
     }
 
     template <size_t W, size_t H, size_t S, typename F>
     static constexpr void sixel_raster_attributes(F &&char_out) {
-        char_out('\"');
-        sixel_number(char_out, 2);
-        char_out(';');
-        sixel_number(char_out, 2);
-        char_out(';');
-        sixel_number(char_out, W * S);
-        char_out(';');
-        sixel_number(char_out, H * S);
+        std::forward<F>(char_out)('\"');
+        sixel_number(std::forward<F>(char_out), 2);
+        std::forward<F>(char_out)(';');
+        sixel_number(std::forward<F>(char_out), 2);
+        std::forward<F>(char_out)(';');
+        sixel_number(std::forward<F>(char_out), W * S);
+        std::forward<F>(char_out)(';');
+        sixel_number(std::forward<F>(char_out), H * S);
     }
 
     template <typename F>
     static constexpr void sixel_number(F &&char_out, uint16_t u) {
         if (u < 10) {
-            char_out(static_cast<char>('0' + u));
+            std::forward<F>(char_out)(static_cast<char>('0' + u));
         } else if (u < 100) {
-            char_out(static_cast<char>('0' + (((u / 10) % 10))));
-            char_out(static_cast<char>('0' + (u % 10)));
+            std::forward<F>(char_out)(static_cast<char>('0' + (((u / 10) % 10))));
+            std::forward<F>(char_out)(static_cast<char>('0' + (u % 10)));
         } else if (u < 1000) {
-            char_out(static_cast<char>('0' + ((u / 100) % 10)));
-            char_out(static_cast<char>('0' + ((u / 10) % 10)));
-            char_out(static_cast<char>('0' + (u % 10)));
+            std::forward<F>(char_out)(static_cast<char>('0' + ((u / 100) % 10)));
+            std::forward<F>(char_out)(static_cast<char>('0' + ((u / 10) % 10)));
+            std::forward<F>(char_out)(static_cast<char>('0' + (u % 10)));
         } else if (u < 10000) {
-            char_out(static_cast<char>('0' + ((u / 1000) % 10)));
-            char_out(static_cast<char>('0' + ((u / 100) % 10)));
-            char_out(static_cast<char>('0' + ((u / 10) % 10)));
-            char_out(static_cast<char>('0' + (u % 10)));
+            std::forward<F>(char_out)(static_cast<char>('0' + ((u / 1000) % 10)));
+            std::forward<F>(char_out)(static_cast<char>('0' + ((u / 100) % 10)));
+            std::forward<F>(char_out)(static_cast<char>('0' + ((u / 10) % 10)));
+            std::forward<F>(char_out)(static_cast<char>('0' + (u % 10)));
         } else {
-            char_out(static_cast<char>('0' + ((u / 10000) % 10)));
-            char_out(static_cast<char>('0' + ((u / 1000) % 10)));
-            char_out(static_cast<char>('0' + ((u / 100) % 10)));
-            char_out(static_cast<char>('0' + ((u / 10) % 10)));
-            char_out(static_cast<char>('0' + (u % 10)));
+            std::forward<F>(char_out)(static_cast<char>('0' + ((u / 10000) % 10)));
+            std::forward<F>(char_out)(static_cast<char>('0' + ((u / 1000) % 10)));
+            std::forward<F>(char_out)(static_cast<char>('0' + ((u / 100) % 10)));
+            std::forward<F>(char_out)(static_cast<char>('0' + ((u / 10) % 10)));
+            std::forward<F>(char_out)(static_cast<char>('0' + (u % 10)));
         }
     }
 
     template <typename F>
     static constexpr void sixel_color(F &&char_out, uint16_t i, uint32_t col) {
-        char_out('#');
+        std::forward<F>(char_out)('#');
         sixel_number(char_out, i);
-        char_out(';');
-        char_out('2');
-        char_out(';');
+        std::forward<F>(char_out)(';');
+        std::forward<F>(char_out)('2');
+        std::forward<F>(char_out)(';');
         for (size_t c = 0; c < 3; c++) {
-            sixel_number(char_out, static_cast<uint16_t>((((col >> (8 * (2 - c))) & 0xFF) * 100) / 255));
-            char_out(';');
+            sixel_number(std::forward<F>(char_out), static_cast<uint16_t>((((col >> (8 * (2 - c))) & 0xFF) * 100) / 255));
+            std::forward<F>(char_out)(';');
         }
     }
 
     template <typename F>
     static constexpr void sixel_end(F &&char_out) {
-        char_out(0x1b);
-        char_out('\\');
+        std::forward<F>(char_out)(0x1b);
+        std::forward<F>(char_out)('\\');
     }
 
     template <typename PBT, size_t PBS>
@@ -821,27 +821,27 @@ class format {
 
     template <size_t W, size_t H, typename PBT, size_t PBS, typename P, typename F, typename L>
     static constexpr void png_image(const uint8_t *data, const P &palette, F &&char_out, const L &line_ptr) {
-        png_marker(char_out);
-        png_header(char_out, W, H, PBS);
-        png_palette(char_out, palette);
-        png_idat_zlib_header(char_out);
+        png_marker(std::forward<F>(char_out));
+        png_header(std::forward<F>(char_out), W, H, PBS);
+        png_palette(std::forward<F>(char_out), palette);
+        png_idat_zlib_header(std::forward<F>(char_out));
         uint32_t adler32_sum = 1;
         for (size_t y = 0; y < H; y++) {
             size_t bpl = 0;
             const uint8_t *ptr = line_ptr(data, y, bpl);
-            adler32_sum = png_idat_zlib_stream(char_out, ptr, bpl, adler32_sum);
+            adler32_sum = png_idat_zlib_stream(std::forward<F>(char_out), ptr, bpl, adler32_sum);
         }
-        png_idat_zlib_trailer(char_out, adler32_sum);
-        png_end(char_out);
+        png_idat_zlib_trailer(std::forward<F>(char_out), adler32_sum);
+        png_end(std::forward<F>(char_out));
     }
 
     template <size_t W, size_t H, int32_t S, typename PBT, size_t PBS, typename P, typename F, typename C, typename D>
     static constexpr void sixel_image(const uint8_t *data, const P &palette, F &&char_out, const rect<int32_t> &_r,
                                       const C &collect6, const D &set6) {
-        sixel_header(char_out);
-        sixel_raster_attributes<W, H, S>(char_out);
+        sixel_header(std::forward<F>(char_out));
+        sixel_raster_attributes<W, H, S>(std::forward<F>(char_out));
         for (size_t c = 0; c < palette.size(); c++) {
-            sixel_color(char_out, static_cast<uint16_t>(c), palette[c]);
+            sixel_color(std::forward<F>(char_out), static_cast<uint16_t>(c), palette[c]);
         }
         const auto r = rect<int32_t>{_r.x * S, _r.y * S, _r.w * S, _r.h * S} & rect<int32_t>{0, 0, W * S, H * S};
         std::array<PBT, std::max(32UL, 1UL << PBS)> stack{};
@@ -853,10 +853,10 @@ class format {
             for (size_t s = 0; s < stack_count; s++) {
                 const PBT col = stack[s];
                 if (col != 0) {
-                    char_out('$');
+                    std::forward<F>(char_out)('$');
                 }
-                char_out('#');
-                sixel_number(char_out, static_cast<uint16_t>(col));
+                std::forward<F>(char_out)('#');
+                sixel_number(std::forward<F>(char_out), static_cast<uint16_t>(col));
                 for (int32_t x = r.x; x < (r.x + r.w); x++) {
                     PBT bits6 = collect6(data, x, col, static_cast<size_t>(y));
                     uint16_t repeat_count = 0;
@@ -868,16 +868,16 @@ class format {
                         break;
                     }
                     if (repeat_count > uint16_t{3}) {
-                        char_out('!');
-                        sixel_number(char_out, static_cast<uint16_t>(repeat_count + 1));
+                        std::forward<F>(char_out)('!');
+                        sixel_number(std::forward<F>(char_out), static_cast<uint16_t>(repeat_count + 1));
                         x += repeat_count;
                     }
-                    char_out(static_cast<char>('?' + bits6));
+                    std::forward<F>(char_out)(static_cast<char>('?' + bits6));
                 }
             }
-            char_out('-');
+            std::forward<F>(char_out)('-');
         }
-        sixel_end(char_out);
+        sixel_end(std::forward<F>(char_out));
     }
 };
 /// @endcond
@@ -1109,7 +1109,7 @@ class format_1bit : public format {
 
     template <typename F>
     static constexpr void png(const std::array<uint8_t, image_size> &data, F &&char_out) {
-        png_image<W, H, uint8_t, bits_per_pixel>(data.data(), quant.palette(), char_out,
+        png_image<W, H, uint8_t, bits_per_pixel>(data.data(), quant.palette(), std::forward<F>(char_out),
                                                  [](const uint8_t *data_raw, size_t y, size_t &bpl) {
                                                      bpl = bytes_per_line;
                                                      return data_raw + y * bytes_per_line;
@@ -1119,7 +1119,7 @@ class format_1bit : public format {
     template <size_t S, typename F>
     static constexpr void sixel(const std::array<uint8_t, image_size> &data, F &&char_out, const rect<int32_t> &r) {
         sixel_image<W, H, S, uint8_t, bits_per_pixel>(
-            data.data(), quant.palette(), char_out, r,
+            data.data(), quant.palette(), std::forward<F>(char_out), r,
             [](const uint8_t *data_raw, size_t x, size_t col, size_t y) {
                 const uint8_t *ptr = &data_raw[(y / S) * bytes_per_line + (x / S) / 8];
                 const size_t x8 = (x / S) % 8;
@@ -1338,7 +1338,7 @@ class format_2bit : public format {
 
     template <typename F>
     static constexpr void png(const std::array<uint8_t, image_size> &data, F &&char_out) {
-        png_image<W, H, uint8_t, bits_per_pixel>(data.data(), quant.palette(), char_out,
+        png_image<W, H, uint8_t, bits_per_pixel>(data.data(), quant.palette(), std::forward<F>(char_out),
                                                  [](const uint8_t *data_raw, size_t y, size_t &bpl) {
                                                      bpl = bytes_per_line;
                                                      return data_raw + y * bytes_per_line;
@@ -1348,7 +1348,7 @@ class format_2bit : public format {
     template <size_t S, typename F>
     static constexpr void sixel(const std::array<uint8_t, image_size> &data, F &&char_out, const rect<int32_t> &r) {
         sixel_image<W, H, S, uint8_t, bits_per_pixel>(
-            data.data(), quant.palette(), char_out, r,
+            data.data(), quant.palette(), std::forward<F>(char_out), r,
             [](const uint8_t *data_raw, size_t x, size_t col, size_t y) {
                 const uint8_t *ptr = &data_raw[(y / S) * bytes_per_line + (x / S) / 4];
                 const size_t x4 = (x / S) % 4;
@@ -1580,7 +1580,7 @@ class format_4bit : public format {
 
     template <typename F>
     static constexpr void png(const std::array<uint8_t, image_size> &data, F &&char_out) {
-        png_image<W, H, uint8_t, bits_per_pixel>(data.data(), quant.palette(), char_out,
+        png_image<W, H, uint8_t, bits_per_pixel>(data.data(), quant.palette(), std::forward<F>(char_out),
                                                  [](const uint8_t *data_raw, size_t y, size_t &bpl) {
                                                      bpl = bytes_per_line;
                                                      return data_raw + y * bytes_per_line;
@@ -1590,7 +1590,7 @@ class format_4bit : public format {
     template <size_t S, typename F>
     static constexpr void sixel(const std::array<uint8_t, image_size> &data, F &&char_out, const rect<int32_t> &r) {
         sixel_image<W, H, S, uint8_t, bits_per_pixel>(
-            data.data(), quant.palette(), char_out, r,
+            data.data(), quant.palette(), std::forward<F>(char_out), r,
             [](const uint8_t *data_raw, size_t x, size_t col, size_t y) {
                 const uint8_t *ptr = &data_raw[(y / S) * bytes_per_line + (x / S) / 2];
                 const size_t x2 = (x / S) % 2;
@@ -1879,7 +1879,7 @@ class format_8bit : public format {
 
     template <typename F>
     static constexpr void png(const std::array<uint8_t, image_size> &data, F &&char_out) {
-        png_image<W, H, uint8_t, bits_per_pixel>(data.data(), quant.palette(), char_out,
+        png_image<W, H, uint8_t, bits_per_pixel>(data.data(), quant.palette(), std::forward<F>(char_out),
                                                  [](const uint8_t *data_raw, size_t y, size_t &bpl) {
                                                      bpl = bytes_per_line;
                                                      return data_raw + y * bytes_per_line;
@@ -1889,7 +1889,7 @@ class format_8bit : public format {
     template <size_t S, typename F>
     static constexpr void sixel(const std::array<uint8_t, image_size> &data, F &&char_out, const rect<int32_t> &r) {
         sixel_image<W, H, S, uint8_t, bits_per_pixel>(
-            data.data(), quant.palette(), char_out, r,
+            data.data(), quant.palette(), std::forward<F>(char_out), r,
             [](const uint8_t *data_raw, size_t x, size_t col, size_t y) {
                 const uint8_t *ptr = &data_raw[(y / S) * bytes_per_line + x / S];
                 uint8_t out = 0;
@@ -3348,7 +3348,7 @@ class image {
      */
     template <typename F>
     constexpr void png(F &&char_out) const {
-        T<W, H, GR>::png(data, char_out);
+        T<W, H, GR>::png(data, std::forward<F>(char_out));
     }
 
     /**
@@ -3366,7 +3366,7 @@ class image {
      */
     template <size_t S = 1, typename F>
     constexpr void sixel(F &&char_out) const {
-        T<W, H, GR>::template sixel<S>(data, char_out, {0, 0, W, H});
+        T<W, H, GR>::template sixel<S>(data, std::forward<F>(char_out), {0, 0, W, H});
     }
 
     /**
@@ -3385,7 +3385,7 @@ class image {
      */
     template <size_t S = 1, typename F>
     constexpr void sixel(F &&char_out, const rect<int32_t> &rect) const {
-        T<W, H, GR>::template sixel<S>(data, char_out, rect);
+        T<W, H, GR>::template sixel<S>(data, std::forward<F>(char_out), rect);
     }
 
     /**
@@ -3469,7 +3469,7 @@ class image {
     constexpr void convert(F &&uint8_out) {
         if constexpr (dst_format == STRAIGHT_THROUGH) {
             for (auto c : data) {
-                uint8_out(static_cast<uint8_t>(c));
+                std::forward<F>(uint8_out)(static_cast<uint8_t>(c));
             }
         } else if constexpr (dst_format == RGB565_8BIT_SERIAL) {
             const uint8_t *ptr = data.data();
@@ -3478,8 +3478,8 @@ class image {
                     const uint32_t col = format.get_col(ptr, x);
                     const uint32_t a = ((((col >> 16) & 0xff) >> 3) << 3) | ((((col >> 8) & 0xff) >> 2) >> 3);
                     const uint32_t b = (((((col >> 8) & 0xff) >> 2) & 0x7) << 5) | ((col & 0xff) >> 3);
-                    uint8_out(static_cast<uint8_t>(a));
-                    uint8_out(static_cast<uint8_t>(b));
+                    std::forward<F>(uint8_out)(static_cast<uint8_t>(a));
+                    std::forward<F>(uint8_out)(static_cast<uint8_t>(b));
                 }
                 ptr += format.bytes_per_line;
             }
@@ -3488,9 +3488,9 @@ class image {
             for (size_t y = 0; y < H; y++) {
                 for (size_t x = 0; x < W; x++) {
                     const uint32_t col = format.get_col(ptr, x);
-                    uint8_out(static_cast<uint8_t>(((col >> 16) & 0xff) >> 2));
-                    uint8_out(static_cast<uint8_t>(((col >> 8) & 0xff) >> 2));
-                    uint8_out(static_cast<uint8_t>(((col >> 0) & 0xff) >> 2));
+                    std::forward<F>(uint8_out)(static_cast<uint8_t>(((col >> 16) & 0xff) >> 2));
+                    std::forward<F>(uint8_out)(static_cast<uint8_t>(((col >> 8) & 0xff) >> 2));
+                    std::forward<F>(uint8_out)(static_cast<uint8_t>(((col >> 0) & 0xff) >> 2));
                 }
                 ptr += format.bytes_per_line;
             }
@@ -3499,9 +3499,9 @@ class image {
             for (size_t y = 0; y < H; y++) {
                 for (size_t x = 0; x < W; x++) {
                     const uint32_t col = format.get_col(ptr, x);
-                    uint8_out(static_cast<uint8_t>(((col >> 16) & 0xff) >> 2) << 2);
-                    uint8_out(static_cast<uint8_t>(((col >> 8) & 0xff) >> 2) << 2);
-                    uint8_out(static_cast<uint8_t>(((col >> 0) & 0xff) >> 2) << 2);
+                    std::forward<F>(uint8_out)(static_cast<uint8_t>(((col >> 16) & 0xff) >> 2) << 2);
+                    std::forward<F>(uint8_out)(static_cast<uint8_t>(((col >> 8) & 0xff) >> 2) << 2);
+                    std::forward<F>(uint8_out)(static_cast<uint8_t>(((col >> 0) & 0xff) >> 2) << 2);
                 }
                 ptr += format.bytes_per_line;
             }
