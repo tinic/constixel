@@ -25,7 +25,6 @@ Checks: "*,
         -modernize-use-trailing-return-type,
         -modernize-use-std-numbers,
         -modernize-use-integer-sign-comparison,
-        -modernize-use-designated-initializers,
 
         -performance-enum-size,        
         

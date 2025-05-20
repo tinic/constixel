@@ -163,14 +163,15 @@ struct srgb {
     const double g = -1.2684380046 * l_ + 2.6097574011 * m_ - 0.3413193965 * s_;
     const double bl = -0.0041960863 * l_ - 0.7034186168 * m_ + 1.7076147031 * s_;
 
-    return {static_cast<double>(linear_to_srgb(std::max(0.0f, std::min(1.0f, static_cast<float>(r))))),
-            static_cast<double>(linear_to_srgb(std::max(0.0f, std::min(1.0f, static_cast<float>(g))))),
-            static_cast<double>(linear_to_srgb(std::max(0.0f, std::min(1.0f, static_cast<float>(bl)))))};
+    return {.r = static_cast<double>(linear_to_srgb(std::max(0.0f, std::min(1.0f, static_cast<float>(r))))),
+            .g = static_cast<double>(linear_to_srgb(std::max(0.0f, std::min(1.0f, static_cast<float>(g))))),
+            .b = static_cast<double>(linear_to_srgb(std::max(0.0f, std::min(1.0f, static_cast<float>(bl)))))};
 }
 
 [[nodiscard]] static consteval oklab oklch_to_oklab_consteval(const oklch &oklch) {
-    return {oklch.l, oklch.c * consteval_cos(oklch.h * 3.14159265358979323846 / 180.0),
-            oklch.c * consteval_sin(oklch.h * 3.14159265358979323846 / 180.0)};
+    return {.l = oklch.l,
+            .a = oklch.c * consteval_cos(oklch.h * 3.14159265358979323846 / 180.0),
+            .b = oklch.c * consteval_sin(oklch.h * 3.14159265358979323846 / 180.0)};
 }
 
 static constexpr const float epsilon_low = srgb_to_linear(0.5f / 255.0f);
@@ -840,7 +841,8 @@ class format {
         for (size_t c = 0; c < palette.size(); c++) {
             sixel_color(std::forward<F>(char_out), static_cast<uint16_t>(c), palette[c]);
         }
-        const auto r = rect<int32_t>{_r.x * S, _r.y * S, _r.w * S, _r.h * S} & rect<int32_t>{0, 0, W * S, H * S};
+        const auto r = rect<int32_t>{.x = _r.x * S, .y = _r.y * S, .w = _r.w * S, .h = _r.h * S} &
+                       rect<int32_t>{.x = 0, .y = 0, .w = W * S, .h = H * S};
         std::array<PBT, std::max(32UL, 1UL << PBS)> stack{};
         palette_bitset<PBT, std::max(32UL, 1UL << PBS)> pset{};
         for (int32_t y = r.y; y < (r.y + r.h); y += 6) {
@@ -1689,13 +1691,13 @@ class format_8bit : public format {
                 pal[0x70 + c + 8] = (255 << 16) | (x << 8) | (255 << 0);
             }
             for (size_t c = 0; c < 8; c++) {
-                const hidden::oklab lft{static_cast<double>(c) / 7 - 0.2, 0.2, 0.0};
-                const hidden::oklab rgh{static_cast<double>(c) / 7 - 0.2, 0.2, 337.5};
+                const hidden::oklab lft{.l = static_cast<double>(c) / 7 - 0.2, .a = 0.2, .b = 0.0};
+                const hidden::oklab rgh{.l = static_cast<double>(c) / 7 - 0.2, .a = 0.2, .b = 337.5};
                 for (size_t d = 0; d < 16; d++) {
                     auto res = hidden::oklab_to_srgb_consteval(hidden::oklch_to_oklab_consteval(hidden::oklch{
-                        std::lerp(lft.l, rgh.l, static_cast<double>(d) / 15.0),
-                        std::lerp(lft.a, rgh.a, static_cast<double>(d) / 15.0),
-                        std::lerp(lft.b, rgh.b, static_cast<double>(d) / 15.0),
+                        .l = std::lerp(lft.l, rgh.l, static_cast<double>(d) / 15.0),
+                        .c = std::lerp(lft.a, rgh.a, static_cast<double>(d) / 15.0),
+                        .h = std::lerp(lft.b, rgh.b, static_cast<double>(d) / 15.0),
                     }));
                     pal[0x80 + c * 16 + d] =
                         (static_cast<uint32_t>(std::max(0.0, std::min(1.0, res.r)) * 255.0) << 16) |
@@ -3216,9 +3218,9 @@ class image {
      */
     constexpr void blit_RGBA(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih,
                              int32_t stride) {
-        rect<int32_t> blitrect{x, y, w, h};
-        blitrect &= {0, 0, W, H};
-        blitrect &= {x, y, iw, ih};
+        rect<int32_t> blitrect{.x = x, .y = y, .w = w, .h = h};
+        blitrect &= {.x = 0, .y = 0, .w = W, .h = H};
+        blitrect &= {.x = x, .y = y, .w = iw, .h = ih};
         T<W, H, GR>::blit_RGBA(data, blitrect, ptr, stride);
     }
 
@@ -3233,8 +3235,8 @@ class image {
      */
     constexpr void blit_RGBA(const rect<int32_t> &dstrect, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
         rect<int32_t> blitrect{dstrect};
-        blitrect &= {0, 0, W, H};
-        blitrect &= {dstrect.x, dstrect.y, iw, ih};
+        blitrect &= {.x = 0, .y = 0, .w = W, .h = H};
+        blitrect &= {.x = dstrect.x, .y = dstrect.y, .w = iw, .h = ih};
         T<W, H, GR>::blit_RGBA(data, blitrect, ptr, stride);
     }
 
@@ -3252,9 +3254,9 @@ class image {
      */
     constexpr void blit_RGBA_diffused(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw,
                                       int32_t ih, int32_t stride) {
-        rect<int32_t> blitrect{x, y, w, h};
-        blitrect &= {0, 0, W, H};
-        blitrect &= {x, y, iw, ih};
+        rect<int32_t> blitrect{.x = x, .y = y, .w = w, .h = h};
+        blitrect &= {.x = 0, .y = 0, .w = W, .h = H};
+        blitrect &= {.x = x, .y = y, .w = iw, .h = ih};
         T<W, H, GR>::blit_RGBA_diffused(data, blitrect, ptr, stride);
     }
 
@@ -3271,8 +3273,8 @@ class image {
     constexpr void blit_RGBA_diffused(const rect<int32_t> &dstrect, const uint8_t *ptr, int32_t iw, int32_t ih,
                                       int32_t stride) {
         rect<int32_t> blitrect{dstrect};
-        blitrect &= {0, 0, W, H};
-        blitrect &= {dstrect.x, dstrect.y, iw, ih};
+        blitrect &= {.x = 0, .y = 0, .w = W, .h = H};
+        blitrect &= {.x = dstrect.x, .y = dstrect.y, .w = iw, .h = ih};
         T<W, H, GR>::blit_RGBA_diffused(data, blitrect, ptr, stride);
     }
 
@@ -3290,9 +3292,9 @@ class image {
      */
     constexpr void blit_RGBA_diffused_linear(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw,
                                              int32_t ih, int32_t stride) {
-        rect<int32_t> blitrect{x, y, w, h};
-        blitrect &= {0, 0, W, H};
-        blitrect &= {x, y, iw, ih};
+        rect<int32_t> blitrect{.x = x, .y = y, .w = w, .h = h};
+        blitrect &= {.x = 0, .y = 0, .w = W, .h = H};
+        blitrect &= {.x = x, .y = y, .w = iw, .h = ih};
         T<W, H, GR>::blit_RGBA_diffused_linear(data, blitrect, ptr, stride);
     }
 
@@ -3309,8 +3311,8 @@ class image {
     constexpr void blit_RGBA_diffused_linear(const rect<int32_t> &dstrect, const uint8_t *ptr, int32_t iw, int32_t ih,
                                              int32_t stride) {
         rect<int32_t> blitrect{dstrect};
-        blitrect &= {0, 0, W, H};
-        blitrect &= {dstrect.x, dstrect.y, iw, ih};
+        blitrect &= {.x = 0, .y = 0, .w = W, .h = H};
+        blitrect &= {.x = dstrect.x, .y = dstrect.y, .w = iw, .h = ih};
         T<W, H, GR>::blit_RGBA_diffused_linear(data, blitrect, ptr, stride);
     }
 
@@ -3493,8 +3495,8 @@ class image {
     /// @cond DOXYGEN_EXCLUDE
 
     constexpr bool check_not_in_bounds(int32_t x, int32_t y, int32_t w, int32_t h) {
-        rect<int32_t> intersect_rect{0, 0, W, H};
-        intersect_rect &= rect<int32_t>{x, y, w, h};
+        rect<int32_t> intersect_rect{.x = 0, .y = 0, .w = W, .h = H};
+        intersect_rect &= rect<int32_t>{.x = x, .y = y, .w = w, .h = h};
         if (intersect_rect.w <= 0 || intersect_rect.h <= 0) {
             return true;
         }
