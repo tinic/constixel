@@ -57,14 +57,14 @@ namespace hidden {
 }
 
 [[nodiscard]] static constexpr float fast_log2(const float x) {
-    const uint32_t xi = std::bit_cast<uint32_t>(x);
-    const float xf = std::bit_cast<float>((xi & 0x007FFFFF) | 0x3f000000);
+    const auto xi = std::bit_cast<uint32_t>(x);
+    const auto xf = std::bit_cast<float>((xi & 0x007FFFFF) | 0x3f000000);
     const float y = static_cast<float>(xi) * 1.1920928955078125e-7f;
     return y - 124.22551499f - 1.498030302f * xf - 1.72587999f / (0.3520887068f + xf);
 }
 
 static constexpr float fast_sqrtf(const float x) {
-    int32_t i = std::bit_cast<int32_t>(x);
+    auto i = std::bit_cast<int32_t>(x);
     const int k = i & 0x00800000;
     float y = 0.0f;
     if (k != 0) {
@@ -86,11 +86,10 @@ static constexpr float fast_sqrtf(const float x) {
     return fast_exp2(p * fast_log2(x));
 }
 
-static constexpr double m_pi_d = 3.14159265358979323846;
-
 [[nodiscard]] static consteval double consteval_cos(double x, int32_t terms = 10) {
     x = x - 6.283185307179586 * static_cast<int32_t>(x / 6.283185307179586);  // wrap x to [0, 2π)
-    double res = 1.0, term = 1.0;
+    double res = 1.0;
+    double term = 1.0;
     const double x2 = x * x;
     for (int32_t i = 1; i < terms; ++i) {
         term *= -x2 / ((2 * i - 1) * (2 * i));
@@ -101,7 +100,8 @@ static constexpr double m_pi_d = 3.14159265358979323846;
 
 [[nodiscard]] static consteval double consteval_sin(double x, int32_t terms = 10) {
     x = x - 6.283185307179586 * static_cast<int32_t>(x / 6.283185307179586);  // wrap x to [0, 2π)
-    double res = x, term = x;
+    double res = x;
+    double term = x;
     const double x2 = x * x;
     for (int32_t i = 1; i < terms; ++i) {
         term *= -x2 / ((2 * i) * (2 * i + 1));
@@ -165,8 +165,8 @@ struct srgb {
 }
 
 [[nodiscard]] static consteval oklab oklch_to_oklab_consteval(const oklch &oklch) {
-    return {oklch.l, oklch.c * consteval_cos(oklch.h * m_pi_d / 180.0),
-            oklch.c * consteval_sin(oklch.h * m_pi_d / 180.0)};
+    return {oklch.l, oklch.c * consteval_cos(oklch.h * std::numbers::pi / 180.0),
+            oklch.c * consteval_sin(oklch.h * std::numbers::pi / 180.0)};
 }
 
 static constexpr const float epsilon_low = srgb_to_linear(0.5f / 255.0f);
@@ -234,7 +234,8 @@ class quantize {
     }
 
     [[nodiscard]] constexpr uint8_t nearest(int32_t r, int32_t g, int32_t b) const {
-        int32_t best = 0, bestd = 1UL << 30;
+        int32_t best = 0;
+        int32_t bestd = 1UL << 30;
         for (size_t i = 0; i < pal.size(); ++i) {
             const int32_t dr = r - static_cast<int32_t>((pal[i] >> 16) & 0xFF);
             const int32_t dg = g - static_cast<int32_t>((pal[i] >> 8) & 0xFF);
@@ -402,8 +403,7 @@ class hextree {
     hextree(const hextree &) = delete;
     hextree &operator=(const hextree &) = delete;
 
-    explicit consteval hextree() {
-    }
+    explicit consteval hextree() = default;
 
     template <std::size_t NS>
     explicit consteval hextree(const std::array<std::pair<T, T>, NS> &in) {
@@ -554,7 +554,7 @@ class format {
         size_t idx = 0;
         uint32_t crc = 0xFFFFFFFF;
         for (size_t c = 0; c < bytes; c++) {
-            uint8_t d = static_cast<uint8_t>(array.at(idx++));
+            auto d = static_cast<uint8_t>(array.at(idx++));
             crc ^= d;
             for (int i = 0; i < 8; ++i) {
                 crc = (crc & 1) ? (crc >> 1) ^ 0xEDB88320u : crc >> 1;
@@ -585,7 +585,7 @@ class format {
     template <typename F>
     static constexpr void png_header(F &&char_out, size_t w, size_t h, size_t depth) {
         const size_t chunkLength = 17;
-        std::array<char, chunkLength> header;
+        std::array<char, chunkLength> header{};
         size_t i = 0;
         header.at(i++) = 'I';
         header.at(i++) = 'H';
@@ -611,7 +611,7 @@ class format {
 
     template <typename F, typename P>
     static constexpr void png_palette(F &&char_out, const P &palette) {
-        std::array<char, 256 * 3 + 4> header;
+        std::array<char, 256 * 3 + 4> header{};
         size_t i = 0;
         header.at(i++) = 'P';
         header.at(i++) = 'L';
@@ -629,7 +629,7 @@ class format {
 
     template <typename F>
     static constexpr void png_end(F &&char_out) {
-        std::array<char, 4> header;
+        std::array<char, 4> header{};
         size_t i = 0;
         header.at(i++) = 'I';
         header.at(i++) = 'E';
@@ -642,7 +642,7 @@ class format {
 
     template <typename F>
     static constexpr void png_idat_zlib_header(F &&char_out) {
-        std::array<char, 6> header;
+        std::array<char, 6> header{};
         size_t i = 0;
         header.at(i++) = 'I';
         header.at(i++) = 'D';
@@ -658,10 +658,10 @@ class format {
     template <typename F>
     [[nodiscard]] static constexpr uint32_t png_idat_zlib_stream(F &&char_out, const uint8_t *line, size_t bytes,
                                                                  uint32_t adler32_sum) {
-        const size_t max_data_use = size_t{1024};
-        const size_t extra_data = size_t{24};
+        const auto max_data_use = size_t{1024};
+        const auto extra_data = size_t{24};
         const size_t max_stack_use = max_data_use + extra_data;
-        std::array<uint8_t, max_stack_use> header;
+        std::array<uint8_t, max_stack_use> header{};
         for (size_t c = 0; c < bytes; c++) {
             size_t i = 0;
             header.at(i++) = 'I';
@@ -694,7 +694,7 @@ class format {
 
     template <typename F>
     static constexpr void png_idat_zlib_trailer(F &&char_out, uint32_t adler32_sum) {
-        std::array<char, 8> header;
+        std::array<char, 8> header{};
         size_t i = 0;
         header.at(i++) = 'I';
         header.at(i++) = 'D';
@@ -831,7 +831,7 @@ class format {
         const auto r = rect<int32_t>{_r.x * S, _r.y * S, _r.w * S, _r.h * S} & rect<int32_t>{0, 0, W * S, H * S};
         std::array<PBT, std::max(32UL, 1UL << PBS)> stack{};
         palette_bitset<PBT, std::max(32UL, 1UL << PBS)> pset{};
-        for (size_t y = static_cast<size_t>(r.y); y < static_cast<size_t>(r.y + r.h); y += 6) {
+        for (auto y = static_cast<size_t>(r.y); y < static_cast<size_t>(r.y + r.h); y += 6) {
             pset.clear();
             set6(data, static_cast<size_t>(r.x), static_cast<size_t>(r.w), y, pset);
             const size_t stack_count = pset.genstack(stack);
@@ -842,7 +842,7 @@ class format {
                 }
                 char_out('#');
                 sixel_number(char_out, static_cast<uint16_t>(col));
-                for (size_t x = static_cast<size_t>(r.x); x < static_cast<size_t>(r.x + r.w); x++) {
+                for (auto x = static_cast<size_t>(r.x); x < static_cast<size_t>(r.x + r.w); x++) {
                     PBT bits6 = collect6(data, x, col, y);
                     uint16_t repeat_count = 0;
                     for (size_t xr = (x + 1); xr < (std::min(x + size_t{255}, W * size_t{S})); xr++) {
@@ -930,7 +930,7 @@ class format_1bit : public format {
 
     template <bool FLIP_H = false, bool FLIP_V = false>
     static constexpr void transpose(const uint8_t *src, uint8_t *dst) {
-        std::array<uint8_t, 8> tmp;
+        std::array<uint8_t, 8> tmp{};
         const size_t src_stride = ((W + 7) / 8);
         const size_t dst_stride = ((H + 7) / 8);
         for (size_t y = 0; y < dst_stride; y++) {
@@ -981,7 +981,7 @@ class format_1bit : public format {
         const size_t xr8 = xr0 / 8;
         xr0 %= 8;
         const size_t xs8 = xr8 - xl8;
-        const uint8_t c8 =
+        const auto c8 =
             static_cast<uint8_t>(col << 7 | col << 6 | col << 5 | col << 4 | col << 3 | col << 2 | col << 1 | col << 0);
         constexpr uint8_t ml[] = {0b11111111, 0b01111111, 0b00111111, 0b00011111,
                                   0b00001111, 0b00000111, 0b00000011, 0b00000001};
@@ -994,7 +994,7 @@ class format_1bit : public format {
             for (size_t x = xl8 + 1; x < xr8; x++) {
                 yptr[x] = c8;
             }
-            if (xr0) {
+            if (xr0 != 0) {
                 yptr[xr8] &= ~mr[xr0];
                 yptr[xr8] |= mr[xr0] & c8;
             }
@@ -1015,7 +1015,7 @@ class format_1bit : public format {
         for (size_t y = 0; y < H; y++) {
             for (size_t x = 0; x < W; x++) {
                 const uint8_t col = get_col(ptr, x);
-                dst[y * W + x] = quant.palette().at(col) | (col ? 0xFF000000 : 0x00000000);
+                dst[y * W + x] = quant.palette().at(col) | ((col != 0) ? 0xFF000000 : 0x00000000);
             }
             ptr += bytes_per_line;
         }
@@ -1029,7 +1029,7 @@ class format_1bit : public format {
                 dst[y * W * 4 + x * 4 + 0] = static_cast<uint8_t>((quant.palette().at(col) >> 16) & 0xFF);
                 dst[y * W * 4 + x * 4 + 1] = static_cast<uint8_t>((quant.palette().at(col) >> 8) & 0xFF);
                 dst[y * W * 4 + x * 4 + 2] = static_cast<uint8_t>((quant.palette().at(col) >> 0) & 0xFF);
-                dst[y * W * 4 + x * 4 + 3] = (col ? 0xFF : 0x00);
+                dst[y * W * 4 + x * 4 + 3] = ((col != 0) ? 0xFF : 0x00);
             }
             ptr += bytes_per_line;
         }
@@ -1059,7 +1059,7 @@ class format_1bit : public format {
                 const int32_t V = (R * 2 + G * 3 + B * 1) + err;
                 const uint8_t n = V > 768 ? 1 : 0;
                 plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
-                err = std::clamp(V - (n ? int32_t{0xFF * 6} : int32_t{0x00}), int32_t{-0xFF * 6}, int32_t{0xFF * 6});
+                err = std::clamp(V - ((n != 0) ? int32_t{0xFF * 6} : int32_t{0x00}), int32_t{-0xFF * 6}, int32_t{0xFF * 6});
             }
         }
     }
@@ -1071,9 +1071,9 @@ class format_1bit : public format {
             float err_g = 0;
             float err_b = 0;
             for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
-                const float R = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 0]) * (1.0f / 255.0f);
-                const float G = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 1]) * (1.0f / 255.0f);
-                const float B = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 2]) * (1.0f / 255.0f);
+                const auto R = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 0]) * (1.0f / 255.0f);
+                const auto G = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 1]) * (1.0f / 255.0f);
+                const auto B = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 2]) * (1.0f / 255.0f);
                 float Rl = hidden::srgb_to_linear(R);
                 float Gl = hidden::srgb_to_linear(G);
                 float Bl = hidden::srgb_to_linear(B);
@@ -1083,9 +1083,9 @@ class format_1bit : public format {
                 uint8_t n = (Rl * 2 * +Gl * 3 + Bl * 1) > 3.0f ? 1 : 0;
                 plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
                 const float c = 0.75;
-                err_r = std::clamp(Rl - (n ? 1.0f : 0.0f), -c, c);
-                err_g = std::clamp(Gl - (n ? 1.0f : 0.0f), -c, c);
-                err_b = std::clamp(Bl - (n ? 1.0f : 0.0f), -c, c);
+                err_r = std::clamp(Rl - ((n != uint8_t{0}) ? 1.0f : 0.0f), -c, c);
+                err_g = std::clamp(Gl - ((n != uint8_t{0}) ? 1.0f : 0.0f), -c, c);
+                err_b = std::clamp(Bl - ((n != uint8_t{0}) ? 1.0f : 0.0f), -c, c);
             }
         }
     }
@@ -1205,7 +1205,7 @@ class format_2bit : public format {
         const size_t xr4 = xr0 / 4;
         xr0 %= 4;
         const size_t xs4 = xr4 - xl4;
-        const uint8_t c4 = static_cast<uint8_t>(col << 6 | col << 4 | col << 2 | col << 0);
+        const auto c4 = static_cast<uint8_t>(col << 6 | col << 4 | col << 2 | col << 0);
         constexpr uint8_t ml[] = {0b11111111, 0b00111111, 0b00001111, 0b00000011};
         constexpr uint8_t mr[] = {0b00000000, 0b11000000, 0b11110000, 0b11111100};
         uint8_t *yptr = &data.data()[y * bytes_per_line];
@@ -1215,7 +1215,7 @@ class format_2bit : public format {
             for (size_t x = xl4 + 1; x < xr4; x++) {
                 yptr[x] = c4;
             }
-            if (xr0) {
+            if (xr0 != 0) {
                 yptr[xr4] &= ~mr[xr0];
                 yptr[xr4] |= mr[xr0] & c4;
             }
@@ -1236,7 +1236,7 @@ class format_2bit : public format {
         for (size_t y = 0; y < H; y++) {
             for (size_t x = 0; x < W; x++) {
                 const uint8_t col = get_col(ptr, x);
-                dst[y * W + x] = quant.palette().at(col) | (col ? 0xFF000000 : 0x00000000);
+                dst[y * W + x] = quant.palette().at(col) | ((col != 0) ? 0xFF000000 : 0x00000000);
             }
             ptr += bytes_per_line;
         }
@@ -1250,7 +1250,7 @@ class format_2bit : public format {
                 dst[y * W * 4 + x * 4 + 0] = static_cast<uint8_t>((quant.palette().at(col) >> 16) & 0xFF);
                 dst[y * W * 4 + x * 4 + 1] = static_cast<uint8_t>((quant.palette().at(col) >> 8) & 0xFF);
                 dst[y * W * 4 + x * 4 + 2] = static_cast<uint8_t>((quant.palette().at(col) >> 0) & 0xFF);
-                dst[y * W * 4 + x * 4 + 3] = (col ? 0xFF : 0x00);
+                dst[y * W * 4 + x * 4 + 3] = ((col != 0) ? 0xFF : 0x00);
             }
             ptr += bytes_per_line;
         }
@@ -1300,9 +1300,9 @@ class format_2bit : public format {
             float err_g = 0;
             float err_b = 0;
             for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
-                const float R = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 0]) * (1.0f / 255.0f);
-                const float G = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 1]) * (1.0f / 255.0f);
-                const float B = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 2]) * (1.0f / 255.0f);
+                const auto R = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 0]) * (1.0f / 255.0f);
+                const auto G = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 1]) * (1.0f / 255.0f);
+                const auto B = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 2]) * (1.0f / 255.0f);
                 float Rl = hidden::srgb_to_linear(R);
                 float Gl = hidden::srgb_to_linear(G);
                 float Bl = hidden::srgb_to_linear(B);
@@ -1417,7 +1417,7 @@ class format_4bit : public format {
 
     static constexpr void compose(std::array<uint8_t, image_size> &data, size_t x, size_t y, float cola, float colr,
                                   float colg, float colb) {
-        const size_t bg = static_cast<size_t>(get_col(data, x, y));
+        const auto bg = static_cast<size_t>(get_col(data, x, y));
         const float Rl = colr * cola + quant.linear_palette().at(bg * 3 + 0) * (1.0f - cola);
         const float Gl = colg * cola + quant.linear_palette().at(bg * 3 + 1) * (1.0f - cola);
         const float Bl = colb * cola + quant.linear_palette().at(bg * 3 + 2) * (1.0f - cola);
@@ -1440,7 +1440,7 @@ class format_4bit : public format {
         const size_t xr2 = xr0 / 2;
         xr0 %= 2;
         const size_t xs2 = xr2 - xl2;
-        const uint8_t c2 = static_cast<uint8_t>(col << 4 | col << 0);
+        const auto c2 = static_cast<uint8_t>(col << 4 | col << 0);
         constexpr uint8_t ml[] = {0b11111111, 0b00001111};
         constexpr uint8_t mr[] = {0b00000000, 0b11110000};
         uint8_t *yptr = &data.data()[y * bytes_per_line];
@@ -1450,7 +1450,7 @@ class format_4bit : public format {
             for (size_t x = xl2 + 1; x < xr2; x++) {
                 yptr[x] = c2;
             }
-            if (xr0) {
+            if (xr0 != 0) {
                 yptr[xr2] &= ~mr[xr0];
                 yptr[xr2] |= mr[xr0] & c2;
             }
@@ -1478,7 +1478,7 @@ class format_4bit : public format {
         for (size_t y = 0; y < H; y++) {
             for (size_t x = 0; x < W; x++) {
                 const uint8_t col = get_col(ptr, x);
-                dst[y * W + x] = quant.palette().at(col) | (col ? 0xFF000000 : 0x00000000);
+                dst[y * W + x] = quant.palette().at(col) | ((col != 0) ? 0xFF000000 : 0x00000000);
             }
             ptr += bytes_per_line;
         }
@@ -1492,7 +1492,7 @@ class format_4bit : public format {
                 dst[y * W * 4 + x * 4 + 0] = static_cast<uint8_t>((quant.palette().at(col) >> 16) & 0xFF);
                 dst[y * W * 4 + x * 4 + 1] = static_cast<uint8_t>((quant.palette().at(col) >> 8) & 0xFF);
                 dst[y * W * 4 + x * 4 + 2] = static_cast<uint8_t>((quant.palette().at(col) >> 0) & 0xFF);
-                dst[y * W * 4 + x * 4 + 3] = (col ? 0xFF : 0x00);
+                dst[y * W * 4 + x * 4 + 3] = ((col != 0) ? 0xFF : 0x00);
             }
             ptr += bytes_per_line;
         }
@@ -1542,9 +1542,9 @@ class format_4bit : public format {
             float err_g = 0;
             float err_b = 0;
             for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
-                const float R = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 0]) * (1.0f / 255.0f);
-                const float G = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 1]) * (1.0f / 255.0f);
-                const float B = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 2]) * (1.0f / 255.0f);
+                const auto R = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 0]) * (1.0f / 255.0f);
+                const auto G = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 1]) * (1.0f / 255.0f);
+                const auto B = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 2]) * (1.0f / 255.0f);
                 float Rl = hidden::srgb_to_linear(R);
                 float Gl = hidden::srgb_to_linear(G);
                 float Bl = hidden::srgb_to_linear(B);
@@ -1721,13 +1721,13 @@ class format_8bit : public format {
     }
 
     static constexpr void plot(std::array<uint8_t, image_size> &data, size_t x, size_t y, uint8_t col) {
-        data.data()[y * bytes_per_line + x] = static_cast<uint8_t>(col);
+        data.data()[y * bytes_per_line + x] = col;
     }
 
     static constexpr void span(std::array<uint8_t, image_size> &data, size_t xl0, size_t xr0, size_t y, uint8_t col) {
         uint8_t *yptr = &data.data()[y * bytes_per_line];
         for (size_t x = xl0; x < xr0; x++) {
-            yptr[x] = static_cast<uint8_t>(col);
+            yptr[x] = col;
         }
     }
 
@@ -1736,7 +1736,7 @@ class format_8bit : public format {
         // clang-format off
 #if defined(__ARM_NEON)
         if (!std::is_constant_evaluated()) {
-            size_t bg = static_cast<size_t>(data.data()[y * bytes_per_line + x]);
+            auto bg = static_cast<size_t>(data.data()[y * bytes_per_line + x]);
             float32x4_t cola_v = vdupq_n_f32(cola);
             float32x4_t inv_cola_v = vdupq_n_f32(1.0f - cola);
             float32x4_t col_rgb = {colr, colg, colb, 0.0f};
@@ -1753,7 +1753,7 @@ class format_8bit : public format {
             __m128 cola_v = _mm_set1_ps(cola);
             __m128 inv_cola_v = _mm_set1_ps(1.0f - cola);
             __m128 col_rgb = _mm_set_ps(0.0f, colb, colg, colr);
-            size_t bg = static_cast<size_t>(data.data()[y * bytes_per_line + x]);
+            auto bg = static_cast<size_t>(data.data()[y * bytes_per_line + x]);
             // Note: this reads 1 float into linearpal_avx2
             __m128 bg_rgb = _mm_loadu_ps(&quant.linear_palette()[bg * 3]);
             __m128 result_rgb = _mm_add_ps(_mm_mul_ps(col_rgb, cola_v), _mm_mul_ps(bg_rgb, inv_cola_v));
@@ -1763,7 +1763,7 @@ class format_8bit : public format {
         } else
 #endif  // #if defined(__AVX2__)
         {
-            const size_t bg = static_cast<size_t>(data.data()[y * bytes_per_line + x]);
+            const auto bg = static_cast<size_t>(data.data()[y * bytes_per_line + x]);
             const float Rl = colr * cola + quant.linear_palette().at(bg * 3 + 0) * (1.0f - cola);
             const float Gl = colg * cola + quant.linear_palette().at(bg * 3 + 1) * (1.0f - cola);
             const float Bl = colb * cola + quant.linear_palette().at(bg * 3 + 2) * (1.0f - cola);
@@ -1777,7 +1777,7 @@ class format_8bit : public format {
         for (size_t y = 0; y < H; y++) {
             for (size_t x = 0; x < W; x++) {
                 const uint8_t col = ptr[x];
-                dst[y * W + x] = quant.palette().at(col) | (col ? 0xFF000000 : 0x00000000);
+                dst[y * W + x] = quant.palette().at(col) | ((col != 0) ? 0xFF000000 : 0x00000000);
             }
             ptr += bytes_per_line;
         }
@@ -1791,7 +1791,7 @@ class format_8bit : public format {
                 dst[y * W * 4 + x * 4 + 0] = static_cast<uint8_t>((quant.palette().at(col) >> 16) & 0xFF);
                 dst[y * W * 4 + x * 4 + 1] = static_cast<uint8_t>((quant.palette().at(col) >> 8) & 0xFF);
                 dst[y * W * 4 + x * 4 + 2] = static_cast<uint8_t>((quant.palette().at(col) >> 0) & 0xFF);
-                dst[y * W * 4 + x * 4 + 3] = (col ? 0xFF : 0x00);
+                dst[y * W * 4 + x * 4 + 3] = ((col != 0) ? 0xFF : 0x00);
             }
             ptr += bytes_per_line;
         }
@@ -1841,9 +1841,9 @@ class format_8bit : public format {
             float err_g = 0;
             float err_b = 0;
             for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
-                const float R = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 0]) * (1.0f / 255.0f);
-                const float G = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 1]) * (1.0f / 255.0f);
-                const float B = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 2]) * (1.0f / 255.0f);
+                const auto R = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 0]) * (1.0f / 255.0f);
+                const auto G = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 1]) * (1.0f / 255.0f);
+                const auto B = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 2]) * (1.0f / 255.0f);
                 float Rl = hidden::srgb_to_linear(R);
                 float Gl = hidden::srgb_to_linear(G);
                 float Bl = hidden::srgb_to_linear(B);
@@ -1998,8 +1998,8 @@ enum device_format {
  * A struct which can be passed to: plot().
  */
 struct plot {
-    int32_t x;                  /**< X coordinate in pixels. */
-    int32_t y;                  /**< Y coordinate in pixels. */
+    int32_t x = 0;               /**< X coordinate in pixels. */
+    int32_t y = 0;               /**< Y coordinate in pixels. */
     uint32_t col = color::WHITE; /**< Color palette index to use. */
 };
 
@@ -2007,35 +2007,35 @@ struct plot {
  * A struct which can be passed to: draw_line(), draw_line_aa().
  */
 struct draw_line {
-    int32_t x0;                 /**< First X coordinate in pixels. */
-    int32_t y0;                 /**< First Y coordinate in pixels. */
-    int32_t x1;                 /**< Second X coordinate in pixels. */
-    int32_t y1;                 /**< Second Y coordinate in pixels. */
+    int32_t x0 = 0;              /**< First X coordinate in pixels. */
+    int32_t y0 = 0;              /**< First Y coordinate in pixels. */
+    int32_t x1 = 0;              /**< Second X coordinate in pixels. */
+    int32_t y1 = 0;              /**< Second Y coordinate in pixels. */
     uint32_t col = color::WHITE; /**< Color palette index to use. */
-    int32_t sw = 1;             /**< Width of the stroke in pixels. */
+    int32_t sw = 1;              /**< Width of the stroke in pixels. */
 };
 
 /**
  * A struct which can be passed to: fill_rect(), stroke_rect(), .
  */
 struct draw_rect {
-    int32_t x;                  /**< X coordinate in pixels. */
-    int32_t y;                  /**< Y coordinate in pixels. */
-    int32_t w;                  /**< Width in pixels. */
-    int32_t h;                  /**< Height in pixels. */
+    int32_t x = 0;               /**< X coordinate in pixels. */
+    int32_t y = 0;               /**< Y coordinate in pixels. */
+    int32_t w = 0;               /**< Width in pixels. */
+    int32_t h = 0;               /**< Height in pixels. */
     uint32_t col = color::WHITE; /**< Color palette index to use. */
-    int32_t sw = 1;             /**< Width of the stroke in pixels. */
+    int32_t sw = 1;              /**< Width of the stroke in pixels. */
 };
 
 /**
  * A struct which can be passed to: fill_circle(), stroke_circle(), fill_circle_aa(), stroke_circle_aa().
  */
 struct draw_circle {
-    int32_t x;                  /**< Center X coordinate in pixels. */
-    int32_t y;                  /**< Center Y coordinate in pixels. */
-    int32_t r;                  /**< Radius of the circle in pixels. */
+    int32_t x = 0;               /**< Center X coordinate in pixels. */
+    int32_t y = 0;               /**< Center Y coordinate in pixels. */
+    int32_t r = 0;               /**< Radius of the circle in pixels. */
     uint32_t col = color::WHITE; /**< Color palette index to use. */
-    int32_t sw = 1;             /**< Width of the stroke in pixels. */
+    int32_t sw = 1;              /**< Width of the stroke in pixels. */
 };
 
 /**
@@ -2043,22 +2043,22 @@ struct draw_circle {
  * stroke_round_rect_aa().
  */
 struct draw_round_rect {
-    int32_t x;                  /**< X coordinate in pixels. */
-    int32_t y;                  /**< Y coordinate in pixels. */
-    int32_t w;                  /**< Width in pixels. */
-    int32_t h;                  /**< Height in pixels. */
-    int32_t r;                  /**< Radius of the corners in pixels. */
+    int32_t x = 0;               /**< X coordinate in pixels. */
+    int32_t y = 0;               /**< Y coordinate in pixels. */
+    int32_t w = 0;               /**< Width in pixels. */
+    int32_t h = 0;               /**< Height in pixels. */
+    int32_t r = 0;               /**< Radius of the corners in pixels. */
     uint32_t col = color::WHITE; /**< Color palette index to use. */
-    int32_t sw = 1;             /**< Width of the stroke in pixels. */
+    int32_t sw = 1;              /**< Width of the stroke in pixels. */
 };
 
 /**
  * A struct which can be passed to: draw_string_mono(), draw_string_centered_mono().
  */
 struct draw_string {
-    int32_t x;                  /**< X coordinate in pixels. */
-    int32_t y;                  /**< Y coordinate in pixels. */
-    const char *str = nullptr;  /**< UTF8 string */
+    int32_t x = 0;               /**< X coordinate in pixels. */
+    int32_t y = 0;               /**< Y coordinate in pixels. */
+    const char *str = nullptr;   /**< UTF8 string */
     uint32_t col = color::WHITE; /**< Color palette index to use. */
 };
 
@@ -2230,24 +2230,20 @@ class image {
             return;
         }
 
-        int32_t steep = abs(y1 - y0) > abs(x1 - x0);
-
+        bool steep = abs(y1 - y0) > abs(x1 - x0);
         if (steep) {
             std::swap(x0, y0);
             std::swap(x1, y1);
         }
-
         if (x0 > x1) {
             std::swap(x0, x1);
             std::swap(y0, y1);
         }
 
-        int32_t dx, dy;
-        dx = x1 - x0;
-        dy = abs(y1 - y0);
-
+        const int32_t dx = x1 - x0;
+        const int32_t dy = abs(y1 - y0);
         int32_t err = dx / 2;
-        int32_t ystep;
+        int32_t ystep = 0;
         if (y0 < y1) {
             ystep = 1;
         } else {
@@ -2330,8 +2326,8 @@ class image {
         const float Gl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 1);
         const float Bl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 2);
 
-        const float dx = static_cast<float>(x1 - x0);
-        const float dy = static_cast<float>(y1 - y0);
+        const auto dx = static_cast<float>(x1 - x0);
+        const auto dy = static_cast<float>(y1 - y0);
         const float gradient = dx == 0.0f ? 1.0f : dy / dx;
 
         auto color_compose = [&](int32_t x, int32_t y, float a) {
@@ -2355,11 +2351,11 @@ class image {
         };
 
         // first endpoint
-        float xend = static_cast<float>(x0);
+        auto xend = static_cast<float>(x0);
         float yend = static_cast<float>(y0) + gradient * (xend - static_cast<float>(x0));
         float xgap = rfpart(static_cast<float>(x0) + 0.5f);
-        const int32_t xpxl1 = static_cast<int32_t>(xend);
-        const int32_t ypxl1 = static_cast<int32_t>(ipart(yend));
+        const auto xpxl1 = static_cast<int32_t>(xend);
+        const auto ypxl1 = static_cast<int32_t>(ipart(yend));
         if (steep) {
             color_compose(ypxl1, xpxl1, rfpart(yend) * xgap);
             color_compose(ypxl1 + 1, xpxl1, fpart(yend) * xgap);
@@ -2373,8 +2369,8 @@ class image {
         xend = static_cast<float>(x1);
         yend = static_cast<float>(y1) + gradient * (xend - static_cast<float>(x1));
         xgap = fpart(static_cast<float>(x1) + 0.5f);
-        const int32_t xpxl2 = static_cast<int32_t>(xend);
-        const int32_t ypxl2 = static_cast<int32_t>(ipart(yend));
+        const auto xpxl2 = static_cast<int32_t>(xend);
+        const auto ypxl2 = static_cast<int32_t>(ipart(yend));
         if (steep) {
             color_compose(ypxl2, xpxl2, rfpart(yend) * xgap);
             color_compose(ypxl2 + 1, xpxl2, fpart(yend) * xgap);
@@ -2385,7 +2381,7 @@ class image {
 
         // main loop
         for (int32_t x = xpxl1 + 1; x < xpxl2; ++x) {
-            int32_t y = static_cast<int32_t>(ipart(intery));
+            auto y = static_cast<int32_t>(ipart(intery));
             if (steep) {
                 color_compose(y, x, rfpart(intery));
                 color_compose(y + 1, x, fpart(intery));
@@ -3387,7 +3383,7 @@ class image {
                                            out.push_back(ch);
                                        },
                                        {0, 0, W, H});
-        std::cout << out << std::endl;
+        std::cout << out << '\n';
     }
 
     /**
@@ -3419,7 +3415,7 @@ class image {
         output.append("\033]1337;File=inline=1:");
         append_png_as_base64(output);
         output.append("\07");
-        std::cout << output << std::endl;
+        std::cout << output << '\n';
     }
 
     /**
@@ -3430,7 +3426,7 @@ class image {
         std::string output{};
         append_png_as_base64(base64);
         bool first = true;
-        for (; base64.length();) {
+        for (; !base64.empty();) {
             if (first) {
                 first = false;
                 output.append("\033_Ga=T,f=100,");
@@ -3443,7 +3439,7 @@ class image {
             base64.erase(0, bytes_to_append);
             output.append("\033\\");
         }
-        std::cout << output << std::endl;
+        std::cout << output << '\n';
     }
 
     /**
@@ -3538,33 +3534,34 @@ class image {
         for (size_t i = 0; i < 4; i++) {
             if ((outcode0 | outcode1) == INSIDE) {
                 return true;
-            } else if (outcode0 & outcode1) {
+            } else if ((outcode0 & outcode1) != 0) {
                 return false;
             } else {
                 uint32_t outcode_out = outcode1 > outcode0 ? outcode1 : outcode0;
-                int32_t x = 0, y = 0;
-                if (outcode_out & YMAX) {
-                    const int64_t x1x0 = static_cast<int64_t>(x1 - x0);
-                    const int64_t w1y0 = static_cast<int64_t>(ymax - y0);
-                    const int64_t y1y0 = static_cast<int64_t>(y1 - y0);
+                int32_t x = 0;
+                int32_t y = 0;
+                if ((outcode_out & YMAX) != 0) {
+                    const auto x1x0 = static_cast<int64_t>(x1 - x0);
+                    const auto w1y0 = static_cast<int64_t>(ymax - y0);
+                    const auto y1y0 = static_cast<int64_t>(y1 - y0);
                     x = x0 + static_cast<int32_t>((x1x0 * w1y0) / y1y0);
                     y = ymax;
-                } else if (outcode_out & YMIN) {
-                    const int64_t x1x0 = static_cast<int64_t>(x1 - x0);
-                    const int64_t ymy0 = static_cast<int64_t>(ymin - y0);
-                    const int64_t y1y0 = static_cast<int64_t>(y1 - y0);
+                } else if ((outcode_out & YMIN) != 0) {
+                    const auto x1x0 = static_cast<int64_t>(x1 - x0);
+                    const auto ymy0 = static_cast<int64_t>(ymin - y0);
+                    const auto y1y0 = static_cast<int64_t>(y1 - y0);
                     x = x0 + static_cast<int32_t>((x1x0 * ymy0) / y1y0);
                     y = ymin;
-                } else if (outcode_out & XMAX) {
-                    const int64_t y1y0 = static_cast<int64_t>(y1 - y0);
-                    const int64_t w1x0 = static_cast<int64_t>(xmax - x0);
-                    const int64_t x1x0 = static_cast<int64_t>(x1 - x0);
+                } else if ((outcode_out & XMAX) != 0) {
+                    const auto y1y0 = static_cast<int64_t>(y1 - y0);
+                    const auto w1x0 = static_cast<int64_t>(xmax - x0);
+                    const auto x1x0 = static_cast<int64_t>(x1 - x0);
                     y = y0 + static_cast<int32_t>((y1y0 * w1x0) / x1x0);
                     x = xmax;
                 } else {
-                    const int64_t y1y0 = static_cast<int64_t>(y1 - y0);
-                    const int64_t xmx0 = static_cast<int64_t>(xmin - x0);
-                    const int64_t x1x0 = static_cast<int64_t>(x1 - x0);
+                    const auto y1y0 = static_cast<int64_t>(y1 - y0);
+                    const auto xmx0 = static_cast<int64_t>(xmin - x0);
+                    const auto x1x0 = static_cast<int64_t>(x1 - x0);
                     y = y0 + static_cast<int32_t>((y1y0 * xmx0) / x1x0);
                     x = xmin;
                 }
@@ -3676,8 +3673,8 @@ class image {
         size_t buffer = 0;
         size_t bits_collected = 0;
         T<W, H, GR>::png(data, [&buffer, &bits_collected, &output](char byte) mutable {
-            static constexpr char base64_chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-
+            static constexpr const char *base64_chars =
+                "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
             buffer = (buffer << 8) | static_cast<uint8_t>(byte);
             bits_collected += 8;
             while (bits_collected >= 6) {
@@ -3688,7 +3685,7 @@ class image {
                 if (output.capacity() == 0) {
                     return;
                 }
-                if (output.size() % 4) {
+                if ((output.size() % 4) != 0) {
                     const size_t padding = 4 - output.size() % 4;
                     for (size_t c = 0; c < padding; c++) {
                         output.push_back('=');
@@ -3780,7 +3777,7 @@ class image {
                 }
             }
         } else {
-            const float rF = static_cast<float>(r);
+            const auto rF = static_cast<float>(r);
             const float Rl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 0);
             const float Gl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 1);
             const float Bl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 2);
@@ -3818,7 +3815,7 @@ class image {
                 };
                 for_each_quadrant.template operator()<float>(plot_arc);
             } else {
-                const float rsF = static_cast<float>(r - stroke_width);
+                const auto rsF = static_cast<float>(r - stroke_width);
                 auto plot_arc = [&, this]<typename I>(int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
                                                       int32_t y_off) {
                     for (int32_t y = yy0; y <= yy1; y++) {
@@ -3896,9 +3893,9 @@ class image {
                 for (int32_t xx = x; xx < x2; xx++) {
                     const int32_t x_off = (xx - x) + ch.x % 8;
                     const int32_t bit_index = 7 - (x_off % 8);
-                    const size_t byte_index = static_cast<size_t>(ch_data_off + x_off / 8);
+                    const auto byte_index = static_cast<size_t>(ch_data_off + x_off / 8);
                     if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
-                        const uint8_t a = static_cast<uint8_t>((FONT::glyph_bitmap[byte_index] >> bit_index) & 1);
+                        const auto a = static_cast<uint8_t>((FONT::glyph_bitmap[byte_index] >> bit_index) & 1);
                         if (a) {
                             plot(xx, yy, col);
                         }
@@ -3919,9 +3916,9 @@ class image {
                 for (int32_t xx = x2; xx < x; xx++) {
                     const int32_t x_off = (ch.width - (xx - x2) - 1) + ch.x % 8;
                     const int32_t bit_index = 7 - (x_off % 8);
-                    const size_t byte_index = static_cast<size_t>(ch_data_off + x_off / 8);
+                    const auto byte_index = static_cast<size_t>(ch_data_off + x_off / 8);
                     if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
-                        const uint8_t a = static_cast<uint8_t>((FONT::glyph_bitmap[byte_index] >> bit_index) & 1);
+                        const auto a = static_cast<uint8_t>((FONT::glyph_bitmap[byte_index] >> bit_index) & 1);
                         if (a) {
                             plot(xx, yy, col);
                         }
@@ -3942,9 +3939,9 @@ class image {
                 for (int32_t yy = y; yy < y2; yy++) {
                     const int32_t x_off = (yy - y) + ch.x % 8;
                     const int32_t bit_index = 7 - (x_off % 8);
-                    const size_t byte_index = static_cast<size_t>(ch_data_off + x_off / 8);
+                    const auto byte_index = static_cast<size_t>(ch_data_off + x_off / 8);
                     if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
-                        const uint8_t a = static_cast<uint8_t>((FONT::glyph_bitmap[byte_index] >> bit_index) & 1);
+                        const auto a = static_cast<uint8_t>((FONT::glyph_bitmap[byte_index] >> bit_index) & 1);
                         if (a) {
                             plot(xx, yy, col);
                         }
@@ -3965,9 +3962,9 @@ class image {
                 for (int32_t yy = y2; yy < y; yy++) {
                     const int32_t x_off = (ch.width - (yy - y2) - 1) + ch.x % 8;
                     const int32_t bit_index = 7 - (x_off % 8);
-                    const size_t byte_index = static_cast<size_t>(ch_data_off + x_off / 8);
+                    const auto byte_index = static_cast<size_t>(ch_data_off + x_off / 8);
                     if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
-                        const uint8_t a = static_cast<uint8_t>((FONT::glyph_bitmap[byte_index] >> bit_index) & 1);
+                        const auto a = static_cast<uint8_t>((FONT::glyph_bitmap[byte_index] >> bit_index) & 1);
                         if (a) {
                             plot(xx, yy, col);
                         }
@@ -4003,9 +4000,9 @@ class image {
                 for (int32_t xx = x; xx < x2; xx++) {
                     const int32_t x_off = (xx - x) + ch.x % 2;
                     const int32_t bit_index = (1 - (x_off % 2)) * 4;
-                    const size_t byte_index = static_cast<size_t>(ch_data_off + x_off / 2);
+                    const auto byte_index = static_cast<size_t>(ch_data_off + x_off / 2);
                     if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
-                        const uint8_t a = static_cast<uint8_t>((FONT::glyph_bitmap[byte_index] >> bit_index) & 0xF);
+                        const auto a = static_cast<uint8_t>((FONT::glyph_bitmap[byte_index] >> bit_index) & 0xF);
                         if (a != 0) {
                             if (a == 0xF) {
                                 plot(xx, yy, col);
@@ -4031,9 +4028,9 @@ class image {
                 for (int32_t xx = x2; xx < x; xx++) {
                     const int32_t x_off = (ch.width - (xx - x2) - 1) + ch.x % 2;
                     const int32_t bit_index = (1 - (x_off % 2)) * 4;
-                    const size_t byte_index = static_cast<size_t>(ch_data_off + x_off / 2);
+                    const auto byte_index = static_cast<size_t>(ch_data_off + x_off / 2);
                     if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
-                        const uint8_t a = static_cast<uint8_t>((FONT::glyph_bitmap[byte_index] >> bit_index) & 0xF);
+                        const auto a = static_cast<uint8_t>((FONT::glyph_bitmap[byte_index] >> bit_index) & 0xF);
                         if (a != 0) {
                             if (a == 0xF) {
                                 plot(xx, yy, col);
@@ -4059,9 +4056,9 @@ class image {
                 for (int32_t yy = y; yy < y2; yy++) {
                     const int32_t x_off = (yy - y) + ch.x % 2;
                     const int32_t bit_index = (1 - (x_off % 2)) * 4;
-                    const size_t byte_index = static_cast<size_t>(ch_data_off + x_off / 2);
+                    const auto byte_index = static_cast<size_t>(ch_data_off + x_off / 2);
                     if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
-                        const uint8_t a = static_cast<uint8_t>((FONT::glyph_bitmap[byte_index] >> bit_index) & 0xF);
+                        const auto a = static_cast<uint8_t>((FONT::glyph_bitmap[byte_index] >> bit_index) & 0xF);
                         if (a != 0) {
                             if (a == 0xF) {
                                 plot(xx, yy, col);
@@ -4087,9 +4084,9 @@ class image {
                 for (int32_t yy = y2; yy < y; yy++) {
                     const int32_t x_off = (ch.width - (yy - y2) - 1) + ch.x % 2;
                     const int32_t bit_index = (1 - (x_off % 2)) * 4;
-                    const size_t byte_index = static_cast<size_t>(ch_data_off + x_off / 2);
+                    const auto byte_index = static_cast<size_t>(ch_data_off + x_off / 2);
                     if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
-                        const uint8_t a = static_cast<uint8_t>((FONT::glyph_bitmap[byte_index] >> bit_index) & 0xF);
+                        const auto a = static_cast<uint8_t>((FONT::glyph_bitmap[byte_index] >> bit_index) & 0xF);
                         if (a != 0) {
                             if (a == 0xF) {
                                 plot(xx, yy, col);
