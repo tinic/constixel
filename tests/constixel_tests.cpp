@@ -938,7 +938,6 @@ int main() {
             for (int32_t x = 0; x < 1024; x += delta) {
                 float xf0 = float(x) / 1024.0f * 2.0f * 3.141f * float(c + 1) / 2.0f;
                 float xf1 = float(x + delta) / 1024.0f * 2.0f * 3.141f * float(c + 1) / 2.0f;
-                ;
                 image->draw_line(x, int32_t(256.0f + std::sin(xf0) * 192.0f), x + delta, int32_t(256.0f + std::sin(xf1) * 192.0f), static_cast<uint8_t>(c), 1);
             }
         }
