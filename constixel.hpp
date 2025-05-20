@@ -28,10 +28,12 @@ SOFTWARE.
 #include <array>
 #include <bit>
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
 #include <iostream>
 #include <limits>
 #include <string>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -202,10 +204,15 @@ class quantize {
     alignas(32) std::array<float, palette_size * 3> linearpal_avx2{};
 #endif  // #if defined(__ARM_NEON)
 
-    const std::array<uint32_t, palette_size> pal{};
+    std::array<uint32_t, palette_size> pal{};
 
  public:
+    ~quantize() = default;
+    quantize(const quantize &&) = delete;
+    quantize(const quantize &) = delete;
     quantize &operator=(const quantize &) = delete;
+    quantize &operator=(quantize &&) = delete;
+
     explicit consteval quantize(const std::array<uint32_t, palette_size> &palette) : pal(palette) {
         for (size_t i = 0; i < pal.size(); i++) {
             linearpal.at(i * 3 + 0) =
@@ -406,11 +413,13 @@ class hextree {
         return sizeof(node) * nodes.size();
     }
 
+    ~hextree() = default;
+    hextree(const hextree &&) = delete;
     hextree(const hextree &) = delete;
     hextree &operator=(const hextree &) = delete;
+    hextree &operator=(hextree &&) = delete;
 
     explicit consteval hextree() = default;
-
     template <std::size_t NS>
     explicit consteval hextree(const std::array<std::pair<T, T>, NS> &in) {
         nodes[0] = node{};
@@ -837,7 +846,7 @@ class format {
         const auto r = rect<int32_t>{_r.x * S, _r.y * S, _r.w * S, _r.h * S} & rect<int32_t>{0, 0, W * S, H * S};
         std::array<PBT, std::max(32UL, 1UL << PBS)> stack{};
         palette_bitset<PBT, std::max(32UL, 1UL << PBS)> pset{};
-        for (auto y = static_cast<size_t>(r.y); y < static_cast<size_t>(r.y + r.h); y += 6) {
+        for (int32_t y = r.y; y < (r.y + r.h); y += 6) {
             pset.clear();
             set6(data, static_cast<size_t>(r.x), static_cast<size_t>(r.w), y, pset);
             const size_t stack_count = pset.genstack(stack);
@@ -848,11 +857,11 @@ class format {
                 }
                 char_out('#');
                 sixel_number(char_out, static_cast<uint16_t>(col));
-                for (auto x = static_cast<size_t>(r.x); x < static_cast<size_t>(r.x + r.w); x++) {
-                    PBT bits6 = collect6(data, x, col, y);
+                for (int32_t x = r.x; x < (r.x + r.w); x++) {
+                    PBT bits6 = collect6(data, x, col, static_cast<size_t>(y));
                     uint16_t repeat_count = 0;
-                    for (size_t xr = (x + 1); xr < (std::min(x + size_t{255}, W * size_t{S})); xr++) {
-                        if (bits6 == collect6(data, xr, col, y)) {
+                    for (int32_t xr = x + 1; xr < (std::min(x + int32_t{255}, static_cast<int32_t>(W * S))); xr++) {
+                        if (bits6 == collect6(data, static_cast<size_t>(xr), col, static_cast<size_t>(y))) {
                             repeat_count++;
                             continue;
                         }
