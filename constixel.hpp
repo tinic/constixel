@@ -1053,8 +1053,10 @@ class format_1bit : public format {
 
     static constexpr void blit_RGBA(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr,
                                     int32_t stride) {
-        for (size_t y = 0; std::cmp_less(y, r.h); y++) {
-            for (size_t x = 0; std::cmp_less(x, r.w); x++) {
+        auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
+        auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
+        for (size_t y = 0; y < r_h; y++) {
+            for (size_t x = 0; x < r_w; x++) {
                 const uint32_t R = ptr[y * static_cast<size_t>(stride) + x * 4 + 0];
                 const uint32_t G = ptr[y * static_cast<size_t>(stride) + x * 4 + 1];
                 const uint32_t B = ptr[y * static_cast<size_t>(stride) + x * 4 + 2];
@@ -1066,9 +1068,11 @@ class format_1bit : public format {
 
     static constexpr void blit_RGBA_diffused(std::array<uint8_t, image_size> &data, const rect<int32_t> &r,
                                              const uint8_t *ptr, int32_t stride) {
-        int32_t err = 0;
-        for (size_t y = 0; std::cmp_less(y, r.h); y++) {
-            for (size_t x = 0; std::cmp_less(x, r.w); x++) {
+        auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
+        auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
+        for (size_t y = 0; y < r_h; y++) {
+            int32_t err = 0;
+            for (size_t x = 0; x < r_w; x++) {
                 const int32_t R = ptr[y * static_cast<size_t>(stride) + x * 4 + 0];
                 const int32_t G = ptr[y * static_cast<size_t>(stride) + x * 4 + 1];
                 const int32_t B = ptr[y * static_cast<size_t>(stride) + x * 4 + 2];
@@ -1083,11 +1087,13 @@ class format_1bit : public format {
 
     static constexpr void blit_RGBA_diffused_linear(std::array<uint8_t, image_size> &data, const rect<int32_t> &r,
                                                     const uint8_t *ptr, int32_t stride) {
-        for (size_t y = 0; std::cmp_less(y, r.h); y++) {
+        auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
+        auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
+        for (size_t y = 0; y < r_h; y++) {
             float err_r = 0;
             float err_g = 0;
             float err_b = 0;
-            for (size_t x = 0; std::cmp_less(x, r.w); x++) {
+            for (size_t x = 0; x < r_w; x++) {
                 const auto R = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 0]) * (1.0f / 255.0f);
                 const auto G = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 1]) * (1.0f / 255.0f);
                 const auto B = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 2]) * (1.0f / 255.0f);
@@ -1275,8 +1281,10 @@ class format_2bit : public format {
 
     static constexpr void blit_RGBA(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr,
                                     int32_t stride) {
-        for (size_t y = 0; std::cmp_less(y, r.h); y++) {
-            for (size_t x = 0; std::cmp_less(x, r.w); x++) {
+        auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
+        auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
+        for (size_t y = 0; y < r_h; y++) {
+            for (size_t x = 0; x < r_w; x++) {
                 plot(data, (x + static_cast<uint32_t>(r.x)), (y + static_cast<uint32_t>(r.y)),
                      quant.nearest(ptr[y * static_cast<size_t>(stride) + x * 4 + 0],
                                    ptr[y * static_cast<size_t>(stride) + x * 4 + 1],
@@ -1287,11 +1295,13 @@ class format_2bit : public format {
 
     static constexpr void blit_RGBA_diffused(std::array<uint8_t, image_size> &data, const rect<int32_t> &r,
                                              const uint8_t *ptr, int32_t stride) {
-        for (size_t y = 0; std::cmp_less(y, r.h); y++) {
+        auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
+        auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
+        for (size_t y = 0; y < r_h; y++) {
             int32_t err_r = 0;
             int32_t err_g = 0;
             int32_t err_b = 0;
-            for (size_t x = 0; std::cmp_less(x, r.w); x++) {
+            for (size_t x = 0; x < r_w; x++) {
                 int32_t R = ptr[y * static_cast<size_t>(stride) + x * 4 + 0];
                 int32_t G = ptr[y * static_cast<size_t>(stride) + x * 4 + 1];
                 int32_t B = ptr[y * static_cast<size_t>(stride) + x * 4 + 2];
@@ -1312,11 +1322,13 @@ class format_2bit : public format {
 
     static constexpr void blit_RGBA_diffused_linear(std::array<uint8_t, image_size> &data, const rect<int32_t> &r,
                                                     const uint8_t *ptr, int32_t stride) {
-        for (size_t y = 0; std::cmp_less(y, r.h); y++) {
+        auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
+        auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
+        for (size_t y = 0; y < r_h; y++) {
             float err_r = 0;
             float err_g = 0;
             float err_b = 0;
-            for (size_t x = 0; std::cmp_less(x, r.w); x++) {
+            for (size_t x = 0; x < r_w; x++) {
                 const auto R = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 0]) * (1.0f / 255.0f);
                 const auto G = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 1]) * (1.0f / 255.0f);
                 const auto B = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 2]) * (1.0f / 255.0f);
@@ -1516,8 +1528,10 @@ class format_4bit : public format {
 
     static constexpr void blit_RGBA(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr,
                                     int32_t stride) {
-        for (size_t y = 0; std::cmp_less(y, r.h); y++) {
-            for (size_t x = 0; std::cmp_less(x, r.w); x++) {
+        auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
+        auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
+        for (size_t y = 0; y < r_h; y++) {
+            for (size_t x = 0; x < r_w; x++) {
                 plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)),
                      quant.nearest(ptr[y * static_cast<size_t>(stride) + x * 4 + 0],
                                    ptr[y * static_cast<size_t>(stride) + x * 4 + 1],
@@ -1528,11 +1542,13 @@ class format_4bit : public format {
 
     static constexpr void blit_RGBA_diffused(std::array<uint8_t, image_size> &data, const rect<int32_t> &r,
                                              const uint8_t *ptr, int32_t stride) {
-        for (size_t y = 0; std::cmp_less(y, r.h); y++) {
+        auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
+        auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
+        for (size_t y = 0; y < r_h; y++) {
             int32_t err_r = 0;
             int32_t err_g = 0;
             int32_t err_b = 0;
-            for (size_t x = 0; std::cmp_less(x, r.w); x++) {
+            for (size_t x = 0; x < r_w; x++) {
                 int32_t R = ptr[y * static_cast<size_t>(stride) + x * 4 + 0];
                 int32_t G = ptr[y * static_cast<size_t>(stride) + x * 4 + 1];
                 int32_t B = ptr[y * static_cast<size_t>(stride) + x * 4 + 2];
@@ -1553,11 +1569,13 @@ class format_4bit : public format {
 
     static constexpr void blit_RGBA_diffused_linear(std::array<uint8_t, image_size> &data, const rect<int32_t> &r,
                                                     const uint8_t *ptr, int32_t stride) {
-        for (size_t y = 0; std::cmp_less(y, r.h); y++) {
+        auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
+        auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
+        for (size_t y = 0; y < r_h; y++) {
             float err_r = 0;
             float err_g = 0;
             float err_b = 0;
-            for (size_t x = 0; std::cmp_less(x, r.w); x++) {
+            for (size_t x = 0; x < r_w; x++) {
                 const auto R = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 0]) * (1.0f / 255.0f);
                 const auto G = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 1]) * (1.0f / 255.0f);
                 const auto B = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 2]) * (1.0f / 255.0f);
@@ -1815,8 +1833,10 @@ class format_8bit : public format {
 
     static constexpr void blit_RGBA(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr,
                                     int32_t stride) {
-        for (size_t y = 0; std::cmp_less(y, r.h); y++) {
-            for (size_t x = 0; std::cmp_less(x, r.w); x++) {
+        auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
+        auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
+        for (size_t y = 0; y < r_h; y++) {
+            for (size_t x = 0; x < r_w; x++) {
                 data.data()[(y + static_cast<size_t>(r.y)) * bytes_per_line + (x + static_cast<size_t>(r.x))] =
                     quant.nearest(ptr[y * static_cast<size_t>(stride) + x * 4 + 0],
                                   ptr[y * static_cast<size_t>(stride) + x * 4 + 1],
@@ -1827,11 +1847,13 @@ class format_8bit : public format {
 
     static constexpr void blit_RGBA_diffused(std::array<uint8_t, image_size> &data, const rect<int32_t> &r,
                                              const uint8_t *ptr, int32_t stride) {
-        for (size_t y = 0; std::cmp_less(y, r.h); y++) {
+        auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
+        auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
+        for (size_t y = 0; y < r_h; y++) {
             int32_t err_r = 0;
             int32_t err_g = 0;
             int32_t err_b = 0;
-            for (size_t x = 0; std::cmp_less(x, r.w); x++) {
+            for (size_t x = 0; x < r_w; x++) {
                 int32_t R = ptr[y * static_cast<size_t>(stride) + x * 4 + 0];
                 int32_t G = ptr[y * static_cast<size_t>(stride) + x * 4 + 1];
                 int32_t B = ptr[y * static_cast<size_t>(stride) + x * 4 + 2];
@@ -1852,11 +1874,13 @@ class format_8bit : public format {
 
     static constexpr void blit_RGBA_diffused_linear(std::array<uint8_t, image_size> &data, const rect<int32_t> &r,
                                                     const uint8_t *ptr, int32_t stride) {
-        for (size_t y = 0; std::cmp_less(y, r.h); y++) {
+        auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
+        auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
+        for (size_t y = 0; y < r_h; y++) {
             float err_r = 0;
             float err_g = 0;
             float err_b = 0;
-            for (size_t x = 0; std::cmp_less(x, r.w); x++) {
+            for (size_t x = 0; x < r_w; x++) {
                 const auto R = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 0]) * (1.0f / 255.0f);
                 const auto G = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 1]) * (1.0f / 255.0f);
                 const auto B = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 2]) * (1.0f / 255.0f);
@@ -2210,7 +2234,9 @@ class image {
      * \param col Color palette index to use.
      */
     constexpr void plot(int32_t x, int32_t y, uint8_t col) {
-        if (std::cmp_greater_equal(x, W) || std::cmp_greater_equal(y, H) || x < 0 || y < 0) {
+        auto wS = static_cast<int32_t>(W);
+        auto hS = static_cast<int32_t>(H);
+        if (x >= wS || y >= hS || x < 0 || y < 0) {
             return;
         }
         T<W, H, GR>::plot(data, static_cast<uint32_t>(x), static_cast<uint32_t>(y), col);
@@ -3659,7 +3685,9 @@ class image {
      * @private
      */
     constexpr void compose(int32_t x, int32_t y, float cola, float colr, float colg, float colb) {
-        if (std::cmp_greater_equal(x, W) || std::cmp_greater_equal(y, H) || x < 0 || y < 0) {
+        auto wS = static_cast<int32_t>(W);
+        auto hS = static_cast<int32_t>(H);
+        if (x >= wS || y >= hS || x < 0 || y < 0) {
             return;
         }
         T<W, H, GR>::compose(data, static_cast<uint32_t>(x), static_cast<uint32_t>(y), cola, colr, colg, colb);
@@ -4105,7 +4133,9 @@ class image {
      * @private
      */
     constexpr void span(int32_t x, int32_t w, int32_t y, uint8_t col) {
-        if (w <= 0 || y < 0 || std::cmp_greater_equal(y, H) || x + w <= 0 || std::cmp_greater_equal(x, W)) {
+        auto wS = static_cast<int32_t>(W);
+        auto hS = static_cast<int32_t>(H);
+        if (w <= 0 || y < 0 || y >= hS || x + w <= 0 || x >= wS) {
             return;
         }
         const int32_t x0 = std::max(x, int32_t{0});
