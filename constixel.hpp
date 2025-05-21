@@ -2564,7 +2564,7 @@ class image {
     constexpr int32_t draw_string_mono(const struct draw_string &d,
                                        size_t character_count = std::numeric_limits<size_t>::max(),
                                        size_t *character_actual = nullptr) {
-        return draw_string_mono(d.x, d.y, d.str, d.col, character_count, character_actual);
+        return draw_string_mono<FONT, KERNING, ROTATION>(d.x, d.y, d.str, d.col, character_count, character_actual);
     }
 
     /**
@@ -2690,7 +2690,7 @@ class image {
     constexpr int32_t draw_string_aa(const struct draw_string &d,
                                      size_t character_count = std::numeric_limits<size_t>::max(),
                                      size_t *character_actual = nullptr) {
-        return draw_string_aa(d.x, d.y, d.str, d.col, character_count, character_actual);
+        return draw_string_aa<FONT, KERNING, ROTATION>(d.x, d.y, d.str, d.col, character_count, character_actual);
     }
 
     /**
