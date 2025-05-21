@@ -2127,6 +2127,12 @@ class image {
     static constexpr int32_t min_coord = -1 << 28;
     static constexpr int32_t max_coord = +1 << 28;
 
+#if defined(__x86_64__) || defined(_M_X64) || defined(__aarch64__)
+    static constexpr bool always_use_64bit = true;
+#else  // #if defined(__x86_64__) || defined(_M_X64) || defined(__aarch64__)
+    static constexpr bool always_use_64bit = true;
+#endif  // #if defined(__x86_64__) || defined(_M_X64) || defined(__aarch64__)
+
  public:
     /**
      * \brief Boolean indicating that the palette is grayscale instead of color.
@@ -3656,52 +3662,62 @@ class image {
         uint32_t outcode0 = calc_code(x0, y0);
         uint32_t outcode1 = calc_code(x1, y1);
 
-        for (size_t i = 0; i < 4; i++) {
-            if ((outcode0 | outcode1) == INSIDE) {
-                return true;
+        const int32_t max_value =
+            std::max({abs(x0), abs(y0), abs(x1), abs(y1), abs(xmin), abs(ymin), abs(xmax), abs(ymax)});
+        const bool use_int64 = always_use_64bit || max_value >= (std::numeric_limits<int16_t>::max() / int32_t{4});
+
+        auto clip_loop = [&]<typename I>() -> bool {
+            for (size_t i = 0; i < 4; i++) {
+                if ((outcode0 | outcode1) == INSIDE) {
+                    return true;
+                }
+                if ((outcode0 & outcode1) != 0) {
+                    return false;
+                }
+                uint32_t outcode_out = outcode1 > outcode0 ? outcode1 : outcode0;
+                int32_t x = 0;
+                int32_t y = 0;
+                if ((outcode_out & YMAX) != 0) {
+                    const auto x1x0 = static_cast<I>(x1 - x0);
+                    const auto w1y0 = static_cast<I>(ymax - y0);
+                    const auto y1y0 = static_cast<I>(y1 - y0);
+                    x = x0 + static_cast<int32_t>((x1x0 * w1y0) / y1y0);
+                    y = ymax;
+                } else if ((outcode_out & YMIN) != 0) {
+                    const auto x1x0 = static_cast<I>(x1 - x0);
+                    const auto ymy0 = static_cast<I>(ymin - y0);
+                    const auto y1y0 = static_cast<I>(y1 - y0);
+                    x = x0 + static_cast<int32_t>((x1x0 * ymy0) / y1y0);
+                    y = ymin;
+                } else if ((outcode_out & XMAX) != 0) {
+                    const auto y1y0 = static_cast<I>(y1 - y0);
+                    const auto w1x0 = static_cast<I>(xmax - x0);
+                    const auto x1x0 = static_cast<I>(x1 - x0);
+                    y = y0 + static_cast<int32_t>((y1y0 * w1x0) / x1x0);
+                    x = xmax;
+                } else {
+                    const auto y1y0 = static_cast<I>(y1 - y0);
+                    const auto xmx0 = static_cast<I>(xmin - x0);
+                    const auto x1x0 = static_cast<I>(x1 - x0);
+                    y = y0 + static_cast<int32_t>((y1y0 * xmx0) / x1x0);
+                    x = xmin;
+                }
+                if (outcode_out == outcode0) {
+                    x0 = x;
+                    y0 = y;
+                    outcode0 = calc_code(x0, y0);
+                } else {
+                    x1 = x;
+                    y1 = y;
+                    outcode1 = calc_code(x1, y1);
+                }
             }
-            if ((outcode0 & outcode1) != 0) {
-                return false;
-            }
-            uint32_t outcode_out = outcode1 > outcode0 ? outcode1 : outcode0;
-            int32_t x = 0;
-            int32_t y = 0;
-            if ((outcode_out & YMAX) != 0) {
-                const auto x1x0 = static_cast<int64_t>(x1 - x0);
-                const auto w1y0 = static_cast<int64_t>(ymax - y0);
-                const auto y1y0 = static_cast<int64_t>(y1 - y0);
-                x = x0 + static_cast<int32_t>((x1x0 * w1y0) / y1y0);
-                y = ymax;
-            } else if ((outcode_out & YMIN) != 0) {
-                const auto x1x0 = static_cast<int64_t>(x1 - x0);
-                const auto ymy0 = static_cast<int64_t>(ymin - y0);
-                const auto y1y0 = static_cast<int64_t>(y1 - y0);
-                x = x0 + static_cast<int32_t>((x1x0 * ymy0) / y1y0);
-                y = ymin;
-            } else if ((outcode_out & XMAX) != 0) {
-                const auto y1y0 = static_cast<int64_t>(y1 - y0);
-                const auto w1x0 = static_cast<int64_t>(xmax - x0);
-                const auto x1x0 = static_cast<int64_t>(x1 - x0);
-                y = y0 + static_cast<int32_t>((y1y0 * w1x0) / x1x0);
-                x = xmax;
-            } else {
-                const auto y1y0 = static_cast<int64_t>(y1 - y0);
-                const auto xmx0 = static_cast<int64_t>(xmin - x0);
-                const auto x1x0 = static_cast<int64_t>(x1 - x0);
-                y = y0 + static_cast<int32_t>((y1y0 * xmx0) / x1x0);
-                x = xmin;
-            }
-            if (outcode_out == outcode0) {
-                x0 = x;
-                y0 = y;
-                outcode0 = calc_code(x0, y0);
-            } else {
-                x1 = x;
-                y1 = y;
-                outcode1 = calc_code(x1, y1);
-            }
+            return false;
+        };
+        if (use_int64) {
+            return clip_loop.template operator()<int64_t>();
         }
-        return false;
+        return clip_loop.template operator()<int32_t>();
     }
 
     /**
@@ -3869,7 +3885,7 @@ class image {
         if constexpr (!AA) {
             const int32_t max_value = std::max(
                 {abs(x0), abs(y0), abs(x0r), abs(x0r2), abs(y0r), abs(y0r2), abs(r), abs(s), abs(cx), abs(cy)});
-            const bool use_int64 = max_value >= ((std::numeric_limits<int16_t>::max() / int32_t{8}) - int16_t{1});
+            const bool use_int64 = always_use_64bit || max_value >= ((std::numeric_limits<int16_t>::max() / int32_t{8}) - int16_t{1});
             if constexpr (!STROKE) {
                 auto plot_arc = [&, this]<typename I>(int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
                                                       int32_t y_off) {

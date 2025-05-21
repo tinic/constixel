@@ -66,7 +66,7 @@ static int32_t random_limit() {
 template <class T, bool AA>
 void fuzz_limits() {
     T image;
-    for (size_t c = 0; c < 65536; c++) {
+    for (size_t c = 0; c < 65536 * 8; c++) {
         image.draw_line(random_limit(),random_limit(),random_limit(),random_int32(),static_cast<uint8_t>(random_limit()&0xFF));
         image.fill_circle(random_limit(),random_limit(),random_limit(),static_cast<uint8_t>(random_limit()&0xFF));
         image.fill_rect(random_limit(), random_limit(), random_limit(), random_limit(), static_cast<uint8_t>(random_limit()&0xFF));
@@ -100,7 +100,7 @@ void fuzz_limits() {
 template <class T, bool AA>
 void fuzz_random() {
     T image;
-    for (size_t c = 0; c < 65536; c++) {
+    for (size_t c = 0; c < 65536 * 8; c++) {
         image.draw_line(random_int32(),random_int32(),random_int32(),random_int32(),static_cast<uint8_t>(random_int32()&0xFF));
         image.fill_circle(random_int32(),random_int32(),random_int32(),static_cast<uint8_t>(random_int32()&0xFF));
         image.fill_rect(random_int32(), random_int32(), random_int32(), random_int32(), static_cast<uint8_t>(random_int32()&0xFF));
