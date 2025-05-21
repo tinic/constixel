@@ -6,7 +6,6 @@
 
 set -euo pipefail
 FONT_DIR="${1:-./takwolf}"
-CHARS=(32-126)
 
 git submodule update --init --recursive
 
