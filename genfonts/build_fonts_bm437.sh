@@ -6,7 +6,7 @@
 
 set -euo pipefail
 FONT_DIR="${1:-./bm437}"
-CHARS=(32-126)
+CHARS=(32-126) # comma separated ranges, accepts 0xXXXX hex values.
 
 git submodule update --init --recursive
 
