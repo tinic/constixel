@@ -3,6 +3,13 @@
 #
 # You will need gcc-14+, bash 4.0+, libfreetype-dev and libharfbuzz-dev
 #
+# I strongly recomment to check out the options fontbm supports to adapt this script
+# for your purposes.
+#
+# Of note is that this custom version of fontbm has extra features like the ability
+# to specify --secondary-font-file which can be used to pull symbols/icons from if
+# they don't exist in the primary font.
+#
 
 set -euo pipefail
 shopt -s nullglob

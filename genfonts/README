@@ -1,0 +1,7 @@
+These bash scripts will compile the required tools and generate the font header files in constixel/fonts. A C++23 compiler is required and bash4.0+ (On MacOS install that using 'brew install bash'). The other two system dependencies to compile are freetype2 and harfbuzz which are available on MingGW, homebrew, apt etc.
+
+- build_font_otf.sh -> Build from fonts in otf/. IBM Plex is available here: https://github.com/IBM/plex
+- build_font_bm437.sh -> Build from fonts in bm437/. These are fonts from https://int10h.org/oldschool-pc-fonts/
+- build_font_special.sh -> Build from fonts in special/. These are various free fonts sourced mostly on github.com and https://www.dafont.com/bitmap.php
+
+By default most of the fonts only include ASCII ranges (unicode ids 32-127). You can modify CHARS in some of these scripts to change that or use --all-chars to include all glyphs in a fonts.
