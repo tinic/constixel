@@ -693,7 +693,7 @@ class format {
             header.at(i++) = ((((bytes_to_copy + filter_first) ^ 0xffff) >> 8) & 0xFF);
 
             const size_t adlersum32_start_pos = i;
-            if (filter_first) {
+            if (filter_first != 0) {
                 filter_first = 0;
                 header.at(i++) = 0;
             }
