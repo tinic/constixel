@@ -110,7 +110,7 @@ int main() {
 
 ## Text drawing example
 
-Include a text font and pass the struct name as a template parameter to the draw_string function. The pre-made available fonts in this repo are viewable [here](./tests/constixel_fonts.png "Fonts") More can be easily added/modified, for instance if you need more than just ASCII character ranges or want symbols/icons.
+Include a text font and pass the struct name as a template parameter to the draw_string function. The pre-made available fonts in this repo are viewable [here](./tests/constixel_fonts.png "Fonts"). More can be easily added/modified, for instance if you need more than just ASCII character ranges or want symbols/icons.
 
 ```c++
 #include "constixel.hpp"
@@ -142,7 +142,7 @@ int main() {
 
 As std::vector can not escape consteval (yet) so we use std::array. Output of this example should be "Actual byte size: 18537" and the sixel image. The binary will contain the evaluated sixel string.
 
-Compile as such:
+Compile as such (clang needs -fconstexpr-steps=33554432):
 
 ```bash
 > g++ -fconstexpr-ops-limit=268435456 -std=c++23 constixel.cpp -o constixel -Os
@@ -162,7 +162,7 @@ consteval auto gen_sixel() {
         }
     }
 
-    std::array<char, 32767> sixel;
+    std::array<char, 32767> sixel{};
     char *ptr = sixel.data();
     image.sixel([&ptr](char ch) mutable {
         *ptr++ = ch;
