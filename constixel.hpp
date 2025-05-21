@@ -2124,6 +2124,9 @@ class image {
     static_assert(W > 0 && H > 0);
     static_assert(W <= 16384 && H <= 16384);
 
+    static constexpr int32_t min_coord = -1 << 28;
+    static constexpr int32_t max_coord = +1 << 28;
+
  public:
     /**
      * \brief Boolean indicating that the palette is grayscale instead of color.
@@ -2266,6 +2269,12 @@ class image {
      * \param stroke_width Width of the stroke in pixels.
      */
     constexpr void draw_line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, int32_t stroke_width = 1) {
+        int32_t min_check = std::min({x0, y0, x1, y1});
+        int32_t max_check = std::max({x0, y0, x1, y1});
+        if (min_check < min_coord || max_check > max_coord) {
+            return;
+        }
+
         if (!clip_line(x0, y0, x1, y1, -stroke_width, -stroke_width, static_cast<int32_t>(W) + stroke_width,
                        static_cast<int32_t>(H) + stroke_width)) {
             return;
@@ -2349,6 +2358,12 @@ class image {
      * \param col Color palette index to use.
      */
     constexpr void draw_line_aa(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col) {
+        int32_t min_check = std::min({x0, y0, x1, y1});
+        int32_t max_check = std::max({x0, y0, x1, y1});
+        if (min_check < min_coord || max_check > max_coord) {
+            return;
+        }
+
         if (!clip_line(x0, y0, x1, y1, 0, 0, W, H)) {
             return;
         }
@@ -2523,6 +2538,11 @@ class image {
                                        size_t character_count = std::numeric_limits<size_t>::max(),
                                        size_t *character_actual = nullptr) {
         static_assert(FONT::mono == true, "Can't use an antialiased font to draw mono/pixelized text.");
+        int32_t min_check = std::min({x, y});
+        int32_t max_check = std::max({x, y});
+        if (min_check < min_coord || max_check > max_coord) {
+            return 0;
+        }
         if (str == nullptr) {
             return 0;
         }
@@ -2649,6 +2669,11 @@ class image {
                                      size_t character_count = std::numeric_limits<size_t>::max(),
                                      size_t *character_actual = nullptr) {
         static_assert(FONT::mono == false, "Can't use a mono font to draw antialiased text.");
+        int32_t min_check = std::min({x, y});
+        int32_t max_check = std::max({x, y});
+        if (min_check < min_coord || max_check > max_coord) {
+            return 0;
+        }
         if (str == nullptr) {
             return 0;
         }
@@ -2761,10 +2786,17 @@ class image {
      * \param col Color palette index to use.
      */
     constexpr void fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col) {
+        int32_t min_check = std::min({x, y, w, h});
+        int32_t max_check = std::max({x, y, w, h});
+        if (min_check < min_coord || max_check > max_coord) {
+            return;
+        }
+        if (w <= 0 || h <= 0) {
+            return;
+        }
         if (check_not_in_bounds(x, y, w, h)) {
             return;
         }
-
         if (y < 0) {
             h += y;
             y = 0;
@@ -2806,10 +2838,15 @@ class image {
      * \param stroke_width Width of the stroke in pixels.
      */
     constexpr void stroke_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col, int32_t stroke_width = 1) {
+        int32_t min_check = std::min({x, y, w, h});
+        int32_t max_check = std::max({x, y, w, h});
+        if (min_check < min_coord || max_check > max_coord) {
+            return;
+        }
         if (w <= 0 || h <= 0) {
             return;
         }
-        stroke_width = std::min(pseudo_abs(stroke_width), std::max(w, h) / 2);
+        stroke_width = std::min(abs(stroke_width), std::max(w, h) / 2);
         fill_rect(x, y, stroke_width, h, col);
         fill_rect(x + stroke_width, y, w - stroke_width * 2, stroke_width, col);
         fill_rect(x + w - stroke_width, y, stroke_width, h, col);
@@ -2842,7 +2879,12 @@ class image {
      * \param col Color palette index to use.
      */
     constexpr void fill_circle(int32_t cx, int32_t cy, int32_t radius, uint8_t col) {
-        radius = pseudo_abs(radius);
+        int32_t min_check = std::min({cx, cy, radius});
+        int32_t max_check = std::max({cx, cy, radius});
+        if (min_check < min_coord || max_check > max_coord) {
+            return;
+        }
+        radius = abs(radius);
         if (radius == 1) {
             fill_rect(cx - 1, cy - 1, 2, 2, col);
             return;
@@ -2877,8 +2919,13 @@ class image {
      * \param stroke_width Width of the stroke in pixels.
      */
     constexpr void stroke_circle(int32_t cx, int32_t cy, int32_t radius, uint8_t col, int32_t stroke_width = 1) {
-        radius = pseudo_abs(radius);
-        stroke_width = pseudo_abs(stroke_width);
+        int32_t min_check = std::min({cx, cy, radius, stroke_width});
+        int32_t max_check = std::max({cx, cy, radius, stroke_width});
+        if (min_check < min_coord || max_check > max_coord) {
+            return;
+        }
+        radius = abs(radius);
+        stroke_width = abs(stroke_width);
         if (radius == 1) {
             fill_rect(cx - 1, cy - 1, 2, 2, col);
             return;
@@ -2918,8 +2965,13 @@ class image {
      * \param stroke_width Width of the stroke in pixels.
      */
     constexpr void stroke_circle_aa(int32_t cx, int32_t cy, int32_t radius, uint8_t col, int32_t stroke_width = 1) {
-        radius = pseudo_abs(radius);
-        stroke_width = pseudo_abs(stroke_width);
+        int32_t min_check = std::min({cx, cy, radius, stroke_width});
+        int32_t max_check = std::max({cx, cy, radius, stroke_width});
+        if (min_check < min_coord || max_check > max_coord) {
+            return;
+        }
+        radius = abs(radius);
+        stroke_width = abs(stroke_width);
         if (radius == 1) {
             fill_rect(cx - 1, cy - 1, 2, 2, col);
             return;
@@ -2959,6 +3011,12 @@ class image {
      * \param col Color palette index to use.
      */
     constexpr void fill_circle_aa(int32_t cx, int32_t cy, int32_t radius, uint8_t col) {
+        int32_t min_check = std::min({cx, cy, radius});
+        int32_t max_check = std::max({cx, cy, radius});
+        if (min_check < min_coord || max_check > max_coord) {
+            return;
+        }
+        radius = abs(radius);
         circle_int<true, false>(cx, cy, radius, 0, 0, col, 0);
     }
 
@@ -2993,8 +3051,16 @@ class image {
      */
     constexpr void stroke_round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col,
                                      int32_t stroke_width = 1) {
-        radius = pseudo_abs(radius);
-        stroke_width = pseudo_abs(stroke_width);
+        int32_t min_check = std::min({x, y, w, h, radius});
+        int32_t max_check = std::max({x, y, w, h, radius});
+        if (min_check < min_coord || max_check > max_coord) {
+            return;
+        }
+        if (w <= 0 || h <= 0) {
+            return;
+        }
+        radius = abs(radius);
+        stroke_width = abs(stroke_width);
         const int32_t cr = std::min({w / 2, h / 2, radius});
         const int32_t dx = w - cr * 2;
         const int32_t dy = h - cr * 2;
@@ -3041,6 +3107,14 @@ class image {
      * \param col Color palette index to use.
      */
     constexpr void fill_round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col) {
+        int32_t min_check = std::min({x, y, w, h, radius});
+        int32_t max_check = std::max({x, y, w, h, radius});
+        if (min_check < min_coord || max_check > max_coord) {
+            return;
+        }
+        if (w <= 0 || h <= 0) {
+            return;
+        }
         const int32_t cr = std::min({w / 2, h / 2, radius});
         const int32_t dx = w - cr * 2;
         const int32_t dy = h - cr * 2;
@@ -3079,7 +3153,15 @@ class image {
      * \param col Color palette index to use.
      */
     constexpr void fill_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col) {
-        radius = pseudo_abs(radius);
+        int32_t min_check = std::min({x, y, w, h, radius});
+        int32_t max_check = std::max({x, y, w, h, radius});
+        if (min_check < min_coord || max_check > max_coord) {
+            return;
+        }
+        if (w <= 0 || h <= 0) {
+            return;
+        }
+        radius = abs(radius);
         int32_t cr = std::min({w / 2, h / 2, radius});
         int32_t dx = w - cr * 2;
         int32_t dy = h - cr * 2;
@@ -3120,8 +3202,16 @@ class image {
      */
     constexpr void stroke_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col,
                                         int32_t stroke_width = 1) {
-        radius = pseudo_abs(radius);
-        stroke_width = pseudo_abs(stroke_width);
+        int32_t min_check = std::min({x, y, w, h, radius, stroke_width});
+        int32_t max_check = std::max({x, y, w, h, radius, stroke_width});
+        if (min_check < min_coord || max_check > max_coord) {
+            return;
+        }
+        if (w <= 0 || h <= 0) {
+            return;
+        }
+        radius = abs(radius);
+        stroke_width = abs(stroke_width);
         const int32_t cr = std::min({w / 2, h / 2, radius});
         const int32_t dx = w - cr * 2;
         const int32_t dy = h - cr * 2;
@@ -3626,17 +3716,6 @@ class image {
     /**
      * @private
      */
-    template <typename abs_T>
-    [[nodiscard]] static constexpr abs_T pseudo_abs(abs_T v) {
-        if (v == std::numeric_limits<abs_T>::min()) {
-            return std::numeric_limits<abs_T>::max();
-        }
-        return v < 0 ? -v : v;
-    }
-
-    /**
-     * @private
-     */
     template <typename FONT>
     constexpr bool lookup_glyph(uint32_t utf32, size_t *glyph_index) {
         if (utf32 >= static_cast<uint32_t>(std::numeric_limits<typename FONT::lookup_type>::max()) - 1) {
@@ -3749,7 +3828,6 @@ class image {
     template <bool AA, bool STROKE>
     constexpr void circle_int(int32_t cx, int32_t cy, int32_t r, int32_t ox, int32_t oy, uint8_t col,
                               int32_t stroke_width) {
-
         const int32_t x0 = std::max(cx - r - int32_t{1}, int32_t{0});
         const int32_t y0 = std::max(cy - r - int32_t{1}, int32_t{0});
 
@@ -3770,9 +3848,8 @@ class image {
         };
 
         if constexpr (!AA) {
-            const int32_t max_coord = std::max({pseudo_abs(x0), pseudo_abs(y0), pseudo_abs(x0r), pseudo_abs(x0r2),
-                                                pseudo_abs(y0r), pseudo_abs(y0r2), pseudo_abs(r)});
-            const bool use_int64 = max_coord >= ((std::numeric_limits<int16_t>::max() / int32_t{8}) - int16_t{1});
+            const int32_t max_value = std::max({abs(x0), abs(y0), abs(x0r), abs(x0r2), abs(y0r), abs(y0r2), abs(r)});
+            const bool use_int64 = max_value >= ((std::numeric_limits<int16_t>::max() / int32_t{8}) - int16_t{1});
             if constexpr (!STROKE) {
                 auto plot_arc = [&, this]<typename I>(int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
                                                       int32_t y_off) {
@@ -3919,7 +3996,6 @@ class image {
     constexpr void draw_char_mono(int32_t x, int32_t y, const char_info<typename FONT::char_info_type> &ch,
                                   uint8_t col) {
         static_assert(FONT::mono == true, "Can't use an antialiased font to draw mono/pixelized text.");
-
         int32_t ch_data_off = static_cast<int32_t>(ch.y) * static_cast<int32_t>(FONT::glyph_bitmap_stride) +
                               static_cast<int32_t>(ch.x) / 8;
         if constexpr (ROTATION == DEGREE_0) {
