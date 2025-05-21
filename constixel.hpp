@@ -675,7 +675,7 @@ class format {
         const auto extra_data = size_t{10};
         const size_t max_stack_use = max_data_use + extra_data;
         std::array<uint8_t, max_stack_use> header{};
-        bool filter_first = 1;
+        int32_t filter_first = 1;
         while (bytes > 0) {
             size_t i = 0;
             header.at(i++) = 'I';
