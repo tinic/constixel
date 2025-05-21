@@ -3737,16 +3737,16 @@ class image {
         const int32_t x0 = std::max(cx - r - int32_t{1}, int32_t{0});
         const int32_t y0 = std::max(cy - r - int32_t{1}, int32_t{0});
         const int32_t x1 = std::min(x0 + r * int32_t{2} + ox, static_cast<int32_t>(W));
-        const int32_t y1 = std::min(y0 + r * int32_t{2} + oy, static_cast<int32_t>(W));
+        const int32_t y1 = std::min(y0 + r * int32_t{2} + oy, static_cast<int32_t>(H));
 
         if (check_not_in_bounds(x0, y0, r * int32_t{2} + ox + int32_t{1}, r * int32_t{2} + oy + int32_t{1})) {
             return;
         }
 
-        const int32_t x0r = std::min(x0 + r, static_cast<int32_t>(W) - int32_t{1});
-        const int32_t x0r2 = std::min(x0 + r * int32_t{2}, static_cast<int32_t>(W) - int32_t{1});
-        const int32_t y0r = std::min(y0 + r, static_cast<int32_t>(H) - int32_t{1});
-        const int32_t y0r2 = std::min(y0 + r * int32_t{2}, static_cast<int32_t>(H) - int32_t{1});
+        const int32_t x0r = std::clamp(x0 + r, int32_t{0}, static_cast<int32_t>(W) - int32_t{1});
+        const int32_t x0r2 = std::clamp(x0 + r * int32_t{2}, int32_t{0}, static_cast<int32_t>(W) - int32_t{1});
+        const int32_t y0r = std::clamp(y0 + r, int32_t{0}, static_cast<int32_t>(H) - int32_t{1});
+        const int32_t y0r2 = std::clamp(y0 + r * int32_t{2}, int32_t{0}, static_cast<int32_t>(H) - int32_t{1});
 
         auto for_each_quadrant = [&]<typename I>(auto &&plot_arc) {
             plot_arc.template operator()<I>(x0, y0, x0r, y0r, 0, 0);
