@@ -2130,7 +2130,7 @@ class image {
 #if defined(__x86_64__) || defined(_M_X64) || defined(__aarch64__)
     static constexpr bool always_use_64bit = true;
 #else  // #if defined(__x86_64__) || defined(_M_X64) || defined(__aarch64__)
-    static constexpr bool always_use_64bit = true;
+    static constexpr bool always_use_64bit = false;
 #endif  // #if defined(__x86_64__) || defined(_M_X64) || defined(__aarch64__)
 
  public:
