@@ -3799,6 +3799,9 @@ class image {
         T<W, H, GR>::compose(data, static_cast<uint32_t>(x), static_cast<uint32_t>(y), cola, colr, colg, colb);
     }
 
+    /**
+     * @private
+     */
     constexpr void plot_unsafe(int32_t x, int32_t y, uint8_t col) {
         T<W, H, GR>::plot(data, static_cast<uint32_t>(x), static_cast<uint32_t>(y), col);
     }
