@@ -3619,7 +3619,6 @@ class image {
  private:
 #ifndef __INTELLISENSE__
     /// @cond DOXYGEN_EXCLUDE
-
     constexpr bool check_not_in_bounds(int32_t x, int32_t y, int32_t w, int32_t h) {
         rect<int32_t> intersect_rect{.x = 0, .y = 0, .w = W, .h = H};
         intersect_rect &= rect<int32_t>{.x = x, .y = y, .w = w, .h = h};
@@ -3796,6 +3795,17 @@ class image {
     /**
      * @private
      */
+    constexpr void compose_unsafe(int32_t x, int32_t y, float cola, float colr, float colg, float colb) {
+        T<W, H, GR>::compose(data, static_cast<uint32_t>(x), static_cast<uint32_t>(y), cola, colr, colg, colb);
+    }
+
+    constexpr void plot_unsafe(int32_t x, int32_t y, uint8_t col) {
+        T<W, H, GR>::plot(data, static_cast<uint32_t>(x), static_cast<uint32_t>(y), col);
+    }
+
+    /**
+     * @private
+     */
     void append_png_as_base64(std::string &output) const {
         size_t buffer = 0;
         size_t bits_collected = 0;
@@ -3846,6 +3856,13 @@ class image {
             plot_arc.template operator()<I>(x0r, y0r, x0r2, y0r2, ox, oy);
         };
 
+        auto limit_box = [&](int32_t &xmin, int32_t &ymin, int32_t &xmax, int32_t &ymax) {
+            ymin = std::max(ymin - oy, int32_t{0}) + oy;
+            ymax = std::min(ymax + oy, static_cast<int32_t>(H) - int32_t{1}) - oy;
+            xmin = std::max(xmin - ox, int32_t{0}) + ox;
+            xmax = std::min(xmax + ox, static_cast<int32_t>(W) - int32_t{1}) - ox;
+        };
+
         if constexpr (!AA) {
             const int32_t max_value =
                 std::max({abs(x0), abs(y0), abs(x0r), abs(x0r2), abs(y0r), abs(y0r2), abs(r), abs(s), abs(cx), abs(cy)});
@@ -3853,6 +3870,7 @@ class image {
             if constexpr (!STROKE) {
                 auto plot_arc = [&, this]<typename I>(int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
                                                       int32_t y_off) {
+                    limit_box(xx0, yy0, xx1, yy1);
                     for (int32_t y = yy0; y <= yy1; y++) {
                         for (int32_t x = xx0; x <= xx1; x++) {
                             const I dx = (static_cast<I>(x) * I{2} + I{1}) - (static_cast<I>(cx) * I{2});
@@ -3861,7 +3879,7 @@ class image {
                             if (dist_sq > (static_cast<I>(r) * static_cast<I>(r) * I{4} - I{3})) {
                                 continue;
                             }
-                            plot(x + x_off, y + y_off, col);
+                            plot_unsafe(x + x_off, y + y_off, col);
                         }
                     }
                 };
@@ -3873,6 +3891,7 @@ class image {
             } else {
                 auto plot_arc = [&, this]<typename I>(int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
                                                       int32_t y_off) {
+                    limit_box(xx0, yy0, xx1, yy1);
                     for (int32_t y = yy0; y <= yy1; y++) {
                         for (int32_t x = xx0; x <= xx1; x++) {
                             const I dx = (static_cast<I>(x) * I{2} + I{1}) - (static_cast<I>(cx) * I{2});
@@ -3884,7 +3903,7 @@ class image {
                             if (dist_sq < (static_cast<I>(r - s) * static_cast<I>(r - s) * I{4} - I{3})) {
                                 continue;
                             }
-                            plot(x + x_off, y + y_off, col);
+                            plot_unsafe(x + x_off, y + y_off, col);
                         }
                     }
                 };
@@ -3902,6 +3921,7 @@ class image {
             if constexpr (!STROKE) {
                 auto plot_arc = [&, this]<typename I>(int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
                                                       int32_t y_off) {
+                    limit_box(xx0, yy0, xx1, yy1);
                     for (int32_t y = yy0; y <= yy1; y++) {
                         for (int32_t x = xx0; x <= xx1; x++) {
                             const float dx = (static_cast<float>(x) + 0.5f) - static_cast<float>(cx);
@@ -3911,7 +3931,7 @@ class image {
                                 continue;
                             }
                             if (dist_sq < (rF - 0.5f) * (rF - 0.5f)) {
-                                plot(x + x_off, y + y_off, col);
+                                plot_unsafe(x + x_off, y + y_off, col);
                                 continue;
                             }
                             float a = rF;
@@ -3923,9 +3943,9 @@ class image {
                             a = std::clamp(a + 0.5f, 0.0f, 1.0f);
                             if (a >= hidden::epsilon_low) {
                                 if (a >= hidden::epsilon_high) {
-                                    plot(x + x_off, y + y_off, col);
+                                    plot_unsafe(x + x_off, y + y_off, col);
                                 } else {
-                                    compose(x + x_off, y + y_off, a, Rl, Gl, Bl);
+                                    compose_unsafe(x + x_off, y + y_off, a, Rl, Gl, Bl);
                                 }
                             }
                         }
@@ -3936,6 +3956,7 @@ class image {
                 const auto rsF = static_cast<float>(r - s);
                 auto plot_arc = [&, this]<typename I>(int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
                                                       int32_t y_off) {
+                    limit_box(xx0, yy0, xx1, yy1);
                     for (int32_t y = yy0; y <= yy1; y++) {
                         for (int32_t x = xx0; x <= xx1; x++) {
                             const float dx = (static_cast<float>(x) + 0.5f) - static_cast<float>(cx);
@@ -3957,12 +3978,12 @@ class image {
                                 a = 1.0f - std::clamp(a + 0.5f, 0.0f, 1.0f);
                                 if (a >= hidden::epsilon_low) {
                                     if (a >= hidden::epsilon_high) {
-                                        plot(x + x_off, y + y_off, col);
+                                        plot_unsafe(x + x_off, y + y_off, col);
                                     } else {
-                                        compose(x + x_off, y + y_off, a, Rl, Gl, Bl);
+                                        compose_unsafe(x + x_off, y + y_off, a, Rl, Gl, Bl);
                                     }
                                 } else {
-                                    plot(x + x_off, y + y_off, col);
+                                    plot_unsafe(x + x_off, y + y_off, col);
                                 }
                             } else {
                                 float a = rF;
@@ -3974,9 +3995,9 @@ class image {
                                 a = std::clamp(a + 0.5f, 0.0f, 1.0f);
                                 if (a >= hidden::epsilon_low) {
                                     if (a >= hidden::epsilon_high) {
-                                        plot(x + x_off, y + y_off, col);
+                                        plot_unsafe(x + x_off, y + y_off, col);
                                     } else {
-                                        compose(x + x_off, y + y_off, a, Rl, Gl, Bl);
+                                        compose_unsafe(x + x_off, y + y_off, a, Rl, Gl, Bl);
                                     }
                                 }
                             }
@@ -3997,6 +4018,14 @@ class image {
         static_assert(FONT::mono == true, "Can't use an antialiased font to draw mono/pixelized text.");
         int32_t ch_data_off = static_cast<int32_t>(ch.y) * static_cast<int32_t>(FONT::glyph_bitmap_stride) +
                               static_cast<int32_t>(ch.x) / 8;
+
+        auto limit_box = [&](int32_t &xmin, int32_t &ymin, int32_t &xmax, int32_t &ymax) {
+            ymin = std::max(ymin, int32_t{0});
+            ymax = std::min(ymax, static_cast<int32_t>(H) - int32_t{1});
+            xmin = std::max(xmin, int32_t{0});
+            xmax = std::min(xmax, static_cast<int32_t>(W) - int32_t{1});
+        };
+
         if constexpr (ROTATION == DEGREE_0) {
             if (check_not_in_bounds(x + ch.xoffset, y + ch.yoffset, ch.width + 1, ch.height + 1)) {
                 return;
@@ -4004,8 +4033,9 @@ class image {
 
             x += ch.xoffset;
             y += ch.yoffset;
-            const int32_t x2 = x + static_cast<int32_t>(ch.width);
-            const int32_t y2 = y + static_cast<int32_t>(ch.height);
+            int32_t x2 = x + static_cast<int32_t>(ch.width);
+            int32_t y2 = y + static_cast<int32_t>(ch.height);
+            limit_box(x, y, x2, y2);
             for (int32_t yy = y; yy < y2; yy++) {
                 for (int32_t xx = x; xx < x2; xx++) {
                     const int32_t x_off = (xx - x) + ch.x % 8;
@@ -4014,7 +4044,7 @@ class image {
                     if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
                         const auto a = static_cast<uint8_t>((FONT::glyph_bitmap[byte_index] >> bit_index) & 1);
                         if (a) {
-                            plot(xx, yy, col);
+                            plot_unsafe(xx, yy, col);
                         }
                     }
                 }
@@ -4027,8 +4057,9 @@ class image {
 
             x -= ch.xoffset;
             y -= FONT::ascent;
-            const int32_t x2 = x - static_cast<int32_t>(ch.width);
-            const int32_t y2 = y + static_cast<int32_t>(ch.height);
+            int32_t x2 = x - static_cast<int32_t>(ch.width);
+            int32_t y2 = y + static_cast<int32_t>(ch.height);
+            limit_box(x2, y, x, y2);
             for (int32_t yy = y2 - 1; yy >= y; yy--) {
                 for (int32_t xx = x2; xx < x; xx++) {
                     const int32_t x_off = (ch.width - (xx - x2) - 1) + ch.x % 8;
@@ -4037,7 +4068,7 @@ class image {
                     if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
                         const auto a = static_cast<uint8_t>((FONT::glyph_bitmap[byte_index] >> bit_index) & 1);
                         if (a) {
-                            plot(xx, yy, col);
+                            plot_unsafe(xx, yy, col);
                         }
                     }
                 }
@@ -4050,8 +4081,9 @@ class image {
 
             x -= FONT::ascent;
             y += ch.xoffset;
-            const int32_t x2 = x + static_cast<int32_t>(ch.height);
-            const int32_t y2 = y + static_cast<int32_t>(ch.width);
+            int32_t x2 = x + static_cast<int32_t>(ch.height);
+            int32_t y2 = y + static_cast<int32_t>(ch.width);
+            limit_box(x, y, x2, y2);
             for (int32_t xx = x2 - 1; xx >= x; xx--) {
                 for (int32_t yy = y; yy < y2; yy++) {
                     const int32_t x_off = (yy - y) + ch.x % 8;
@@ -4060,7 +4092,7 @@ class image {
                     if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
                         const auto a = static_cast<uint8_t>((FONT::glyph_bitmap[byte_index] >> bit_index) & 1);
                         if (a) {
-                            plot(xx, yy, col);
+                            plot_unsafe(xx, yy, col);
                         }
                     }
                 }
@@ -4073,8 +4105,9 @@ class image {
 
             x += ch.yoffset;
             y -= ch.xoffset;
-            const int32_t x2 = x + static_cast<int32_t>(ch.height);
-            const int32_t y2 = y - static_cast<int32_t>(ch.width);
+            int32_t x2 = x + static_cast<int32_t>(ch.height);
+            int32_t y2 = y - static_cast<int32_t>(ch.width);
+            limit_box(x, y2, x2, y);
             for (int32_t xx = x; xx < x2; xx++) {
                 for (int32_t yy = y2; yy < y; yy++) {
                     const int32_t x_off = (ch.width - (yy - y2) - 1) + ch.x % 8;
@@ -4083,7 +4116,7 @@ class image {
                     if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
                         const auto a = static_cast<uint8_t>((FONT::glyph_bitmap[byte_index] >> bit_index) & 1);
                         if (a) {
-                            plot(xx, yy, col);
+                            plot_unsafe(xx, yy, col);
                         }
                     }
                 }
@@ -4104,6 +4137,14 @@ class image {
         const float Rl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 0);
         const float Gl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 1);
         const float Bl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 2);
+
+        auto limit_box = [&](int32_t &xmin, int32_t &ymin, int32_t &xmax, int32_t &ymax) {
+            ymin = std::max(ymin, int32_t{0});
+            ymax = std::min(ymax, static_cast<int32_t>(H) - int32_t{1});
+            xmin = std::max(xmin, int32_t{0});
+            xmax = std::min(xmax, static_cast<int32_t>(W) - int32_t{1});
+        };
+
         if constexpr (ROTATION == DEGREE_0) {
             if (check_not_in_bounds(x + ch.xoffset, y + ch.yoffset, ch.width + 1, ch.height + 1)) {
                 return;
@@ -4111,8 +4152,9 @@ class image {
 
             x += ch.xoffset;
             y += ch.yoffset;
-            const int32_t x2 = x + static_cast<int32_t>(ch.width);
-            const int32_t y2 = y + static_cast<int32_t>(ch.height);
+            int32_t x2 = x + static_cast<int32_t>(ch.width);
+            int32_t y2 = y + static_cast<int32_t>(ch.height);
+            limit_box(x, y, x2, y2);
             for (int32_t yy = y; yy < y2; yy++) {
                 for (int32_t xx = x; xx < x2; xx++) {
                     const int32_t x_off = (xx - x) + ch.x % 2;
@@ -4122,10 +4164,10 @@ class image {
                         const auto a = static_cast<uint8_t>((FONT::glyph_bitmap[byte_index] >> bit_index) & 0xF);
                         if (a != 0) {
                             if (a == 0xF) {
-                                plot(xx, yy, col);
+                                plot_unsafe(xx, yy, col);
                             } else {
                                 float Al = hidden::a2al_4bit[a];
-                                compose(xx, yy, Al, Rl, Gl, Bl);
+                                compose_unsafe(xx, yy, Al, Rl, Gl, Bl);
                             }
                         }
                     }
@@ -4139,8 +4181,9 @@ class image {
 
             x -= ch.xoffset;
             y -= FONT::ascent;
-            const int32_t x2 = x - static_cast<int32_t>(ch.width);
-            const int32_t y2 = y + static_cast<int32_t>(ch.height);
+            int32_t x2 = x - static_cast<int32_t>(ch.width);
+            int32_t y2 = y + static_cast<int32_t>(ch.height);
+            limit_box(x2, y, x, y2);
             for (int32_t yy = y2 - 1; yy >= y; yy--) {
                 for (int32_t xx = x2; xx < x; xx++) {
                     const int32_t x_off = (ch.width - (xx - x2) - 1) + ch.x % 2;
@@ -4150,10 +4193,10 @@ class image {
                         const auto a = static_cast<uint8_t>((FONT::glyph_bitmap[byte_index] >> bit_index) & 0xF);
                         if (a != 0) {
                             if (a == 0xF) {
-                                plot(xx, yy, col);
+                                plot_unsafe(xx, yy, col);
                             } else {
                                 float Al = hidden::a2al_4bit[a];
-                                compose(xx, yy, Al, Rl, Gl, Bl);
+                                compose_unsafe(xx, yy, Al, Rl, Gl, Bl);
                             }
                         }
                     }
@@ -4167,8 +4210,9 @@ class image {
 
             x -= FONT::ascent;
             y += ch.xoffset;
-            const int32_t x2 = x + static_cast<int32_t>(ch.height);
-            const int32_t y2 = y + static_cast<int32_t>(ch.width);
+            int32_t x2 = x + static_cast<int32_t>(ch.height);
+            int32_t y2 = y + static_cast<int32_t>(ch.width);
+            limit_box(x, y, x2, y2);
             for (int32_t xx = x2 - 1; xx >= x; xx--) {
                 for (int32_t yy = y; yy < y2; yy++) {
                     const int32_t x_off = (yy - y) + ch.x % 2;
@@ -4178,10 +4222,10 @@ class image {
                         const auto a = static_cast<uint8_t>((FONT::glyph_bitmap[byte_index] >> bit_index) & 0xF);
                         if (a != 0) {
                             if (a == 0xF) {
-                                plot(xx, yy, col);
+                                plot_unsafe(xx, yy, col);
                             } else {
                                 float Al = hidden::a2al_4bit[a];
-                                compose(xx, yy, Al, Rl, Gl, Bl);
+                                compose_unsafe(xx, yy, Al, Rl, Gl, Bl);
                             }
                         }
                     }
@@ -4195,8 +4239,9 @@ class image {
 
             x += ch.yoffset;
             y -= ch.xoffset;
-            const int32_t x2 = x + static_cast<int32_t>(ch.height);
-            const int32_t y2 = y - static_cast<int32_t>(ch.width);
+            int32_t x2 = x + static_cast<int32_t>(ch.height);
+            int32_t y2 = y - static_cast<int32_t>(ch.width);
+            limit_box(x, y2, x2, y);
             for (int32_t xx = x; xx < x2; xx++) {
                 for (int32_t yy = y2; yy < y; yy++) {
                     const int32_t x_off = (ch.width - (yy - y2) - 1) + ch.x % 2;
@@ -4206,10 +4251,10 @@ class image {
                         const auto a = static_cast<uint8_t>((FONT::glyph_bitmap[byte_index] >> bit_index) & 0xF);
                         if (a != 0) {
                             if (a == 0xF) {
-                                plot(xx, yy, col);
+                                plot_unsafe(xx, yy, col);
                             } else {
                                 float Al = hidden::a2al_4bit[a];
-                                compose(xx, yy, Al, Rl, Gl, Bl);
+                                compose_unsafe(xx, yy, Al, Rl, Gl, Bl);
                             }
                         }
                     }
