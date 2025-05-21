@@ -2269,8 +2269,8 @@ class image {
      * \param stroke_width Width of the stroke in pixels.
      */
     constexpr void draw_line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, int32_t stroke_width = 1) {
-        int32_t min_check = std::min({x0, y0, x1, y1});
-        int32_t max_check = std::max({x0, y0, x1, y1});
+        int32_t min_check = std::min({x0, y0, x1, y1, stroke_width});
+        int32_t max_check = std::max({x0, y0, x1, y1, stroke_width});
         if (min_check < min_coord || max_check > max_coord) {
             return;
         }
@@ -2838,8 +2838,8 @@ class image {
      * \param stroke_width Width of the stroke in pixels.
      */
     constexpr void stroke_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col, int32_t stroke_width = 1) {
-        int32_t min_check = std::min({x, y, w, h});
-        int32_t max_check = std::max({x, y, w, h});
+        int32_t min_check = std::min({x, y, w, h, stroke_width});
+        int32_t max_check = std::max({x, y, w, h, stroke_width});
         if (min_check < min_coord || max_check > max_coord) {
             return;
         }
@@ -3051,8 +3051,8 @@ class image {
      */
     constexpr void stroke_round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col,
                                      int32_t stroke_width = 1) {
-        int32_t min_check = std::min({x, y, w, h, radius});
-        int32_t max_check = std::max({x, y, w, h, radius});
+        int32_t min_check = std::min({x, y, w, h, radius, stroke_width});
+        int32_t max_check = std::max({x, y, w, h, radius, stroke_width});
         if (min_check < min_coord || max_check > max_coord) {
             return;
         }
@@ -3826,8 +3826,7 @@ class image {
      * @private
      */
     template <bool AA, bool STROKE>
-    constexpr void circle_int(int32_t cx, int32_t cy, int32_t r, int32_t ox, int32_t oy, uint8_t col,
-                              int32_t stroke_width) {
+    constexpr void circle_int(int32_t cx, int32_t cy, int32_t r, int32_t ox, int32_t oy, uint8_t col, int32_t s) {
         const int32_t x0 = std::max(cx - r - int32_t{1}, int32_t{0});
         const int32_t y0 = std::max(cy - r - int32_t{1}, int32_t{0});
 
@@ -3848,7 +3847,8 @@ class image {
         };
 
         if constexpr (!AA) {
-            const int32_t max_value = std::max({abs(x0), abs(y0), abs(x0r), abs(x0r2), abs(y0r), abs(y0r2), abs(r)});
+            const int32_t max_value =
+                std::max({abs(x0), abs(y0), abs(x0r), abs(x0r2), abs(y0r), abs(y0r2), abs(r), abs(s), abs(cx), abs(cy)});
             const bool use_int64 = max_value >= ((std::numeric_limits<int16_t>::max() / int32_t{8}) - int16_t{1});
             if constexpr (!STROKE) {
                 auto plot_arc = [&, this]<typename I>(int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
@@ -3881,8 +3881,7 @@ class image {
                             if (dist_sq > (static_cast<I>(r) * static_cast<I>(r) * I{4} - I{3})) {
                                 continue;
                             }
-                            if (dist_sq <
-                                (static_cast<I>(r - stroke_width) * static_cast<I>(r - stroke_width) * I{4} - I{3})) {
+                            if (dist_sq < (static_cast<I>(r - s) * static_cast<I>(r - s) * I{4} - I{3})) {
                                 continue;
                             }
                             plot(x + x_off, y + y_off, col);
@@ -3934,7 +3933,7 @@ class image {
                 };
                 for_each_quadrant.template operator()<float>(plot_arc);
             } else {
-                const auto rsF = static_cast<float>(r - stroke_width);
+                const auto rsF = static_cast<float>(r - s);
                 auto plot_arc = [&, this]<typename I>(int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
                                                       int32_t y_off) {
                     for (int32_t y = yy0; y <= yy1; y++) {
