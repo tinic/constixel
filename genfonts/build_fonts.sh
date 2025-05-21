@@ -1,16 +1,14 @@
 #!/usr/bin/env bash
 
 #
-# You will need libfreetype-dev and libharfbuzz-dev
+# You will need gcc-14+, bash 4.0+, libfreetype-dev and libharfbuzz-dev
 #
-# genfonts.cpp wants gcc-14 or newer due to use of std::print/std::format
-# 
 
 set -euo pipefail
 
 FONT_DIR="${1:-./otf}"
 SIZES=(12 18 24 32 48)
-CHARS=(32-126)
+CHARS=(32-126) # comma separated ranges, accepts 0xXXXX hex values.
 
 git submodule update --init --recursive
 
