@@ -2809,7 +2809,7 @@ class image {
         if (w <= 0 || h <= 0) {
             return;
         }
-        stroke_width = std::min(abs(stroke_width), std::max(w, h) / 2);
+        stroke_width = std::min(pseudo_abs(stroke_width), std::max(w, h) / 2);
         fill_rect(x, y, stroke_width, h, col);
         fill_rect(x + stroke_width, y, w - stroke_width * 2, stroke_width, col);
         fill_rect(x + w - stroke_width, y, stroke_width, h, col);
@@ -2842,6 +2842,7 @@ class image {
      * \param col Color palette index to use.
      */
     constexpr void fill_circle(int32_t cx, int32_t cy, int32_t radius, uint8_t col) {
+        radius = pseudo_abs(radius);
         if (radius == 1) {
             fill_rect(cx - 1, cy - 1, 2, 2, col);
             return;
@@ -2876,6 +2877,8 @@ class image {
      * \param stroke_width Width of the stroke in pixels.
      */
     constexpr void stroke_circle(int32_t cx, int32_t cy, int32_t radius, uint8_t col, int32_t stroke_width = 1) {
+        radius = pseudo_abs(radius);
+        stroke_width = pseudo_abs(stroke_width);
         if (radius == 1) {
             fill_rect(cx - 1, cy - 1, 2, 2, col);
             return;
@@ -2915,6 +2918,8 @@ class image {
      * \param stroke_width Width of the stroke in pixels.
      */
     constexpr void stroke_circle_aa(int32_t cx, int32_t cy, int32_t radius, uint8_t col, int32_t stroke_width = 1) {
+        radius = pseudo_abs(radius);
+        stroke_width = pseudo_abs(stroke_width);
         if (radius == 1) {
             fill_rect(cx - 1, cy - 1, 2, 2, col);
             return;
@@ -2988,6 +2993,8 @@ class image {
      */
     constexpr void stroke_round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col,
                                      int32_t stroke_width = 1) {
+        radius = pseudo_abs(radius);
+        stroke_width = pseudo_abs(stroke_width);
         const int32_t cr = std::min({w / 2, h / 2, radius});
         const int32_t dx = w - cr * 2;
         const int32_t dy = h - cr * 2;
@@ -3072,6 +3079,7 @@ class image {
      * \param col Color palette index to use.
      */
     constexpr void fill_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col) {
+        radius = pseudo_abs(radius);
         int32_t cr = std::min({w / 2, h / 2, radius});
         int32_t dx = w - cr * 2;
         int32_t dy = h - cr * 2;
@@ -3112,6 +3120,8 @@ class image {
      */
     constexpr void stroke_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col,
                                         int32_t stroke_width = 1) {
+        radius = pseudo_abs(radius);
+        stroke_width = pseudo_abs(stroke_width);
         const int32_t cr = std::min({w / 2, h / 2, radius});
         const int32_t dx = w - cr * 2;
         const int32_t dy = h - cr * 2;
@@ -3616,6 +3626,17 @@ class image {
     /**
      * @private
      */
+    template <typename abs_T>
+    [[nodiscard]] static constexpr abs_T pseudo_abs(abs_T v) {
+        if (v == std::numeric_limits<abs_T>::min()) {
+            return std::numeric_limits<abs_T>::max();
+        }
+        return v < 0 ? -v : v;
+    }
+
+    /**
+     * @private
+     */
     template <typename FONT>
     constexpr bool lookup_glyph(uint32_t utf32, size_t *glyph_index) {
         if (utf32 >= static_cast<uint32_t>(std::numeric_limits<typename FONT::lookup_type>::max()) - 1) {
@@ -3728,16 +3749,9 @@ class image {
     template <bool AA, bool STROKE>
     constexpr void circle_int(int32_t cx, int32_t cy, int32_t r, int32_t ox, int32_t oy, uint8_t col,
                               int32_t stroke_width) {
-        r = abs(r);
-
-        if (r > std::numeric_limits<int32_t>::max() / 4) {
-            return;
-        }
 
         const int32_t x0 = std::max(cx - r - int32_t{1}, int32_t{0});
         const int32_t y0 = std::max(cy - r - int32_t{1}, int32_t{0});
-        const int32_t x1 = std::min(x0 + r * int32_t{2} + ox, static_cast<int32_t>(W));
-        const int32_t y1 = std::min(y0 + r * int32_t{2} + oy, static_cast<int32_t>(H));
 
         if (check_not_in_bounds(x0, y0, r * int32_t{2} + ox + int32_t{1}, r * int32_t{2} + oy + int32_t{1})) {
             return;
@@ -3756,8 +3770,9 @@ class image {
         };
 
         if constexpr (!AA) {
-            const int32_t max_coord = std::max({abs(x0), abs(x1), abs(y0), abs(y1), r});
-            const bool use_int64 = max_coord >= ((std::numeric_limits<int16_t>::max() - int16_t{1}) / int32_t{2});
+            const int32_t max_coord = std::max({pseudo_abs(x0), pseudo_abs(y0), pseudo_abs(x0r), pseudo_abs(x0r2),
+                                                pseudo_abs(y0r), pseudo_abs(y0r2), pseudo_abs(r)});
+            const bool use_int64 = max_coord >= ((std::numeric_limits<int16_t>::max() / int32_t{8}) - int16_t{1});
             if constexpr (!STROKE) {
                 auto plot_arc = [&, this]<typename I>(int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
                                                       int32_t y_off) {
