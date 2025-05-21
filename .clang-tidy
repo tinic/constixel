@@ -9,12 +9,12 @@ Checks: "*,
 
         -misc-non-private-member-variables-in-classes,
         
-        -readability-static-accessed-through-instance,
         -readability-magic-numbers,
         -readability-function-cognitive-complexity,
         -readability-uppercase-literal-suffix,
         -readability-identifier-length,
         -readability-simplify-boolean-expr,
+        -readability-math-missing-parentheses,
 
         -cppcoreguidelines-avoid-magic-numbers,
         -cppcoreguidelines-pro-bounds-pointer-arithmetic,

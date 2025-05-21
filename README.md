@@ -1,4 +1,4 @@
-# constixel
+# constixel.hpp
 
 [![CMake on multiple platforms](https://github.com/tinic/constixel/actions/workflows/cmake-multi-platform.yml/badge.svg)](https://github.com/tinic/constixel/actions/workflows/cmake-multi-platform.yml)
 [![CodeQL Advanced](https://github.com/tinic/constixel/actions/workflows/codeql.yml/badge.svg)](https://github.com/tinic/constixel/actions/workflows/codeql.yml)
@@ -23,12 +23,12 @@ constixel is a single header minimalistic constexpr C++20 2D graphics palette ba
 - Minimalistic interface and single header implementation.
 - 1, 2, 4 and 8bit palette based back buffers for minimal memory usage. Reasonable standard palettes are provided.
 - Simple fill_rect(), fill_round_rect(), draw_line() and fill_circle() drawing functions among others.
-- Render proportional text, optionally with kerning, using fonts genenerated by a custom version of fontbm. Repository includes a set of pre-made fonts which are trivial to use. UTF-8 is supported.
+- Render proportional text, optionally with kerning, using fonts genenerated by a custom version of fontbm. Repository includes a set of pre-made (open source) fonts which are trivial to use. UTF-8 is supported.
 - A uncompressed png encoder is included to reduce dependencies.
 - Blit raw 32-bit RGBA image buffers into the palette based back buffer (with or without dithering). Also convert back into a RGBA buffer when needed.
 - Code is cpplint compliant, has a .clang-tidy profile, passes cppcheck and is of course consteval runnable.
 - Code compiles with "-Wall -Wextra -Wpedantic -Weffc++ -Werror" on so it can be easily used in any existing C++ project without creating noise.
-- Resistance to unbound behavior (i.e. potential for DoS) when passing unreasonable values. Right now it will not pass UBSan (-fno-sanitize=undefined) when the API is fuzzed due to integer overflows (only) but nothing 'bad' will happen as everything is bounds checked before committing to the back buffer. WIP.
+- Resistance to unbound behavior (i.e. potential for DoS) when passing unreasonable values.
 - Various other simple image manipulation operations.
 
 > [!NOTE]
@@ -67,8 +67,11 @@ Option 1: Simply copy the header file to your project and include it. Optionally
 Option 2: If you prefer you can add this git repo as a cmake library:
 
 ```find_package(constixel REQUIRED)
+...
 add_subdirectory(constixel)
+...
 target_link_libraries([your target name] PRIVATE constixel::constixel)
+...
 ```
 
 After that you can simply do this:
@@ -106,11 +109,11 @@ int main() {
 
 ## Text drawing example
 
-Include a text font and pass the struct name as a template parameter to the draw_string function. The pre-made available fonts in this repo are viewable [here](./tests/constixel_fonts.png "Fonts") More can be easily added/modified, for instance if you need more than just ASCII character ranges.
+Include a text font and pass the struct name as a template parameter to the draw_string function. The pre-made available fonts in this repo are viewable [here](./tests/constixel_fonts.png "Fonts") More can be easily added/modified, for instance if you need more than just ASCII character ranges or want symbols/icons.
 
 ```c++
 #include "constixel.hpp"
-#include "fonts/ibmplexsans_medium_48_mono.h"
+#include "fonts/ibmplexsans_medium_48_mono.hpp"
 using large_font = constixel::ibmplexsans_medium_48_mono;
 
 int main() {

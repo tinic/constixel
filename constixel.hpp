@@ -163,14 +163,15 @@ struct srgb {
     const double g = -1.2684380046 * l_ + 2.6097574011 * m_ - 0.3413193965 * s_;
     const double bl = -0.0041960863 * l_ - 0.7034186168 * m_ + 1.7076147031 * s_;
 
-    return {static_cast<double>(linear_to_srgb(std::max(0.0f, std::min(1.0f, static_cast<float>(r))))),
-            static_cast<double>(linear_to_srgb(std::max(0.0f, std::min(1.0f, static_cast<float>(g))))),
-            static_cast<double>(linear_to_srgb(std::max(0.0f, std::min(1.0f, static_cast<float>(bl)))))};
+    return {.r = static_cast<double>(linear_to_srgb(std::max(0.0f, std::min(1.0f, static_cast<float>(r))))),
+            .g = static_cast<double>(linear_to_srgb(std::max(0.0f, std::min(1.0f, static_cast<float>(g))))),
+            .b = static_cast<double>(linear_to_srgb(std::max(0.0f, std::min(1.0f, static_cast<float>(bl)))))};
 }
 
 [[nodiscard]] static consteval oklab oklch_to_oklab_consteval(const oklch &oklch) {
-    return {oklch.l, oklch.c * consteval_cos(oklch.h * 3.14159265358979323846 / 180.0),
-            oklch.c * consteval_sin(oklch.h * 3.14159265358979323846 / 180.0)};
+    return {.l = oklch.l,
+            .a = oklch.c * consteval_cos(oklch.h * 3.14159265358979323846 / 180.0),
+            .b = oklch.c * consteval_sin(oklch.h * 3.14159265358979323846 / 180.0)};
 }
 
 static constexpr const float epsilon_low = srgb_to_linear(0.5f / 255.0f);
@@ -278,18 +279,19 @@ class quantize {
             std::size_t bestIdx = 0;
 
             for (size_t i = 0; i < pal.size(); i += 4) {
-                float32x4_t dr = vsubq_f32(vld1q_f32(&linearpal_neon[i * 3]), vR);
-                float32x4_t dg = vsubq_f32(vld1q_f32(&linearpal_neon[i * 3 + 4]), vG);
-                float32x4_t db = vsubq_f32(vld1q_f32(&linearpal_neon[i * 3 + 8]), vB);
+                const float32x4_t dr = vsubq_f32(vld1q_f32(&linearpal_neon[i * 3]), vR);
+                const float32x4_t dg = vsubq_f32(vld1q_f32(&linearpal_neon[i * 3 + 4]), vG);
+                const float32x4_t db = vsubq_f32(vld1q_f32(&linearpal_neon[i * 3 + 8]), vB);
 
 #if defined(__aarch64__) && defined(__ARM_FEATURE_FMA)
-                float32x4_t dist = vfmaq_f32(vfmaq_f32(vmulq_f32(dr, dr), dg, dg), db, db);
+                const float32x4_t dist = vfmaq_f32(vfmaq_f32(vmulq_f32(dr, dr), dg, dg), db, db);
 #else
-                float32x4_t dist = vaddq_f32(vaddq_f32(vmulq_f32(dr, dr), vmulq_f32(dg, dg)), vmulq_f32(db, db));
+                const float32x4_t dist = vaddq_f32(vaddq_f32(vmulq_f32(dr, dr), vmulq_f32(dg, dg)), vmulq_f32(db, db));
 #endif
 
-                float32x2_t lo = vget_low_f32(dist), hi = vget_high_f32(dist);
-                float d0 = vget_lane_f32(lo, 0);
+                const float32x2_t lo = vget_low_f32(dist);
+                const float32x2_t hi = vget_high_f32(dist);
+                const float d0 = vget_lane_f32(lo, 0);
                 if (d0 < best) {
                     best = d0;
                     bestIdx = i;
@@ -297,7 +299,7 @@ class quantize {
                         break;
                     }
                 }
-                float d1 = vget_lane_f32(lo, 1);
+                const float d1 = vget_lane_f32(lo, 1);
                 if (d1 < best) {
                     best = d1;
                     bestIdx = i + 1;
@@ -305,7 +307,7 @@ class quantize {
                         break;
                     }
                 }
-                float d2 = vget_lane_f32(hi, 0);
+                const float d2 = vget_lane_f32(hi, 0);
                 if (d2 < best) {
                     best = d2;
                     bestIdx = i + 2;
@@ -313,7 +315,7 @@ class quantize {
                         break;
                     }
                 }
-                float d3 = vget_lane_f32(hi, 1);
+                const float d3 = vget_lane_f32(hi, 1);
                 if (d3 < best) {
                     best = d3;
                     bestIdx = i + 3;
@@ -840,7 +842,8 @@ class format {
         for (size_t c = 0; c < palette.size(); c++) {
             sixel_color(std::forward<F>(char_out), static_cast<uint16_t>(c), palette[c]);
         }
-        const auto r = rect<int32_t>{_r.x * S, _r.y * S, _r.w * S, _r.h * S} & rect<int32_t>{0, 0, W * S, H * S};
+        const auto r = rect<int32_t>{.x = _r.x * S, .y = _r.y * S, .w = _r.w * S, .h = _r.h * S} &
+                       rect<int32_t>{.x = 0, .y = 0, .w = W * S, .h = H * S};
         std::array<PBT, std::max(32UL, 1UL << PBS)> stack{};
         palette_bitset<PBT, std::max(32UL, 1UL << PBS)> pset{};
         for (int32_t y = r.y; y < (r.y + r.h); y += 6) {
@@ -1050,8 +1053,8 @@ class format_1bit : public format {
 
     static constexpr void blit_RGBA(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr,
                                     int32_t stride) {
-        for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
-            for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
+        for (size_t y = 0; std::cmp_less(y, r.h); y++) {
+            for (size_t x = 0; std::cmp_less(x, r.w); x++) {
                 const uint32_t R = ptr[y * static_cast<size_t>(stride) + x * 4 + 0];
                 const uint32_t G = ptr[y * static_cast<size_t>(stride) + x * 4 + 1];
                 const uint32_t B = ptr[y * static_cast<size_t>(stride) + x * 4 + 2];
@@ -1064,8 +1067,8 @@ class format_1bit : public format {
     static constexpr void blit_RGBA_diffused(std::array<uint8_t, image_size> &data, const rect<int32_t> &r,
                                              const uint8_t *ptr, int32_t stride) {
         int32_t err = 0;
-        for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
-            for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
+        for (size_t y = 0; std::cmp_less(y, r.h); y++) {
+            for (size_t x = 0; std::cmp_less(x, r.w); x++) {
                 const int32_t R = ptr[y * static_cast<size_t>(stride) + x * 4 + 0];
                 const int32_t G = ptr[y * static_cast<size_t>(stride) + x * 4 + 1];
                 const int32_t B = ptr[y * static_cast<size_t>(stride) + x * 4 + 2];
@@ -1080,11 +1083,11 @@ class format_1bit : public format {
 
     static constexpr void blit_RGBA_diffused_linear(std::array<uint8_t, image_size> &data, const rect<int32_t> &r,
                                                     const uint8_t *ptr, int32_t stride) {
-        for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
+        for (size_t y = 0; std::cmp_less(y, r.h); y++) {
             float err_r = 0;
             float err_g = 0;
             float err_b = 0;
-            for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
+            for (size_t x = 0; std::cmp_less(x, r.w); x++) {
                 const auto R = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 0]) * (1.0f / 255.0f);
                 const auto G = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 1]) * (1.0f / 255.0f);
                 const auto B = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 2]) * (1.0f / 255.0f);
@@ -1272,8 +1275,8 @@ class format_2bit : public format {
 
     static constexpr void blit_RGBA(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr,
                                     int32_t stride) {
-        for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
-            for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
+        for (size_t y = 0; std::cmp_less(y, r.h); y++) {
+            for (size_t x = 0; std::cmp_less(x, r.w); x++) {
                 plot(data, (x + static_cast<uint32_t>(r.x)), (y + static_cast<uint32_t>(r.y)),
                      quant.nearest(ptr[y * static_cast<size_t>(stride) + x * 4 + 0],
                                    ptr[y * static_cast<size_t>(stride) + x * 4 + 1],
@@ -1284,11 +1287,11 @@ class format_2bit : public format {
 
     static constexpr void blit_RGBA_diffused(std::array<uint8_t, image_size> &data, const rect<int32_t> &r,
                                              const uint8_t *ptr, int32_t stride) {
-        for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
+        for (size_t y = 0; std::cmp_less(y, r.h); y++) {
             int32_t err_r = 0;
             int32_t err_g = 0;
             int32_t err_b = 0;
-            for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
+            for (size_t x = 0; std::cmp_less(x, r.w); x++) {
                 int32_t R = ptr[y * static_cast<size_t>(stride) + x * 4 + 0];
                 int32_t G = ptr[y * static_cast<size_t>(stride) + x * 4 + 1];
                 int32_t B = ptr[y * static_cast<size_t>(stride) + x * 4 + 2];
@@ -1309,11 +1312,11 @@ class format_2bit : public format {
 
     static constexpr void blit_RGBA_diffused_linear(std::array<uint8_t, image_size> &data, const rect<int32_t> &r,
                                                     const uint8_t *ptr, int32_t stride) {
-        for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
+        for (size_t y = 0; std::cmp_less(y, r.h); y++) {
             float err_r = 0;
             float err_g = 0;
             float err_b = 0;
-            for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
+            for (size_t x = 0; std::cmp_less(x, r.w); x++) {
                 const auto R = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 0]) * (1.0f / 255.0f);
                 const auto G = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 1]) * (1.0f / 255.0f);
                 const auto B = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 2]) * (1.0f / 255.0f);
@@ -1513,8 +1516,8 @@ class format_4bit : public format {
 
     static constexpr void blit_RGBA(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr,
                                     int32_t stride) {
-        for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
-            for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
+        for (size_t y = 0; std::cmp_less(y, r.h); y++) {
+            for (size_t x = 0; std::cmp_less(x, r.w); x++) {
                 plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)),
                      quant.nearest(ptr[y * static_cast<size_t>(stride) + x * 4 + 0],
                                    ptr[y * static_cast<size_t>(stride) + x * 4 + 1],
@@ -1525,11 +1528,11 @@ class format_4bit : public format {
 
     static constexpr void blit_RGBA_diffused(std::array<uint8_t, image_size> &data, const rect<int32_t> &r,
                                              const uint8_t *ptr, int32_t stride) {
-        for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
+        for (size_t y = 0; std::cmp_less(y, r.h); y++) {
             int32_t err_r = 0;
             int32_t err_g = 0;
             int32_t err_b = 0;
-            for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
+            for (size_t x = 0; std::cmp_less(x, r.w); x++) {
                 int32_t R = ptr[y * static_cast<size_t>(stride) + x * 4 + 0];
                 int32_t G = ptr[y * static_cast<size_t>(stride) + x * 4 + 1];
                 int32_t B = ptr[y * static_cast<size_t>(stride) + x * 4 + 2];
@@ -1550,11 +1553,11 @@ class format_4bit : public format {
 
     static constexpr void blit_RGBA_diffused_linear(std::array<uint8_t, image_size> &data, const rect<int32_t> &r,
                                                     const uint8_t *ptr, int32_t stride) {
-        for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
+        for (size_t y = 0; std::cmp_less(y, r.h); y++) {
             float err_r = 0;
             float err_g = 0;
             float err_b = 0;
-            for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
+            for (size_t x = 0; std::cmp_less(x, r.w); x++) {
                 const auto R = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 0]) * (1.0f / 255.0f);
                 const auto G = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 1]) * (1.0f / 255.0f);
                 const auto B = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 2]) * (1.0f / 255.0f);
@@ -1689,13 +1692,13 @@ class format_8bit : public format {
                 pal[0x70 + c + 8] = (255 << 16) | (x << 8) | (255 << 0);
             }
             for (size_t c = 0; c < 8; c++) {
-                const hidden::oklab lft{static_cast<double>(c) / 7 - 0.2, 0.2, 0.0};
-                const hidden::oklab rgh{static_cast<double>(c) / 7 - 0.2, 0.2, 337.5};
+                const hidden::oklab lft{.l = static_cast<double>(c) / 7 - 0.2, .a = 0.2, .b = 0.0};
+                const hidden::oklab rgh{.l = static_cast<double>(c) / 7 - 0.2, .a = 0.2, .b = 337.5};
                 for (size_t d = 0; d < 16; d++) {
                     auto res = hidden::oklab_to_srgb_consteval(hidden::oklch_to_oklab_consteval(hidden::oklch{
-                        std::lerp(lft.l, rgh.l, static_cast<double>(d) / 15.0),
-                        std::lerp(lft.a, rgh.a, static_cast<double>(d) / 15.0),
-                        std::lerp(lft.b, rgh.b, static_cast<double>(d) / 15.0),
+                        .l = std::lerp(lft.l, rgh.l, static_cast<double>(d) / 15.0),
+                        .c = std::lerp(lft.a, rgh.a, static_cast<double>(d) / 15.0),
+                        .h = std::lerp(lft.b, rgh.b, static_cast<double>(d) / 15.0),
                     }));
                     pal[0x80 + c * 16 + d] =
                         (static_cast<uint32_t>(std::max(0.0, std::min(1.0, res.r)) * 255.0) << 16) |
@@ -1750,14 +1753,14 @@ class format_8bit : public format {
 #if defined(__ARM_NEON)
         if (!std::is_constant_evaluated()) {
             auto bg = static_cast<size_t>(data.data()[y * bytes_per_line + x]);
-            float32x4_t cola_v = vdupq_n_f32(cola);
-            float32x4_t inv_cola_v = vdupq_n_f32(1.0f - cola);
-            float32x4_t col_rgb = {colr, colg, colb, 0.0f};
+            const float32x4_t cola_v = vdupq_n_f32(cola);
+            const float32x4_t inv_cola_v = vdupq_n_f32(1.0f - cola);
+            const float32x4_t col_rgb = {colr, colg, colb, 0.0f};
             // Note: this reads 1 float into linearpal_neon
-            float32x4_t bg_rgb = vld1q_f32(&quant.linear_palette()[bg * 3]);
-            float32x4_t result_rgb = vaddq_f32(vmulq_f32(col_rgb, cola_v), vmulq_f32(bg_rgb, inv_cola_v));
-            alignas(16) float result[4];
-            vst1q_f32(result, result_rgb);
+            const float32x4_t bg_rgb = vld1q_f32(&quant.linear_palette()[bg * 3]);
+            const float32x4_t result_rgb = vaddq_f32(vmulq_f32(col_rgb, cola_v), vmulq_f32(bg_rgb, inv_cola_v));
+            alignas(16) std::array<float, 4> result{};
+            vst1q_f32(result.data(), result_rgb);
             plot(data, x, y, quant.nearest_linear(result[0], result[1], result[2]));
         } else
 #endif  // #if defined(__ARM_NEON)
@@ -1812,8 +1815,8 @@ class format_8bit : public format {
 
     static constexpr void blit_RGBA(std::array<uint8_t, image_size> &data, const rect<int32_t> &r, const uint8_t *ptr,
                                     int32_t stride) {
-        for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
-            for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
+        for (size_t y = 0; std::cmp_less(y, r.h); y++) {
+            for (size_t x = 0; std::cmp_less(x, r.w); x++) {
                 data.data()[(y + static_cast<size_t>(r.y)) * bytes_per_line + (x + static_cast<size_t>(r.x))] =
                     quant.nearest(ptr[y * static_cast<size_t>(stride) + x * 4 + 0],
                                   ptr[y * static_cast<size_t>(stride) + x * 4 + 1],
@@ -1824,11 +1827,11 @@ class format_8bit : public format {
 
     static constexpr void blit_RGBA_diffused(std::array<uint8_t, image_size> &data, const rect<int32_t> &r,
                                              const uint8_t *ptr, int32_t stride) {
-        for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
+        for (size_t y = 0; std::cmp_less(y, r.h); y++) {
             int32_t err_r = 0;
             int32_t err_g = 0;
             int32_t err_b = 0;
-            for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
+            for (size_t x = 0; std::cmp_less(x, r.w); x++) {
                 int32_t R = ptr[y * static_cast<size_t>(stride) + x * 4 + 0];
                 int32_t G = ptr[y * static_cast<size_t>(stride) + x * 4 + 1];
                 int32_t B = ptr[y * static_cast<size_t>(stride) + x * 4 + 2];
@@ -1849,11 +1852,11 @@ class format_8bit : public format {
 
     static constexpr void blit_RGBA_diffused_linear(std::array<uint8_t, image_size> &data, const rect<int32_t> &r,
                                                     const uint8_t *ptr, int32_t stride) {
-        for (size_t y = 0; y < static_cast<size_t>(r.h); y++) {
+        for (size_t y = 0; std::cmp_less(y, r.h); y++) {
             float err_r = 0;
             float err_g = 0;
             float err_b = 0;
-            for (size_t x = 0; x < static_cast<size_t>(r.w); x++) {
+            for (size_t x = 0; std::cmp_less(x, r.w); x++) {
                 const auto R = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 0]) * (1.0f / 255.0f);
                 const auto G = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 1]) * (1.0f / 255.0f);
                 const auto B = static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 2]) * (1.0f / 255.0f);
@@ -2044,8 +2047,8 @@ struct draw_rect {
  * A struct which can be passed to: fill_circle(), stroke_circle(), fill_circle_aa(), stroke_circle_aa().
  */
 struct draw_circle {
-    int32_t cx = 0;               /**< Center X coordinate in pixels. */
-    int32_t cy = 0;               /**< Center Y coordinate in pixels. */
+    int32_t cx = 0;              /**< Center X coordinate in pixels. */
+    int32_t cy = 0;              /**< Center Y coordinate in pixels. */
     int32_t r = 0;               /**< Radius of the circle in pixels. */
     uint32_t col = color::WHITE; /**< Color palette index to use. */
     int32_t sw = 1;              /**< Width of the stroke in pixels. */
@@ -2207,8 +2210,7 @@ class image {
      * \param col Color palette index to use.
      */
     constexpr void plot(int32_t x, int32_t y, uint8_t col) {
-        if (static_cast<uint32_t>(x) >= static_cast<uint32_t>(W) ||
-            static_cast<uint32_t>(y) >= static_cast<uint32_t>(H)) {
+        if (std::cmp_greater_equal(x, W) || std::cmp_greater_equal(y, H) || x < 0 || y < 0) {
             return;
         }
         T<W, H, GR>::plot(data, static_cast<uint32_t>(x), static_cast<uint32_t>(y), col);
@@ -2960,7 +2962,7 @@ class image {
      */
     constexpr void stroke_round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col,
                                      int32_t stroke_width = 1) {
-        const int32_t cr = std::min((w) / 2, std::min((h) / 2, radius));
+        const int32_t cr = std::min({w / 2, h / 2, radius});
         const int32_t dx = w - cr * 2;
         const int32_t dy = h - cr * 2;
         if (radius == 0) {
@@ -3006,7 +3008,7 @@ class image {
      * \param col Color palette index to use.
      */
     constexpr void fill_round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col) {
-        const int32_t cr = std::min((w) / 2, std::min((h) / 2, radius));
+        const int32_t cr = std::min({w / 2, h / 2, radius});
         const int32_t dx = w - cr * 2;
         const int32_t dy = h - cr * 2;
         circle_int<false, false>(x + cr, y + cr, cr, dx, dy, col, 0);
@@ -3044,7 +3046,7 @@ class image {
      * \param col Color palette index to use.
      */
     constexpr void fill_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col) {
-        int32_t cr = std::min((w) / 2, std::min((h) / 2, radius));
+        int32_t cr = std::min({w / 2, h / 2, radius});
         int32_t dx = w - cr * 2;
         int32_t dy = h - cr * 2;
         circle_int<true, false>(x + cr, y + cr, cr, dx, dy, col, 0);
@@ -3084,7 +3086,7 @@ class image {
      */
     constexpr void stroke_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col,
                                         int32_t stroke_width = 1) {
-        const int32_t cr = std::min((w) / 2, std::min((h) / 2, radius));
+        const int32_t cr = std::min({w / 2, h / 2, radius});
         const int32_t dx = w - cr * 2;
         const int32_t dy = h - cr * 2;
         if (radius == 0) {
@@ -3216,9 +3218,9 @@ class image {
      */
     constexpr void blit_RGBA(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih,
                              int32_t stride) {
-        rect<int32_t> blitrect{x, y, w, h};
-        blitrect &= {0, 0, W, H};
-        blitrect &= {x, y, iw, ih};
+        rect<int32_t> blitrect{.x = x, .y = y, .w = w, .h = h};
+        blitrect &= {.x = 0, .y = 0, .w = W, .h = H};
+        blitrect &= {.x = x, .y = y, .w = iw, .h = ih};
         T<W, H, GR>::blit_RGBA(data, blitrect, ptr, stride);
     }
 
@@ -3233,8 +3235,8 @@ class image {
      */
     constexpr void blit_RGBA(const rect<int32_t> &dstrect, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
         rect<int32_t> blitrect{dstrect};
-        blitrect &= {0, 0, W, H};
-        blitrect &= {dstrect.x, dstrect.y, iw, ih};
+        blitrect &= {.x = 0, .y = 0, .w = W, .h = H};
+        blitrect &= {.x = dstrect.x, .y = dstrect.y, .w = iw, .h = ih};
         T<W, H, GR>::blit_RGBA(data, blitrect, ptr, stride);
     }
 
@@ -3252,9 +3254,9 @@ class image {
      */
     constexpr void blit_RGBA_diffused(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw,
                                       int32_t ih, int32_t stride) {
-        rect<int32_t> blitrect{x, y, w, h};
-        blitrect &= {0, 0, W, H};
-        blitrect &= {x, y, iw, ih};
+        rect<int32_t> blitrect{.x = x, .y = y, .w = w, .h = h};
+        blitrect &= {.x = 0, .y = 0, .w = W, .h = H};
+        blitrect &= {.x = x, .y = y, .w = iw, .h = ih};
         T<W, H, GR>::blit_RGBA_diffused(data, blitrect, ptr, stride);
     }
 
@@ -3271,8 +3273,8 @@ class image {
     constexpr void blit_RGBA_diffused(const rect<int32_t> &dstrect, const uint8_t *ptr, int32_t iw, int32_t ih,
                                       int32_t stride) {
         rect<int32_t> blitrect{dstrect};
-        blitrect &= {0, 0, W, H};
-        blitrect &= {dstrect.x, dstrect.y, iw, ih};
+        blitrect &= {.x = 0, .y = 0, .w = W, .h = H};
+        blitrect &= {.x = dstrect.x, .y = dstrect.y, .w = iw, .h = ih};
         T<W, H, GR>::blit_RGBA_diffused(data, blitrect, ptr, stride);
     }
 
@@ -3290,9 +3292,9 @@ class image {
      */
     constexpr void blit_RGBA_diffused_linear(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw,
                                              int32_t ih, int32_t stride) {
-        rect<int32_t> blitrect{x, y, w, h};
-        blitrect &= {0, 0, W, H};
-        blitrect &= {x, y, iw, ih};
+        rect<int32_t> blitrect{.x = x, .y = y, .w = w, .h = h};
+        blitrect &= {.x = 0, .y = 0, .w = W, .h = H};
+        blitrect &= {.x = x, .y = y, .w = iw, .h = ih};
         T<W, H, GR>::blit_RGBA_diffused_linear(data, blitrect, ptr, stride);
     }
 
@@ -3309,8 +3311,8 @@ class image {
     constexpr void blit_RGBA_diffused_linear(const rect<int32_t> &dstrect, const uint8_t *ptr, int32_t iw, int32_t ih,
                                              int32_t stride) {
         rect<int32_t> blitrect{dstrect};
-        blitrect &= {0, 0, W, H};
-        blitrect &= {dstrect.x, dstrect.y, iw, ih};
+        blitrect &= {.x = 0, .y = 0, .w = W, .h = H};
+        blitrect &= {.x = dstrect.x, .y = dstrect.y, .w = iw, .h = ih};
         T<W, H, GR>::blit_RGBA_diffused_linear(data, blitrect, ptr, stride);
     }
 
@@ -3493,8 +3495,8 @@ class image {
     /// @cond DOXYGEN_EXCLUDE
 
     constexpr bool check_not_in_bounds(int32_t x, int32_t y, int32_t w, int32_t h) {
-        rect<int32_t> intersect_rect{0, 0, W, H};
-        intersect_rect &= rect<int32_t>{x, y, w, h};
+        rect<int32_t> intersect_rect{.x = 0, .y = 0, .w = W, .h = H};
+        intersect_rect &= rect<int32_t>{.x = x, .y = y, .w = w, .h = h};
         if (intersect_rect.w <= 0 || intersect_rect.h <= 0) {
             return true;
         }
@@ -3657,8 +3659,7 @@ class image {
      * @private
      */
     constexpr void compose(int32_t x, int32_t y, float cola, float colr, float colg, float colb) {
-        if (static_cast<uint32_t>(x) >= static_cast<uint32_t>(W) ||
-            static_cast<uint32_t>(y) >= static_cast<uint32_t>(H)) {
+        if (std::cmp_greater_equal(x, W) || std::cmp_greater_equal(y, H) || x < 0 || y < 0) {
             return;
         }
         T<W, H, GR>::compose(data, static_cast<uint32_t>(x), static_cast<uint32_t>(y), cola, colr, colg, colb);
@@ -4104,7 +4105,7 @@ class image {
      * @private
      */
     constexpr void span(int32_t x, int32_t w, int32_t y, uint8_t col) {
-        if (w <= 0 || y < 0 || y >= static_cast<int32_t>(H) || x + w <= 0 || x >= static_cast<int32_t>(W)) {
+        if (w <= 0 || y < 0 || std::cmp_greater_equal(y, H) || x + w <= 0 || std::cmp_greater_equal(x, W)) {
             return;
         }
         const int32_t x0 = std::max(x, int32_t{0});
