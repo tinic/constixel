@@ -670,29 +670,35 @@ class format {
 
     template <typename F>
     [[nodiscard]] static constexpr uint32_t png_idat_zlib_stream(F &&char_out, const uint8_t *line, size_t bytes,
-                                                                 uint32_t adler32_sum) {
+                                                                 uint32_t adler32_sum, bool last_line) {
         const auto max_data_use = size_t{1024};
-        const auto extra_data = size_t{24};
+        const auto extra_data = size_t{10};
         const size_t max_stack_use = max_data_use + extra_data;
         std::array<uint8_t, max_stack_use> header{};
-        for (size_t c = 0; c < bytes; c++) {
+        bool filter_first = 1;
+        while (bytes > 0) {
             size_t i = 0;
             header.at(i++) = 'I';
             header.at(i++) = 'D';
             header.at(i++) = 'A';
             header.at(i++) = 'T';
-            header.at(i++) = 0x00;
 
             const size_t bytes_to_copy = std::min(max_data_use, bytes);
-            header.at(i++) = (((bytes_to_copy + 1) >> 0) & 0xFF);
-            header.at(i++) = (((bytes_to_copy + 1) >> 8) & 0xFF);
-            header.at(i++) = ((((bytes_to_copy + 1) ^ 0xffff) >> 0) & 0xFF);
-            header.at(i++) = ((((bytes_to_copy + 1) ^ 0xffff) >> 8) & 0xFF);
+
+            header.at(i++) = ((bytes_to_copy == bytes) && last_line) ? 0x01 : 0x00;
+
+            header.at(i++) = (((bytes_to_copy + filter_first) >> 0) & 0xFF);
+            header.at(i++) = (((bytes_to_copy + filter_first) >> 8) & 0xFF);
+            header.at(i++) = ((((bytes_to_copy + filter_first) ^ 0xffff) >> 0) & 0xFF);
+            header.at(i++) = ((((bytes_to_copy + filter_first) ^ 0xffff) >> 8) & 0xFF);
 
             const size_t adlersum32_start_pos = i;
-            header.at(i++) = 0;
+            if (filter_first) {
+                filter_first = 0;
+                header.at(i++) = 0;
+            }
             for (size_t d = 0; d < bytes_to_copy; d++) {
-                header.at(i++) = line[d];
+                header.at(i++) = *line++;
             }
             adler32_sum = adler32(&header[adlersum32_start_pos], i - adlersum32_start_pos, adler32_sum);
 
@@ -702,6 +708,7 @@ class format {
 
             bytes -= bytes_to_copy;
         }
+
         return adler32_sum;
     }
 
@@ -828,7 +835,7 @@ class format {
         for (size_t y = 0; y < H; y++) {
             size_t bpl = 0;
             const uint8_t *ptr = line_ptr(data, y, bpl);
-            adler32_sum = png_idat_zlib_stream(std::forward<F>(char_out), ptr, bpl, adler32_sum);
+            adler32_sum = png_idat_zlib_stream(std::forward<F>(char_out), ptr, bpl, adler32_sum, y == H - 1);
         }
         png_idat_zlib_trailer(std::forward<F>(char_out), adler32_sum);
         png_end(std::forward<F>(char_out));
@@ -2122,14 +2129,14 @@ class image {
     static_assert(sizeof(H) >= sizeof(uint32_t));
 
     static_assert(W > 0 && H > 0);
-    static_assert(W <= 16384 && H <= 16384);
+    static_assert(W <= 65535 && H <= 65535);
 
     static constexpr int32_t min_coord = -1 << 28;
     static constexpr int32_t max_coord = +1 << 28;
 
 #if defined(__x86_64__) || defined(_M_X64) || defined(__aarch64__)
     static constexpr bool always_use_64bit = true;
-#else  // #if defined(__x86_64__) || defined(_M_X64) || defined(__aarch64__)
+#else   // #if defined(__x86_64__) || defined(_M_X64) || defined(__aarch64__)
     static constexpr bool always_use_64bit = false;
 #endif  // #if defined(__x86_64__) || defined(_M_X64) || defined(__aarch64__)
 
@@ -3871,7 +3878,8 @@ class image {
         if constexpr (!AA) {
             const int32_t max_value = std::max(
                 {abs(x0), abs(y0), abs(x0r), abs(x0r2), abs(y0r), abs(y0r2), abs(r), abs(s), abs(cx), abs(cy)});
-            const bool use_int64 = always_use_64bit || max_value >= ((std::numeric_limits<int16_t>::max() / int32_t{8}) - int16_t{1});
+            const bool use_int64 =
+                always_use_64bit || max_value >= ((std::numeric_limits<int16_t>::max() / int32_t{8}) - int16_t{1});
             if constexpr (!STROKE) {
                 auto plot_arc = [&, this]<typename I>(int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
                                                       int32_t y_off) {
