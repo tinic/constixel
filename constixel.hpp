@@ -3856,21 +3856,21 @@ class image {
             plot_arc.template operator()<I>(x0r, y0r, x0r2, y0r2, ox, oy);
         };
 
-        auto limit_box = [&](int32_t &xmin, int32_t &ymin, int32_t &xmax, int32_t &ymax) {
-            ymin = std::max(ymin - oy, int32_t{0}) + oy;
-            ymax = std::min(ymax + oy, static_cast<int32_t>(H) - int32_t{1}) - oy;
-            xmin = std::max(xmin - ox, int32_t{0}) + ox;
-            xmax = std::min(xmax + ox, static_cast<int32_t>(W) - int32_t{1}) - ox;
+        auto limit_box = [](int32_t &xmin, int32_t &ymin, int32_t &xmax, int32_t &ymax, int32_t x_off, int32_t y_off) {
+            xmin = std::max(xmin + x_off, int32_t{0}) - x_off;
+            xmax = std::min(xmax + x_off, static_cast<int32_t>(W) - int32_t{1}) - x_off;
+            ymin = std::max(ymin + y_off, int32_t{0}) - y_off;
+            ymax = std::min(ymax + y_off, static_cast<int32_t>(H) - int32_t{1}) - y_off;
         };
 
         if constexpr (!AA) {
-            const int32_t max_value =
-                std::max({abs(x0), abs(y0), abs(x0r), abs(x0r2), abs(y0r), abs(y0r2), abs(r), abs(s), abs(cx), abs(cy)});
+            const int32_t max_value = std::max(
+                {abs(x0), abs(y0), abs(x0r), abs(x0r2), abs(y0r), abs(y0r2), abs(r), abs(s), abs(cx), abs(cy)});
             const bool use_int64 = max_value >= ((std::numeric_limits<int16_t>::max() / int32_t{8}) - int16_t{1});
             if constexpr (!STROKE) {
                 auto plot_arc = [&, this]<typename I>(int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
                                                       int32_t y_off) {
-                    limit_box(xx0, yy0, xx1, yy1);
+                    limit_box(xx0, yy0, xx1, yy1, x_off, y_off);
                     for (int32_t y = yy0; y <= yy1; y++) {
                         for (int32_t x = xx0; x <= xx1; x++) {
                             const I dx = (static_cast<I>(x) * I{2} + I{1}) - (static_cast<I>(cx) * I{2});
@@ -3891,7 +3891,7 @@ class image {
             } else {
                 auto plot_arc = [&, this]<typename I>(int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
                                                       int32_t y_off) {
-                    limit_box(xx0, yy0, xx1, yy1);
+                    limit_box(xx0, yy0, xx1, yy1, x_off, y_off);
                     for (int32_t y = yy0; y <= yy1; y++) {
                         for (int32_t x = xx0; x <= xx1; x++) {
                             const I dx = (static_cast<I>(x) * I{2} + I{1}) - (static_cast<I>(cx) * I{2});
@@ -3921,7 +3921,7 @@ class image {
             if constexpr (!STROKE) {
                 auto plot_arc = [&, this]<typename I>(int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
                                                       int32_t y_off) {
-                    limit_box(xx0, yy0, xx1, yy1);
+                    limit_box(xx0, yy0, xx1, yy1, x_off, y_off);
                     for (int32_t y = yy0; y <= yy1; y++) {
                         for (int32_t x = xx0; x <= xx1; x++) {
                             const float dx = (static_cast<float>(x) + 0.5f) - static_cast<float>(cx);
@@ -3956,7 +3956,7 @@ class image {
                 const auto rsF = static_cast<float>(r - s);
                 auto plot_arc = [&, this]<typename I>(int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
                                                       int32_t y_off) {
-                    limit_box(xx0, yy0, xx1, yy1);
+                    limit_box(xx0, yy0, xx1, yy1, x_off, y_off);
                     for (int32_t y = yy0; y <= yy1; y++) {
                         for (int32_t x = xx0; x <= xx1; x++) {
                             const float dx = (static_cast<float>(x) + 0.5f) - static_cast<float>(cx);
