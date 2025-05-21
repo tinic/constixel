@@ -52,7 +52,7 @@ There are plenty of other uses for this library.
 ## Requirements
 
 - C++20, i.e. gcc 13.3 or newer, clang 16 or newer, MSVC 17 or newer
-- For viewing the sixel image you will need a sixel capable terminal. Windows Terminal, iTerm2 on MacOS and [some](https://www.arewesixelyet.com/) Linux terminals will work. In Visual Studio Code sixel rendering can be enabled for all terminals using the ```"terminal.integrated.enableImages": true``` setting (Seems to be broken on Windows as of 4/2025, but works on MacOS and Linux). There is also an option to output to a [kitty](https://sw.kovidgoyal.net/kitty/graphics-protocol/) graphics enabled terminal.
+- For viewing the sixel image you will need a sixel capable terminal. [Windows Terminal](https://github.com/microsoft/terminal), [iTerm2](https://iterm2.com/) on MacOS and [some](https://www.arewesixelyet.com/) Linux terminals will work. In Visual Studio Code sixel rendering can be enabled for all terminals using the ```"terminal.integrated.enableImages": true``` setting (Seems to be broken on Windows as of 4/2025, but works on MacOS and Linux). There is also an option to output to a [kitty](https://sw.kovidgoyal.net/kitty/graphics-protocol/) graphics enabled terminal.
 
 > [!NOTE]
 > The Terminal app on MacOS does not support sixel, please use iTerm2.
