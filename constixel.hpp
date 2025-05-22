@@ -136,7 +136,7 @@ static constexpr float fast_sqrtf(const float x) {
 #if defined(__ARM_NEON)
 inline float32x4_t fast_log2_f32_neon(float32x4_t x) {
     uint32x4_t xi = vreinterpretq_u32_f32(x);
-    float32x4_t y = vmulq_n_f32(vcvtq_f32_u32(xi), 1.1920928955078125e-7f); // 1/(1<<23)
+    float32x4_t y = vmulq_n_f32(vcvtq_f32_u32(xi), 1.1920928955078125e-7f);
 
     uint32x4_t mantissa = vorrq_u32(vandq_u32(xi, vdupq_n_u32(0x007FFFFF)), vdupq_n_u32(0x3f000000));
     float32x4_t xf = vreinterpretq_f32_u32(mantissa);
@@ -146,10 +146,7 @@ inline float32x4_t fast_log2_f32_neon(float32x4_t x) {
     float32x4_t c = vdupq_n_f32(1.72587999f);
     float32x4_t d = vdupq_n_f32(0.3520887068f);
 
-    return vsubq_f32(
-        vsubq_f32(y, vmlaq_f32(a, b, xf)),
-        vdivq_f32(c, vaddq_f32(d, xf))
-    );
+    return vsubq_f32(vsubq_f32(y, vmlaq_f32(a, b, xf)), vdivq_f32(c, vaddq_f32(d, xf)));
 }
 
 inline float32x4_t fast_exp2_f32_neon(float32x4_t p) {
@@ -172,7 +169,7 @@ inline float32x4_t fast_exp2_f32_neon(float32x4_t p) {
     float32x4_t t = vaddq_f32(clipp, vsubq_f32(a, vmulq_f32(d, z)));
     t = vaddq_f32(t, vdivq_f32(b, vsubq_f32(c, z)));
 
-    int32x4_t res = vcvtq_s32_f32(vmulq_n_f32(t, float(1 << 23)));
+    int32x4_t res = vcvtq_s32_f32(vmulq_n_f32(t, static_cast<float>(1 << 23)));
     return vreinterpretq_f32_s32(res);
 }
 
@@ -227,10 +224,10 @@ inline __m128 fast_log2_ps(__m128 x) {
     const __m128i xi = _mm_castps_si128(x);
 
     const __m128i mant_mask = _mm_set1_epi32(0x007FFFFF);
-    const __m128i one_bits  = _mm_set1_epi32(0x3f000000);
+    const __m128i one_bits = _mm_set1_epi32(0x3f000000);
 
     // Extract exponent
-    const __m128 y = _mm_mul_ps(_mm_cvtepi32_ps(xi), _mm_set1_ps(1.1920928955078125e-7f)); // 1/(1<<23)
+    const __m128 y = _mm_mul_ps(_mm_cvtepi32_ps(xi), _mm_set1_ps(1.1920928955078125e-7f));  // 1/(1<<23)
 
     // Rebuild mantissa as float
     __m128i mant_bits = _mm_or_si128(_mm_and_si128(xi, mant_mask), one_bits);
@@ -242,10 +239,7 @@ inline __m128 fast_log2_ps(__m128 x) {
     const __m128 c2 = _mm_set1_ps(1.72587999f);
     const __m128 c3 = _mm_set1_ps(0.3520887068f);
 
-    return _mm_sub_ps(
-        _mm_sub_ps(y, _mm_add_ps(c0, _mm_mul_ps(c1, xf))),
-        _mm_div_ps(c2, _mm_add_ps(c3, xf))
-    );
+    return _mm_sub_ps(_mm_sub_ps(y, _mm_add_ps(c0, _mm_mul_ps(c1, xf))), _mm_div_ps(c2, _mm_add_ps(c3, xf)));
 }
 
 inline __m128 fast_pow_ps(__m128 x, __m128 p) {
@@ -361,10 +355,8 @@ class quantize {
 
     explicit consteval quantize(const std::array<uint32_t, palette_size> &palette) : pal(palette) {
         for (size_t i = 0; i < pal.size(); i++) {
-            pal[i] = ( pal[i] & 0xFF000000 ) |
-                     ( pal[i] & 0x0000FF00 ) |
-                     ( ( pal[i] >> 16 ) & 0x000000FF ) |
-                     ( ( pal[i] << 16 ) & 0x00FF0000 );
+            pal[i] = (pal[i] & 0xFF000000) | (pal[i] & 0x0000FF00) | ((pal[i] >> 16) & 0x000000FF) |
+                     ((pal[i] << 16) & 0x00FF0000);
         }
         for (size_t i = 0; i < pal.size(); i++) {
             linearpal.at(i * 3 + 0) =
@@ -414,11 +406,11 @@ class quantize {
         return static_cast<uint8_t>(best);
     }
 
-    [[nodiscard]] constexpr auto palette() const {
+    [[nodiscard]] constexpr auto &palette() const {
         return pal;
     }
 
-    [[nodiscard]] constexpr auto linear_palette() const {
+    [[nodiscard]] constexpr auto &linear_palette() const {
         return linearpal;
     }
 
@@ -946,8 +938,7 @@ class format {
         std::forward<F>(char_out)('2');
         std::forward<F>(char_out)(';');
         for (size_t c = 0; c < 3; c++) {
-            sixel_number(std::forward<F>(char_out),
-                         static_cast<uint16_t>((((col >> (8 * c)) & 0xFF) * 100) / 255));
+            sixel_number(std::forward<F>(char_out), static_cast<uint16_t>((((col >> (8 * c)) & 0xFF) * 100) / 255));
             std::forward<F>(char_out)(';');
         }
     }
@@ -1065,7 +1056,6 @@ template <size_t W, size_t H, bool GR>
 class format_1bit : public format {
  public:
     /// @cond DOXYGEN_EXCLUDE
-    static constexpr bool grayscale = GR;
     static constexpr size_t bits_per_pixel = 1;
     static constexpr size_t bytes_per_line = (W * bits_per_pixel + 7) / 8;
     static constexpr size_t image_size = H * bytes_per_line;
@@ -1349,7 +1339,6 @@ template <size_t W, size_t H, bool GR>
 class format_2bit : public format {
  public:
     /// @cond DOXYGEN_EXCLUDE
-    static constexpr bool grayscale = GR;
     static constexpr size_t bits_per_pixel = 2;
     static constexpr size_t bytes_per_line = (W * bits_per_pixel + 7) / 8;
     static constexpr size_t image_size = H * bytes_per_line;
@@ -1583,7 +1572,6 @@ template <size_t W, size_t H, bool GR>
 class format_4bit : public format {
  public:
     /// @cond DOXYGEN_EXCLUDE
-    static constexpr bool grayscale = GR;
     static constexpr size_t bits_per_pixel = 4;
     static constexpr size_t bytes_per_line = (W * bits_per_pixel + 7) / 8;
     static constexpr size_t image_size = H * bytes_per_line;
@@ -1830,7 +1818,6 @@ template <size_t W, size_t H, bool GR>
 class format_8bit : public format {
  public:
     /// @cond DOXYGEN_EXCLUDE
-    static constexpr bool grayscale = GR;
     static constexpr size_t bits_per_pixel = 8;
     static constexpr size_t bytes_per_line = W;
     static constexpr size_t image_size = H * bytes_per_line;
@@ -2180,10 +2167,11 @@ class format_32bit : public format {
 
     static constexpr void plot(std::array<uint8_t, image_size> &data, size_t x, size_t y, uint8_t col) {
         if (std::is_constant_evaluated()) {
-            data.data()[y * bytes_per_line + x * 4 + 0] = (quant.palette().at(col) >> 0) & 0xFF;
-            data.data()[y * bytes_per_line + x * 4 + 1] = (quant.palette().at(col) >> 8) & 0xFF;
-            data.data()[y * bytes_per_line + x * 4 + 2] = (quant.palette().at(col) >> 16) & 0xFF;
-            data.data()[y * bytes_per_line + x * 4 + 3] = 0xFF;
+            uint8_t *ptr = &data.data()[y * bytes_per_line + x * 4];
+            ptr[0] = (quant.palette().at(col) >> 0) & 0xFF;
+            ptr[1] = (quant.palette().at(col) >> 8) & 0xFF;
+            ptr[2] = (quant.palette().at(col) >> 16) & 0xFF;
+            ptr[3] = 0xFF;
         } else {
             uint32_t *yptr = reinterpret_cast<uint32_t *>(&data.data()[y * bytes_per_line + x * 4]);
             *yptr = quant.palette().at(col) | 0xFF000000;
@@ -2216,9 +2204,7 @@ class format_32bit : public format {
             const size_t off = y * bytes_per_line + x * 4;
             uint8x8_t px = vld1_u8(&data[off]);
             float32x4_t src = {colr, colg, colb, cola};
-            float32x4_t dst = {hidden::a2al_8bit[px[0]], 
-                               hidden::a2al_8bit[px[1]], 
-                               hidden::a2al_8bit[px[2]],
+            float32x4_t dst = {hidden::a2al_8bit[px[0]], hidden::a2al_8bit[px[1]], hidden::a2al_8bit[px[2]],
                                hidden::a2al_8bit[px[3]]};
             float32x4_t one = vdupq_n_f32(1.0f);
             float32x4_t inv_srca = vsubq_f32(one, vdupq_n_f32(cola));
@@ -2319,10 +2305,10 @@ class format_32bit : public format {
                                     int32_t stride) {
         rect<int32_t> intersect_rect{.x = 0, .y = 0, .w = W, .h = H};
         intersect_rect &= rect<int32_t>{.x = r.x, .y = r.y, .w = r.w, .h = r.h};
-        auto const r_x = static_cast<size_t>(r.x);
-        auto const r_y = static_cast<size_t>(r.y);
-        auto const r_w = static_cast<size_t>(r.w);
-        auto const r_h = static_cast<size_t>(r.h);
+        auto const r_x = static_cast<size_t>(intersect_rect.x);
+        auto const r_y = static_cast<size_t>(intersect_rect.y);
+        auto const r_w = static_cast<size_t>(intersect_rect.w);
+        auto const r_h = static_cast<size_t>(intersect_rect.h);
         const uint8_t *src = ptr;
         uint8_t *dst = data.data() + r_y * bytes_per_line + r_x * 4;
         for (size_t y = 0; y < r_h; y++) {
@@ -2533,8 +2519,8 @@ class image {
     static_assert(W > 0 && H > 0);
     static_assert(W <= 65535 && H <= 65535);
 
-    static constexpr int32_t min_coord = -1 << 28;
-    static constexpr int32_t max_coord = +1 << 28;
+    static constexpr int32_t min_coord = -int32_t{1 << 28};
+    static constexpr int32_t max_coord = +int32_t{1 << 28};
 
 #if defined(__x86_64__) || defined(_M_X64) || defined(__aarch64__)
     static constexpr bool always_use_64bit = true;
