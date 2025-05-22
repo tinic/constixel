@@ -1,9 +1,5 @@
 #!/usr/bin/env bash
 
-#
-# Fixed font building script 
-#
-
 set -euo pipefail
 
 # Default values
