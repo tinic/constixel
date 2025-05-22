@@ -763,6 +763,9 @@ class format {
         if (depth <= 8) {
             header.at(i++) = static_cast<char>(depth);
             header.at(i++) = 3;
+        } else if (depth == 24) {
+            header.at(i++) = 8;
+            header.at(i++) = 2;
         } else {
             header.at(i++) = 8;
             header.at(i++) = 6;
@@ -1985,7 +1988,7 @@ class format_8bit : public format {
         }
     }
 
-    static constexpr void RGBA_uint8(std::span<uint8_t, W * H * 4> dst,
+    static constexpr void RGBA_uint8(std::array<uint8_t, W * H * 4> &dst,
                                      const std::span<const uint8_t, image_size> &src) {
         const uint8_t *ptr = src.data();
         for (size_t y = 0; y < H; y++) {
@@ -2117,6 +2120,228 @@ class format_8bit : public format {
                     }
                 }
             });
+    }
+    /// @endcond
+};
+
+/**
+ * @brief 24-bit format. Use as template parameter for image. Example:
+ *
+ * \code{.cpp}
+ * constixel::image<constixel::format_32bit, 640, 480> image;
+ * \endcode
+ *
+ * @tparam W Width in pixels.
+ * @tparam H Height in pixels.
+ * @tparam GRAYSCALE Grayscale palette.
+ */
+template <size_t W, size_t H, bool GRAYSCALE, bool USE_SPAN>
+class format_24bit : public format {
+ public:
+    /// @cond DOXYGEN_EXCLUDE
+    static constexpr size_t bits_per_pixel = 24;
+    static constexpr size_t bytes_per_line = W * 3;
+    static constexpr size_t image_size = H * bytes_per_line;
+    static constexpr size_t color_mask = 0xFF;
+
+    static consteval auto gen_palette_consteval() {
+        return format_8bit<1, 1, GRAYSCALE, USE_SPAN>::gen_palette_consteval();
+    }
+    static constexpr const auto quant = hidden::quantize<1UL << 8>(gen_palette_consteval());
+
+    template <bool FLIP_H = false, bool FLIP_V = false>
+    static constexpr void transpose(const uint8_t *src, uint8_t *dst) {
+        for (size_t y = 0; y < H; y++) {
+            for (size_t x = 0; x < W; x++) {
+                if constexpr (FLIP_H) {
+                    if constexpr (FLIP_V) {
+                        dst[(W - x - 1) * H * 3 + (H - y - 1) * 3 + 0] = *src++;
+                        dst[(W - x - 1) * H * 3 + (H - y - 1) * 3 + 1] = *src++;
+                        dst[(W - x - 1) * H * 3 + (H - y - 1) * 3 + 2] = *src++;
+                    } else {
+                        dst[(W - x - 1) * H * 3 + y * 3 + 0] = *src++;
+                        dst[(W - x - 1) * H * 3 + y * 3 + 1] = *src++;
+                        dst[(W - x - 1) * H * 3 + y * 3 + 2] = *src++;
+                    }
+                } else {
+                    if constexpr (FLIP_V) {
+                        dst[x * H * 3 + (H - y - 1) * 3 + 0] = *src++;
+                        dst[x * H * 3 + (H - y - 1) * 3 + 1] = *src++;
+                        dst[x * H * 3 + (H - y - 1) * 3 + 2] = *src++;
+                    } else {
+                        dst[x * H * 3 + y * 3 + 0] = *src++;
+                        dst[x * H * 3 + y * 3 + 1] = *src++;
+                        dst[x * H * 3 + y * 3 + 2] = *src++;
+                    }
+                }
+            }
+        }
+    }
+
+    static constexpr void plot(std::span<uint8_t, image_size> data, size_t x, size_t y, uint8_t col) {
+        uint8_t *ptr = &data.data()[y * bytes_per_line + x * 3];
+        ptr[0] = (quant.palette().at(col) >> 0) & 0xFF;
+        ptr[1] = (quant.palette().at(col) >> 8) & 0xFF;
+        ptr[2] = (quant.palette().at(col) >> 16) & 0xFF;
+    }
+
+    static constexpr void extent(std::span<uint8_t, image_size> data, size_t xl0, size_t xr0, size_t y, uint8_t col) {
+        uint8_t *yptr = &data.data()[y * bytes_per_line + xl0 * 3];
+        uint32_t rgba = quant.palette().at(col);
+        for (size_t x = xl0; x < xr0; x++) {
+            *yptr++ = (rgba >> 0) & 0xFF;
+            *yptr++ = (rgba >> 8) & 0xFF;
+            *yptr++ = (rgba >> 16) & 0xFF;
+        }
+    }
+
+    static constexpr void compose(std::span<uint8_t, image_size> data, size_t x, size_t y, float cola, float colr,
+                                  float colg, float colb) {
+#if 0   // defined(__ARM_NEON)
+        if (!std::is_constant_evaluated()) {
+            const size_t off = y * bytes_per_line + x * 3;
+            uint8x8_t px = vld1_u8(&data[off]);
+            float32x4_t src = {colr, colg, colb, cola};
+            float32x4_t dst = {hidden::a2al_8bit[px[0]], hidden::a2al_8bit[px[1]], hidden::a2al_8bit[px[2]], 1.0f};
+            float32x4_t one = vdupq_n_f32(1.0f);
+            float32x4_t inv_srca = vsubq_f32(one, vdupq_n_f32(cola));
+            float32x4_t blended = vmlaq_f32(vmulq_n_f32(src, cola), dst, inv_srca);
+
+            float outa = cola + dst[3] * (1.0f - cola);
+            float32x4_t norm = vmulq_f32(blended, vdupq_n_f32(1.0f / outa));
+            float32x4_t final = hidden::linear_to_srgb_approx_neon(norm);
+
+            uint8x8_t out;
+            out[0] = static_cast<uint8_t>(final[0] * 255.0f);
+            out[1] = static_cast<uint8_t>(final[1] * 255.0f);
+            out[2] = static_cast<uint8_t>(final[2] * 255.0f);
+            vst1_lane_u32(reinterpret_cast<uint32_t *>(&data[off]), vreinterpret_u32_u8(out), 0);
+            return;
+        }
+#endif  // #if defined(__ARM_NEON)
+#if defined(__AVX2__)
+        if (!std::is_constant_evaluated()) {
+            const size_t off = y * bytes_per_line + x * 3;
+
+            const float lr = hidden::a2al_8bit[data[off + 0]];
+            const float lg = hidden::a2al_8bit[data[off + 1]];
+            const float lb = hidden::a2al_8bit[data[off + 2]];
+            const float la = 1.0;
+
+            const float as = cola + la * (1.0f - cola);
+            const float inv_cola = 1.0f - cola;
+
+            __m128 dst = _mm_set_ps(0.0f, lb, lg, lr);
+            __m128 src = _mm_set_ps(0.0f, colb, colg, colr);
+
+            __m128 blended = _mm_add_ps(_mm_mul_ps(src, _mm_set1_ps(cola)), _mm_mul_ps(dst, _mm_set1_ps(inv_cola)));
+
+            __m128 denom = _mm_set_ss(as);
+            __m128 inv_as = _mm_rcp_ss(denom);
+            inv_as = _mm_shuffle_ps(inv_as, inv_as, _MM_SHUFFLE(0, 0, 0, 0));
+
+            __m128 scaled = _mm_mul_ps(blended, inv_as);
+            __m128 srgb = hidden::linear_to_srgb_approx_sse(scaled);
+
+            alignas(16) float out[4];
+            _mm_store_ps(out, srgb);
+
+            data[off + 0] = static_cast<uint8_t>(out[0] * 255.0f);
+            data[off + 1] = static_cast<uint8_t>(out[1] * 255.0f);
+            data[off + 2] = static_cast<uint8_t>(out[2] * 255.0f);
+            return;
+        }
+#endif  // #if defined(__AVX2__)
+        const size_t off = y * bytes_per_line + x * 3;
+
+        const float lr = hidden::a2al_8bit[data[off + 0]];
+        const float lg = hidden::a2al_8bit[data[off + 1]];
+        const float lb = hidden::a2al_8bit[data[off + 2]];
+        const float la = 1.0f;
+
+        const float as = cola + la * (1.0f - cola);
+        const float rs = hidden::linear_to_srgb(colr * cola + lr * (1.0f - cola)) * (1.0f / as);
+        const float gs = hidden::linear_to_srgb(colg * cola + lg * (1.0f - cola)) * (1.0f / as);
+        const float bs = hidden::linear_to_srgb(colb * cola + lb * (1.0f - cola)) * (1.0f / as);
+
+        data[off + 0] = static_cast<uint8_t>(rs * 255.0f);
+        data[off + 1] = static_cast<uint8_t>(gs * 255.0f);
+        data[off + 2] = static_cast<uint8_t>(bs * 255.0f);
+    }
+
+    static constexpr void RGBA_uint32(std::array<uint32_t, W * H> &dst,
+                                      const std::span<const uint8_t, image_size> &src) {
+        for (size_t y = 0; y < H; y++) {
+            for (size_t x = 0; x < W; x++) {
+                dst.data()[y * W + x] = static_cast<uint32_t>(
+                    (src.data()[y * bytes_per_line + x * 3 + 0]) | (src.data()[y * bytes_per_line + x * 3 + 1] << 8) |
+                    (src.data()[y * bytes_per_line + x * 3 + 2] << 16) | 0xFF000000);
+            }
+        }
+    }
+
+    static constexpr void RGBA_uint8(std::array<uint8_t, W * H * 4> &dst,
+                                     const std::span<const uint8_t, image_size> &src) {
+        const uint8_t *src_ptr = src.data();
+        uint8_t *dst_ptr = dst.data();
+        for (size_t y = 0; y < H; y++) {
+            for (size_t x = 0; x < W; x++) {
+                dst_ptr[x * 4 + 0] = src_ptr[x * 3 + 0];
+                dst_ptr[x * 4 + 1] = src_ptr[x * 3 + 1];
+                dst_ptr[x * 4 + 2] = src_ptr[x * 3 + 2];
+                dst_ptr[x * 4 + 3] = 0xFF;
+            }
+            src_ptr += bytes_per_line;
+            dst_ptr += W * 4;
+        }
+    }
+
+    static constexpr void blit_RGBA(std::span<uint8_t, image_size> data, const rect<int32_t> &r, const uint8_t *ptr,
+                                    int32_t stride) {
+        rect<int32_t> intersect_rect{.x = 0, .y = 0, .w = W, .h = H};
+        intersect_rect &= rect<int32_t>{.x = r.x, .y = r.y, .w = r.w, .h = r.h};
+        auto const r_x = static_cast<size_t>(intersect_rect.x);
+        auto const r_y = static_cast<size_t>(intersect_rect.y);
+        auto const r_w = static_cast<size_t>(intersect_rect.w);
+        auto const r_h = static_cast<size_t>(intersect_rect.h);
+        const uint8_t *src = ptr;
+        uint8_t *dst = data.data() + r_y * bytes_per_line + r_x * 3;
+        for (size_t y = 0; y < r_h; y++) {
+            for (size_t x = 0; x < r_w; x++) {
+                dst[x * 3 + 0] = src[x * 4 + 0];
+                dst[x * 3 + 1] = src[x * 4 + 1];
+                dst[x * 3 + 2] = src[x * 4 + 2];
+            }
+            dst += bytes_per_line;
+            src += stride;
+        }
+    }
+
+    static constexpr void blit_RGBA_diffused(std::span<uint8_t, image_size> data, const rect<int32_t> &r,
+                                             const uint8_t *ptr, int32_t stride) {
+        blit_RGBA(data, r, ptr, stride);
+    }
+
+    static constexpr void blit_RGBA_diffused_linear(std::span<uint8_t, image_size> data, const rect<int32_t> &r,
+                                                    const uint8_t *ptr, int32_t stride) {
+        blit_RGBA(data, r, ptr, stride);
+    }
+
+    template <typename F>
+    static constexpr void png(const std::span<const uint8_t, image_size> data, F &&char_out) {
+        png_image<W, H, uint8_t, bits_per_pixel>(data.data(), quant.palette(), std::forward<F>(char_out),
+                                                 [](const uint8_t *data_raw, size_t y, size_t &bpl) {
+                                                     bpl = bytes_per_line;
+                                                     return data_raw + y * bytes_per_line;
+                                                 });
+    }
+
+    template <size_t S, typename F>
+    static constexpr void sixel(const std::span<const uint8_t, image_size> & /*data*/, F && /*char_out*/,
+                                const rect<int32_t> & /*r*/) {
+#ifndef _MSC_VER
+        static_assert(false, "Sixel not available for format_24bit.");
+#endif  // #ifndef _MSC_VER
     }
     /// @endcond
 };
@@ -2547,16 +2772,15 @@ class image {
 #endif  // #if defined(__x86_64__) || defined(_M_X64) || defined(__aarch64__)
 
  public:
-
     /**
-     * \brief Creates a new image with internal storage. 
+     * \brief Creates a new image with internal storage.
      */
     image()
         requires(!USE_SPAN)
     = default;
 
     /**
-     * \brief When USE_SPAN=true creates a new image with external storage based existing std::span. 
+     * \brief When USE_SPAN=true creates a new image with external storage based existing std::span.
      * \param other If USE_SPAN=true this constructor will accept a std::span.
      */
     image(const std::span<uint8_t, T<W, H, GRAYSCALE, USE_SPAN>::image_size> &other)
