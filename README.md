@@ -246,14 +246,14 @@ int main() {
 
 Full doxygen generated API docs are at [constixel.dev](https://constixel.dev)
 
-The following image formats are available. [Width] is the width in pixels, [Height] is the height in pixels. [Grayscale] will set the palette to a grayscale palette with black being the first entry in the palette and white being the last entry in the palette.
+The following image formats are available. [Width] is the width in pixels, [Height] is the height in pixels. [Grayscale] will set the palette to a grayscale palette with black being the first entry in the palette and white being the last entry in the palette. [Use_Span] allows to pass in an existing std::span/std::array to be used as a backbuffer if so required.
 
 ```c++
-    constixel::image<constixel::format_1bit, [Width], [Height]>
-    constixel::image<constixel::format_2bit, [Width], [Height], [Grayscale=false]>
-    constixel::image<constixel::format_4bit, [Width], [Height], [Grayscale=false]>
-    constixel::image<constixel::format_8bit, [Width], [Height], [Grayscale=false]>
-    constixel::image<constixel::format_32bit, [Width], [Height]>
+    constixel::image<constixel::format_1bit, [Width], [Height], [Unused=false], [Use_Span=false]>
+    constixel::image<constixel::format_2bit, [Width], [Height], [Grayscale=false], [Use_Span=false]>
+    constixel::image<constixel::format_4bit, [Width], [Height], [Grayscale=false], [Use_Span=false]>
+    constixel::image<constixel::format_8bit, [Width], [Height], [Grayscale=false], [Use_Span=false]>
+    constixel::image<constixel::format_32bit, [Width], [Height], [Unused=false], [Use_Span=false]>
 ```
 
 A quick overview of some functionality of image, refer to the [full documention here](https://constixel.dev):
