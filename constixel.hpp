@@ -862,20 +862,15 @@ class format {
     static constexpr void sixel_header(F &&char_out) {
         std::forward<F>(char_out)(0x1b);
         std::forward<F>(char_out)('P');
-        std::forward<F>(char_out)('0');
-        std::forward<F>(char_out)(';');
-        std::forward<F>(char_out)('1');
-        std::forward<F>(char_out)(';');
-        std::forward<F>(char_out)('0');
         std::forward<F>(char_out)('q');
     }
 
     template <size_t W, size_t H, size_t S, typename F>
     static constexpr void sixel_raster_attributes(F &&char_out) {
         std::forward<F>(char_out)('\"');
-        sixel_number(std::forward<F>(char_out), 2);
+        sixel_number(std::forward<F>(char_out), 1);
         std::forward<F>(char_out)(';');
-        sixel_number(std::forward<F>(char_out), 2);
+        sixel_number(std::forward<F>(char_out), 1);
         std::forward<F>(char_out)(';');
         sixel_number(std::forward<F>(char_out), W * S);
         std::forward<F>(char_out)(';');
@@ -916,7 +911,9 @@ class format {
         std::forward<F>(char_out)(';');
         for (size_t c = 0; c < 3; c++) {
             sixel_number(std::forward<F>(char_out), static_cast<uint16_t>((((col >> (8 * c)) & 0xFF) * 100) / 255));
-            std::forward<F>(char_out)(';');
+            if (c < 2) {
+                std::forward<F>(char_out)(';');
+            }
         }
     }
 
