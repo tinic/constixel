@@ -1059,6 +1059,7 @@ class format_1bit : public format {
     static constexpr size_t bits_per_pixel = 1;
     static constexpr size_t bytes_per_line = (W * bits_per_pixel + 7) / 8;
     static constexpr size_t image_size = H * bytes_per_line;
+    static constexpr size_t color_mask = 0x01;
 
     static consteval auto gen_palette_consteval() {
         return std::array<uint32_t, (1UL << bits_per_pixel)>({{0x00000000, 0x00ffffff}});
@@ -1342,6 +1343,7 @@ class format_2bit : public format {
     static constexpr size_t bits_per_pixel = 2;
     static constexpr size_t bytes_per_line = (W * bits_per_pixel + 7) / 8;
     static constexpr size_t image_size = H * bytes_per_line;
+    static constexpr size_t color_mask = 0x03;
     static consteval auto gen_palette_consteval() {
         if (GR) {
             return std::array<uint32_t, (1UL << bits_per_pixel)>({{0x000000, 0x444444, 0x888888, 0xffffff}});
@@ -1575,6 +1577,7 @@ class format_4bit : public format {
     static constexpr size_t bits_per_pixel = 4;
     static constexpr size_t bytes_per_line = (W * bits_per_pixel + 7) / 8;
     static constexpr size_t image_size = H * bytes_per_line;
+    static constexpr size_t color_mask = 0x0f;
 
     static consteval auto gen_palette_consteval() {
         if (GR) {
@@ -1821,6 +1824,7 @@ class format_8bit : public format {
     static constexpr size_t bits_per_pixel = 8;
     static constexpr size_t bytes_per_line = W;
     static constexpr size_t image_size = H * bytes_per_line;
+    static constexpr size_t color_mask = 0xFF;
 
     static consteval auto gen_palette_consteval() {
         std::array<uint32_t, (1UL << bits_per_pixel)> pal{};
@@ -2126,6 +2130,7 @@ class format_32bit : public format {
     static constexpr size_t bits_per_pixel = 32;
     static constexpr size_t bytes_per_line = W * 4;
     static constexpr size_t image_size = H * bytes_per_line;
+    static constexpr size_t color_mask = 0xFF;
 
     static consteval auto gen_palette_consteval() {
         return format_8bit<1, 1, GR>::gen_palette_consteval();
@@ -4316,9 +4321,9 @@ class image {
             }
         } else {
             const auto rF = static_cast<float>(r);
-            const float Rl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 0);
-            const float Gl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 1);
-            const float Bl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 2);
+            const float Rl = format.quant.linear_palette().at((col & format.color_mask) * 3 + 0);
+            const float Gl = format.quant.linear_palette().at((col & format.color_mask) * 3 + 1);
+            const float Bl = format.quant.linear_palette().at((col & format.color_mask) * 3 + 2);
             if constexpr (!STROKE) {
                 auto plot_arc = [&, this]<typename I>(int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
                                                       int32_t y_off) {
@@ -4535,9 +4540,9 @@ class image {
 
         int32_t ch_data_off = static_cast<int32_t>(ch.y) * static_cast<int32_t>(FONT::glyph_bitmap_stride) +
                               static_cast<int32_t>(ch.x) / 2;
-        const float Rl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 0);
-        const float Gl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 1);
-        const float Bl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 2);
+        const float Rl = format.quant.linear_palette().at((col & format.color_mask) * 3 + 0);
+        const float Gl = format.quant.linear_palette().at((col & format.color_mask) * 3 + 1);
+        const float Bl = format.quant.linear_palette().at((col & format.color_mask) * 3 + 2);
 
         auto limit_box = [&](int32_t &xmin, int32_t &ymin, int32_t &xmax, int32_t &ymax) {
             ymin = std::max(ymin, int32_t{0});
