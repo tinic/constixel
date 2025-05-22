@@ -38,7 +38,7 @@ static void append_utf8(std::string& out, char32_t cp) {
 }
 
 int main() {
-    static constixel::image<constixel::format_8bit, 512, 2600> screen;
+    static constixel::image<constixel::format_8bit, 512, 2700> screen;
 
     int32_t y_pos = 8;
     int32_t x_pos = 8;
