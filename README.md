@@ -41,6 +41,7 @@ constixel is a single header minimalistic constexpr C++20 palette based 2D graph
 - Add graphical output to unit tests.
 - Programmatically render static graphical assets.
 - Help debug dynamic memory handling issues in complex C++ projects.
+- Add text overlays to RGBA8 buffers.
 - ...
 
 ## Requirements
