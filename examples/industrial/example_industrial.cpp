@@ -83,7 +83,7 @@ int main() {
         "FAULT: Motor 2 Overcurrent", color::WHITE);
 
     // 4) Write out PNG
-    std::ofstream fout("ui_demo_aa.png", std::ios::binary);
+    std::ofstream fout("example_industrial.png", std::ios::binary);
     img.png([&](char c){ fout.put(c); });
 
     return 0;

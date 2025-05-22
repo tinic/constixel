@@ -69,7 +69,7 @@ int main() {
     drawBtn(cx + spacing, "⏭", col_button_bg, col_button_fg);
 
     // ─── save out PNG ─────────────────────────────────────────────────────────
-    std::ofstream fout("watch_player_ui.png", std::ios::binary);
+    std::ofstream fout("example_watchui.png", std::ios::binary);
     img.png([&](char c){ fout.put(c); });
 
     return 0;
