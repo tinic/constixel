@@ -152,19 +152,50 @@ struct srgb {
 }
 
 #if defined(__ARM_NEON)
-static inline float32x4_t pow_1_over_2_4_neon(float32x4_t x) {
-    const float32x4_t two_point_four = vdupq_n_f32(2.4f);
-    float32x4_t y = vmulq_f32(x, vrsqrteq_f32(x));
-    for (int i = 0; i < 4; ++i) {
-        float32x4_t y2 = vmulq_f32(y, y);
-        float32x4_t y25 = vmulq_f32(y2, y);
-        y25 = vmulq_f32(y25, vrsqrteq_f32(y));
-        float32x4_t f = vsubq_f32(y25, x);
-        float32x4_t y15 = vmulq_f32(y, vrsqrteq_f32(y));
-        float32x4_t fp = vmulq_f32(two_point_four, y15);
-        y = vsubq_f32(y, vdivq_f32(f, fp));
-    }
-    return y;
+inline float32x4_t fast_log2_f32_neon(float32x4_t x) {
+    uint32x4_t xi = vreinterpretq_u32_f32(x);
+    float32x4_t y = vmulq_n_f32(vcvtq_f32_u32(xi), 1.1920928955078125e-7f); // 1/(1<<23)
+
+    uint32x4_t mantissa = vorrq_u32(vandq_u32(xi, vdupq_n_u32(0x007FFFFF)), vdupq_n_u32(0x3f000000));
+    float32x4_t xf = vreinterpretq_f32_u32(mantissa);
+
+    float32x4_t a = vdupq_n_f32(124.22551499f);
+    float32x4_t b = vdupq_n_f32(1.498030302f);
+    float32x4_t c = vdupq_n_f32(1.72587999f);
+    float32x4_t d = vdupq_n_f32(0.3520887068f);
+
+    return vsubq_f32(
+        vsubq_f32(y, vmlaq_f32(a, b, xf)),
+        vdivq_f32(c, vaddq_f32(d, xf))
+    );
+}
+
+inline float32x4_t fast_exp2_f32_neon(float32x4_t p) {
+    float32x4_t one = vdupq_n_f32(1.0f);
+    float32x4_t zero = vdupq_n_f32(0.0f);
+    float32x4_t neg126 = vdupq_n_f32(-126.0f);
+
+    float32x4_t offset = vbslq_f32(vcltq_f32(p, zero), one, zero);
+    float32x4_t clipp = vmaxq_f32(p, neg126);
+
+    int32x4_t ipart = vcvtq_s32_f32(clipp);
+    float32x4_t fpart = vsubq_f32(clipp, vcvtq_f32_s32(ipart));
+    float32x4_t z = vaddq_f32(fpart, offset);
+
+    float32x4_t a = vdupq_n_f32(121.2740575f);
+    float32x4_t b = vdupq_n_f32(27.7280233f);
+    float32x4_t c = vdupq_n_f32(4.84252568f);
+    float32x4_t d = vdupq_n_f32(1.49012907f);
+
+    float32x4_t t = vaddq_f32(clipp, vsubq_f32(a, vmulq_f32(d, z)));
+    t = vaddq_f32(t, vdivq_f32(b, vsubq_f32(c, z)));
+
+    int32x4_t res = vcvtq_s32_f32(vmulq_n_f32(t, float(1 << 23)));
+    return vreinterpretq_f32_s32(res);
+}
+
+inline float32x4_t pow_1_over_2_4_f32_neon(float32x4_t x) {
+    return fast_exp2_f32_neon(vmulq_n_f32(fast_log2_f32_neon(x), 1.0f / 2.4f));
 }
 
 static inline float32x4_t linear_to_srgb_approx_neon(float32x4_t l) {
@@ -174,7 +205,7 @@ static inline float32x4_t linear_to_srgb_approx_neon(float32x4_t l) {
     const float32x4_t b = vdupq_n_f32(-0.055f);
     uint32x4_t mask = vcltq_f32(l, cutoff);
     float32x4_t srgb = vmulq_f32(l, scale);
-    float32x4_t approx = vmlaq_f32(b, a, pow_1_over_2_4_neon(l));
+    float32x4_t approx = vmlaq_f32(b, a, pow_1_over_2_4_f32_neon(l));
     return vbslq_f32(mask, srgb, approx);
 }
 #endif  // #if defined(__ARM_NEON)
