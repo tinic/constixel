@@ -1,6 +1,6 @@
 #include "constixel.hpp"
 #include "fonts/ibmplexsans_bold_18_aa.hpp"
-#include "fonts/ibmplexsans_regular_12_aa.hpp"
+#include "fonts/ibmplexsans_bold_12_aa.hpp"
 #include <chrono>
 #include <ctime>
 #include <iomanip>
@@ -9,7 +9,7 @@
 
 using namespace constixel;
 using myfont = constixel::ibmplexsans_bold_18_aa;
-using smallfont = constixel::ibmplexsans_regular_12_aa;
+using smallfont = constixel::ibmplexsans_bold_12_aa;
 using UI = image<format_8bit, 1024, 768>;
 
 // Industrial HMI color scheme (inspired by classic industrial monitors)
