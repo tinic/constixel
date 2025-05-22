@@ -54,6 +54,7 @@ declare -A meta=(
   [file37:name]=Bescii-Mono.otf                                [file37:size]=8        [file37:flags]="--all-chars --monochrome --texture-size 256x192"
   [file38:name]=SMW_Whole-Pixel_Spacing.otf                    [file38:size]=8        [file38:flags]="--all-chars --monochrome"
   [file39:name]=SMW_Monospace.otf                              [file39:size]=8        [file39:flags]="--all-chars --monochrome"
+  [file40:name]=NotoSansSymbols2-Regular.ttf                   [file40:size]=32       [file40:flags]="--chars 0x2300-0x23ff,0x2190-0x21ff,0x25A0-0x25FF"
 )
 
 git submodule update --init --recursive

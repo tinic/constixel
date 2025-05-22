@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.21)
 
 set(CMAKE_CXX_STANDARD 23)
 
-set(EXAMPLES "text" "graph" "embedded" "specimen" "minimal" "drawingapi")
+set(EXAMPLES "text" "graph" "embedded" "specimen" "minimal" "drawingapi" "industrial" "watchui")
 
 project(examples)
 
@@ -20,5 +20,3 @@ foreach(EXAMPLE IN LISTS EXAMPLES)
         message("Unknown compiler!")
     endif()
 endforeach()
-
-
