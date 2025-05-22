@@ -151,6 +151,68 @@ struct srgb {
     return std::pow((s + 0.055f) / 1.055f, 2.4f);
 }
 
+#if defined(__ARM_NEON)
+static inline float32x4_t pow_1_over_2_4_neon(float32x4_t x) {
+    const float32x4_t two_point_four = vdupq_n_f32(2.4f);
+    float32x4_t y = vmulq_f32(x, vrsqrteq_f32(x));
+    for (int i = 0; i < 4; ++i) {
+        float32x4_t y2 = vmulq_f32(y, y);
+        float32x4_t y25 = vmulq_f32(y2, y);
+        y25 = vmulq_f32(y25, vrsqrteq_f32(y));
+        float32x4_t f = vsubq_f32(y25, x);
+        float32x4_t y15 = vmulq_f32(y, vrsqrteq_f32(y));
+        float32x4_t fp = vmulq_f32(two_point_four, y15);
+        y = vsubq_f32(y, vdivq_f32(f, fp));
+    }
+    return y;
+}
+
+static inline float32x4_t linear_to_srgb_approx_neon(float32x4_t l) {
+    const float32x4_t cutoff = vdupq_n_f32(0.0031308f);
+    const float32x4_t scale = vdupq_n_f32(12.92f);
+    const float32x4_t a = vdupq_n_f32(1.055f);
+    const float32x4_t b = vdupq_n_f32(-0.055f);
+    uint32x4_t mask = vcltq_f32(l, cutoff);
+    float32x4_t srgb = vmulq_f32(l, scale);
+    float32x4_t approx = vmlaq_f32(b, a, pow_1_over_2_4_neon(l));
+    return vbslq_f32(mask, srgb, approx);
+}
+#endif  // #if defined(__ARM_NEON)
+
+#if defined(__AVX2__)
+inline __m128 pow_1_over_2_4_sse(__m128 x) {
+    const __m128 two_point_four = _mm_set1_ps(2.4f);
+    __m128 y = _mm_mul_ps(x, _mm_rsqrt_ps(x));  // ≈ x^0.5
+
+    for (int i = 0; i < 4; ++i) {
+        __m128 y2 = _mm_mul_ps(y, y);
+        __m128 y25 = _mm_mul_ps(y2, y);          // y^3
+        y25 = _mm_mul_ps(y25, _mm_rsqrt_ps(y));  // ≈ y^2.5
+
+        __m128 f = _mm_sub_ps(y25, x);
+        __m128 y15 = _mm_mul_ps(y, _mm_rsqrt_ps(y));  // y^1.5
+        __m128 fp = _mm_mul_ps(two_point_four, y15);
+
+        y = _mm_sub_ps(y, _mm_div_ps(f, fp));
+    }
+    return y;
+}
+
+inline __m128 linear_to_srgb_approx_sse(__m128 l) {
+    const __m128 cutoff = _mm_set1_ps(0.0031308f);
+    const __m128 scale = _mm_set1_ps(12.92f);
+    const __m128 a = _mm_set1_ps(1.055f);
+    const __m128 b = _mm_set1_ps(-0.055f);
+
+    __m128 below = _mm_mul_ps(l, scale);
+    __m128 powed = pow_1_over_2_4_sse(l);
+    __m128 above = _mm_add_ps(_mm_mul_ps(a, powed), b);
+    __m128 mask = _mm_cmplt_ps(l, cutoff);
+
+    return _mm_or_ps(_mm_and_ps(mask, below), _mm_andnot_ps(mask, above));
+}
+#endif  // #if defined(__AVX2__)
+
 [[nodiscard]] static consteval srgb oklab_to_srgb_consteval(const oklab &oklab) {
     const double l = oklab.l;
     const double a = oklab.a;
@@ -187,6 +249,16 @@ static consteval auto gen_a2al_4bit_consteval() {
 }
 
 static constexpr const std::array<float, 16> a2al_4bit = gen_a2al_4bit_consteval();
+
+static consteval auto gen_a2al_8bit_consteval() {
+    std::array<float, 256> a2al{};
+    for (size_t c = 0; c < 256; c++) {
+        a2al[c] = srgb_to_linear(static_cast<float>(c) * (1.0f / 255.0f));
+    }
+    return a2al;
+}
+
+static constexpr const std::array<float, 256> a2al_8bit = gen_a2al_8bit_consteval();
 
 template <size_t S>
 class quantize {
@@ -2057,22 +2129,81 @@ class format_32bit : public format {
 
     static constexpr void compose(std::array<uint8_t, image_size> &data, size_t x, size_t y, float cola, float colr,
                                   float colg, float colb) {
+#if defined(__ARM_NEON)
+        if (!std::is_constant_evaluated()) {
+            const size_t off = y * bytes_per_line + x * 4;
+            uint8x8_t px = vld1_u8(&data[off]);
+            float32x4_t src = {colb, colg, colr, cola};
+            float32x4_t dst = {hidden::a2al_8bit[px[0]], hidden::a2al_8bit[px[1]], hidden::a2al_8bit[px[2]],
+                               hidden::a2al_8bit[px[3]]};
+            float32x4_t one = vdupq_n_f32(1.0f);
+            float32x4_t inv_srca = vsubq_f32(one, vdupq_n_f32(cola));
+            float32x4_t blended = vmlaq_f32(vmulq_n_f32(src, cola), dst, inv_srca);
+
+            float outa = cola + dst[3] * (1.0f - cola);
+            float32x4_t norm = vmulq_f32(blended, vdupq_n_f32(1.0f / outa));
+            float32x4_t final = hidden::linear_to_srgb_approx_neon(norm);
+
+            uint8x8_t out;
+            out[0] = static_cast<uint8_t>(final[0] * 255.0f);
+            out[1] = static_cast<uint8_t>(final[1] * 255.0f);
+            out[2] = static_cast<uint8_t>(final[2] * 255.0f);
+            out[3] = static_cast<uint8_t>(outa * 255.0f);
+
+            vst1_lane_u32(reinterpret_cast<uint32_t *>(&data[off]), vreinterpret_u32_u8(out), 0);
+            return;
+        }
+#endif  // #if defined(__ARM_NEON)
+#if defined(__AVX2__)
+        if (!std::is_constant_evaluated()) {
+            const size_t off = y * bytes_per_line + x * 4;
+
+            const float lb = hidden::a2al_8bit[data[off + 0]];
+            const float lg = hidden::a2al_8bit[data[off + 1]];
+            const float lr = hidden::a2al_8bit[data[off + 2]];
+            const float la = data[off + 3] * (1.0f / 255.0f);
+
+            const float as = cola + la * (1.0f - cola);
+            const float inv_cola = 1.0f - cola;
+
+            __m128 dst = _mm_set_ps(0.0f, lr, lg, lb);
+            __m128 src = _mm_set_ps(0.0f, colr, colg, colb);
+
+            __m128 blended = _mm_add_ps(_mm_mul_ps(src, _mm_set1_ps(cola)), _mm_mul_ps(dst, _mm_set1_ps(inv_cola)));
+
+            __m128 denom = _mm_set_ss(as);
+            __m128 inv_as = _mm_rcp_ss(denom);
+            inv_as = _mm_shuffle_ps(inv_as, inv_as, _MM_SHUFFLE(0, 0, 0, 0));
+
+            __m128 scaled = _mm_mul_ps(blended, inv_as);
+            __m128 srgb = linear_to_srgb_approx_sse(scaled);
+
+            alignas(16) float out[4];
+            _mm_store_ps(out, srgb);
+
+            data[off + 0] = static_cast<uint8_t>(out[0] * 255.0f);
+            data[off + 1] = static_cast<uint8_t>(out[1] * 255.0f);
+            data[off + 2] = static_cast<uint8_t>(out[2] * 255.0f);
+            data[off + 3] = static_cast<uint8_t>(as * 255.0f);
+            return;
+        }
+#endif  // #if defined(__AVX2__)
         const size_t off = y * bytes_per_line + x * 4;
 
-        const float lb = hidden::srgb_to_linear(static_cast<float>(data[off + 0]) * (1.0f / 255.0f));
-        const float lg = hidden::srgb_to_linear(static_cast<float>(data[off + 1]) * (1.0f / 255.0f));
-        const float lr = hidden::srgb_to_linear(static_cast<float>(data[off + 2]) * (1.0f / 255.0f));
+        const float lb = hidden::a2al_8bit[data[off + 0]];
+        const float lg = hidden::a2al_8bit[data[off + 1]];
+        const float lr = hidden::a2al_8bit[data[off + 2]];
         const float la = data[off + 3] * (1.0f / 255.0f);
 
-        const float rs = hidden::linear_to_srgb(colr * cola + lr * (1.0f - cola));
-        const float gs = hidden::linear_to_srgb(colg * cola + lg * (1.0f - cola));
-        const float bs = hidden::linear_to_srgb(colb * cola + lb * (1.0f - cola));
         const float as = cola + la * (1.0f - cola);
+        const float rs = hidden::linear_to_srgb(colr * cola + lr * (1.0f - cola)) * (1.0f / as);
+        const float gs = hidden::linear_to_srgb(colg * cola + lg * (1.0f - cola)) * (1.0f / as);
+        const float bs = hidden::linear_to_srgb(colb * cola + lb * (1.0f - cola)) * (1.0f / as);
 
-        data[off + 0] = static_cast<uint8_t>(std::clamp(bs * 255.0f, 0.0f, 255.0f));
-        data[off + 1] = static_cast<uint8_t>(std::clamp(gs * 255.0f, 0.0f, 255.0f));
-        data[off + 2] = static_cast<uint8_t>(std::clamp(rs * 255.0f, 0.0f, 255.0f));
-        data[off + 3] = static_cast<uint8_t>(std::clamp(as * 255.0f, 0.0f, 255.0f));
+        data[off + 0] = static_cast<uint8_t>(bs * 255.0f);
+        data[off + 1] = static_cast<uint8_t>(gs * 255.0f);
+        data[off + 2] = static_cast<uint8_t>(rs * 255.0f);
+        data[off + 3] = static_cast<uint8_t>(as * 255.0f);
     }
 
     static constexpr void RGBA_uint32(std::array<uint32_t, W * H> &dst, const std::array<uint8_t, image_size> &src) {
@@ -2333,7 +2464,7 @@ class image {
      * \return If true, the palette is grayscale. If false a colored palette is used.
      */
     [[nodiscard]] static constexpr bool grayscale() {
-        return T<W, H, GR>::grayscale;
+        return GR;
     }
 
     /**

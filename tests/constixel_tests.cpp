@@ -339,7 +339,11 @@ template <typename T>
 void draw_image_cut(const std::vector<uint8_t> &rgbaimage, int32_t w, int32_t h) {
     static T image;
     image.blit_RGBA(0, 0, w, h, rgbaimage.data(), w, h, w * 4);
-    image.sixel_to_cout();
+    if constexpr (std::is_same_v<T, constixel::image<constixel::format_32bit, T::width(), T::height(), T::grayscale()>>) {
+        image.png_to_iterm();
+    } else {
+        image.sixel_to_cout();
+    }
     printf("%d-bit %dpx %dpx cut\n", int(image.bit_depth()), int(image.width()), int(image.height()));
     separator();
 }
@@ -348,7 +352,11 @@ template <typename T>
 void draw_image_diffused(const std::vector<uint8_t> &rgbaimage, int32_t w, int32_t h) {
     static T image;
     image.blit_RGBA_diffused(0, 0, w, h, rgbaimage.data(), w, h, w * 4);
-    image.sixel_to_cout();
+    if constexpr (std::is_same_v<T, constixel::image<constixel::format_32bit, T::width(), T::height(), T::grayscale()>>) {
+        image.png_to_iterm();
+    } else {
+        image.sixel_to_cout();
+    }
     printf("%d-bit %dpx %dpx diffused\n", int(image.bit_depth()), int(image.width()), int(image.height()));
     separator();
 }
@@ -357,7 +365,11 @@ template <typename T>
 void draw_image_linear(const std::vector<uint8_t> &rgbaimage, int32_t w, int32_t h) {
     static T image;
     image.blit_RGBA_diffused_linear(0, 0, w, h, rgbaimage.data(), w, h, w * 4);
-    image.sixel_to_cout();
+    if constexpr (std::is_same_v<T, constixel::image<constixel::format_32bit, T::width(), T::height(), T::grayscale()>>) {
+        image.png_to_iterm();
+    } else {
+        image.sixel_to_cout();
+    }
     printf("%d-bit %dpx %dpx diffused linear\n", int(image.bit_depth()), int(image.width()), int(image.height()));
     separator();
 }
@@ -370,11 +382,11 @@ void draw_palette() {
             image.fill_rect(x, y, 1, 1, static_cast<uint8_t>(y * 16 + x));
         }
     }
-    std::string out;
-    image.template sixel<32>([&out](char ch) mutable {
-        out.push_back(ch);
-    });
-    puts(out.c_str());
+    if constexpr (std::is_same_v<T, constixel::image<constixel::format_32bit, T::width(), T::height(), T::grayscale()>>) {
+        image.png_to_iterm();
+    } else {
+        image.sixel_to_cout();
+    }
     printf("%d-bit %dpx %dpx\n", int(image.bit_depth()), int(image.width()), int(image.height()));
     separator();
 }
@@ -385,36 +397,48 @@ void draw_rgb() {
     auto rgb = std::make_unique<std::array<uint32_t, 65536>>();
     for (uint32_t y = 0; y < 256; y++) {
         for (uint32_t x = 0; x < 256; x++) {
-            rgb->data()[y * 256 + x] = ((255 - y) << 16) | (x << 0) | (y << 8);
+            rgb->data()[y * 256 + x] = 0xFF000000 | ((255 - y) << 16) | (x << 0) | (y << 8);
         }
     }
     {
         image.blit_RGBA(0, 0, 256, 256, reinterpret_cast<const uint8_t *>(rgb->data()), 256, 256, 256 * 4);
-        std::string out;
-        image.sixel([&out](char ch) mutable {
-            out.push_back(ch);
-        });
-        puts(out.c_str());
+        if constexpr (std::is_same_v<T, constixel::image<constixel::format_32bit, T::width(), T::height(), T::grayscale()>>) {
+            image.png_to_iterm();
+        } else {
+            std::string out;
+            image.sixel([&out](char ch) mutable {
+                out.push_back(ch);
+            });
+            puts(out.c_str());
+        }
         printf("%d-bit %dpx %dpx cut\n", int(image.bit_depth()), int(image.width()), int(image.height()));
         separator();
     }
     {
         image.blit_RGBA_diffused(0, 0, 256, 256, reinterpret_cast<const uint8_t *>(rgb->data()), 256, 256, 256 * 4);
-        std::string out;
-        image.sixel([&out](char ch) mutable {
-            out.push_back(ch);
-        });
-        puts(out.c_str());
+        if constexpr (std::is_same_v<T, constixel::image<constixel::format_32bit, T::width(), T::height(), T::grayscale()>>) {
+            image.png_to_iterm();
+        } else {
+            std::string out;
+            image.sixel([&out](char ch) mutable {
+                out.push_back(ch);
+            });
+            puts(out.c_str());
+        }
         printf("%d-bit %dpx %dpx diffused\n", int(image.bit_depth()), int(image.width()), int(image.height()));
         separator();
     }
     {
         image.blit_RGBA_diffused_linear(0, 0, 256, 256, reinterpret_cast<const uint8_t *>(rgb->data()), 256, 256, 256 * 4);
-        std::string out;
-        image.sixel([&out](char ch) mutable {
-            out.push_back(ch);
-        });
-        puts(out.c_str());
+        if constexpr (std::is_same_v<T, constixel::image<constixel::format_32bit, T::width(), T::height(), T::grayscale()>>) {
+            image.png_to_iterm();
+        } else {
+            std::string out;
+            image.sixel([&out](char ch) mutable {
+                out.push_back(ch);
+            });
+            puts(out.c_str());
+        }
         printf("%d-bit %dpx %dpx diffused linear\n", int(image.bit_depth()), int(image.width()), int(image.height()));
         separator();
     }
@@ -426,18 +450,22 @@ void round_trip() {
     auto rgb = std::make_unique<std::array<uint32_t, 65536>>();
     for (uint32_t y = 0; y < 256; y++) {
         for (uint32_t x = 0; x < 256; x++) {
-            rgb->data()[y * 256 + x] = ((255 - y) << 16) | (x << 0) | (y << 8);
+            rgb->data()[y * 256 + x] = 0xFF000000 | ((255 - y) << 16) | (x << 0) | (y << 8);
         }
     }
     image.blit_RGBA_diffused_linear(0, 0, 256, 256, reinterpret_cast<const uint8_t *>(rgb->data()), 256, 256, 256 * 4);
     auto rgba8 = std::make_unique<std::array<uint8_t, 256 * 256 * 4>>();
     image.RGBA_uint8(*rgba8);
     image.blit_RGBA(0, 0, 256, 256, rgba8->data(), 256, 256, 256 * 4);
-    std::string out;
-    image.sixel([&out](char ch) mutable {
-        out.push_back(ch);
-    });
-    puts(out.c_str());
+    if constexpr (std::is_same_v<T, constixel::image<constixel::format_32bit, T::width(), T::height(), T::grayscale()>>) {
+        image.png_to_iterm();
+    } else {
+        std::string out;
+        image.sixel([&out](char ch) mutable {
+            out.push_back(ch);
+        });
+        puts(out.c_str());
+    }
     printf("%d-bit %dpx %dpx round trip\n", int(image.bit_depth()), int(image.width()), int(image.height()));
     separator();
 }
@@ -450,33 +478,45 @@ void draw_functions() {
     for (int32_t c = 0; c < static_cast<int32_t>(I); c++) {
         image.fill_rect(16 + c * 37, c * 32, 128, 128, static_cast<uint8_t>(c));
         image.vt100_home();
-        std::string out;
-        image.sixel([&out](char ch) mutable {
-            out.push_back(ch);
-        });
-        puts(out.c_str());
+        if constexpr (std::is_same_v<T, constixel::image<constixel::format_32bit, T::width(), T::height(), T::grayscale()>>) {
+            image.png_to_iterm();
+        } else {
+            std::string out;
+            image.sixel([&out](char ch) mutable {
+                out.push_back(ch);
+            });
+            puts(out.c_str());
+        }
         printf("%d-bit %dpx %dpx fill_rect  \n", int(image.bit_depth()), int(image.width()), int(image.height()));
         separator();
     }
     for (int32_t c = 0; c < static_cast<int32_t>(I); c++) {
         image.draw_line(16, 16, 64 + c * 42, 700, static_cast<uint8_t>(c), static_cast<uint8_t>(c));
         image.vt100_home();
-        std::string out;
-        image.sixel([&out](char ch) mutable {
-            out.push_back(ch);
-        });
-        puts(out.c_str());
+        if constexpr (std::is_same_v<T, constixel::image<constixel::format_32bit, T::width(), T::height(), T::grayscale()>>) {
+            image.png_to_iterm();
+        } else {
+            std::string out;
+            image.sixel([&out](char ch) mutable {
+                out.push_back(ch);
+            });
+            puts(out.c_str());
+        }
         printf("%d-bit %dpx %dpx line       \n", int(image.bit_depth()), int(image.width()), int(image.height()));
         separator();
     }
     for (int32_t c = 0; c < static_cast<int32_t>(I); c++) {
         image.fill_circle(600, 384, 256 - c * 16, static_cast<uint8_t>(c));
         image.vt100_home();
-        std::string out;
-        image.sixel([&out](char ch) mutable {
-            out.push_back(ch);
-        });
-        puts(out.c_str());
+        if constexpr (std::is_same_v<T, constixel::image<constixel::format_32bit, T::width(), T::height(), T::grayscale()>>) {
+            image.png_to_iterm();
+        } else {
+            std::string out;
+            image.sixel([&out](char ch) mutable {
+                out.push_back(ch);
+            });
+            puts(out.c_str());
+        }
         printf("%d-bit %dpx %dpx circle     \n", int(image.bit_depth()), int(image.width()), int(image.height()));
         separator();
     }
@@ -490,33 +530,45 @@ void draw_functions_aa() {
     for (int32_t c = 0; c < static_cast<int32_t>(I); c++) {
         image.fill_rect(16 + c * 37, c * 32, 128, 128, static_cast<uint8_t>(c));
         image.vt100_home();
-        std::string out;
-        image.sixel([&out](char ch) mutable {
-            out.push_back(ch);
-        });
-        puts(out.c_str());
+        if constexpr (std::is_same_v<T, constixel::image<constixel::format_32bit, T::width(), T::height(), T::grayscale()>>) {
+            image.png_to_iterm();
+        } else {
+            std::string out;
+            image.sixel([&out](char ch) mutable {
+                out.push_back(ch);
+            });
+            puts(out.c_str());
+        }
         printf("%d-bit %dpx %dpx fill_rect aa \n", int(image.bit_depth()), int(image.width()), int(image.height()));
         separator();
     }
     for (int32_t c = 0; c < static_cast<int32_t>(I); c++) {
         image.draw_line_aa(16, 16, 64 + c * 42, 700, static_cast<uint8_t>(c));
         image.vt100_home();
-        std::string out;
-        image.sixel([&out](char ch) mutable {
-            out.push_back(ch);
-        });
-        puts(out.c_str());
+        if constexpr (std::is_same_v<T, constixel::image<constixel::format_32bit, T::width(), T::height(), T::grayscale()>>) {
+            image.png_to_iterm();
+        } else {
+            std::string out;
+            image.sixel([&out](char ch) mutable {
+                out.push_back(ch);
+            });
+            puts(out.c_str());
+        }
         printf("%d-bit %dpx %dpx line aa      \n", int(image.bit_depth()), int(image.width()), int(image.height()));
         separator();
     }
     for (int32_t c = 0; c < static_cast<int32_t>(I); c++) {
         image.fill_circle_aa(600, 384, 256 - c * 16, static_cast<uint8_t>(c));
         image.vt100_home();
-        std::string out;
-        image.sixel([&out](char ch) mutable {
-            out.push_back(ch);
-        });
-        puts(out.c_str());
+        if constexpr (std::is_same_v<T, constixel::image<constixel::format_32bit, T::width(), T::height(), T::grayscale()>>) {
+            image.png_to_iterm();
+        } else {
+            std::string out;
+            image.sixel([&out](char ch) mutable {
+                out.push_back(ch);
+            });
+            puts(out.c_str());
+        }
         printf("%d-bit %dpx %dpx circle aa    \n", int(image.bit_depth()), int(image.width()), int(image.height()));
         separator();
     }
@@ -591,6 +643,7 @@ int main() {
     draw_functions<constixel::image<constixel::format_2bit, 768, 768>, 32>();
     draw_functions<constixel::image<constixel::format_4bit, 768, 768>, 32>();
     draw_functions<constixel::image<constixel::format_8bit, 768, 768>, 32>();
+    draw_functions<constixel::image<constixel::format_32bit, 768, 768>, 32>();
 
     draw_functions<constixel::image<constixel::format_1bit, 768, 768, true>, 32>();
     draw_functions<constixel::image<constixel::format_2bit, 768, 768, true>, 32>();
@@ -601,6 +654,7 @@ int main() {
 #if MAINLINE_TESTS
     draw_functions_aa<constixel::image<constixel::format_4bit, 768, 768>, 32>();
     draw_functions_aa<constixel::image<constixel::format_8bit, 768, 768>, 32>();
+    draw_functions_aa<constixel::image<constixel::format_32bit, 768, 768>, 32>();
 
     draw_functions_aa<constixel::image<constixel::format_4bit, 768, 768, true>, 32>();
     draw_functions_aa<constixel::image<constixel::format_8bit, 768, 768, true>, 32>();
@@ -612,6 +666,7 @@ int main() {
     draw_palette<constixel::image<constixel::format_2bit, 16, 16>>();
     draw_palette<constixel::image<constixel::format_4bit, 16, 16>>();
     draw_palette<constixel::image<constixel::format_8bit, 16, 16>>();
+    draw_palette<constixel::image<constixel::format_32bit, 16, 16>>();
 
     draw_palette<constixel::image<constixel::format_1bit, 16, 16, true>>();
     draw_palette<constixel::image<constixel::format_2bit, 16, 16, true>>();
@@ -633,16 +688,19 @@ int main() {
         draw_image_cut<constixel::image<constixel::format_2bit, ow, oh>>(rgbaimage, int32_t(w), int32_t(h));
         draw_image_cut<constixel::image<constixel::format_4bit, ow, oh>>(rgbaimage, int32_t(w), int32_t(h));
         draw_image_cut<constixel::image<constixel::format_8bit, ow, oh>>(rgbaimage, int32_t(w), int32_t(h));
+        draw_image_cut<constixel::image<constixel::format_32bit, ow, oh>>(rgbaimage, int32_t(w), int32_t(h));
 
         draw_image_diffused<constixel::image<constixel::format_1bit, ow, oh>>(rgbaimage, int32_t(w), int32_t(h));
         draw_image_diffused<constixel::image<constixel::format_2bit, ow, oh>>(rgbaimage, int32_t(w), int32_t(h));
         draw_image_diffused<constixel::image<constixel::format_4bit, ow, oh>>(rgbaimage, int32_t(w), int32_t(h));
         draw_image_diffused<constixel::image<constixel::format_8bit, ow, oh>>(rgbaimage, int32_t(w), int32_t(h));
+        draw_image_diffused<constixel::image<constixel::format_32bit, ow, oh>>(rgbaimage, int32_t(w), int32_t(h));
 
         draw_image_linear<constixel::image<constixel::format_1bit, ow, oh>>(rgbaimage, int32_t(w), int32_t(h));
         draw_image_linear<constixel::image<constixel::format_2bit, ow, oh>>(rgbaimage, int32_t(w), int32_t(h));
         draw_image_linear<constixel::image<constixel::format_4bit, ow, oh>>(rgbaimage, int32_t(w), int32_t(h));
         draw_image_linear<constixel::image<constixel::format_8bit, ow, oh>>(rgbaimage, int32_t(w), int32_t(h));
+        draw_image_linear<constixel::image<constixel::format_32bit, ow, oh>>(rgbaimage, int32_t(w), int32_t(h));
 
         draw_image_linear<constixel::image<constixel::format_1bit, ow, oh, true>>(rgbaimage, int32_t(w), int32_t(h));
         draw_image_linear<constixel::image<constixel::format_2bit, ow, oh, true>>(rgbaimage, int32_t(w), int32_t(h));
@@ -656,6 +714,7 @@ int main() {
     draw_rgb<constixel::image<constixel::format_2bit, 256, 256>>();
     draw_rgb<constixel::image<constixel::format_4bit, 256, 256>>();
     draw_rgb<constixel::image<constixel::format_8bit, 256, 256>>();
+    draw_rgb<constixel::image<constixel::format_32bit, 256, 256>>();
 
     draw_rgb<constixel::image<constixel::format_1bit, 256, 256, true>>();
     draw_rgb<constixel::image<constixel::format_2bit, 256, 256, true>>();
@@ -668,6 +727,7 @@ int main() {
     round_trip<constixel::image<constixel::format_2bit, 256, 256>>();
     round_trip<constixel::image<constixel::format_4bit, 256, 256>>();
     round_trip<constixel::image<constixel::format_8bit, 256, 256>>();
+    round_trip<constixel::image<constixel::format_32bit, 256, 256>>();
 #endif  // #if 1
 
 #if MAINLINE_TESTS
