@@ -2658,7 +2658,7 @@ struct draw_line {
     int32_t x1 = 0;              /**< Second X coordinate in pixels. */
     int32_t y1 = 0;              /**< Second Y coordinate in pixels. */
     uint32_t col = color::WHITE; /**< Color palette index to use. */
-    int32_t sw = 1;              /**< Width of the stroke in pixels. */
+    float sw = 1;                /**< Width of the stroke in pixels. */
 };
 
 /**
@@ -2943,18 +2943,14 @@ class image {
                 }
             }
         } else if (stroke_width > 1) {
-            stroke_width = std::min(stroke_width, int32_t{16});
-            for (; x0 <= x1; x0++) {
-                if (steep) {
-                    fill_circle(y0, x0, (stroke_width + 1) / 2, col);
-                } else {
-                    fill_circle(x0, y0, (stroke_width + 1) / 2, col);
-                }
-                err -= dy;
-                if (err < 0) {
-                    y0 += ystep;
-                    err += dx;
-                }
+            const int32_t max_coord_val = std::max({abs(x0), abs(y0), abs(x1), abs(y1)});
+            const int32_t max_stroke =
+                std::min(stroke_width, std::max(static_cast<int32_t>(W), static_cast<int32_t>(H)));
+
+            if (max_coord_val < 16384 && max_stroke < 512) {
+                line_thick_int<false>(x0, y0, x1, y1, col, max_stroke);
+            } else {
+                line_thick_int<true>(x0, y0, x1, y1, col, max_stroke);
             }
         }
     }
@@ -2969,15 +2965,15 @@ class image {
      * \param d \ref draw_line initializer struct
      */
     constexpr void draw_line(const struct draw_line &d) {
-        draw_line(d.x0, d.y0, d.x1, d.y1, d.col, d.sw);
+        draw_line(d.x0, d.y0, d.x1, d.y1, d.col, static_cast<int32_t>(d.sw));
     }
 
     /**
-     * \brief Draw a 1-pixel wide antialiased line with the specified color. Only format_8bit targets are supported.
+     * \brief Draw an antialiased line with variable stroke width. Only format_8bit targets are supported.
      * Example:
      *
      * \code{.cpp}
-     * image.draw_line_aa(0, 0, 200, 100, constixel::color::WHITE);
+     * image.draw_line_aa(0, 0, 200, 100, constixel::color::WHITE, 3.0f);
      * \endcode
      *
      * \param x0 Starting X-coordinate in pixels.
@@ -2985,96 +2981,166 @@ class image {
      * \param x1 Ending X-coordinate in pixels.
      * \param y1 Ending Y-coordinate in pixels.
      * \param col Color palette index to use.
+     * \param stroke_width Width of the line in pixels (can be fractional).
      */
-    constexpr void draw_line_aa(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col) {
+    constexpr void draw_line_aa(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, float stroke_width = 1.0f) {
         auto minmax_check = std::minmax({x0, y0, x1, y1});
         if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
             return;
         }
 
-        if (!clip_line(x0, y0, x1, y1, 0, 0, W, H)) {
+        if (stroke_width <= 1.0f) {
+            if (!clip_line(x0, y0, x1, y1, 0, 0, W, H)) {
+                return;
+            }
+
+            bool steep = abs(y1 - y0) > abs(x1 - x0);
+            if (steep) {
+                std::swap(x0, y0);
+                std::swap(x1, y1);
+            }
+            if (x0 > x1) {
+                std::swap(x0, x1);
+                std::swap(y0, y1);
+            }
+
+            const float Rl = format.quant.linear_palette().at((col & format.color_mask) * 3 + 0);
+            const float Gl = format.quant.linear_palette().at((col & format.color_mask) * 3 + 1);
+            const float Bl = format.quant.linear_palette().at((col & format.color_mask) * 3 + 2);
+
+            const auto dx = static_cast<float>(x1 - x0);
+            const auto dy = static_cast<float>(y1 - y0);
+            const float gradient = dx == 0.0f ? 1.0f : dy / dx;
+
+            auto color_compose = [&](int32_t x, int32_t y, float a) {
+                if (a < hidden::epsilon_low) {
+                    return;
+                }
+                if (a >= hidden::epsilon_high) {
+                    plot(x, y, col);
+                } else {
+                    compose(x, y, a, Rl, Gl, Bl);
+                }
+            };
+
+            auto ipart = [](float x) {
+                return std::floor(x);
+            };
+            auto fpart = [](float x) {
+                return x - std::floor(x);
+            };
+            auto rfpart = [&](float x) {
+                return 1.0f - fpart(x);
+            };
+
+            // first endpoint
+            auto xend = static_cast<float>(x0);
+            float yend = static_cast<float>(y0) + gradient * (xend - static_cast<float>(x0));
+            float xgap = rfpart(static_cast<float>(x0) + 0.5f);
+            const auto xpxl1 = static_cast<int32_t>(xend);
+            const auto ypxl1 = static_cast<int32_t>(ipart(yend));
+            if (steep) {
+                color_compose(ypxl1, xpxl1, rfpart(yend) * xgap);
+                color_compose(ypxl1 + 1, xpxl1, fpart(yend) * xgap);
+            } else {
+                color_compose(xpxl1, ypxl1, rfpart(yend) * xgap);
+                color_compose(xpxl1, ypxl1 + 1, fpart(yend) * xgap);
+            }
+            float intery = yend + gradient;
+
+            xend = static_cast<float>(x1);
+            yend = static_cast<float>(y1) + gradient * (xend - static_cast<float>(x1));
+            xgap = fpart(static_cast<float>(x1) + 0.5f);
+            const auto xpxl2 = static_cast<int32_t>(xend);
+            const auto ypxl2 = static_cast<int32_t>(ipart(yend));
+            if (steep) {
+                color_compose(ypxl2, xpxl2, rfpart(yend) * xgap);
+                color_compose(ypxl2 + 1, xpxl2, fpart(yend) * xgap);
+            } else {
+                color_compose(xpxl2, ypxl2, rfpart(yend) * xgap);
+                color_compose(xpxl2, ypxl2 + 1, fpart(yend) * xgap);
+            }
+
+            for (int32_t x = xpxl1 + 1; x < xpxl2; ++x) {
+                auto y = static_cast<int32_t>(ipart(intery));
+                if (steep) {
+                    color_compose(y, x, rfpart(intery));
+                    color_compose(y + 1, x, fpart(intery));
+                } else {
+                    color_compose(x, y, rfpart(intery));
+                    color_compose(x, y + 1, fpart(intery));
+                }
+                intery += gradient;
+            }
             return;
         }
 
-        bool steep = abs(y1 - y0) > abs(x1 - x0);
-        if (steep) {
-            std::swap(x0, y0);
-            std::swap(x1, y1);
-        }
-        if (x0 > x1) {
-            std::swap(x0, x1);
-            std::swap(y0, y1);
+        const float half_width = stroke_width * 0.5f;
+
+        const int32_t margin = static_cast<int32_t>(std::ceil(half_width + 1.0f));
+        const int32_t min_x = std::max(0, std::min({x0, x1}) - margin);
+        const int32_t max_x = std::min(static_cast<int32_t>(W) - 1, std::max({x0, x1}) + margin);
+        const int32_t min_y = std::max(0, std::min({y0, y1}) - margin);
+        const int32_t max_y = std::min(static_cast<int32_t>(H) - 1, std::max({y0, y1}) + margin);
+
+        if (min_x > max_x || min_y > max_y) {
+            return;
         }
 
         const float Rl = format.quant.linear_palette().at((col & format.color_mask) * 3 + 0);
         const float Gl = format.quant.linear_palette().at((col & format.color_mask) * 3 + 1);
         const float Bl = format.quant.linear_palette().at((col & format.color_mask) * 3 + 2);
 
-        const auto dx = static_cast<float>(x1 - x0);
-        const auto dy = static_cast<float>(y1 - y0);
-        const float gradient = dx == 0.0f ? 1.0f : dy / dx;
+        const float dx = static_cast<float>(x1 - x0);
+        const float dy = static_cast<float>(y1 - y0);
+        const float line_length_sq = dx * dx + dy * dy;
 
-        auto color_compose = [&](int32_t x, int32_t y, float a) {
-            if (a < hidden::epsilon_low) {
-                return;
+        if (line_length_sq < hidden::epsilon_low) {
+            const float radius = half_width;
+            const int32_t r_ceil = static_cast<int32_t>(std::ceil(radius));
+            for (int32_t py = y0 - r_ceil; py <= y0 + r_ceil; py++) {
+                for (int32_t px = x0 - r_ceil; px <= x0 + r_ceil; px++) {
+                    if (px >= 0 && px < static_cast<int32_t>(W) && py >= 0 && py < static_cast<int32_t>(H)) {
+                        const float dist =
+                            hidden::fast_sqrtf(static_cast<float>((px - x0) * (px - x0) + (py - y0) * (py - y0)));
+                        const float coverage = std::max(0.0f, std::min(1.0f, radius + 0.5f - dist));
+                        if (coverage > hidden::epsilon_low) {
+                            if (coverage >= hidden::epsilon_high) {
+                                plot(px, py, col);
+                            } else {
+                                compose(px, py, coverage, Rl, Gl, Bl);
+                            }
+                        }
+                    }
+                }
             }
-            if (a >= hidden::epsilon_high) {
-                plot(x, y, col);
-            } else {
-                compose(x, y, a, Rl, Gl, Bl);
-            }
-        };
-
-        auto ipart = [](float x) {
-            return std::floor(x);
-        };
-        auto fpart = [](float x) {
-            return x - std::floor(x);
-        };
-        auto rfpart = [&](float x) {
-            return 1.0f - fpart(x);
-        };
-
-        // first endpoint
-        auto xend = static_cast<float>(x0);
-        float yend = static_cast<float>(y0) + gradient * (xend - static_cast<float>(x0));
-        float xgap = rfpart(static_cast<float>(x0) + 0.5f);
-        const auto xpxl1 = static_cast<int32_t>(xend);
-        const auto ypxl1 = static_cast<int32_t>(ipart(yend));
-        if (steep) {
-            color_compose(ypxl1, xpxl1, rfpart(yend) * xgap);
-            color_compose(ypxl1 + 1, xpxl1, fpart(yend) * xgap);
-        } else {
-            color_compose(xpxl1, ypxl1, rfpart(yend) * xgap);
-            color_compose(xpxl1, ypxl1 + 1, fpart(yend) * xgap);
-        }
-        float intery = yend + gradient;
-
-        // second endpoint
-        xend = static_cast<float>(x1);
-        yend = static_cast<float>(y1) + gradient * (xend - static_cast<float>(x1));
-        xgap = fpart(static_cast<float>(x1) + 0.5f);
-        const auto xpxl2 = static_cast<int32_t>(xend);
-        const auto ypxl2 = static_cast<int32_t>(ipart(yend));
-        if (steep) {
-            color_compose(ypxl2, xpxl2, rfpart(yend) * xgap);
-            color_compose(ypxl2 + 1, xpxl2, fpart(yend) * xgap);
-        } else {
-            color_compose(xpxl2, ypxl2, rfpart(yend) * xgap);
-            color_compose(xpxl2, ypxl2 + 1, fpart(yend) * xgap);
+            return;
         }
 
-        // main loop
-        for (int32_t x = xpxl1 + 1; x < xpxl2; ++x) {
-            auto y = static_cast<int32_t>(ipart(intery));
-            if (steep) {
-                color_compose(y, x, rfpart(intery));
-                color_compose(y + 1, x, fpart(intery));
-            } else {
-                color_compose(x, y, rfpart(intery));
-                color_compose(x, y + 1, fpart(intery));
+        for (int32_t py = min_y; py <= max_y; py++) {
+            for (int32_t px = min_x; px <= max_x; px++) {
+                const float px_dx = static_cast<float>(px - x0);
+                const float px_dy = static_cast<float>(py - y0);
+
+                const float t = std::max(0.0f, std::min(1.0f, (px_dx * dx + px_dy * dy) / line_length_sq));
+
+                const float closest_x = static_cast<float>(x0) + t * dx;
+                const float closest_y = static_cast<float>(y0) + t * dy;
+
+                const float dist_x = static_cast<float>(px) - closest_x;
+                const float dist_y = static_cast<float>(py) - closest_y;
+                const float distance = hidden::fast_sqrtf(dist_x * dist_x + dist_y * dist_y);
+
+                const float coverage = std::max(0.0f, std::min(1.0f, half_width + 0.5f - distance));
+
+                if (coverage > hidden::epsilon_low) {
+                    if (coverage >= hidden::epsilon_high) {
+                        plot(px, py, col);
+                    } else {
+                        compose(px, py, coverage, Rl, Gl, Bl);
+                    }
+                }
             }
-            intery += gradient;
         }
     }
 
@@ -3083,13 +3149,13 @@ class image {
      * Example:
      *
      * \code{.cpp}
-     * image.draw_line_aa({.x0=0, .y0=0, .x1=200, .y1=100, .col=color::WHITE});
+     * image.draw_line_aa({.x0=0, .y0=0, .x1=200, .y1=100, .col=color::WHITE, .sw=2.5f});
      * \endcode
      *
      * \param d \ref draw_line initializer struct
      */
     constexpr void draw_line_aa(const struct draw_line &d) {
-        draw_line_aa(d.x0, d.y0, d.x1, d.y1, d.col);
+        draw_line_aa(d.x0, d.y0, d.x1, d.y1, d.col, d.sw);
     }
 
     /**
@@ -4637,6 +4703,123 @@ class image {
                     }
                 };
                 for_each_quadrant.template operator()<float>(plot_arc);
+            }
+        }
+    }
+
+    /**
+     * @private
+     */
+    template <bool USE_64BIT>
+    constexpr void line_thick_int(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, int32_t stroke_width) {
+        const int32_t half_width = stroke_width / 2;
+
+        if constexpr (USE_64BIT) {
+            int64_t min_coord_64 = std::min(static_cast<int64_t>(x0), static_cast<int64_t>(x1));
+            int64_t max_coord_64 = std::max(static_cast<int64_t>(x0), static_cast<int64_t>(x1));
+            int64_t min_y_coord_64 = std::min(static_cast<int64_t>(y0), static_cast<int64_t>(y1));
+            int64_t max_y_coord_64 = std::max(static_cast<int64_t>(y0), static_cast<int64_t>(y1));
+
+            const int64_t margin = static_cast<int64_t>(half_width) + 1;
+            const int32_t min_x = static_cast<int32_t>(
+                std::max(static_cast<int64_t>(0), std::min(static_cast<int64_t>(W) - 1, min_coord_64 - margin)));
+            const int32_t max_x = static_cast<int32_t>(
+                std::max(static_cast<int64_t>(0), std::min(static_cast<int64_t>(W) - 1, max_coord_64 + margin)));
+            const int32_t min_y = static_cast<int32_t>(
+                std::max(static_cast<int64_t>(0), std::min(static_cast<int64_t>(H) - 1, min_y_coord_64 - margin)));
+            const int32_t max_y = static_cast<int32_t>(
+                std::max(static_cast<int64_t>(0), std::min(static_cast<int64_t>(H) - 1, max_y_coord_64 + margin)));
+
+            if (min_x > max_x || min_y > max_y) {
+                return;
+            }
+
+            const int64_t bbox_area = static_cast<int64_t>(max_x - min_x + 1) * (max_y - min_y + 1);
+            const int64_t max_reasonable_area = static_cast<int64_t>(W) * H * 4;
+            if (bbox_area > max_reasonable_area) {
+                return;
+            }
+
+            const int64_t line_dx_64 = static_cast<int64_t>(x1) - x0;
+            const int64_t line_dy_64 = static_cast<int64_t>(y1) - y0;
+            const int64_t line_length_sq = line_dx_64 * line_dx_64 + line_dy_64 * line_dy_64;
+
+            if (line_length_sq == 0) {
+                if (x0 >= 0 && x0 < static_cast<int32_t>(W) && y0 >= 0 && y0 < static_cast<int32_t>(H)) {
+                    fill_circle(x0, y0, half_width, col);
+                }
+                return;
+            }
+
+            for (int32_t py = min_y; py <= max_y; py++) {
+                for (int32_t px = min_x; px <= max_x; px++) {
+                    const int64_t px_dx_64 = static_cast<int64_t>(px) - x0;
+                    const int64_t px_dy_64 = static_cast<int64_t>(py) - y0;
+
+                    const int64_t dot_product = px_dx_64 * line_dx_64 + px_dy_64 * line_dy_64;
+                    const int64_t t_scaled = std::max(static_cast<int64_t>(0), std::min(line_length_sq, dot_product));
+
+                    const int64_t closest_x_64 = static_cast<int64_t>(x0) + (t_scaled * line_dx_64) / line_length_sq;
+                    const int64_t closest_y_64 = static_cast<int64_t>(y0) + (t_scaled * line_dy_64) / line_length_sq;
+
+                    const int64_t dist_x_64 = static_cast<int64_t>(px) - closest_x_64;
+                    const int64_t dist_y_64 = static_cast<int64_t>(py) - closest_y_64;
+                    const int64_t distance_sq_64 = dist_x_64 * dist_x_64 + dist_y_64 * dist_y_64;
+
+                    if (distance_sq_64 > static_cast<int64_t>(INT32_MAX)) {
+                        continue;
+                    }
+
+                    const int32_t distance =
+                        static_cast<int32_t>(hidden::fast_sqrtf(static_cast<float>(distance_sq_64)));
+
+                    if (distance <= half_width) {
+                        plot(px, py, col);
+                    }
+                }
+            }
+        } else {
+            const int32_t margin = half_width + 1;
+            const int32_t min_x = std::max(0, std::min({x0, x1}) - margin);
+            const int32_t max_x = std::min(static_cast<int32_t>(W) - 1, std::max({x0, x1}) + margin);
+            const int32_t min_y = std::max(0, std::min({y0, y1}) - margin);
+            const int32_t max_y = std::min(static_cast<int32_t>(H) - 1, std::max({y0, y1}) + margin);
+
+            if (min_x > max_x || min_y > max_y) {
+                return;
+            }
+
+            const int32_t line_dx = x1 - x0;
+            const int32_t line_dy = y1 - y0;
+            const int32_t line_length_sq = line_dx * line_dx + line_dy * line_dy;
+
+            if (line_length_sq == 0) {
+                if (x0 >= 0 && x0 < static_cast<int32_t>(W) && y0 >= 0 && y0 < static_cast<int32_t>(H)) {
+                    fill_circle(x0, y0, half_width, col);
+                }
+                return;
+            }
+
+            for (int32_t py = min_y; py <= max_y; py++) {
+                for (int32_t px = min_x; px <= max_x; px++) {
+                    const int32_t px_dx = px - x0;
+                    const int32_t px_dy = py - y0;
+
+                    const int32_t dot_product = px_dx * line_dx + px_dy * line_dy;
+                    const int32_t t_scaled = std::max(0, std::min(line_length_sq, dot_product));
+
+                    const int32_t closest_x = x0 + (t_scaled * line_dx) / line_length_sq;
+                    const int32_t closest_y = y0 + (t_scaled * line_dy) / line_length_sq;
+
+                    const int32_t dist_x = px - closest_x;
+                    const int32_t dist_y = py - closest_y;
+                    const int32_t distance_sq = dist_x * dist_x + dist_y * dist_y;
+                    const int32_t distance = static_cast<int32_t>(hidden::fast_sqrtf(static_cast<float>(distance_sq)));
+
+                    if (distance <= half_width) {
+                        plot(px, py, col);
+                    }
+                }
             }
         }
     }
