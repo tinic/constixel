@@ -7,6 +7,7 @@ var hierarchy =
     [ "constixel::draw_string", "structconstixel_1_1draw__string.html", null ],
     [ "format", null, [
       [ "constixel::format_1bit< W, H, GRAYSCALE, USE_SPAN >", "classconstixel_1_1format__1bit.html", null ],
+      [ "constixel::format_24bit< W, H, GRAYSCALE, USE_SPAN >", "classconstixel_1_1format__24bit.html", null ],
       [ "constixel::format_2bit< W, H, GRAYSCALE, USE_SPAN >", "classconstixel_1_1format__2bit.html", null ],
       [ "constixel::format_32bit< W, H, GRAYSCALE, USE_SPAN >", "classconstixel_1_1format__32bit.html", null ],
       [ "constixel::format_4bit< W, H, GRAYSCALE, USE_SPAN >", "classconstixel_1_1format__4bit.html", null ],

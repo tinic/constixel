@@ -7,6 +7,7 @@ var annotated_dup =
       [ "draw_round_rect", "structconstixel_1_1draw__round__rect.html", "structconstixel_1_1draw__round__rect" ],
       [ "draw_string", "structconstixel_1_1draw__string.html", "structconstixel_1_1draw__string" ],
       [ "format_1bit", "classconstixel_1_1format__1bit.html", null ],
+      [ "format_24bit", "classconstixel_1_1format__24bit.html", null ],
       [ "format_2bit", "classconstixel_1_1format__2bit.html", null ],
       [ "format_32bit", "classconstixel_1_1format__32bit.html", null ],
       [ "format_4bit", "classconstixel_1_1format__4bit.html", null ],

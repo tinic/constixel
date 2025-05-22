@@ -10,8 +10,9 @@ var searchData=
   ['flip_5fhv_7',['flip_hv',['../classconstixel_1_1image.html#a6334c76a690e5e3d4c4f70336f0987f7',1,'constixel::image']]],
   ['flip_5fv_8',['flip_v',['../classconstixel_1_1image.html#a5dda05afda2d2e544d93e40486dbae60',1,'constixel::image']]],
   ['format_5f1bit_9',['format_1bit',['../classconstixel_1_1format__1bit.html',1,'constixel']]],
-  ['format_5f2bit_10',['format_2bit',['../classconstixel_1_1format__2bit.html',1,'constixel']]],
-  ['format_5f32bit_11',['format_32bit',['../classconstixel_1_1format__32bit.html',1,'constixel']]],
-  ['format_5f4bit_12',['format_4bit',['../classconstixel_1_1format__4bit.html',1,'constixel']]],
-  ['format_5f8bit_13',['format_8bit',['../classconstixel_1_1format__8bit.html',1,'constixel']]]
+  ['format_5f24bit_10',['format_24bit',['../classconstixel_1_1format__24bit.html',1,'constixel']]],
+  ['format_5f2bit_11',['format_2bit',['../classconstixel_1_1format__2bit.html',1,'constixel']]],
+  ['format_5f32bit_12',['format_32bit',['../classconstixel_1_1format__32bit.html',1,'constixel']]],
+  ['format_5f4bit_13',['format_4bit',['../classconstixel_1_1format__4bit.html',1,'constixel']]],
+  ['format_5f8bit_14',['format_8bit',['../classconstixel_1_1format__8bit.html',1,'constixel']]]
 ];
