@@ -947,7 +947,7 @@ class format {
         std::forward<F>(char_out)(';');
         for (size_t c = 0; c < 3; c++) {
             sixel_number(std::forward<F>(char_out),
-                         static_cast<uint16_t>((((col >> (8 * (2 - c))) & 0xFF) * 100) / 255));
+                         static_cast<uint16_t>((((col >> (8 * c)) & 0xFF) * 100) / 255));
             std::forward<F>(char_out)(';');
         }
     }
