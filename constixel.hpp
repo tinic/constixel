@@ -30,6 +30,7 @@ SOFTWARE.
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <iostream>
 #include <limits>
 #include <string>
@@ -2058,9 +2059,9 @@ class format_32bit : public format {
                                   float colg, float colb) {
         const size_t off = y * bytes_per_line + x * 4;
 
-        const float lr = hidden::srgb_to_linear(static_cast<float>(data[off + 0]) * (1.0f / 255.0f));
+        const float lb = hidden::srgb_to_linear(static_cast<float>(data[off + 0]) * (1.0f / 255.0f));
         const float lg = hidden::srgb_to_linear(static_cast<float>(data[off + 1]) * (1.0f / 255.0f));
-        const float lb = hidden::srgb_to_linear(static_cast<float>(data[off + 2]) * (1.0f / 255.0f));
+        const float lr = hidden::srgb_to_linear(static_cast<float>(data[off + 2]) * (1.0f / 255.0f));
         const float la = data[off + 3] * (1.0f / 255.0f);
 
         const float rs = hidden::linear_to_srgb(colr * cola + lr * (1.0f - cola));
@@ -2068,9 +2069,9 @@ class format_32bit : public format {
         const float bs = hidden::linear_to_srgb(colb * cola + lb * (1.0f - cola));
         const float as = cola + la * (1.0f - cola);
 
-        data[off + 0] = static_cast<uint8_t>(std::clamp(rs * 255.0f, 0.0f, 255.0f));
+        data[off + 0] = static_cast<uint8_t>(std::clamp(bs * 255.0f, 0.0f, 255.0f));
         data[off + 1] = static_cast<uint8_t>(std::clamp(gs * 255.0f, 0.0f, 255.0f));
-        data[off + 2] = static_cast<uint8_t>(std::clamp(bs * 255.0f, 0.0f, 255.0f));
+        data[off + 2] = static_cast<uint8_t>(std::clamp(rs * 255.0f, 0.0f, 255.0f));
         data[off + 3] = static_cast<uint8_t>(std::clamp(as * 255.0f, 0.0f, 255.0f));
     }
 
@@ -2108,9 +2109,9 @@ class format_32bit : public format {
         auto const r_w = static_cast<size_t>(r.w);
         auto const r_h = static_cast<size_t>(r.h);
         const uint8_t *src = ptr;
-        uint8_t *dst = data.data() + r.y * bytes_per_line + r_x * 4;
+        uint8_t *dst = data.data() + r_y * bytes_per_line + r_x * 4;
         for (size_t y = 0; y < r_h; y++) {
-            memcpy(dst, src, r_w * 4);
+            std::memcpy(dst, src, r_w * 4);
             dst += bytes_per_line;
             src += stride;
         }
