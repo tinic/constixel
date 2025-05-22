@@ -8,7 +8,7 @@ using UI = image<format_32bit, 640, 480>;
 using myfont = ibmplexsans_bold_32_aa;
 
 int main() {
-    UI img;
+    static UI img;
     img.clear();
 
     // Shortcut to raw buffer

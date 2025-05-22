@@ -37,7 +37,7 @@ std::string nowString() {
 }
 
 int main() {
-    UI img;
+    static UI img;
     img.clear();
 
     // 1) Top banner
