@@ -285,12 +285,18 @@ class quantize {
 
     explicit consteval quantize(const std::array<uint32_t, palette_size> &palette) : pal(palette) {
         for (size_t i = 0; i < pal.size(); i++) {
+            pal[i] = ( pal[i] & 0xFF000000 ) |
+                     ( pal[i] & 0x0000FF00 ) |
+                     ( ( pal[i] >> 16 ) & 0x000000FF ) |
+                     ( ( pal[i] << 16 ) & 0x00FF0000 );
+        }
+        for (size_t i = 0; i < pal.size(); i++) {
             linearpal.at(i * 3 + 0) =
-                hidden::srgb_to_linear(static_cast<float>((pal[i] >> 16) & 0xFF) * (1.0f / 255.0f));
+                hidden::srgb_to_linear(static_cast<float>((pal[i] >> 0) & 0xFF) * (1.0f / 255.0f));
             linearpal.at(i * 3 + 1) =
                 hidden::srgb_to_linear(static_cast<float>((pal[i] >> 8) & 0xFF) * (1.0f / 255.0f));
             linearpal.at(i * 3 + 2) =
-                hidden::srgb_to_linear(static_cast<float>((pal[i] >> 0) & 0xFF) * (1.0f / 255.0f));
+                hidden::srgb_to_linear(static_cast<float>((pal[i] >> 16) & 0xFF) * (1.0f / 255.0f));
         }
 #if defined(__ARM_NEON)
         if (pal.size() >= 4) {
@@ -320,9 +326,9 @@ class quantize {
         int32_t best = 0;
         int32_t bestd = 1UL << 30;
         for (size_t i = 0; i < pal.size(); ++i) {
-            const int32_t dr = r - static_cast<int32_t>((pal[i] >> 16) & 0xFF);
+            const int32_t dr = r - static_cast<int32_t>((pal[i] >> 0) & 0xFF);
             const int32_t dg = g - static_cast<int32_t>((pal[i] >> 8) & 0xFF);
-            const int32_t db = b - static_cast<int32_t>((pal[i] >> 0) & 0xFF);
+            const int32_t db = b - static_cast<int32_t>((pal[i] >> 16) & 0xFF);
             const int32_t d = dr * dr + dg * dg + db * db;
             if (d < bestd) {
                 bestd = d;
@@ -709,9 +715,9 @@ class format {
         header.at(i++) = 'T';
         header.at(i++) = 'E';
         for (size_t c = 0; c < palette.size(); c++) {
-            header.at(i++) = static_cast<char>((palette[c] >> 16) & 0xFF);
-            header.at(i++) = static_cast<char>((palette[c] >> 8) & 0xFF);
             header.at(i++) = static_cast<char>((palette[c] >> 0) & 0xFF);
+            header.at(i++) = static_cast<char>((palette[c] >> 8) & 0xFF);
+            header.at(i++) = static_cast<char>((palette[c] >> 16) & 0xFF);
         }
         png_write_be(std::forward<F>(char_out), static_cast<uint32_t>(i - 4));
         png_write_array(std::forward<F>(char_out), header, i);
@@ -1129,9 +1135,9 @@ class format_1bit : public format {
         for (size_t y = 0; y < H; y++) {
             for (size_t x = 0; x < W; x++) {
                 const uint8_t col = get_col(ptr, x);
-                dst[y * W * 4 + x * 4 + 0] = static_cast<uint8_t>((quant.palette().at(col) >> 16) & 0xFF);
+                dst[y * W * 4 + x * 4 + 0] = static_cast<uint8_t>((quant.palette().at(col) >> 0) & 0xFF);
                 dst[y * W * 4 + x * 4 + 1] = static_cast<uint8_t>((quant.palette().at(col) >> 8) & 0xFF);
-                dst[y * W * 4 + x * 4 + 2] = static_cast<uint8_t>((quant.palette().at(col) >> 0) & 0xFF);
+                dst[y * W * 4 + x * 4 + 2] = static_cast<uint8_t>((quant.palette().at(col) >> 16) & 0xFF);
                 dst[y * W * 4 + x * 4 + 3] = ((col != 0) ? 0xFF : 0x00);
             }
             ptr += bytes_per_line;
@@ -1357,9 +1363,9 @@ class format_2bit : public format {
         for (size_t y = 0; y < H; y++) {
             for (size_t x = 0; x < W; x++) {
                 const uint8_t col = get_col(ptr, x);
-                dst[y * W * 4 + x * 4 + 0] = static_cast<uint8_t>((quant.palette().at(col) >> 16) & 0xFF);
+                dst[y * W * 4 + x * 4 + 0] = static_cast<uint8_t>((quant.palette().at(col) >> 0) & 0xFF);
                 dst[y * W * 4 + x * 4 + 1] = static_cast<uint8_t>((quant.palette().at(col) >> 8) & 0xFF);
-                dst[y * W * 4 + x * 4 + 2] = static_cast<uint8_t>((quant.palette().at(col) >> 0) & 0xFF);
+                dst[y * W * 4 + x * 4 + 2] = static_cast<uint8_t>((quant.palette().at(col) >> 16) & 0xFF);
                 dst[y * W * 4 + x * 4 + 3] = ((col != 0) ? 0xFF : 0x00);
             }
             ptr += bytes_per_line;
@@ -1397,11 +1403,11 @@ class format_2bit : public format {
                 B = B + err_b;
                 uint8_t n = quant.nearest(R, G, B);
                 plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
-                err_r = std::clamp(R - static_cast<int32_t>((quant.palette().at(n) >> 16) & 0xFF), int32_t{-255},
+                err_r = std::clamp(R - static_cast<int32_t>((quant.palette().at(n) >> 0) & 0xFF), int32_t{-255},
                                    int32_t{255});
                 err_g = std::clamp(G - static_cast<int32_t>((quant.palette().at(n) >> 8) & 0xFF), int32_t{-255},
                                    int32_t{255});
-                err_b = std::clamp(B - static_cast<int32_t>((quant.palette().at(n) >> 0) & 0xFF), int32_t{-255},
+                err_b = std::clamp(B - static_cast<int32_t>((quant.palette().at(n) >> 16) & 0xFF), int32_t{-255},
                                    int32_t{255});
             }
         }
@@ -1604,9 +1610,9 @@ class format_4bit : public format {
         for (size_t y = 0; y < H; y++) {
             for (size_t x = 0; x < W; x++) {
                 const uint8_t col = get_col(ptr, x);
-                dst[y * W * 4 + x * 4 + 0] = static_cast<uint8_t>((quant.palette().at(col) >> 16) & 0xFF);
+                dst[y * W * 4 + x * 4 + 0] = static_cast<uint8_t>((quant.palette().at(col) >> 0) & 0xFF);
                 dst[y * W * 4 + x * 4 + 1] = static_cast<uint8_t>((quant.palette().at(col) >> 8) & 0xFF);
-                dst[y * W * 4 + x * 4 + 2] = static_cast<uint8_t>((quant.palette().at(col) >> 0) & 0xFF);
+                dst[y * W * 4 + x * 4 + 2] = static_cast<uint8_t>((quant.palette().at(col) >> 16) & 0xFF);
                 dst[y * W * 4 + x * 4 + 3] = ((col != 0) ? 0xFF : 0x00);
             }
             ptr += bytes_per_line;
@@ -1644,11 +1650,11 @@ class format_4bit : public format {
                 B = B + err_b;
                 uint8_t n = quant.nearest(R, G, B);
                 plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
-                err_r = std::clamp(R - static_cast<int32_t>((quant.palette().at(n) >> 16) & 0xFF), int32_t{-255},
+                err_r = std::clamp(R - static_cast<int32_t>((quant.palette().at(n) >> 0) & 0xFF), int32_t{-255},
                                    int32_t{255});
                 err_g = std::clamp(G - static_cast<int32_t>((quant.palette().at(n) >> 8) & 0xFF), int32_t{-255},
                                    int32_t{255});
-                err_b = std::clamp(B - static_cast<int32_t>((quant.palette().at(n) >> 0) & 0xFF), int32_t{-255},
+                err_b = std::clamp(B - static_cast<int32_t>((quant.palette().at(n) >> 16) & 0xFF), int32_t{-255},
                                    int32_t{255});
             }
         }
@@ -1909,9 +1915,9 @@ class format_8bit : public format {
         for (size_t y = 0; y < H; y++) {
             for (size_t x = 0; x < W; x++) {
                 const uint8_t col = ptr[x];
-                dst[y * W * 4 + x * 4 + 0] = static_cast<uint8_t>((quant.palette().at(col) >> 16) & 0xFF);
+                dst[y * W * 4 + x * 4 + 0] = static_cast<uint8_t>((quant.palette().at(col) >> 0) & 0xFF);
                 dst[y * W * 4 + x * 4 + 1] = static_cast<uint8_t>((quant.palette().at(col) >> 8) & 0xFF);
-                dst[y * W * 4 + x * 4 + 2] = static_cast<uint8_t>((quant.palette().at(col) >> 0) & 0xFF);
+                dst[y * W * 4 + x * 4 + 2] = static_cast<uint8_t>((quant.palette().at(col) >> 16) & 0xFF);
                 dst[y * W * 4 + x * 4 + 3] = ((col != 0) ? 0xFF : 0x00);
             }
             ptr += bytes_per_line;
@@ -1949,11 +1955,11 @@ class format_8bit : public format {
                 B = B + err_b;
                 uint8_t n = quant.nearest(R, G, B);
                 data.data()[(y + static_cast<size_t>(r.y)) * bytes_per_line + (x + static_cast<size_t>(r.x))] = n;
-                err_r = std::clamp(R - static_cast<int32_t>((quant.palette().at(n) >> 16) & 0xFF), int32_t{-255},
+                err_r = std::clamp(R - static_cast<int32_t>((quant.palette().at(n) >> 0) & 0xFF), int32_t{-255},
                                    int32_t{255});
                 err_g = std::clamp(G - static_cast<int32_t>((quant.palette().at(n) >> 8) & 0xFF), int32_t{-255},
                                    int32_t{255});
-                err_b = std::clamp(B - static_cast<int32_t>((quant.palette().at(n) >> 0) & 0xFF), int32_t{-255},
+                err_b = std::clamp(B - static_cast<int32_t>((quant.palette().at(n) >> 16) & 0xFF), int32_t{-255},
                                    int32_t{255});
             }
         }
@@ -2098,9 +2104,9 @@ class format_32bit : public format {
 
     static constexpr void plot(std::array<uint8_t, image_size> &data, size_t x, size_t y, uint8_t col) {
         if (std::is_constant_evaluated()) {
-            data.data()[y * bytes_per_line + x * 4 + 0] = (quant.palette().at(col) >> 16) & 0xFF;
+            data.data()[y * bytes_per_line + x * 4 + 0] = (quant.palette().at(col) >> 0) & 0xFF;
             data.data()[y * bytes_per_line + x * 4 + 1] = (quant.palette().at(col) >> 8) & 0xFF;
-            data.data()[y * bytes_per_line + x * 4 + 2] = (quant.palette().at(col) >> 0) & 0xFF;
+            data.data()[y * bytes_per_line + x * 4 + 2] = (quant.palette().at(col) >> 16) & 0xFF;
             data.data()[y * bytes_per_line + x * 4 + 3] = 0xFF;
         } else {
             uint32_t *yptr = reinterpret_cast<uint32_t *>(&data.data()[y * bytes_per_line + x * 4]);
@@ -2113,9 +2119,9 @@ class format_32bit : public format {
             uint8_t *yptr = &data.data()[y * bytes_per_line + xl0 * 4];
             uint32_t rgba = quant.palette().at(col);
             for (size_t x = xl0; x < xr0; x++) {
-                *yptr++ = (rgba >> 16) & 0xFF;
-                *yptr++ = (rgba >> 8) & 0xFF;
                 *yptr++ = (rgba >> 0) & 0xFF;
+                *yptr++ = (rgba >> 8) & 0xFF;
+                *yptr++ = (rgba >> 16) & 0xFF;
                 *yptr++ = 0xFF;
             }
         } else {
@@ -2133,8 +2139,10 @@ class format_32bit : public format {
         if (!std::is_constant_evaluated()) {
             const size_t off = y * bytes_per_line + x * 4;
             uint8x8_t px = vld1_u8(&data[off]);
-            float32x4_t src = {colb, colg, colr, cola};
-            float32x4_t dst = {hidden::a2al_8bit[px[0]], hidden::a2al_8bit[px[1]], hidden::a2al_8bit[px[2]],
+            float32x4_t src = {colr, colg, colb, cola};
+            float32x4_t dst = {hidden::a2al_8bit[px[0]], 
+                               hidden::a2al_8bit[px[1]], 
+                               hidden::a2al_8bit[px[2]],
                                hidden::a2al_8bit[px[3]]};
             float32x4_t one = vdupq_n_f32(1.0f);
             float32x4_t inv_srca = vsubq_f32(one, vdupq_n_f32(cola));
@@ -2166,8 +2174,8 @@ class format_32bit : public format {
             const float as = cola + la * (1.0f - cola);
             const float inv_cola = 1.0f - cola;
 
-            __m128 dst = _mm_set_ps(0.0f, lr, lg, lb);
-            __m128 src = _mm_set_ps(0.0f, colr, colg, colb);
+            __m128 dst = _mm_set_ps(0.0f, lb, lg, lr);
+            __m128 src = _mm_set_ps(0.0f, colb, colg, colr);
 
             __m128 blended = _mm_add_ps(_mm_mul_ps(src, _mm_set1_ps(cola)), _mm_mul_ps(dst, _mm_set1_ps(inv_cola)));
 
@@ -2190,9 +2198,9 @@ class format_32bit : public format {
 #endif  // #if defined(__AVX2__)
         const size_t off = y * bytes_per_line + x * 4;
 
-        const float lb = hidden::a2al_8bit[data[off + 0]];
+        const float lr = hidden::a2al_8bit[data[off + 0]];
         const float lg = hidden::a2al_8bit[data[off + 1]];
-        const float lr = hidden::a2al_8bit[data[off + 2]];
+        const float lb = hidden::a2al_8bit[data[off + 2]];
         const float la = data[off + 3] * (1.0f / 255.0f);
 
         const float as = cola + la * (1.0f - cola);
@@ -2200,9 +2208,9 @@ class format_32bit : public format {
         const float gs = hidden::linear_to_srgb(colg * cola + lg * (1.0f - cola)) * (1.0f / as);
         const float bs = hidden::linear_to_srgb(colb * cola + lb * (1.0f - cola)) * (1.0f / as);
 
-        data[off + 0] = static_cast<uint8_t>(bs * 255.0f);
+        data[off + 0] = static_cast<uint8_t>(rs * 255.0f);
         data[off + 1] = static_cast<uint8_t>(gs * 255.0f);
-        data[off + 2] = static_cast<uint8_t>(rs * 255.0f);
+        data[off + 2] = static_cast<uint8_t>(bs * 255.0f);
         data[off + 3] = static_cast<uint8_t>(as * 255.0f);
     }
 
@@ -3901,8 +3909,8 @@ class image {
             for (size_t y = 0; y < H; y++) {
                 for (size_t x = 0; x < W; x++) {
                     const uint32_t col = format.get_col(ptr, x);
-                    const uint32_t a = ((((col >> 16) & 0xff) >> 3) << 3) | ((((col >> 8) & 0xff) >> 2) >> 3);
-                    const uint32_t b = (((((col >> 8) & 0xff) >> 2) & 0x7) << 5) | ((col & 0xff) >> 3);
+                    const uint32_t a = ((((col >> 0) & 0xff) >> 3) << 3) | ((((col >> 8) & 0xff) >> 2) >> 3);
+                    const uint32_t b = (((((col >> 8) & 0xff) >> 2) & 0x7) << 5) | (((col >> 16) & 0xff) >> 3);
                     std::forward<F>(uint8_out)(static_cast<uint8_t>(a));
                     std::forward<F>(uint8_out)(static_cast<uint8_t>(b));
                 }
@@ -3913,9 +3921,9 @@ class image {
             for (size_t y = 0; y < H; y++) {
                 for (size_t x = 0; x < W; x++) {
                     const uint32_t col = format.get_col(ptr, x);
-                    std::forward<F>(uint8_out)(static_cast<uint8_t>(((col >> 16) & 0xff) >> 2));
-                    std::forward<F>(uint8_out)(static_cast<uint8_t>(((col >> 8) & 0xff) >> 2));
                     std::forward<F>(uint8_out)(static_cast<uint8_t>(((col >> 0) & 0xff) >> 2));
+                    std::forward<F>(uint8_out)(static_cast<uint8_t>(((col >> 8) & 0xff) >> 2));
+                    std::forward<F>(uint8_out)(static_cast<uint8_t>(((col >> 16) & 0xff) >> 2));
                 }
                 ptr += format.bytes_per_line;
             }
@@ -3924,9 +3932,9 @@ class image {
             for (size_t y = 0; y < H; y++) {
                 for (size_t x = 0; x < W; x++) {
                     const uint32_t col = format.get_col(ptr, x);
-                    std::forward<F>(uint8_out)(static_cast<uint8_t>(((col >> 16) & 0xff) >> 2) << 2);
-                    std::forward<F>(uint8_out)(static_cast<uint8_t>(((col >> 8) & 0xff) >> 2) << 2);
                     std::forward<F>(uint8_out)(static_cast<uint8_t>(((col >> 0) & 0xff) >> 2) << 2);
+                    std::forward<F>(uint8_out)(static_cast<uint8_t>(((col >> 8) & 0xff) >> 2) << 2);
+                    std::forward<F>(uint8_out)(static_cast<uint8_t>(((col >> 16) & 0xff) >> 2) << 2);
                 }
                 ptr += format.bytes_per_line;
             }
