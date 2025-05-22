@@ -2176,7 +2176,7 @@ class format_32bit : public format {
             inv_as = _mm_shuffle_ps(inv_as, inv_as, _MM_SHUFFLE(0, 0, 0, 0));
 
             __m128 scaled = _mm_mul_ps(blended, inv_as);
-            __m128 srgb = linear_to_srgb_approx_sse(scaled);
+            __m128 srgb = hidden::linear_to_srgb_approx_sse(scaled);
 
             alignas(16) float out[4];
             _mm_store_ps(out, srgb);
