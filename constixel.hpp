@@ -2166,9 +2166,9 @@ class format_32bit : public format {
         if (!std::is_constant_evaluated()) {
             const size_t off = y * bytes_per_line + x * 4;
 
-            const float lb = hidden::a2al_8bit[data[off + 0]];
+            const float lr = hidden::a2al_8bit[data[off + 0]];
             const float lg = hidden::a2al_8bit[data[off + 1]];
-            const float lr = hidden::a2al_8bit[data[off + 2]];
+            const float lb = hidden::a2al_8bit[data[off + 2]];
             const float la = data[off + 3] * (1.0f / 255.0f);
 
             const float as = cola + la * (1.0f - cola);

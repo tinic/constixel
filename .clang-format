@@ -9,4 +9,5 @@ AllowShortIfStatementsOnASingleLine: false
 AllowShortLambdasOnASingleLine: false
 AllowShortBlocksOnASingleLine: false
 AlignTrailingComments: true
+AlignOperands: true
 AccessModifierOffset: -3
