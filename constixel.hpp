@@ -2782,9 +2782,9 @@ class image {
             std::swap(y0, y1);
         }
 
-        const float Rl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 0);
-        const float Gl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 1);
-        const float Bl = format.quant.linear_palette().at((col & ((1UL << format.bits_per_pixel) - 1)) * 3 + 2);
+        const float Rl = format.quant.linear_palette().at((col & format.color_mask) * 3 + 0);
+        const float Gl = format.quant.linear_palette().at((col & format.color_mask) * 3 + 1);
+        const float Bl = format.quant.linear_palette().at((col & format.color_mask) * 3 + 2);
 
         const auto dx = static_cast<float>(x1 - x0);
         const auto dy = static_cast<float>(y1 - y0);
