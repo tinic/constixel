@@ -51,44 +51,6 @@ namespace constixel {
 /// @cond DOXYGEN_EXCLUDE
 namespace hidden {
 
-[[nodiscard]] static constexpr float fast_exp2(const float p) {
-    const float offset = (p < 0) ? 1.0f : 0.0f;
-    const float clipp = (p < -126) ? -126.0f : p;
-    const float z = clipp - static_cast<float>(static_cast<int32_t>(clipp)) + offset;
-    return std::bit_cast<float>(
-        static_cast<uint32_t>((1 << 23) * (clipp + 121.2740575f + 27.7280233f / (4.84252568f - z) - 1.49012907f * z)));
-}
-
-[[nodiscard]] static constexpr float fast_log2(const float x) {
-    const auto xi = std::bit_cast<uint32_t>(x);
-    const auto xf = std::bit_cast<float>((xi & 0x007FFFFF) | 0x3f000000);
-    const float y = static_cast<float>(xi) * 1.1920928955078125e-7f;
-    return y - 124.22551499f - 1.498030302f * xf - 1.72587999f / (0.3520887068f + xf);
-}
-
-static constexpr float fast_sqrtf(const float x) {
-    auto i = std::bit_cast<int32_t>(x);
-    const int k = i & 0x00800000;
-    float y = 0.0f;
-    if (k != 0) {
-        i = 0x5ed9d098 - (i >> 1);
-        y = std::bit_cast<float>(i);
-        y = 2.33139729f * y * ((-x * y * y) + 1.07492042f);
-    } else {
-        i = 0x5f19d352 - (i >> 1);
-        y = std::bit_cast<float>(i);
-        y = 0.82420468f * y * ((-x * y * y) + 2.14996147f);
-    }
-    const float c = x * y;
-    const float r = ((y * -c) + 1.0f);
-    y = ((0.5f * c * r) + c);
-    return y;
-}
-
-[[nodiscard]] static constexpr float fast_pow(const float x, const float p) {
-    return fast_exp2(p * fast_log2(x));
-}
-
 [[nodiscard]] static consteval double consteval_cos(double x, int32_t terms = 10) {
     x = x - 6.283185307179586 * static_cast<int32_t>(x / 6.283185307179586);  // wrap x to [0, 2π)
     double res = 1.0;
@@ -113,23 +75,43 @@ static constexpr float fast_sqrtf(const float x) {
     return res;
 }
 
-struct oklch {
-    double l = 0.0;
-    double c = 0.0;
-    double h = 0.0;
-};
+static constexpr float fast_sqrtf(const float x) {
+    auto i = std::bit_cast<int32_t>(x);
+    const int k = i & 0x00800000;
+    float y = 0.0f;
+    if (k != 0) {
+        i = 0x5ed9d098 - (i >> 1);
+        y = std::bit_cast<float>(i);
+        y = 2.33139729f * y * ((-x * y * y) + 1.07492042f);
+    } else {
+        i = 0x5f19d352 - (i >> 1);
+        y = std::bit_cast<float>(i);
+        y = 0.82420468f * y * ((-x * y * y) + 2.14996147f);
+    }
+    const float c = x * y;
+    const float r = ((y * -c) + 1.0f);
+    y = ((0.5f * c * r) + c);
+    return y;
+}
 
-struct oklab {
-    double l = 0.0;
-    double a = 0.0;
-    double b = 0.0;
-};
+[[nodiscard]] static constexpr float fast_exp2(const float p) {
+    const float offset = (p < 0) ? 1.0f : 0.0f;
+    const float clipp = (p < -126) ? -126.0f : p;
+    const float z = clipp - static_cast<float>(static_cast<int32_t>(clipp)) + offset;
+    return std::bit_cast<float>(
+        static_cast<uint32_t>((1 << 23) * (clipp + 121.2740575f + 27.7280233f / (4.84252568f - z) - 1.49012907f * z)));
+}
 
-struct srgb {
-    double r = 0.0;
-    double g = 0.0;
-    double b = 0.0;
-};
+[[nodiscard]] static constexpr float fast_log2(const float x) {
+    const auto xi = std::bit_cast<uint32_t>(x);
+    const auto xf = std::bit_cast<float>((xi & 0x007FFFFF) | 0x3f000000);
+    const float y = static_cast<float>(xi) * 1.1920928955078125e-7f;
+    return y - 124.22551499f - 1.498030302f * xf - 1.72587999f / (0.3520887068f + xf);
+}
+
+[[nodiscard]] static constexpr float fast_pow(const float x, const float p) {
+    return fast_exp2(p * fast_log2(x));
+}
 
 [[nodiscard]] static constexpr float linear_to_srgb(float c) {
     if (c <= 0.0031308f) {
@@ -288,6 +270,24 @@ inline __m128 linear_to_srgb_approx_sse(__m128 l) {
     return _mm_or_ps(_mm_and_ps(mask, below), _mm_andnot_ps(mask, above));
 }
 #endif  // #if defined(__AVX2__)
+
+struct oklch {
+    double l = 0.0;
+    double c = 0.0;
+    double h = 0.0;
+};
+
+struct oklab {
+    double l = 0.0;
+    double a = 0.0;
+    double b = 0.0;
+};
+
+struct srgb {
+    double r = 0.0;
+    double g = 0.0;
+    double b = 0.0;
+};
 
 [[nodiscard]] static consteval srgb oklab_to_srgb_consteval(const oklab &oklab) {
     const double l = oklab.l;
