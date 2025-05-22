@@ -7,7 +7,7 @@ using namespace constixel;
 using UI = image<format_32bit, 396, 484>;
 
 int main() {
-    UI img;
+    static UI img;
     img.clear();
 
     // ─── pick a soft, modern palette via nearest RGB ───────────────────────────
