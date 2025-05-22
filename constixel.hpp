@@ -3515,6 +3515,113 @@ class image {
     }
 
     /**
+     * \brief Fill a rectangle with a shader function that generates colors per pixel.
+     *
+     * \code{.cpp}
+     * // Linear gradient from red to blue
+     * image.fill_rect(0, 0, 320, 240, [](float u, float v, float au, float av) -> std::array<float, 4> {
+     *     return {1.0f - u, 0.0f, u, 1.0f}; // R, G, B, A
+     * });
+     * \endcode
+     *
+     * \param x Starting X-coordinate in pixels.
+     * \param y Starting Y-coordinate in pixels.
+     * \param w Width of the rectangle in pixels.
+     * \param h Height of the rectangle in pixels.
+     * \param shader Lambda function taking (u, v, aspect_u, aspect_v) normalized coordinates 
+     *                    and returning RGBA color as std::array<float, 4>
+     */
+    template<typename shader_func>
+    constexpr auto fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, const shader_func& shader) 
+        -> std::enable_if_t<std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float>, void> {
+        auto minmax_check = std::minmax({x, y, w, h});
+        if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
+            return;
+        }
+        if (w <= 0 || h <= 0) {
+            return;
+        }
+        if (check_not_in_bounds(x, y, w, h)) {
+            return;
+        }
+        
+        int32_t x0 = std::max(x, 0);
+        int32_t y0 = std::max(y, 0);
+        int32_t x1 = std::min(x + w, static_cast<int32_t>(W));
+        int32_t y1 = std::min(y + h, static_cast<int32_t>(H));
+        
+        for (int32_t py = y0; py < y1; py++) {
+            for (int32_t px = x0; px < x1; px++) {
+                float u = static_cast<float>(px - x) / static_cast<float>(w);
+                float v = static_cast<float>(py - y) / static_cast<float>(h);
+                
+                float aspect_ratio = static_cast<float>(w) / static_cast<float>(h);
+                float au = u;
+                float av = v;
+                if (aspect_ratio > 1.0f) {
+                    au = u * aspect_ratio;
+                } else {
+                    av = v / aspect_ratio;
+                }
+                
+                auto rgba = shader(u, v, au, av);
+                
+                compose(px, py, rgba[3], rgba[0], rgba[1], rgba[2]);
+            }
+        }
+    }
+
+    /**
+     * @private
+     */
+    template<typename shader_func>
+    constexpr auto fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, const shader_func& shader,
+                             int32_t parent_x, int32_t parent_y, int32_t parent_w, int32_t parent_h) 
+        -> std::enable_if_t<std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float>, void> {
+        auto minmax_check = std::minmax({x, y, w, h});
+        if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
+            return;
+        }
+        if (w <= 0 || h <= 0) {
+            return;
+        }
+        if (check_not_in_bounds(x, y, w, h)) {
+            return;
+        }
+        
+        int32_t x0 = std::max(x, 0);
+        int32_t y0 = std::max(y, 0);
+        int32_t x1 = std::min(x + w, static_cast<int32_t>(W));
+        int32_t y1 = std::min(y + h, static_cast<int32_t>(H));
+        
+        const float parent_wF = static_cast<float>(parent_w);
+        const float parent_hF = static_cast<float>(parent_h);
+        
+        for (int32_t py = y0; py < y1; py++) {
+            for (int32_t px = x0; px < x1; px++) {
+                float u = (static_cast<float>(px) - static_cast<float>(parent_x)) / parent_wF;
+                float v = (static_cast<float>(py) - static_cast<float>(parent_y)) / parent_hF;
+                
+                u = std::clamp(u, 0.0f, 1.0f);
+                v = std::clamp(v, 0.0f, 1.0f);
+                
+                float aspect_ratio = parent_wF / parent_hF;
+                float au = u;
+                float av = v;
+                if (aspect_ratio > 1.0f) {
+                    av = v * aspect_ratio;
+                } else {
+                    au = u / aspect_ratio;
+                }
+                
+                auto rgba = shader(u, v, au, av);
+                
+                compose(px, py, rgba[3], rgba[0], rgba[1], rgba[2]);
+            }
+        }
+    }
+
+    /**
      * \brief Draw a stroked rectangle with the specified color and stroke width. Example:
      *
      * \code{.cpp}
@@ -3721,6 +3828,35 @@ class image {
     }
 
     /**
+     * \brief Fill a circle using antialiasing with a shader function that generates colors per pixel.
+     *
+     * \code{.cpp}
+     * // Radial gradient circle
+     * image.fill_circle_aa(100, 100, 50, [](float u, float v, float au, float av) -> std::array<float, 4> {
+     *     float dist = std::sqrt((u - 0.5f) * (u - 0.5f) + (v - 0.5f) * (v - 0.5f)) * 2.0f;
+     *     float intensity = 1.0f - std::clamp(dist, 0.0f, 1.0f);
+     *     return {intensity, intensity * 0.8f, 1.0f, 1.0f}; // R, G, B, A
+     * });
+     * \endcode
+     *
+     * \param cx Center X-coordinate of the circle in pixels.
+     * \param cy Center Y-coordinate of the circle in pixels.
+     * \param radius Radius of the circle in pixels.
+     * \param shader Lambda function taking (u, v, aspect_u, aspect_v) normalized coordinates 
+     *                    and returning RGBA color as std::array<float, 4>
+     */
+    template<typename shader_func>
+    constexpr auto fill_circle_aa(int32_t cx, int32_t cy, int32_t radius, const shader_func& shader) 
+        -> std::enable_if_t<std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float>, void> {
+        auto minmax_check = std::minmax({cx, cy, radius});
+        if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
+            return;
+        }
+        radius = abs(radius);
+        circle_int_shader(cx, cy, radius, 0, 0, shader);
+    }
+
+    /**
      * \brief Stroke a rounded rectangle with the specified color. Example:
      *
      * \code{.cpp}
@@ -3866,6 +4002,46 @@ class image {
      */
     constexpr void fill_round_rect_aa(const struct draw_round_rect &d) {
         fill_round_rect_aa(d.x, d.y, d.w, d.h, d.r, d.col);
+    }
+
+    /**
+     * \brief Fill a rounded rectangle using antialiasing with a shader function that generates colors per pixel.
+     *
+     * \code{.cpp}
+     * // Gradient rounded rectangle
+     * image.fill_round_rect_aa(10, 10, 200, 100, 15, [](float u, float v, float au, float av) -> std::array<float, 4> {
+     *     return {u, v, 1.0f - u, 1.0f}; // Corner-to-corner gradient
+     * });
+     * \endcode
+     *
+     * \param x Starting X-coordinate in pixels.
+     * \param y Starting Y-coordinate in pixels.
+     * \param w Width of the rectangle in pixels.
+     * \param h Height of the rectangle in pixels.
+     * \param radius Radius of the rounded corners in pixels.
+     * \param shader Lambda function taking (u, v, aspect_u, aspect_v) normalized coordinates 
+     *                    and returning RGBA color as std::array<float, 4>
+     */
+    template<typename shader_func>
+    constexpr auto fill_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, const shader_func& shader)
+        -> std::enable_if_t<std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float>, void> {
+        auto minmax_check = std::minmax({x, y, w, h, radius});
+        if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
+            return;
+        }
+        if (w <= 0 || h <= 0) {
+            return;
+        }
+        radius = abs(radius);
+        int32_t cr = std::min({w / 2, h / 2, radius});
+        int32_t dx = w - cr * 2;
+        int32_t dy = h - cr * 2;
+        
+        circle_int_shader(x + cr, y + cr, cr, dx, dy, shader, x, y, w, h);
+        
+        fill_rect(x, y + cr, cr, dy, shader, x, y, w, h);
+        fill_rect(x + w - cr, y + cr, cr, dy, shader, x, y, w, h);
+        fill_rect(x + cr, y, dx, h, shader, x, y, w, h);
     }
 
     /**
@@ -4705,6 +4881,175 @@ class image {
                 for_each_quadrant.template operator()<float>(plot_arc);
             }
         }
+    }
+
+    /**
+     * @private
+     */
+    template<typename shader_func>
+    constexpr void circle_int_shader(int32_t cx, int32_t cy, int32_t r, int32_t ox, int32_t oy, const shader_func& shader) {
+        const int32_t x0 = std::max(cx - r - int32_t{1}, int32_t{0});
+        const int32_t y0 = std::max(cy - r - int32_t{1}, int32_t{0});
+
+        if (check_not_in_bounds(x0, y0, r * int32_t{2} + ox + int32_t{1}, r * int32_t{2} + oy + int32_t{1})) {
+            return;
+        }
+
+        const int32_t x0r = std::clamp(x0 + r, int32_t{0}, static_cast<int32_t>(W) - int32_t{1});
+        const int32_t x0r2 = std::clamp(x0 + r * int32_t{2}, int32_t{0}, static_cast<int32_t>(W) - int32_t{1});
+        const int32_t y0r = std::clamp(y0 + r, int32_t{0}, static_cast<int32_t>(H) - int32_t{1});
+        const int32_t y0r2 = std::clamp(y0 + r * int32_t{2}, int32_t{0}, static_cast<int32_t>(H) - int32_t{1});
+
+        auto for_each_quadrant = [&]<typename I>(auto &&plot_arc) {
+            plot_arc.template operator()<I>(x0, y0, x0r, y0r, 0, 0);
+            plot_arc.template operator()<I>(x0r, y0, x0r2, y0r, ox, 0);
+            plot_arc.template operator()<I>(x0, y0r, x0r, y0r2, 0, oy);
+            plot_arc.template operator()<I>(x0r, y0r, x0r2, y0r2, ox, oy);
+        };
+
+        auto limit_box = [](int32_t &xmin, int32_t &ymin, int32_t &xmax, int32_t &ymax, int32_t x_off, int32_t y_off) {
+            xmin = std::max(xmin + x_off, int32_t{0}) - x_off;
+            xmax = std::min(xmax + x_off, static_cast<int32_t>(W) - int32_t{1}) - x_off;
+            ymin = std::max(ymin + y_off, int32_t{0}) - y_off;
+            ymax = std::min(ymax + y_off, static_cast<int32_t>(H) - int32_t{1}) - y_off;
+        };
+
+        const auto rF = static_cast<float>(r);
+        
+        const float circle_left = static_cast<float>(cx - r);
+        const float circle_top = static_cast<float>(cy - r);
+        const float circle_size = static_cast<float>(r * 2);
+        
+        auto plot_arc = [&, this]<typename I>(int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
+                                              int32_t y_off) {
+            limit_box(xx0, yy0, xx1, yy1, x_off, y_off);
+            for (int32_t y = yy0; y <= yy1; y++) {
+                for (int32_t x = xx0; x <= xx1; x++) {
+                    const float dx = (static_cast<float>(x) + 0.5f) - static_cast<float>(cx);
+                    const float dy = (static_cast<float>(y) + 0.5f) - static_cast<float>(cy);
+                    const float dist_sq = dx * dx + dy * dy;
+                    if (dist_sq > (rF + 0.5f) * (rF + 0.5f)) {
+                        continue;
+                    }
+                    
+                    float u = (static_cast<float>(x) - circle_left) / circle_size;
+                    float v = (static_cast<float>(y) - circle_top) / circle_size;
+                    
+                    u = std::clamp(u, 0.0f, 1.0f);
+                    v = std::clamp(v, 0.0f, 1.0f);
+                    
+                    float au = u;
+                    float av = v;
+                    
+                    auto rgba = shader(u, v, au, av);
+                    
+                    if (dist_sq < (rF - 0.5f) * (rF - 0.5f)) {
+                        compose_unsafe(x + x_off, y + y_off, rgba[3], rgba[0], rgba[1], rgba[2]);
+                        continue;
+                    }
+                    
+                    float a = rF;
+                    if (std::is_constant_evaluated()) {
+                        a -= hidden::fast_sqrtf(dist_sq);
+                    } else {
+                        a -= std::sqrt(dist_sq);
+                    }
+                    a = std::clamp(a + 0.5f, 0.0f, 1.0f);
+                    if (a >= hidden::epsilon_low) {
+                        compose_unsafe(x + x_off, y + y_off, a * rgba[3], rgba[0], rgba[1], rgba[2]);
+                    }
+                }
+            }
+        };
+        for_each_quadrant.template operator()<float>(plot_arc);
+    }
+
+    /**
+     * @private
+     * Enhanced circle shader that maps UV coordinates to parent shape bounds
+     */
+    template<typename shader_func>
+    constexpr void circle_int_shader(int32_t cx, int32_t cy, int32_t r, int32_t ox, int32_t oy, const shader_func& shader,
+                                     int32_t parent_x, int32_t parent_y, int32_t parent_w, int32_t parent_h) {
+        const int32_t x0 = std::max(cx - r - int32_t{1}, int32_t{0});
+        const int32_t y0 = std::max(cy - r - int32_t{1}, int32_t{0});
+
+        if (check_not_in_bounds(x0, y0, r * int32_t{2} + ox + int32_t{1}, r * int32_t{2} + oy + int32_t{1})) {
+            return;
+        }
+
+        const int32_t x0r = std::clamp(x0 + r, int32_t{0}, static_cast<int32_t>(W) - int32_t{1});
+        const int32_t x0r2 = std::clamp(x0 + r * int32_t{2}, int32_t{0}, static_cast<int32_t>(W) - int32_t{1});
+        const int32_t y0r = std::clamp(y0 + r, int32_t{0}, static_cast<int32_t>(H) - int32_t{1});
+        const int32_t y0r2 = std::clamp(y0 + r * int32_t{2}, int32_t{0}, static_cast<int32_t>(H) - int32_t{1});
+
+        auto for_each_quadrant = [&]<typename I>(auto &&plot_arc) {
+            plot_arc.template operator()<I>(x0, y0, x0r, y0r, 0, 0);
+            plot_arc.template operator()<I>(x0r, y0, x0r2, y0r, ox, 0);
+            plot_arc.template operator()<I>(x0, y0r, x0r, y0r2, 0, oy);
+            plot_arc.template operator()<I>(x0r, y0r, x0r2, y0r2, ox, oy);
+        };
+
+        auto limit_box = [](int32_t &xmin, int32_t &ymin, int32_t &xmax, int32_t &ymax, int32_t x_off, int32_t y_off) {
+            xmin = std::max(xmin + x_off, int32_t{0}) - x_off;
+            xmax = std::min(xmax + x_off, static_cast<int32_t>(W) - int32_t{1}) - x_off;
+            ymin = std::max(ymin + y_off, int32_t{0}) - y_off;
+            ymax = std::min(ymax + y_off, static_cast<int32_t>(H) - int32_t{1}) - y_off;
+        };
+
+        // Only AA fill shader version (no stroke support)
+        const auto rF = static_cast<float>(r);
+        const float parent_wF = static_cast<float>(parent_w);
+        const float parent_hF = static_cast<float>(parent_h);
+        
+        auto plot_arc = [&, this]<typename I>(int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
+                                              int32_t y_off) {
+            limit_box(xx0, yy0, xx1, yy1, x_off, y_off);
+            for (int32_t y = yy0; y <= yy1; y++) {
+                for (int32_t x = xx0; x <= xx1; x++) {
+                    const float dx = (static_cast<float>(x) + 0.5f) - static_cast<float>(cx);
+                    const float dy = (static_cast<float>(y) + 0.5f) - static_cast<float>(cy);
+                    const float dist_sq = dx * dx + dy * dy;
+                    if (dist_sq > (rF + 0.5f) * (rF + 0.5f)) {
+                        continue;
+                    }
+                    
+                    float u = (static_cast<float>(x + x_off) - static_cast<float>(parent_x)) / parent_wF;
+                    float v = (static_cast<float>(y + y_off) - static_cast<float>(parent_y)) / parent_hF;
+                    
+                    u = std::clamp(u, 0.0f, 1.0f);
+                    v = std::clamp(v, 0.0f, 1.0f);
+                    
+                    float aspect_ratio = parent_wF / parent_hF;
+                    float au = u;
+                    float av = v;
+                    if (aspect_ratio > 1.0f) {
+                        av = v * aspect_ratio;
+                    } else {
+                        au = u / aspect_ratio;
+                    }
+                    
+                    auto rgba = shader(u, v, au, av);
+                    
+                    if (dist_sq < (rF - 0.5f) * (rF - 0.5f)) {
+                        compose_unsafe(x + x_off, y + y_off, rgba[3], rgba[0], rgba[1], rgba[2]);
+                        continue;
+                    }
+                    
+                    float a = rF;
+                    if (std::is_constant_evaluated()) {
+                        a -= hidden::fast_sqrtf(dist_sq);
+                    } else {
+                        a -= std::sqrt(dist_sq);
+                    }
+                    a = std::clamp(a + 0.5f, 0.0f, 1.0f);
+                    if (a >= hidden::epsilon_low) {
+                        compose_unsafe(x + x_off, y + y_off, a * rgba[3], rgba[0], rgba[1], rgba[2]);
+                    }
+                }
+            }
+        };
+        for_each_quadrant.template operator()<float>(plot_arc);
     }
 
     /**

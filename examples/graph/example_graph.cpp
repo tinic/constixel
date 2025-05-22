@@ -1,25 +1,40 @@
 #include "constixel.hpp"
-
 #include "fonts/ibmplexsans_semibold_24_aa.hpp"
-using large_font = constixel::ibmplexsans_semibold_24_aa;
 #include "fonts/ibmplexsans_semibold_18_aa.hpp"
-using small_font = constixel::ibmplexsans_semibold_18_aa;
-
 #include <iomanip>
 #include <sstream>
+#include <cmath>
 
-const char *x_label = "time (s)";
-const char *y_label = "amplitude";
+using namespace constixel;
+using large_font = ibmplexsans_semibold_24_aa;
+using small_font = ibmplexsans_semibold_18_aa;
 
-const float axis_xmin = 0.0f;
-const float axis_xmax = 6.0f;
-const float axis_ymin = -1.0f;
-const float axis_ymax = +1.0f;
+// Graph configuration
+constexpr char x_label[] = "Time (seconds)";
+constexpr char y_label[] = "Amplitude";
+constexpr float axis_xmin = 0.0f;
+constexpr float axis_xmax = 6.0f;
+constexpr float axis_ymin = -1.2f;
+constexpr float axis_ymax = +1.2f;
 
-const uint8_t background_color = constixel::color::BLACK;
-const uint8_t axis_color = constixel::color::WHITE;
-const uint8_t graph_color = constixel::color::RED;
+// Color palette
+const uint8_t col_bg_dark = color::BLACK;
+const uint8_t col_bg_light = color::DARK_GRAY;
+const uint8_t col_axis = color::WHITE;
+const uint8_t col_grid = color::GRAY;
+const uint8_t col_graph_primary = color::CYAN;
+const uint8_t col_graph_secondary = color::YELLOW;
+const uint8_t col_text = color::WHITE;
 
+// Bayer dither pattern for gradient background
+constexpr int bayer_matrix[4][4] = {
+    { 0,  8,  2, 10},
+    {12,  4, 14,  6},
+    { 3, 11,  1,  9},
+    {15,  7, 13,  5}
+};
+
+// Generate sample data
 auto generate_damped_sine(float x_start, float x_end, float step, float decay_factor) {
     std::vector<std::pair<float, float>> points;
     for (float x = x_start; x <= x_end; x += step) {
@@ -29,8 +44,21 @@ auto generate_damped_sine(float x_start, float x_end, float step, float decay_fa
     return points;
 }
 
-auto generate_plot() {
-    return generate_damped_sine(0.0f, 6.0f, 0.02f, 0.5f);
+auto generate_secondary_wave(float x_start, float x_end, float step) {
+    std::vector<std::pair<float, float>> points;
+    for (float x = x_start; x <= x_end; x += step) {
+        float y = 0.6f * std::sin(2.0f * x + 1.0f) * std::cos(0.5f * x);
+        points.emplace_back(x, y);
+    }
+    return points;
+}
+
+auto generate_primary_data() {
+    return generate_damped_sine(axis_xmin, axis_xmax, 0.015f, 0.4f);
+}
+
+auto generate_secondary_data() {
+    return generate_secondary_wave(axis_xmin, axis_xmax, 0.02f);
 }
 
 // ---------------------------
