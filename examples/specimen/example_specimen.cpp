@@ -6,8 +6,8 @@
 // Font to show a specimen of
 //
 // clang-format off
-#include "fonts/cd_iconspc_mono.hpp"
-using font = constixel::cd_iconspc_mono;
+#include "fonts/notosanssymbols2_regular_aa.hpp"
+using font = constixel::notosanssymbols2_regular_aa;
 // clang-format on
 
 //--------------------------------------------------------------------
@@ -38,12 +38,12 @@ static void append_utf8(std::string& out, char32_t cp) {
 }
 
 int main() {
-    static constixel::image<constixel::format_1bit, 512, 600> screen;
+    static constixel::image<constixel::format_8bit, 512, 2600> screen;
 
     int32_t y_pos = 8;
     int32_t x_pos = 8;
 
-    screen.fill_rect(0, 0, screen.width(), screen.height(), 1);
+    screen.fill_rect(0, 0, screen.width(), screen.height(), 0);
 
     for (auto c : font::glyph_table) {
         // Get a UTF-8 string with our character in it.
@@ -55,11 +55,11 @@ int main() {
         cw = std::max(32, cw);
 
         // Draw character
-        screen.draw_string_centered_mono<font>(x_pos + cw / 2, y_pos, str.c_str(), 0);
+        screen.draw_string_centered_aa<font>(x_pos + cw / 2, y_pos, str.c_str(), 1);
 
         // Draw label under it
         auto unicode = std::format("{:04x}", c.first);
-        screen.draw_string_centered_mono<label>(x_pos + cw / 2, y_pos + font::total_height + 4, unicode.c_str(), 0);
+        screen.draw_string_centered_mono<label>(x_pos + cw / 2, y_pos + font::total_height + 4, unicode.c_str(), 1);
 
         // Advance and break line
         x_pos += cw;

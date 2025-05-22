@@ -27,7 +27,10 @@ void drawGauge(UI &img, int x, int y, int w, int h, float pct, uint8_t bgCol, ui
 std::string nowString() {
     auto t = std::chrono::system_clock::now();
     std::time_t tt = std::chrono::system_clock::to_time_t(t);
-    std::tm tm; localtime_r(&tt, &tm);
+    std::tm tm {}; 
+#ifndef _MSC_VER
+    localtime_r(&tt, &tm);
+#endif  // #ifndef _MSC_VER
     std::ostringstream ss;
     ss << std::put_time(&tm, "%H:%M:%S");
     return ss.str();
