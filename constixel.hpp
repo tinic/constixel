@@ -180,22 +180,67 @@ static inline float32x4_t linear_to_srgb_approx_neon(float32x4_t l) {
 #endif  // #if defined(__ARM_NEON)
 
 #if defined(__AVX2__)
-inline __m128 pow_1_over_2_4_sse(__m128 x) {
-    const __m128 two_point_four = _mm_set1_ps(2.4f);
-    __m128 y = _mm_mul_ps(x, _mm_rsqrt_ps(x));  // ≈ x^0.5
 
-    for (int i = 0; i < 4; ++i) {
-        __m128 y2 = _mm_mul_ps(y, y);
-        __m128 y25 = _mm_mul_ps(y2, y);          // y^3
-        y25 = _mm_mul_ps(y25, _mm_rsqrt_ps(y));  // ≈ y^2.5
+inline __m128 fast_exp2_ps(__m128 p) {
+    const __m128 one = _mm_set1_ps(1.0f);
+    const __m128 zero = _mm_setzero_ps();
+    const __m128 neg126 = _mm_set1_ps(-126.0f);
 
-        __m128 f = _mm_sub_ps(y25, x);
-        __m128 y15 = _mm_mul_ps(y, _mm_rsqrt_ps(y));  // y^1.5
-        __m128 fp = _mm_mul_ps(two_point_four, y15);
+    // offset = (p < 0) ? 1.0f : 0.0f
+    __m128 offset = _mm_and_ps(_mm_cmplt_ps(p, zero), one);
 
-        y = _mm_sub_ps(y, _mm_div_ps(f, fp));
-    }
-    return y;
+    // clipp = (p < -126) ? -126.0f : p
+    __m128 clipp = _mm_max_ps(p, neg126);
+
+    // z = clipp - floor(clipp) + offset
+    __m128i ipart = _mm_cvttps_epi32(clipp);
+    __m128 fpart = _mm_sub_ps(clipp, _mm_cvtepi32_ps(ipart));
+    __m128 z = _mm_add_ps(fpart, offset);
+
+    // exp2 approx using bit hack
+    const __m128 c1 = _mm_set1_ps(121.2740575f);
+    const __m128 c2 = _mm_set1_ps(27.7280233f);
+    const __m128 c3 = _mm_set1_ps(4.84252568f);
+    const __m128 c4 = _mm_set1_ps(1.49012907f);
+    const __m128 bias = _mm_set1_ps(1 << 23);
+
+    __m128 t = _mm_add_ps(clipp, _mm_sub_ps(c1, _mm_mul_ps(c4, z)));
+    t = _mm_add_ps(t, _mm_div_ps(c2, _mm_sub_ps(c3, z)));
+    __m128i result = _mm_cvtps_epi32(_mm_mul_ps(t, bias));
+    return _mm_castsi128_ps(result);
+}
+
+inline __m128 fast_log2_ps(__m128 x) {
+    const __m128i xi = _mm_castps_si128(x);
+
+    const __m128i mant_mask = _mm_set1_epi32(0x007FFFFF);
+    const __m128i one_bits  = _mm_set1_epi32(0x3f000000);
+
+    // Extract exponent
+    const __m128 y = _mm_mul_ps(_mm_cvtepi32_ps(xi), _mm_set1_ps(1.1920928955078125e-7f)); // 1/(1<<23)
+
+    // Rebuild mantissa as float
+    __m128i mant_bits = _mm_or_si128(_mm_and_si128(xi, mant_mask), one_bits);
+    __m128 xf = _mm_castsi128_ps(mant_bits);
+
+    // Polynomial approximation
+    const __m128 c0 = _mm_set1_ps(124.22551499f);
+    const __m128 c1 = _mm_set1_ps(1.498030302f);
+    const __m128 c2 = _mm_set1_ps(1.72587999f);
+    const __m128 c3 = _mm_set1_ps(0.3520887068f);
+
+    return _mm_sub_ps(
+        _mm_sub_ps(y, _mm_add_ps(c0, _mm_mul_ps(c1, xf))),
+        _mm_div_ps(c2, _mm_add_ps(c3, xf))
+    );
+}
+
+inline __m128 fast_pow_ps(__m128 x, __m128 p) {
+    return fast_exp2_ps(_mm_mul_ps(p, fast_log2_ps(x)));
+}
+
+inline __m128 pow_1_over_2_4_ps(__m128 x) {
+    return fast_pow_ps(x, _mm_set1_ps(1.0f / 2.4f));
 }
 
 inline __m128 linear_to_srgb_approx_sse(__m128 l) {
@@ -205,7 +250,7 @@ inline __m128 linear_to_srgb_approx_sse(__m128 l) {
     const __m128 b = _mm_set1_ps(-0.055f);
 
     __m128 below = _mm_mul_ps(l, scale);
-    __m128 powed = pow_1_over_2_4_sse(l);
+    __m128 powed = pow_1_over_2_4_ps(l);
     __m128 above = _mm_add_ps(_mm_mul_ps(a, powed), b);
     __m128 mask = _mm_cmplt_ps(l, cutoff);
 
