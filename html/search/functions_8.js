@@ -1,5 +1,7 @@
 var searchData=
 [
-  ['rgba_5fuint32_0',['RGBA_uint32',['../classconstixel_1_1image.html#af8be75300446c74f87046eca86399af2',1,'constixel::image']]],
-  ['rgba_5fuint8_1',['RGBA_uint8',['../classconstixel_1_1image.html#a11c237c9bbf056fae4784647bb04a84a',1,'constixel::image']]]
+  ['plot_0',['plot',['../classconstixel_1_1image.html#ac471aaf3c7fdb56059b20a58c5d6f596',1,'constixel::image::plot(int32_t x, int32_t y, uint8_t col)'],['../classconstixel_1_1image.html#a704e5b47bb1d888a675027dc28575474',1,'constixel::image::plot(const struct plot &amp;p)']]],
+  ['png_1',['png',['../classconstixel_1_1image.html#a76a5c4af0baf26d096b2f056249fa327',1,'constixel::image']]],
+  ['png_5fto_5fiterm_2',['png_to_iterm',['../classconstixel_1_1image.html#a797f9b4c797bb28fd0b74d5e728b7c5a',1,'constixel::image']]],
+  ['png_5fto_5fkitty_3',['png_to_kitty',['../classconstixel_1_1image.html#ab41974f6652f2f27aaafb99ec114db86',1,'constixel::image']]]
 ];

@@ -2525,6 +2525,7 @@ struct draw_string {
  * @tparam W Width in pixels.
  * @tparam H Height in pixels.
  * @tparam GRAYSCALE boolean to indicate if palette should be grayscale. Otherwise a colored palette will be used.
+ * @tparam USE_SPAN Pass in your own std::span in the constructor to be used as a back buffer.
  * Defaults to false.
  */
 template <template <size_t, size_t, bool, bool> class T, size_t W, size_t H, bool GRAYSCALE = false,
@@ -2546,13 +2547,21 @@ class image {
 #endif  // #if defined(__x86_64__) || defined(_M_X64) || defined(__aarch64__)
 
  public:
+
+    /**
+     * \brief Creates a new image with internal storage. 
+     */
     image()
         requires(!USE_SPAN)
     = default;
 
-    image(const std::span<uint8_t, T<W, H, GRAYSCALE, USE_SPAN>::image_size> &in)
+    /**
+     * \brief When USE_SPAN=true creates a new image with external storage based existing std::span. 
+     * \param other If USE_SPAN=true this constructor will accept a std::span.
+     */
+    image(const std::span<uint8_t, T<W, H, GRAYSCALE, USE_SPAN>::image_size> &other)
         requires(USE_SPAN)
-        : data(in) {
+        : data(other) {
     }
 
     /**

@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['operator_26_0',['operator&amp;',['../structconstixel_1_1rect.html#aa8f18249ed87d97bd57312a2c5e2bc50',1,'constixel::rect']]],
-  ['operator_26_3d_1',['operator&amp;=',['../structconstixel_1_1rect.html#a5a27f1ea794be5401b2d9bc9cff20e5d',1,'constixel::rect']]]
+  ['image_0',['image',['../classconstixel_1_1image.html#ac0b51b87a63b6e025df0b69221a88e01',1,'constixel::image::image()=default'],['../classconstixel_1_1image.html#af35bac64f3bada9d16609df12b6e794a',1,'constixel::image::image(const std::span&lt; uint8_t, T&lt; W, H, GRAYSCALE, USE_SPAN &gt;::image_size &gt; &amp;other)']]]
 ];

@@ -1,8 +1,8 @@
 var structconstixel_1_1draw__circle =
 [
     [ "col", "structconstixel_1_1draw__circle.html#abba2a10fdfddcdcd89c6cad0a51a8361", null ],
+    [ "cx", "structconstixel_1_1draw__circle.html#a6d44030a945dadb53b1df38166cc513a", null ],
+    [ "cy", "structconstixel_1_1draw__circle.html#a6e80d9f53cfa5bb333a3c6ce1dc27f73", null ],
     [ "r", "structconstixel_1_1draw__circle.html#a8700dd878eb5e3d11ecf5fefb1a6217e", null ],
-    [ "sw", "structconstixel_1_1draw__circle.html#aaa519ec6d8e40cb6ce209784ce6df327", null ],
-    [ "x", "structconstixel_1_1draw__circle.html#ac5760fae7517c1776cecd12a1b4e8506", null ],
-    [ "y", "structconstixel_1_1draw__circle.html#a496f7f9868872ce230b58b7f2faff70f", null ]
+    [ "sw", "structconstixel_1_1draw__circle.html#aaa519ec6d8e40cb6ce209784ce6df327", null ]
 ];

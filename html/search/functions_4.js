@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['get_5fnearest_5fcolor_0',['get_nearest_color',['../classconstixel_1_1image.html#abc1e6059a20d269f9e15a477fba37fef',1,'constixel::image']]],
-  ['grayscale_1',['grayscale',['../classconstixel_1_1image.html#a07ab984ebc99a830507059779c2d5b41',1,'constixel::image']]]
+  ['get_5fnearest_5fcolor_0',['get_nearest_color',['../classconstixel_1_1image.html#ab4ec91b659f6dd98ec2faf2d02685b49',1,'constixel::image']]],
+  ['grayscale_1',['grayscale',['../classconstixel_1_1image.html#ac70cd7b8050c46e68c4bc604978a9e0f',1,'constixel::image']]]
 ];
