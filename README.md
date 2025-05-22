@@ -3,7 +3,7 @@
 [![CMake on multiple platforms](https://github.com/tinic/constixel/actions/workflows/cmake-multi-platform.yml/badge.svg)](https://github.com/tinic/constixel/actions/workflows/cmake-multi-platform.yml)
 [![CodeQL Advanced](https://github.com/tinic/constixel/actions/workflows/codeql.yml/badge.svg)](https://github.com/tinic/constixel/actions/workflows/codeql.yml)
 
-constixel is a single header minimalistic constexpr C++20 palette based 2D graphics rendering library with the ability to output to a sixel image stream which can be viewed in a modern terminal like Windows Terminal.
+constixel is a single header minimalistic constexpr C++20 palette based 2D graphics rendering library with the ability to output to a sixel image stream and png images which can be viewed in a modern terminal like Windows Terminal.
 
 ##### Table of Contents  
 [Primary features and goals](#primary-features-and-goals)  
@@ -42,12 +42,6 @@ constixel is a single header minimalistic constexpr C++20 palette based 2D graph
 - Programmatically render static graphical assets.
 - Help debug dynamic memory handling issues in complex C++ projects.
 - ...
-
-## Why Sixel
-
-Yes, VT330/VT340/Sixel is a horrendous format, but it's the best we got at this point. If better protocols come online this library can be easily adjusted to use them. iTerm's PNG support is unfortunately not very performant right now. 
-
-There are plenty of other uses for this library.
 
 ## Requirements
 
