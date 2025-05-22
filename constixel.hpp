@@ -138,15 +138,12 @@ static constexpr float fast_sqrtf(const float x) {
 inline float32x4_t fast_log2_f32_neon(float32x4_t x) {
     uint32x4_t xi = vreinterpretq_u32_f32(x);
     float32x4_t y = vmulq_n_f32(vcvtq_f32_u32(xi), 1.1920928955078125e-7f);
-
     uint32x4_t mantissa = vorrq_u32(vandq_u32(xi, vdupq_n_u32(0x007FFFFF)), vdupq_n_u32(0x3f000000));
     float32x4_t xf = vreinterpretq_f32_u32(mantissa);
-
     float32x4_t a = vdupq_n_f32(124.22551499f);
     float32x4_t b = vdupq_n_f32(1.498030302f);
     float32x4_t c = vdupq_n_f32(1.72587999f);
     float32x4_t d = vdupq_n_f32(0.3520887068f);
-
     return vsubq_f32(vsubq_f32(y, vmlaq_f32(a, b, xf)), vdivq_f32(c, vaddq_f32(d, xf)));
 }
 
@@ -154,22 +151,17 @@ inline float32x4_t fast_exp2_f32_neon(float32x4_t p) {
     float32x4_t one = vdupq_n_f32(1.0f);
     float32x4_t zero = vdupq_n_f32(0.0f);
     float32x4_t neg126 = vdupq_n_f32(-126.0f);
-
     float32x4_t offset = vbslq_f32(vcltq_f32(p, zero), one, zero);
     float32x4_t clipp = vmaxq_f32(p, neg126);
-
     int32x4_t ipart = vcvtq_s32_f32(clipp);
     float32x4_t fpart = vsubq_f32(clipp, vcvtq_f32_s32(ipart));
     float32x4_t z = vaddq_f32(fpart, offset);
-
     float32x4_t a = vdupq_n_f32(121.2740575f);
     float32x4_t b = vdupq_n_f32(27.7280233f);
     float32x4_t c = vdupq_n_f32(4.84252568f);
     float32x4_t d = vdupq_n_f32(1.49012907f);
-
     float32x4_t t = vaddq_f32(clipp, vsubq_f32(a, vmulq_f32(d, z)));
     t = vaddq_f32(t, vdivq_f32(b, vsubq_f32(c, z)));
-
     int32x4_t res = vcvtq_s32_f32(vmulq_n_f32(t, static_cast<float>(1 << 23)));
     return vreinterpretq_f32_s32(res);
 }
@@ -196,25 +188,16 @@ inline __m128 fast_exp2_ps(__m128 p) {
     const __m128 one = _mm_set1_ps(1.0f);
     const __m128 zero = _mm_setzero_ps();
     const __m128 neg126 = _mm_set1_ps(-126.0f);
-
-    // offset = (p < 0) ? 1.0f : 0.0f
     __m128 offset = _mm_and_ps(_mm_cmplt_ps(p, zero), one);
-
-    // clipp = (p < -126) ? -126.0f : p
     __m128 clipp = _mm_max_ps(p, neg126);
-
-    // z = clipp - floor(clipp) + offset
     __m128i ipart = _mm_cvttps_epi32(clipp);
     __m128 fpart = _mm_sub_ps(clipp, _mm_cvtepi32_ps(ipart));
     __m128 z = _mm_add_ps(fpart, offset);
-
-    // exp2 approx using bit hack
     const __m128 c1 = _mm_set1_ps(121.2740575f);
     const __m128 c2 = _mm_set1_ps(27.7280233f);
     const __m128 c3 = _mm_set1_ps(4.84252568f);
     const __m128 c4 = _mm_set1_ps(1.49012907f);
     const __m128 bias = _mm_set1_ps(1 << 23);
-
     __m128 t = _mm_add_ps(clipp, _mm_sub_ps(c1, _mm_mul_ps(c4, z)));
     t = _mm_add_ps(t, _mm_div_ps(c2, _mm_sub_ps(c3, z)));
     __m128i result = _mm_cvtps_epi32(_mm_mul_ps(t, bias));
@@ -223,23 +206,15 @@ inline __m128 fast_exp2_ps(__m128 p) {
 
 inline __m128 fast_log2_ps(__m128 x) {
     const __m128i xi = _mm_castps_si128(x);
-
     const __m128i mant_mask = _mm_set1_epi32(0x007FFFFF);
     const __m128i one_bits = _mm_set1_epi32(0x3f000000);
-
-    // Extract exponent
     const __m128 y = _mm_mul_ps(_mm_cvtepi32_ps(xi), _mm_set1_ps(1.1920928955078125e-7f));  // 1/(1<<23)
-
-    // Rebuild mantissa as float
     __m128i mant_bits = _mm_or_si128(_mm_and_si128(xi, mant_mask), one_bits);
     __m128 xf = _mm_castsi128_ps(mant_bits);
-
-    // Polynomial approximation
     const __m128 c0 = _mm_set1_ps(124.22551499f);
     const __m128 c1 = _mm_set1_ps(1.498030302f);
     const __m128 c2 = _mm_set1_ps(1.72587999f);
     const __m128 c3 = _mm_set1_ps(0.3520887068f);
-
     return _mm_sub_ps(_mm_sub_ps(y, _mm_add_ps(c0, _mm_mul_ps(c1, xf))), _mm_div_ps(c2, _mm_add_ps(c3, xf)));
 }
 
@@ -256,12 +231,10 @@ inline __m128 linear_to_srgb_approx_sse(__m128 l) {
     const __m128 scale = _mm_set1_ps(12.92f);
     const __m128 a = _mm_set1_ps(1.055f);
     const __m128 b = _mm_set1_ps(-0.055f);
-
     __m128 below = _mm_mul_ps(l, scale);
     __m128 powed = pow_1_over_2_4_ps(l);
     __m128 above = _mm_add_ps(_mm_mul_ps(a, powed), b);
     __m128 mask = _mm_cmplt_ps(l, cutoff);
-
     return _mm_or_ps(_mm_and_ps(mask, below), _mm_andnot_ps(mask, above));
 }
 #endif  // #if defined(__AVX2__)
