@@ -675,7 +675,7 @@ class format {
         const auto extra_data = size_t{10};
         const size_t max_stack_use = max_data_use + extra_data;
         std::array<uint8_t, max_stack_use> header{};
-        int32_t filter_first = 1;
+        size_t filter_first = 1;
         while (bytes > 0) {
             size_t i = 0;
             header.at(i++) = 'I';
@@ -1955,6 +1955,83 @@ class format_8bit : public format {
                     }
                 }
             });
+    }
+    /// @endcond
+};
+
+/**
+ * @brief 32-bit format. Use as template parameter for image. Example:
+ *
+ * \code{.cpp}
+ * constixel::image<constixel::format_32bit, 640, 480> image;
+ * \endcode
+ *
+ * @tparam W Width in pixels.
+ * @tparam H Height in pixels.
+ * @tparam GR Grayscale palette.
+ */
+template <size_t W, size_t H, bool GR>
+class format_32bit : public format {
+ public:
+    /// @cond DOXYGEN_EXCLUDE
+    static constexpr size_t bits_per_pixel = 32;
+    static constexpr size_t bytes_per_line = W * 4;
+    static constexpr size_t image_size = H * bytes_per_line;
+
+    static consteval auto gen_palette_consteval() {
+        return format_8bit<1, 1, GR>::gen_palette_consteval();
+    }
+    static constexpr const auto quant = hidden::quantize<1UL << bits_per_pixel>(gen_palette_consteval());
+
+    template <bool FLIP_H = false, bool FLIP_V = false>
+    static constexpr void transpose(const uint8_t * /*src*/, uint8_t * /*dst*/) {
+    }
+
+    static constexpr void plot(std::array<uint8_t, image_size> &data, size_t x, size_t y, uint8_t col) {
+        data.data()[y * bytes_per_line + x * 4 + 0] = (quant.palette().at(col) >> 16) & 0xFF;
+        data.data()[y * bytes_per_line + x * 4 + 1] = (quant.palette().at(col) >> 8) & 0xFF;
+        data.data()[y * bytes_per_line + x * 4 + 2] = (quant.palette().at(col) >> 0) & 0xFF;
+        data.data()[y * bytes_per_line + x * 4 + 3] = 0xFF;
+    }
+
+    static constexpr void span(std::array<uint8_t, image_size> &data, size_t xl0, size_t xr0, size_t y, uint8_t col) {
+        uint8_t *yptr = &data.data()[y * bytes_per_line + xl0 * 4];
+        uint32_t rgba = quant.palette().at(col);
+        for (size_t x = xl0; x < xr0; x++) {
+            *yptr++ = (rgba >> 16) & 0xFF;
+            *yptr++ = (rgba >> 8) & 0xFF;
+            *yptr++ = (rgba >> 0) & 0xFF;
+            *yptr++ = 0xFF;
+        }
+    }
+
+    static constexpr void compose(std::array<uint8_t, image_size> &data, size_t x, size_t y, float cola, float colr,
+                                  float colg, float colb) {
+
+        const size_t off = y * bytes_per_line + x * 4;
+        const float lr = hidden::srgb_to_linear(static_cast<float>(data[off + 0]) * (1.0f / 255.0f));
+        const float lg = hidden::srgb_to_linear(static_cast<float>(data[off + 1]) * (1.0f / 255.0f));
+        const float lb = hidden::srgb_to_linear(static_cast<float>(data[off + 2]) * (1.0f / 255.0f));
+        const float la = hidden::srgb_to_linear(static_cast<float>(data[off + 3]) * (1.0f / 255.0f));
+
+        const float rs = hidden::linear_to_srgb(colr * cola + lr * (1.0f - cola));
+        const float gs = hidden::linear_to_srgb(colg * cola + lg * (1.0f - cola));
+        const float bs = hidden::linear_to_srgb(colb * cola + lb * (1.0f - cola));
+        const float as = hidden::linear_to_srgb(cola * cola + la * (1.0f - cola));
+
+        data[off + 0] = static_cast<uint8_t>(std::clamp(rs * 255.0f + 0.5f, 0.0f, 255.0f));
+        data[off + 1] = static_cast<uint8_t>(std::clamp(gs * 255.0f + 0.5f, 0.0f, 255.0f));
+        data[off + 2] = static_cast<uint8_t>(std::clamp(bs * 255.0f + 0.5f, 0.0f, 255.0f));
+        data[off + 3] = static_cast<uint8_t>(std::clamp(as * 255.0f + 0.5f, 0.0f, 255.0f));
+    }
+
+    template <typename F>
+    static constexpr void png(const std::array<uint8_t, image_size> & /*data*/, F && /*char_out*/) {
+    }
+
+    template <size_t S, typename F>
+    static constexpr void sixel(const std::array<uint8_t, image_size> & /*data*/, F && /*char_out*/,
+                                const rect<int32_t> & /*r*/) {
     }
     /// @endcond
 };
