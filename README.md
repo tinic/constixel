@@ -3,7 +3,7 @@
 [![CMake on multiple platforms](https://github.com/tinic/constixel/actions/workflows/cmake-multi-platform.yml/badge.svg)](https://github.com/tinic/constixel/actions/workflows/cmake-multi-platform.yml)
 [![CodeQL Advanced](https://github.com/tinic/constixel/actions/workflows/codeql.yml/badge.svg)](https://github.com/tinic/constixel/actions/workflows/codeql.yml)
 
-constixel is a single header minimalistic constexpr C++20 palette based 2D graphics rendering library with the ability to output to a sixel image stream which can be viewed in a modern terminal like Windows Terminal.
+constixel is a single header minimalistic constexpr C++20 palette based 2D graphics rendering library with the ability to output to a sixel image stream and png images which can be viewed in a modern terminal like Windows Terminal.
 
 ##### Table of Contents  
 [Primary features and goals](#primary-features-and-goals)  
@@ -42,12 +42,6 @@ constixel is a single header minimalistic constexpr C++20 palette based 2D graph
 - Programmatically render static graphical assets.
 - Help debug dynamic memory handling issues in complex C++ projects.
 - ...
-
-## Why Sixel
-
-Yes, VT330/VT340/Sixel is a horrendous format, but it's the best we got at this point. If better protocols come online this library can be easily adjusted to use them. iTerm's PNG support is unfortunately not very performant right now. 
-
-There are plenty of other uses for this library.
 
 ## Requirements
 
@@ -258,6 +252,7 @@ The following image formats are available. [Width] is the width in pixels, [Heig
     constixel::image<constixel::format_2bit, [Width], [Height], [Grayscale=false]>
     constixel::image<constixel::format_4bit, [Width], [Height], [Grayscale=false]>
     constixel::image<constixel::format_8bit, [Width], [Height], [Grayscale=false]>
+    constixel::image<constixel::format_32bit, [Width], [Height]>
 ```
 
 A quick overview of some functionality of image, refer to the [full documention here](https://constixel.dev):
@@ -315,7 +310,7 @@ class image {
     // Draw smoothed utf8 text. #include a antialiased font and specify the included struct as the template parameter.
     // Rotation can be 0, 90, 180 or 270 degrees
     // Returns the current x caret position in pixels.
-    // NOTE: This only works with constixel::format_8bit images
+    // NOTE: This only works with constixel::format_8bit/constixel::format_32bit images
     template <typename FONT, bool KERNING = false, ROTATION = DEGREE_0>
     constexpr int32_t draw_string_aa(int32_t x, int32_t y, const char *str, uint8_t col);
 
@@ -327,7 +322,7 @@ class image {
     void draw_line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, uint32_t stroke_width = 1);
 
     // Draw an 1-pixel wide antialiased line with the specified color and thickness.
-    // NOTE: This only works with constixel::format_8bit images
+    // NOTE: This only works with constixel::format_8bit/constixel::format_32bit images
     void draw_line_aa(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col);
 
     // Draw a filled rectangle
@@ -343,11 +338,11 @@ class image {
     void stroke_round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col, int32_t stroke_width = 1);
 
     // Draw a rounded rectangle with antialiasing
-    // NOTE: This only works with constixel::format_8bit images
+    // NOTE: This only works with constixel::format_8bit/constixel::format_32bit images
     void fill_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col);
 
     // Draw a stroked rounded rectangle
-    // NOTE: This only works with constixel::format_8bit images
+    // NOTE: This only works with constixel::format_8bit/constixel::format_32bit images
     void stroke_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col, int32_t stroke_width = 1);
 
     // Draw a filled circle
