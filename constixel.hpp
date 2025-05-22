@@ -980,7 +980,7 @@ class format {
     static constexpr void png_image(const uint8_t *data, const P &palette, F &&char_out, const L &line_ptr) {
         png_marker(std::forward<F>(char_out));
         png_header(std::forward<F>(char_out), W, H, PBS);
-        if (PBS <= 8) {
+        if constexpr (PBS <= 8) {
             png_palette(std::forward<F>(char_out), palette);
         }
         png_idat_zlib_header(std::forward<F>(char_out));
