@@ -253,6 +253,7 @@ constixel::image<constixel::format_1bit,  [Width], [Height], [Unused=false],    
 constixel::image<constixel::format_2bit,  [Width], [Height], [Grayscale=false], [UseSpan=false]>
 constixel::image<constixel::format_4bit,  [Width], [Height], [Grayscale=false], [UseSpan=false]>
 constixel::image<constixel::format_8bit,  [Width], [Height], [Grayscale=false], [UseSpan=false]>
+constixel::image<constixel::format_24bit, [Width], [Height], [Unused=false],    [UseSpan=false]>
 constixel::image<constixel::format_32bit, [Width], [Height], [Unused=false],    [UseSpan=false]>
 ```
 
