@@ -2181,7 +2181,7 @@ class format_8bit : public format {
  * @brief 24-bit format. Use as template parameter for image. Example:
  *
  * \code{.cpp}
- * constixel::image<constixel::format_32bit, 640, 480> image;
+ * constixel::image<constixel::format_24bit, 640, 480> image;
  * \endcode
  *
  * @tparam W Width in pixels.
@@ -2799,7 +2799,7 @@ struct draw_string {
  * constixel::image<constixel::format_8bit, 640, 480> image;
  * \endcode
  *
- * @tparam T Type of the image buffer. One of format_1bit, format_2bit, format_4bit or format_8bit.
+ * @tparam T Type of the image buffer. One of format_1bit, format_2bit, format_4bit, format_8bit, format_24bit or format_32bit.
  * @tparam W Width in pixels.
  * @tparam H Height in pixels.
  * @tparam GRAYSCALE boolean to indicate if palette should be grayscale. Otherwise a colored palette will be used.
@@ -3825,7 +3825,7 @@ class image {
      * \brief Fill a circle with the specified radius and color. Example:
      *
      * \code{.cpp}
-     * image.fill_circle({.x=64, .y=64, .r=32, .col=constixel::color::WHITE});
+     * image.fill_circle({.cx=64, .cy=64, .r=32, .col=constixel::color::WHITE});
      * \endcode
      *
      * \param d \ref draw_circle initializer struct
@@ -3869,7 +3869,7 @@ class image {
      * \brief Stroke a circle with the specified radius and color. Example:
      *
      * \code{.cpp}
-     * image.stroke_circle({.x=64, .y=64, .r=32, .col=constixel::color::WHITE, .sw=2});
+     * image.stroke_circle({.cx=64, .cy=64, .r=32, .col=constixel::color::WHITE, .sw=2});
      * \endcode
      *
      * \param d \ref draw_circle initializer struct
@@ -3915,7 +3915,7 @@ class image {
      * supported. Example:
      *
      * \code{.cpp}
-     * image.stroke_circle_aa({.x=64, .y=64, .r=32, .col=constixel::color::WHITE, .sw=2});
+     * image.stroke_circle_aa({.cx=64, .cy=64, .r=32, .col=constixel::color::WHITE, .sw=2});
      * \endcode
      *
      * \param d \ref draw_circle initializer struct
@@ -3951,7 +3951,7 @@ class image {
      * supported. Example:
      *
      * \code{.cpp}
-     * image.fill_circle_aa({.x=64, .y=64, .r=32, .col=constixel::color::WHITE});
+     * image.fill_circle_aa({.cx=64, .cy=64, .r=32, .col=constixel::color::WHITE});
      * \endcode
      *
      * \param d \ref draw_circle initializer struct
