@@ -2967,7 +2967,7 @@ class image {
             const I line_dy = y1 - y0;
             const I line_length_sq = line_dx * line_dx + line_dy * line_dy;
 
-            if (line_length_sq == 0) {
+            if (line_length_sq <= 1) {
                 if (x0 >= 0 && x0 < static_cast<int32_t>(W) && y0 >= 0 && y0 < static_cast<int32_t>(H)) {
                     fill_circle(x0, y0, half_width, col);
                 }
@@ -3139,7 +3139,7 @@ class image {
         const float dy = static_cast<float>(y1 - y0);
         const float line_length_sq = dx * dx + dy * dy;
 
-        if (line_length_sq < 1.0f) {
+        if (line_length_sq <= 1.0f) {
             const float radius = half_width;
             const int32_t r_ceil = static_cast<int32_t>(std::ceil(radius));
             for (int32_t py = y0 - r_ceil; py <= y0 + r_ceil; py++) {
