@@ -5,7 +5,7 @@ var searchData=
   ['disk_20example_2',['Saving a PNG to disk example',['../md__r_e_a_d_m_e.html#autotoc_md10',1,'']]],
   ['draw_5fcircle_3',['draw_circle',['../structconstixel_1_1draw__circle.html',1,'constixel']]],
   ['draw_5fline_4',['draw_line',['../structconstixel_1_1draw__line.html',1,'constixel::draw_line'],['../classconstixel_1_1image.html#a61f881c7e78dbd6dad951c2aaa80fbd0',1,'constixel::image::draw_line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, int32_t stroke_width=1)'],['../classconstixel_1_1image.html#a6606d2b3f571e9c0568240d749799bbd',1,'constixel::image::draw_line(const struct draw_line &amp;d)']]],
-  ['draw_5fline_5faa_5',['draw_line_aa',['../classconstixel_1_1image.html#a47ee0c1c7dc2134c75035df3e6b8cdb2',1,'constixel::image::draw_line_aa(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col)'],['../classconstixel_1_1image.html#a70321c25bf15a7e0e0759c6da599778a',1,'constixel::image::draw_line_aa(const struct draw_line &amp;d)']]],
+  ['draw_5fline_5faa_5',['draw_line_aa',['../classconstixel_1_1image.html#a0e01279744eeb4269f160ec86986fe77',1,'constixel::image::draw_line_aa(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, float stroke_width=1.0f)'],['../classconstixel_1_1image.html#a70321c25bf15a7e0e0759c6da599778a',1,'constixel::image::draw_line_aa(const struct draw_line &amp;d)']]],
   ['draw_5frect_6',['draw_rect',['../structconstixel_1_1draw__rect.html',1,'constixel']]],
   ['draw_5fround_5frect_7',['draw_round_rect',['../structconstixel_1_1draw__round__rect.html',1,'constixel']]],
   ['draw_5fstring_8',['draw_string',['../structconstixel_1_1draw__string.html',1,'constixel']]],
