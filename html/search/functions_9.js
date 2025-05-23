@@ -1,5 +1,8 @@
 var searchData=
 [
-  ['rgba_5fuint32_0',['RGBA_uint32',['../classconstixel_1_1image.html#a93fa55bda11819a8a7d5d4ecf93e467c',1,'constixel::image']]],
-  ['rgba_5fuint8_1',['RGBA_uint8',['../classconstixel_1_1image.html#a3d84e2cd6d6ce5d34d8a187258182ddb',1,'constixel::image']]]
+  ['plot_0',['plot',['../classconstixel_1_1shapes_1_1point.html#ab7111ee7f1cedb7fe7429834d58c0bcd',1,'constixel::shapes::point::plot()'],['../classconstixel_1_1image.html#ac471aaf3c7fdb56059b20a58c5d6f596',1,'constixel::image::plot(int32_t x, int32_t y, uint8_t col)'],['../classconstixel_1_1image.html#a704e5b47bb1d888a675027dc28575474',1,'constixel::image::plot(const struct plot &amp;p)']]],
+  ['png_1',['png',['../classconstixel_1_1image.html#a76a5c4af0baf26d096b2f056249fa327',1,'constixel::image']]],
+  ['png_5fto_5fiterm_2',['png_to_iterm',['../classconstixel_1_1image.html#a797f9b4c797bb28fd0b74d5e728b7c5a',1,'constixel::image']]],
+  ['png_5fto_5fkitty_3',['png_to_kitty',['../classconstixel_1_1image.html#ab41974f6652f2f27aaafb99ec114db86',1,'constixel::image']]],
+  ['point_4',['point',['../classconstixel_1_1shapes_1_1point.html#a9dc7ab2a7d077758ae55a4a531d322a2',1,'constixel::shapes::point::point()'],['../classconstixel_1_1image.html#ace9a4bc386268bfda228712d06974858',1,'constixel::image::point()']]]
 ];

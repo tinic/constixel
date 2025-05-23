@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['w_0',['w',['../structconstixel_1_1rect.html#ae1291bf45c485a7e14fa6e9d1fd5567f',1,'constixel::rect::w'],['../structconstixel_1_1draw__rect.html#a49df3570c5d5b019e141640a27bda653',1,'constixel::draw_rect::w'],['../structconstixel_1_1draw__round__rect.html#a304a8cdcc602d12bfc8a04d578208d2c',1,'constixel::draw_round_rect::w']]],
-  ['width_1',['width',['../classconstixel_1_1image.html#a13a20e73412dc283ed908959a31ebca6',1,'constixel::image']]]
+  ['vt100_5fclear_0',['vt100_clear',['../classconstixel_1_1image.html#a5ea8bbc3dd0c803544319949c5c399d8',1,'constixel::image']]],
+  ['vt100_5fclear_5fscrollback_1',['vt100_clear_scrollback',['../classconstixel_1_1image.html#a5209c6ba107273f2b4c3652247995ba1',1,'constixel::image']]],
+  ['vt100_5fhome_2',['vt100_home',['../classconstixel_1_1image.html#ae0eb1cdfc6da67497e6f0fac437ff1f6',1,'constixel::image']]]
 ];

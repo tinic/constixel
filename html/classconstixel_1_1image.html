@@ -342,6 +342,46 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>png_to_kitty</b> () c
 <tr class="memitem:a486a02413b3ff900c69ec43b85c9ea70"><td class="memTemplItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a486a02413b3ff900c69ec43b85c9ea70">convert</a> (F &amp;&amp;uint8_out)</td></tr>
 <tr class="memdesc:a486a02413b3ff900c69ec43b85c9ea70"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert the current instance into a byte stream formatted for embedded displays.  <br /></td></tr>
 <tr class="separator:a486a02413b3ff900c69ec43b85c9ea70"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb97c591957e1a59abc04e7c88c220bd" id="r_aeb97c591957e1a59abc04e7c88c220bd"><td class="memItemLeft" align="right" valign="top">constexpr auto&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aeb97c591957e1a59abc04e7c88c220bd">rect</a> (int32_t x, int32_t y, int32_t w, int32_t h)</td></tr>
+<tr class="memdesc:aeb97c591957e1a59abc04e7c88c220bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fluent shape API methods for method chaining These provide a more expressive way to create shapes compared to struct-based calls.  <br /></td></tr>
+<tr class="separator:aeb97c591957e1a59abc04e7c88c220bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0cbdb10f079b3ee0581a628dc9476c5d" id="r_a0cbdb10f079b3ee0581a628dc9476c5d"><td class="memItemLeft" align="right" valign="top">constexpr auto&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0cbdb10f079b3ee0581a628dc9476c5d">circle</a> (int32_t cx, int32_t cy, int32_t r)</td></tr>
+<tr class="memdesc:a0cbdb10f079b3ee0581a628dc9476c5d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a circle shape for fluent method chaining.  <br /></td></tr>
+<tr class="separator:a0cbdb10f079b3ee0581a628dc9476c5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac3bf53b99f37c6e47bfcc799dbb57a75" id="r_ac3bf53b99f37c6e47bfcc799dbb57a75"><td class="memItemLeft" align="right" valign="top">constexpr auto&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac3bf53b99f37c6e47bfcc799dbb57a75">circle_aa</a> (int32_t cx, int32_t cy, int32_t r)</td></tr>
+<tr class="memdesc:ac3bf53b99f37c6e47bfcc799dbb57a75"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an antialiased circle shape for fluent method chaining. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported.  <br /></td></tr>
+<tr class="separator:ac3bf53b99f37c6e47bfcc799dbb57a75"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9d2ab33c429c26a6dd7e8c5bcb4555f9" id="r_a9d2ab33c429c26a6dd7e8c5bcb4555f9"><td class="memItemLeft" align="right" valign="top">constexpr auto&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9d2ab33c429c26a6dd7e8c5bcb4555f9">round_rect</a> (int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius)</td></tr>
+<tr class="memdesc:a9d2ab33c429c26a6dd7e8c5bcb4555f9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a rounded rectangle shape for fluent method chaining.  <br /></td></tr>
+<tr class="separator:a9d2ab33c429c26a6dd7e8c5bcb4555f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a35fad144cfc9932aafb1875814ad7c27" id="r_a35fad144cfc9932aafb1875814ad7c27"><td class="memItemLeft" align="right" valign="top">constexpr auto&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a35fad144cfc9932aafb1875814ad7c27">round_rect_aa</a> (int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius)</td></tr>
+<tr class="memdesc:a35fad144cfc9932aafb1875814ad7c27"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an antialiased rounded rectangle shape for fluent method chaining. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported.  <br /></td></tr>
+<tr class="separator:a35fad144cfc9932aafb1875814ad7c27"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab51a0777b177a683063de0d3eb7f5432" id="r_ab51a0777b177a683063de0d3eb7f5432"><td class="memItemLeft" align="right" valign="top">constexpr auto&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab51a0777b177a683063de0d3eb7f5432">line</a> (int32_t x0, int32_t y0, int32_t x1, int32_t y1)</td></tr>
+<tr class="memdesc:ab51a0777b177a683063de0d3eb7f5432"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a line shape for fluent method chaining.  <br /></td></tr>
+<tr class="separator:ab51a0777b177a683063de0d3eb7f5432"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a02e1dd7fa89b3f77fc08a6c579888517" id="r_a02e1dd7fa89b3f77fc08a6c579888517"><td class="memItemLeft" align="right" valign="top">constexpr auto&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a02e1dd7fa89b3f77fc08a6c579888517">line_aa</a> (int32_t x0, int32_t y0, int32_t x1, int32_t y1)</td></tr>
+<tr class="memdesc:a02e1dd7fa89b3f77fc08a6c579888517"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an antialiased line shape for fluent method chaining. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported.  <br /></td></tr>
+<tr class="separator:a02e1dd7fa89b3f77fc08a6c579888517"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ace9a4bc386268bfda228712d06974858" id="r_ace9a4bc386268bfda228712d06974858"><td class="memItemLeft" align="right" valign="top">constexpr auto&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ace9a4bc386268bfda228712d06974858">point</a> (int32_t x, int32_t y)</td></tr>
+<tr class="memdesc:ace9a4bc386268bfda228712d06974858"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a point shape for fluent method chaining.  <br /></td></tr>
+<tr class="separator:ace9a4bc386268bfda228712d06974858"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5a73f0719efdcd7d467531ded4bd2104" id="r_a5a73f0719efdcd7d467531ded4bd2104"><td class="memTemplParams" colspan="2">template&lt;typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0&gt; </td></tr>
+<tr class="memitem:a5a73f0719efdcd7d467531ded4bd2104"><td class="memTemplItemLeft" align="right" valign="top">constexpr auto&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a5a73f0719efdcd7d467531ded4bd2104">text_mono</a> (int32_t x, int32_t y, const char *str)</td></tr>
+<tr class="memdesc:a5a73f0719efdcd7d467531ded4bd2104"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a text shape for fluent monospace string drawing with method chaining.  <br /></td></tr>
+<tr class="separator:a5a73f0719efdcd7d467531ded4bd2104"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a658bd0f0123994ca7b5ff4b2a154cac2" id="r_a658bd0f0123994ca7b5ff4b2a154cac2"><td class="memTemplParams" colspan="2">template&lt;typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0&gt; </td></tr>
+<tr class="memitem:a658bd0f0123994ca7b5ff4b2a154cac2"><td class="memTemplItemLeft" align="right" valign="top">constexpr auto&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a658bd0f0123994ca7b5ff4b2a154cac2">text_aa</a> (int32_t x, int32_t y, const char *str)</td></tr>
+<tr class="memdesc:a658bd0f0123994ca7b5ff4b2a154cac2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a text shape for fluent antialiased string drawing with method chaining. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported.  <br /></td></tr>
+<tr class="separator:a658bd0f0123994ca7b5ff4b2a154cac2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3a9e638c38059337f75611e458a4ec99" id="r_a3a9e638c38059337f75611e458a4ec99"><td class="memTemplParams" colspan="2">template&lt;typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0&gt; </td></tr>
+<tr class="memitem:a3a9e638c38059337f75611e458a4ec99"><td class="memTemplItemLeft" align="right" valign="top">constexpr auto&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a3a9e638c38059337f75611e458a4ec99">text_centered_mono</a> (int32_t x, int32_t y, const char *str)</td></tr>
+<tr class="memdesc:a3a9e638c38059337f75611e458a4ec99"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a text shape for fluent centered monospace string drawing with method chaining.  <br /></td></tr>
+<tr class="separator:a3a9e638c38059337f75611e458a4ec99"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3bb9d0db246e5f4b7514e0acb1617d73" id="r_a3bb9d0db246e5f4b7514e0acb1617d73"><td class="memTemplParams" colspan="2">template&lt;typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0&gt; </td></tr>
+<tr class="memitem:a3bb9d0db246e5f4b7514e0acb1617d73"><td class="memTemplItemLeft" align="right" valign="top">constexpr auto&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a3bb9d0db246e5f4b7514e0acb1617d73">text_centered_aa</a> (int32_t x, int32_t y, const char *str)</td></tr>
+<tr class="memdesc:a3bb9d0db246e5f4b7514e0acb1617d73"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a text shape for fluent centered antialiased string drawing with method chaining. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported.  <br /></td></tr>
+<tr class="separator:a3bb9d0db246e5f4b7514e0acb1617d73"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
@@ -368,7 +408,7 @@ Static Public Member Functions</h2></td></tr>
 <div class="textblock"><div class="compoundTemplParams">template&lt;template&lt; size_t, size_t, bool, bool &gt; class T, size_t W, size_t H, bool GRAYSCALE = false, bool USE_SPAN = false&gt;<br />
 class constixel::image&lt; T, W, H, GRAYSCALE, USE_SPAN &gt;</div><p>Core class of constixel. Holds a buffer of an image width a certain size and format. Typical use: </p>
 <div class="fragment"><div class="line"><a class="code hl_class" href="classconstixel_1_1image.html">constixel::image&lt;constixel::format_8bit, 640, 480&gt;</a> <a class="code hl_function" href="#ac0b51b87a63b6e025df0b69221a88e01">image</a>;</div>
-<div class="ttc" id="aclassconstixel_1_1image_html"><div class="ttname"><a href="classconstixel_1_1image.html">constixel::image</a></div><div class="ttdoc">Core class of constixel. Holds a buffer of an image width a certain size and format....</div><div class="ttdef"><b>Definition</b> constixel.hpp:2811</div></div>
+<div class="ttc" id="aclassconstixel_1_1image_html"><div class="ttname"><a href="classconstixel_1_1image.html">constixel::image</a></div><div class="ttdoc">Core class of constixel. Holds a buffer of an image width a certain size and format....</div><div class="ttdef"><b>Definition</b> constixel.hpp:3487</div></div>
 <div class="ttc" id="aclassconstixel_1_1image_html_ac0b51b87a63b6e025df0b69221a88e01"><div class="ttname"><a href="#ac0b51b87a63b6e025df0b69221a88e01">constixel::image::image</a></div><div class="ttdeci">image()=default</div><div class="ttdoc">Creates a new image with internal storage.</div></div>
 </div><!-- fragment --><dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
@@ -876,6 +916,100 @@ template&lt;template&lt; size_t, size_t, bool, bool &gt; class T, size_t W, size
 
 <p>Bytes per line in the image data. Also called stride. </p>
 <dl class="section return"><dt>Returns</dt><dd>Bytes per line in the image data. </dd></dl>
+
+</div>
+</div>
+<a id="a0cbdb10f079b3ee0581a628dc9476c5d" name="a0cbdb10f079b3ee0581a628dc9476c5d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0cbdb10f079b3ee0581a628dc9476c5d">&#9670;&#160;</a></span>circle()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;template&lt; size_t, size_t, bool, bool &gt; class T, size_t W, size_t H, bool GRAYSCALE = false, bool USE_SPAN = false&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">auto <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, GRAYSCALE, USE_SPAN &gt;::circle </td>
+          <td>(</td>
+          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>cx</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>cy</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>r</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Create a circle shape for fluent method chaining. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cx</td><td>Center X-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">cy</td><td>Center Y-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">r</td><td>Radius of the circle in pixels. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A circle shape object that supports .fill() and .stroke() methods. </dd></dl>
+
+</div>
+</div>
+<a id="ac3bf53b99f37c6e47bfcc799dbb57a75" name="ac3bf53b99f37c6e47bfcc799dbb57a75"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac3bf53b99f37c6e47bfcc799dbb57a75">&#9670;&#160;</a></span>circle_aa()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;template&lt; size_t, size_t, bool, bool &gt; class T, size_t W, size_t H, bool GRAYSCALE = false, bool USE_SPAN = false&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">auto <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, GRAYSCALE, USE_SPAN &gt;::circle_aa </td>
+          <td>(</td>
+          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>cx</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>cy</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>r</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Create an antialiased circle shape for fluent method chaining. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cx</td><td>Center X-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">cy</td><td>Center Y-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">r</td><td>Radius of the circle in pixels. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A circle_aa shape object that supports .fill() and .stroke() methods. </dd></dl>
 
 </div>
 </div>
@@ -2445,6 +2579,112 @@ template&lt;template&lt; size_t, size_t, bool, bool &gt; class T, size_t W, size
 
 </div>
 </div>
+<a id="ab51a0777b177a683063de0d3eb7f5432" name="ab51a0777b177a683063de0d3eb7f5432"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab51a0777b177a683063de0d3eb7f5432">&#9670;&#160;</a></span>line()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;template&lt; size_t, size_t, bool, bool &gt; class T, size_t W, size_t H, bool GRAYSCALE = false, bool USE_SPAN = false&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">auto <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, GRAYSCALE, USE_SPAN &gt;::line </td>
+          <td>(</td>
+          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>x0</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>y0</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>x1</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>y1</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Create a line shape for fluent method chaining. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">x0</td><td>Starting X-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">y0</td><td>Starting Y-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">x1</td><td>Ending X-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">y1</td><td>Ending Y-coordinate in pixels. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A line shape object that supports .stroke() method. </dd></dl>
+
+</div>
+</div>
+<a id="a02e1dd7fa89b3f77fc08a6c579888517" name="a02e1dd7fa89b3f77fc08a6c579888517"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a02e1dd7fa89b3f77fc08a6c579888517">&#9670;&#160;</a></span>line_aa()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;template&lt; size_t, size_t, bool, bool &gt; class T, size_t W, size_t H, bool GRAYSCALE = false, bool USE_SPAN = false&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">auto <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, GRAYSCALE, USE_SPAN &gt;::line_aa </td>
+          <td>(</td>
+          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>x0</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>y0</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>x1</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>y1</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Create an antialiased line shape for fluent method chaining. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">x0</td><td>Starting X-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">y0</td><td>Starting Y-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">x1</td><td>Ending X-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">y1</td><td>Ending Y-coordinate in pixels. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A line_aa shape object that supports .stroke() method. </dd></dl>
+
+</div>
+</div>
 <a id="a704e5b47bb1d888a675027dc28575474" name="a704e5b47bb1d888a675027dc28575474"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a704e5b47bb1d888a675027dc28575474">&#9670;&#160;</a></span>plot() <span class="overload">[1/2]</span></h2>
 
@@ -2567,6 +2807,103 @@ template&lt;typename F&gt; </div>
 
 </div>
 </div>
+<a id="ace9a4bc386268bfda228712d06974858" name="ace9a4bc386268bfda228712d06974858"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ace9a4bc386268bfda228712d06974858">&#9670;&#160;</a></span>point()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;template&lt; size_t, size_t, bool, bool &gt; class T, size_t W, size_t H, bool GRAYSCALE = false, bool USE_SPAN = false&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">auto <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, GRAYSCALE, USE_SPAN &gt;::point </td>
+          <td>(</td>
+          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>x</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>y</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Create a point shape for fluent method chaining. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">x</td><td>X-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">y</td><td>Y-coordinate in pixels. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A point shape object that supports .<a class="el" href="#ac471aaf3c7fdb56059b20a58c5d6f596" title="Plot a single pixel at the specified coordinates using the supplied color.">plot()</a> method. </dd></dl>
+
+</div>
+</div>
+<a id="aeb97c591957e1a59abc04e7c88c220bd" name="aeb97c591957e1a59abc04e7c88c220bd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeb97c591957e1a59abc04e7c88c220bd">&#9670;&#160;</a></span>rect()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;template&lt; size_t, size_t, bool, bool &gt; class T, size_t W, size_t H, bool GRAYSCALE = false, bool USE_SPAN = false&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">auto <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, GRAYSCALE, USE_SPAN &gt;::rect </td>
+          <td>(</td>
+          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>x</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>y</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>w</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>h</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Fluent shape API methods for method chaining These provide a more expressive way to create shapes compared to struct-based calls. </p>
+<p>Example usage: </p><div class="fragment"><div class="line"><a class="code hl_function" href="#ac0b51b87a63b6e025df0b69221a88e01">image</a>.rect(10, 10, 50, 30).fill(constixel::color::RED).stroke(constixel::color::BLACK, 2);</div>
+<div class="line"><a class="code hl_function" href="#ac0b51b87a63b6e025df0b69221a88e01">image</a>.circle(100, 100, 20).fill(constixel::color::BLUE);</div>
+<div class="line"><a class="code hl_function" href="#ac0b51b87a63b6e025df0b69221a88e01">image</a>.line(0, 0, 100, 100).stroke(constixel::color::WHITE, 3);</div>
+</div><!-- fragment --><p>Create a rectangle shape for fluent method chaining. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">x</td><td>Starting X-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">y</td><td>Starting Y-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">w</td><td>Width of the rectangle in pixels. </td></tr>
+    <tr><td class="paramname">h</td><td>Height of the rectangle in pixels. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A rect shape object that supports .fill() and .stroke() methods. </dd></dl>
+
+</div>
+</div>
 <a id="a93fa55bda11819a8a7d5d4ecf93e467c" name="a93fa55bda11819a8a7d5d4ecf93e467c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a93fa55bda11819a8a7d5d4ecf93e467c">&#9670;&#160;</a></span>RGBA_uint32()</h2>
 
@@ -2634,6 +2971,124 @@ template&lt;template&lt; size_t, size_t, bool, bool &gt; class T, size_t W, size
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="a9d2ab33c429c26a6dd7e8c5bcb4555f9" name="a9d2ab33c429c26a6dd7e8c5bcb4555f9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9d2ab33c429c26a6dd7e8c5bcb4555f9">&#9670;&#160;</a></span>round_rect()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;template&lt; size_t, size_t, bool, bool &gt; class T, size_t W, size_t H, bool GRAYSCALE = false, bool USE_SPAN = false&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">auto <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, GRAYSCALE, USE_SPAN &gt;::round_rect </td>
+          <td>(</td>
+          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>x</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>y</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>w</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>h</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>radius</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Create a rounded rectangle shape for fluent method chaining. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">x</td><td>Starting X-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">y</td><td>Starting Y-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">w</td><td>Width of the rectangle in pixels. </td></tr>
+    <tr><td class="paramname">h</td><td>Height of the rectangle in pixels. </td></tr>
+    <tr><td class="paramname">radius</td><td>Radius of the rounded corners in pixels. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A round_rect shape object that supports .fill() and .stroke() methods. </dd></dl>
+
+</div>
+</div>
+<a id="a35fad144cfc9932aafb1875814ad7c27" name="a35fad144cfc9932aafb1875814ad7c27"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a35fad144cfc9932aafb1875814ad7c27">&#9670;&#160;</a></span>round_rect_aa()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;template&lt; size_t, size_t, bool, bool &gt; class T, size_t W, size_t H, bool GRAYSCALE = false, bool USE_SPAN = false&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">auto <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, GRAYSCALE, USE_SPAN &gt;::round_rect_aa </td>
+          <td>(</td>
+          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>x</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>y</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>w</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>h</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>radius</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Create an antialiased rounded rectangle shape for fluent method chaining. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">x</td><td>Starting X-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">y</td><td>Starting Y-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">w</td><td>Width of the rectangle in pixels. </td></tr>
+    <tr><td class="paramname">h</td><td>Height of the rectangle in pixels. </td></tr>
+    <tr><td class="paramname">radius</td><td>Radius of the rounded corners in pixels. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A round_rect_aa shape object that supports .fill() and .stroke() methods. </dd></dl>
 
 </div>
 </div>
@@ -2844,7 +3299,7 @@ template&lt;typename FONT, bool KERNING = false&gt; </div>
 <div class="line">...</div>
 <div class="line">    int32_t <a class="code hl_function" href="#a13a20e73412dc283ed908959a31ebca6">width</a> = <a class="code hl_function" href="#ac0b51b87a63b6e025df0b69221a88e01">image</a>.string_width&lt;constixel::some_font_aa&gt;();</div>
 <div class="line">...</div>
-<div class="ttc" id="aclassconstixel_1_1image_html_a13a20e73412dc283ed908959a31ebca6"><div class="ttname"><a href="#a13a20e73412dc283ed908959a31ebca6">constixel::image::width</a></div><div class="ttdeci">static constexpr int32_t width()</div><div class="ttdoc">Width in pixels of the image.</div><div class="ttdef"><b>Definition</b> constixel.hpp:2881</div></div>
+<div class="ttc" id="aclassconstixel_1_1image_html_a13a20e73412dc283ed908959a31ebca6"><div class="ttname"><a href="#a13a20e73412dc283ed908959a31ebca6">constixel::image::width</a></div><div class="ttdeci">static constexpr int32_t width()</div><div class="ttdoc">Width in pixels of the image.</div><div class="ttdef"><b>Definition</b> constixel.hpp:3557</div></div>
 </div><!-- fragment --><dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">FONT</td><td>The font struct name. </td></tr>
@@ -3367,6 +3822,238 @@ template&lt;template&lt; size_t, size_t, bool, bool &gt; class T, size_t W, size
   </dd>
 </dl>
 
+</div>
+</div>
+<a id="a658bd0f0123994ca7b5ff4b2a154cac2" name="a658bd0f0123994ca7b5ff4b2a154cac2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a658bd0f0123994ca7b5ff4b2a154cac2">&#9670;&#160;</a></span>text_aa()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;template&lt; size_t, size_t, bool, bool &gt; class T, size_t W, size_t H, bool GRAYSCALE = false, bool USE_SPAN = false&gt; </div>
+<div class="memtemplate">
+template&lt;typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">auto <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, GRAYSCALE, USE_SPAN &gt;::text_aa </td>
+          <td>(</td>
+          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>x</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>y</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>str</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Create a text shape for fluent antialiased string drawing with method chaining. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported. </p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">FONT</td><td>The font type to use for rendering. </td></tr>
+    <tr><td class="paramname">KERNING</td><td>Enable kerning if true (default: false). </td></tr>
+    <tr><td class="paramname">ROTATION</td><td>Text rotation (default: DEGREE_0). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">x</td><td>Starting X-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">y</td><td>Starting Y-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">str</td><td>The string to draw. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A text_aa shape object that supports .color() and .draw() methods.</dd></dl>
+<p>Example usage: </p><div class="fragment"><div class="line">img.text_aa&lt;constixel::ibmplexmono_regular_12_aa&gt;(10, 20, <span class="stringliteral">&quot;Hello&quot;</span>).color(constixel::color::WHITE);</div>
+</div><!-- fragment --> 
+</div>
+</div>
+<a id="a3bb9d0db246e5f4b7514e0acb1617d73" name="a3bb9d0db246e5f4b7514e0acb1617d73"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3bb9d0db246e5f4b7514e0acb1617d73">&#9670;&#160;</a></span>text_centered_aa()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;template&lt; size_t, size_t, bool, bool &gt; class T, size_t W, size_t H, bool GRAYSCALE = false, bool USE_SPAN = false&gt; </div>
+<div class="memtemplate">
+template&lt;typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">auto <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, GRAYSCALE, USE_SPAN &gt;::text_centered_aa </td>
+          <td>(</td>
+          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>x</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>y</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>str</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Create a text shape for fluent centered antialiased string drawing with method chaining. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported. </p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">FONT</td><td>The font type to use for rendering. </td></tr>
+    <tr><td class="paramname">KERNING</td><td>Enable kerning if true (default: false). </td></tr>
+    <tr><td class="paramname">ROTATION</td><td>Text rotation (default: DEGREE_0). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">x</td><td>Center X-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">y</td><td>Center Y-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">str</td><td>The string to draw. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A text_centered_aa shape object that supports .color() method.</dd></dl>
+<p>Example usage: </p><div class="fragment"><div class="line">img.text_centered_aa&lt;constixel::ibmplexmono_regular_12_aa&gt;(100, 50, <span class="stringliteral">&quot;Centered&quot;</span>).color(constixel::color::WHITE);</div>
+</div><!-- fragment --> 
+</div>
+</div>
+<a id="a3a9e638c38059337f75611e458a4ec99" name="a3a9e638c38059337f75611e458a4ec99"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3a9e638c38059337f75611e458a4ec99">&#9670;&#160;</a></span>text_centered_mono()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;template&lt; size_t, size_t, bool, bool &gt; class T, size_t W, size_t H, bool GRAYSCALE = false, bool USE_SPAN = false&gt; </div>
+<div class="memtemplate">
+template&lt;typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">auto <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, GRAYSCALE, USE_SPAN &gt;::text_centered_mono </td>
+          <td>(</td>
+          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>x</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>y</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>str</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Create a text shape for fluent centered monospace string drawing with method chaining. </p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">FONT</td><td>The font type to use for rendering. </td></tr>
+    <tr><td class="paramname">KERNING</td><td>Enable kerning if true (default: false). </td></tr>
+    <tr><td class="paramname">ROTATION</td><td>Text rotation (default: DEGREE_0). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">x</td><td>Center X-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">y</td><td>Center Y-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">str</td><td>The string to draw. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A text_centered_mono shape object that supports .color() method.</dd></dl>
+<p>Example usage: </p><div class="fragment"><div class="line">img.text_centered_mono&lt;constixel::ibmplexmono_regular_12_mono&gt;(100, 50, <span class="stringliteral">&quot;Centered&quot;</span>).color(constixel::color::WHITE);</div>
+</div><!-- fragment --> 
+</div>
+</div>
+<a id="a5a73f0719efdcd7d467531ded4bd2104" name="a5a73f0719efdcd7d467531ded4bd2104"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5a73f0719efdcd7d467531ded4bd2104">&#9670;&#160;</a></span>text_mono()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;template&lt; size_t, size_t, bool, bool &gt; class T, size_t W, size_t H, bool GRAYSCALE = false, bool USE_SPAN = false&gt; </div>
+<div class="memtemplate">
+template&lt;typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">auto <a class="el" href="classconstixel_1_1image.html">constixel::image</a>&lt; T, W, H, GRAYSCALE, USE_SPAN &gt;::text_mono </td>
+          <td>(</td>
+          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>x</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t</td>          <td class="paramname"><span class="paramname"><em>y</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>str</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Create a text shape for fluent monospace string drawing with method chaining. </p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">FONT</td><td>The font type to use for rendering. </td></tr>
+    <tr><td class="paramname">KERNING</td><td>Enable kerning if true (default: false). </td></tr>
+    <tr><td class="paramname">ROTATION</td><td>Text rotation (default: DEGREE_0). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">x</td><td>Starting X-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">y</td><td>Starting Y-coordinate in pixels. </td></tr>
+    <tr><td class="paramname">str</td><td>The string to draw. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A text_mono shape object that supports .color() and .draw() methods.</dd></dl>
+<p>Example usage: </p><div class="fragment"><div class="line">img.text_mono&lt;constixel::ibmplexmono_regular_12_mono&gt;(10, 20, <span class="stringliteral">&quot;Hello&quot;</span>).color(constixel::color::WHITE);</div>
+</div><!-- fragment --> 
 </div>
 </div>
 <a id="a32ad81fbc0feb78c7f8857d42a685475" name="a32ad81fbc0feb78c7f8857d42a685475"></a>

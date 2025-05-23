@@ -37,6 +37,9 @@ var NAVTREE =
       [ "Saving a PNG to disk example", "md__r_e_a_d_m_e.html#autotoc_md10", null ],
       [ "API", "md__r_e_a_d_m_e.html#autotoc_md11", null ]
     ] ],
+    [ "Namespaces", "namespaces.html", [
+      [ "Namespace List", "namespaces.html", "namespaces_dup" ]
+    ] ],
     [ "Classes", "annotated.html", [
       [ "Class List", "annotated.html", "annotated_dup" ],
       [ "Class Index", "classes.html", null ],
@@ -55,7 +58,8 @@ var NAVTREE =
 
 var NAVTREEINDEX =
 [
-"annotated.html"
+"annotated.html",
+"classconstixel_1_1shapes_1_1text__centered__aa.html#a9cd8ce11ab0b5912a524b5b0ca192e13"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronization';
