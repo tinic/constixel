@@ -2910,31 +2910,31 @@ class image {
             return;
         }
 
-        bool steep = abs(y1 - y0) > abs(x1 - x0);
-        if (steep) {
-            std::swap(x0, y0);
-            std::swap(x1, y1);
-        }
-        if (x0 > x1) {
-            std::swap(x0, x1);
-            std::swap(y0, y1);
-        }
-
-        const int32_t dx = x1 - x0;
-        const int32_t dy = abs(y1 - y0);
-        int32_t err = dx / 2;
-        int32_t ystep = 0;
-        if (y0 < y1) {
-            ystep = 1;
-        } else {
-            ystep = -1;
-        }
-
         if (stroke_width <= 0) {
             return;
         }
 
         if (stroke_width == 1) {
+            bool steep = abs(y1 - y0) > abs(x1 - x0);
+            if (steep) {
+                std::swap(x0, y0);
+                std::swap(x1, y1);
+            }
+            if (x0 > x1) {
+                std::swap(x0, x1);
+                std::swap(y0, y1);
+            }
+
+            const int32_t dx = x1 - x0;
+            const int32_t dy = abs(y1 - y0);
+            int32_t err = dx / 2;
+            int32_t ystep = 0;
+            if (y0 < y1) {
+                ystep = 1;
+            } else {
+                ystep = -1;
+            }
+
             for (; x0 <= x1; x0++) {
                 if (steep) {
                     plot(y0, x0, col);
@@ -2948,7 +2948,7 @@ class image {
                 }
             }
             return;
-        } 
+        }
 
         auto line_thick = [&]<typename I>() {
             const int32_t half_width = stroke_width / 2;
@@ -4753,11 +4753,30 @@ class image {
     /**
      * @private
      */
+    constexpr auto calculate_circle_bounds(int32_t cx, int32_t cy, int32_t r) const {
+        struct bounds {
+            int32_t x0, y0, x0r, x0r2, y0r, y0r2;
+        };
+
+        const int32_t x0 = std::max(cx - r - int32_t{1}, int32_t{0});
+        const int32_t y0 = std::max(cy - r - int32_t{1}, int32_t{0});
+        const int32_t x0r = std::clamp(x0 + r, int32_t{0}, static_cast<int32_t>(W) - int32_t{1});
+        const int32_t x0r2 = std::clamp(x0 + r * int32_t{2}, int32_t{0}, static_cast<int32_t>(W) - int32_t{1});
+        const int32_t y0r = std::clamp(y0 + r, int32_t{0}, static_cast<int32_t>(H) - int32_t{1});
+        const int32_t y0r2 = std::clamp(y0 + r * int32_t{2}, int32_t{0}, static_cast<int32_t>(H) - int32_t{1});
+
+        return bounds{x0, y0, x0r, x0r2, y0r, y0r2};
+    }
+
+    /**
+     * @private
+     */
     template <bool AA, bool STROKE>
     constexpr void circle_int(int32_t cx, int32_t cy, int32_t r, int32_t ox, int32_t oy, uint8_t col, int32_t s) {
         auto bounds = calculate_circle_bounds(cx, cy, r);
 
-        if (check_not_in_bounds(bounds.x0, bounds.y0, r * int32_t{2} + ox + int32_t{1}, r * int32_t{2} + oy + int32_t{1})) {
+        if (check_not_in_bounds(bounds.x0, bounds.y0, r * int32_t{2} + ox + int32_t{1},
+                                r * int32_t{2} + oy + int32_t{1})) {
             return;
         }
 
@@ -4913,31 +4932,14 @@ class image {
     /**
      * @private
      */
-    constexpr auto calculate_circle_bounds(int32_t cx, int32_t cy, int32_t r) const {
-        struct bounds {
-            int32_t x0, y0, x0r, x0r2, y0r, y0r2;
-        };
-        
-        const int32_t x0 = std::max(cx - r - int32_t{1}, int32_t{0});
-        const int32_t y0 = std::max(cy - r - int32_t{1}, int32_t{0});
-        const int32_t x0r = std::clamp(x0 + r, int32_t{0}, static_cast<int32_t>(W) - int32_t{1});
-        const int32_t x0r2 = std::clamp(x0 + r * int32_t{2}, int32_t{0}, static_cast<int32_t>(W) - int32_t{1});
-        const int32_t y0r = std::clamp(y0 + r, int32_t{0}, static_cast<int32_t>(H) - int32_t{1});
-        const int32_t y0r2 = std::clamp(y0 + r * int32_t{2}, int32_t{0}, static_cast<int32_t>(H) - int32_t{1});
-        
-        return bounds{x0, y0, x0r, x0r2, y0r, y0r2};
-    }
-
-    /**
-     * @private
-     */
     template <typename shader_func>
     constexpr void circle_int_shader(int32_t cx, int32_t cy, int32_t r, int32_t ox, int32_t oy,
-                                     const shader_func &shader, int32_t parent_x = -1, int32_t parent_y = -1, 
+                                     const shader_func &shader, int32_t parent_x = -1, int32_t parent_y = -1,
                                      int32_t parent_w = -1, int32_t parent_h = -1) {
         auto bounds = calculate_circle_bounds(cx, cy, r);
 
-        if (check_not_in_bounds(bounds.x0, bounds.y0, r * int32_t{2} + ox + int32_t{1}, r * int32_t{2} + oy + int32_t{1})) {
+        if (check_not_in_bounds(bounds.x0, bounds.y0, r * int32_t{2} + ox + int32_t{1},
+                                r * int32_t{2} + oy + int32_t{1})) {
             return;
         }
 
@@ -4960,7 +4962,7 @@ class image {
         const int32_t actual_parent_y = (parent_y == -1) ? cy - r : parent_y;
         const int32_t actual_parent_w = (parent_w == -1) ? r * 2 : parent_w;
         const int32_t actual_parent_h = (parent_h == -1) ? r * 2 : parent_h;
-        
+
         const float parent_wF = static_cast<float>(actual_parent_w);
         const float parent_hF = static_cast<float>(actual_parent_h);
 
