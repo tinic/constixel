@@ -2729,7 +2729,7 @@ enum device_format {
 struct plot {
     int32_t x = 0;               /**< X coordinate in pixels. */
     int32_t y = 0;               /**< Y coordinate in pixels. */
-    uint32_t col = color::WHITE; /**< Color palette index to use. */
+    uint8_t col = color::WHITE; /**< Color palette index to use. */
 };
 
 /**
@@ -2740,7 +2740,7 @@ struct draw_line {
     int32_t y0 = 0;              /**< First Y coordinate in pixels. */
     int32_t x1 = 0;              /**< Second X coordinate in pixels. */
     int32_t y1 = 0;              /**< Second Y coordinate in pixels. */
-    uint32_t col = color::WHITE; /**< Color palette index to use. */
+    uint8_t col = color::WHITE; /**< Color palette index to use. */
     float sw = 1;                /**< Width of the stroke in pixels. */
 };
 
@@ -2752,7 +2752,7 @@ struct draw_rect {
     int32_t y = 0;               /**< Y coordinate in pixels. */
     int32_t w = 0;               /**< Width in pixels. */
     int32_t h = 0;               /**< Height in pixels. */
-    uint32_t col = color::WHITE; /**< Color palette index to use. */
+    uint8_t col = color::WHITE; /**< Color palette index to use. */
     int32_t sw = 1;              /**< Width of the stroke in pixels. */
 };
 
@@ -2763,7 +2763,7 @@ struct draw_circle {
     int32_t cx = 0;              /**< Center X coordinate in pixels. */
     int32_t cy = 0;              /**< Center Y coordinate in pixels. */
     int32_t r = 0;               /**< Radius of the circle in pixels. */
-    uint32_t col = color::WHITE; /**< Color palette index to use. */
+    uint8_t col = color::WHITE; /**< Color palette index to use. */
     int32_t sw = 1;              /**< Width of the stroke in pixels. */
 };
 
@@ -2777,7 +2777,7 @@ struct draw_round_rect {
     int32_t w = 0;               /**< Width in pixels. */
     int32_t h = 0;               /**< Height in pixels. */
     int32_t r = 0;               /**< Radius of the corners in pixels. */
-    uint32_t col = color::WHITE; /**< Color palette index to use. */
+    uint8_t col = color::WHITE; /**< Color palette index to use. */
     int32_t sw = 1;              /**< Width of the stroke in pixels. */
 };
 
@@ -2788,7 +2788,7 @@ struct draw_string {
     int32_t x = 0;               /**< X coordinate in pixels. */
     int32_t y = 0;               /**< Y coordinate in pixels. */
     const char *str = nullptr;   /**< UTF8 string */
-    uint32_t col = color::WHITE; /**< Color palette index to use. */
+    uint8_t col = color::WHITE; /**< Color palette index to use. */
 };
 
 /**
