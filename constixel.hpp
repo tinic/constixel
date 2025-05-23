@@ -2948,9 +2948,9 @@ class image {
                 std::min(stroke_width, std::max(static_cast<int32_t>(W), static_cast<int32_t>(H)));
 
             if (max_coord_val < 16384 && max_stroke < 512) {
-                line_thick_int<false>(x0, y0, x1, y1, col, max_stroke);
+                line_thick_int<int32_t>(x0, y0, x1, y1, col, max_stroke);
             } else {
-                line_thick_int<true>(x0, y0, x1, y1, col, max_stroke);
+                line_thick_int<int64_t>(x0, y0, x1, y1, col, max_stroke);
             }
         }
     }
@@ -3078,9 +3078,9 @@ class image {
         const float half_width = stroke_width * 0.5f;
 
         const int32_t margin = static_cast<int32_t>(std::ceil(half_width + 1.0f));
-        const int32_t min_x = std::max(0, std::min({x0, x1}) - margin);
+        const int32_t min_x = std::max(int32_t{0}, std::min({x0, x1}) - margin);
         const int32_t max_x = std::min(static_cast<int32_t>(W) - 1, std::max({x0, x1}) + margin);
-        const int32_t min_y = std::max(0, std::min({y0, y1}) - margin);
+        const int32_t min_y = std::max(int32_t{0}, std::min({y0, y1}) - margin);
         const int32_t max_y = std::min(static_cast<int32_t>(H) - 1, std::max({y0, y1}) + margin);
 
         if (min_x > max_x || min_y > max_y) {
@@ -3545,8 +3545,8 @@ class image {
             return;
         }
         
-        int32_t x0 = std::max(x, 0);
-        int32_t y0 = std::max(y, 0);
+        int32_t x0 = std::max(x, int32_t{0});
+        int32_t y0 = std::max(y, int32_t{0});
         int32_t x1 = std::min(x + w, static_cast<int32_t>(W));
         int32_t y1 = std::min(y + h, static_cast<int32_t>(H));
         
@@ -3589,8 +3589,8 @@ class image {
             return;
         }
         
-        int32_t x0 = std::max(x, 0);
-        int32_t y0 = std::max(y, 0);
+        int32_t x0 = std::max(x, int32_t{0});
+        int32_t y0 = std::max(y, int32_t{0});
         int32_t x1 = std::min(x + w, static_cast<int32_t>(W));
         int32_t y1 = std::min(y + h, static_cast<int32_t>(H));
         
@@ -5055,115 +5055,48 @@ class image {
     /**
      * @private
      */
-    template <bool USE_64BIT>
+    template <typename I>
     constexpr void line_thick_int(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, int32_t stroke_width) {
         const int32_t half_width = stroke_width / 2;
 
-        if constexpr (USE_64BIT) {
-            int64_t min_coord_64 = std::min(static_cast<int64_t>(x0), static_cast<int64_t>(x1));
-            int64_t max_coord_64 = std::max(static_cast<int64_t>(x0), static_cast<int64_t>(x1));
-            int64_t min_y_coord_64 = std::min(static_cast<int64_t>(y0), static_cast<int64_t>(y1));
-            int64_t max_y_coord_64 = std::max(static_cast<int64_t>(y0), static_cast<int64_t>(y1));
+        const int32_t margin = half_width + 1;
+        const int32_t min_x = std::max(int32_t{0}, std::min({x0, x1}) - margin);
+        const int32_t max_x = std::min(static_cast<int32_t>(W) - 1, std::max({x0, x1}) + margin);
+        const int32_t min_y = std::max(int32_t{0}, std::min({y0, y1}) - margin);
+        const int32_t max_y = std::min(static_cast<int32_t>(H) - 1, std::max({y0, y1}) + margin);
 
-            const int64_t margin = static_cast<int64_t>(half_width) + 1;
-            const int32_t min_x = static_cast<int32_t>(
-                std::max(static_cast<int64_t>(0), std::min(static_cast<int64_t>(W) - 1, min_coord_64 - margin)));
-            const int32_t max_x = static_cast<int32_t>(
-                std::max(static_cast<int64_t>(0), std::min(static_cast<int64_t>(W) - 1, max_coord_64 + margin)));
-            const int32_t min_y = static_cast<int32_t>(
-                std::max(static_cast<int64_t>(0), std::min(static_cast<int64_t>(H) - 1, min_y_coord_64 - margin)));
-            const int32_t max_y = static_cast<int32_t>(
-                std::max(static_cast<int64_t>(0), std::min(static_cast<int64_t>(H) - 1, max_y_coord_64 + margin)));
+        if (min_x > max_x || min_y > max_y) {
+            return;
+        }
 
-            if (min_x > max_x || min_y > max_y) {
-                return;
+        const I line_dx = x1 - x0;
+        const I line_dy = y1 - y0;
+        const I line_length_sq = line_dx * line_dx + line_dy * line_dy;
+
+        if (line_length_sq == 0) {
+            if (x0 >= 0 && x0 < static_cast<int32_t>(W) && y0 >= 0 && y0 < static_cast<int32_t>(H)) {
+                //fill_circle(x0, y0, half_width, col);
             }
+            return;
+        }
 
-            const int64_t bbox_area = static_cast<int64_t>(max_x - min_x + 1) * (max_y - min_y + 1);
-            const int64_t max_reasonable_area = static_cast<int64_t>(W) * H * 4;
-            if (bbox_area > max_reasonable_area) {
-                return;
-            }
+        for (int32_t py = min_y; py <= max_y; py++) {
+            for (int32_t px = min_x; px <= max_x; px++) {
+                const I px_dx = px - x0;
+                const I px_dy = py - y0;
 
-            const int64_t line_dx_64 = static_cast<int64_t>(x1) - x0;
-            const int64_t line_dy_64 = static_cast<int64_t>(y1) - y0;
-            const int64_t line_length_sq = line_dx_64 * line_dx_64 + line_dy_64 * line_dy_64;
+                const I dot_product = px_dx * line_dx + px_dy * line_dy;
+                const I t_scaled = std::max(I{0}, std::min(line_length_sq, dot_product));
 
-            if (line_length_sq == 0) {
-                if (x0 >= 0 && x0 < static_cast<int32_t>(W) && y0 >= 0 && y0 < static_cast<int32_t>(H)) {
-                    fill_circle(x0, y0, half_width, col);
-                }
-                return;
-            }
+                const I closest_x = x0 + (t_scaled * line_dx) / line_length_sq;
+                const I closest_y = y0 + (t_scaled * line_dy) / line_length_sq;
 
-            for (int32_t py = min_y; py <= max_y; py++) {
-                for (int32_t px = min_x; px <= max_x; px++) {
-                    const int64_t px_dx_64 = static_cast<int64_t>(px) - x0;
-                    const int64_t px_dy_64 = static_cast<int64_t>(py) - y0;
+                const I dist_x = px - closest_x;
+                const I dist_y = py - closest_y;
+                const I distance_sq = dist_x * dist_x + dist_y * dist_y;
 
-                    const int64_t dot_product = px_dx_64 * line_dx_64 + px_dy_64 * line_dy_64;
-                    const int64_t t_scaled = std::max(static_cast<int64_t>(0), std::min(line_length_sq, dot_product));
-
-                    const int64_t closest_x_64 = static_cast<int64_t>(x0) + (t_scaled * line_dx_64) / line_length_sq;
-                    const int64_t closest_y_64 = static_cast<int64_t>(y0) + (t_scaled * line_dy_64) / line_length_sq;
-
-                    const int64_t dist_x_64 = static_cast<int64_t>(px) - closest_x_64;
-                    const int64_t dist_y_64 = static_cast<int64_t>(py) - closest_y_64;
-                    const int64_t distance_sq_64 = dist_x_64 * dist_x_64 + dist_y_64 * dist_y_64;
-
-                    if (distance_sq_64 > static_cast<int64_t>(INT32_MAX)) {
-                        continue;
-                    }
-
-                    const int32_t distance =
-                        static_cast<int32_t>(hidden::fast_sqrtf(static_cast<float>(distance_sq_64)));
-
-                    if (distance <= half_width) {
-                        plot(px, py, col);
-                    }
-                }
-            }
-        } else {
-            const int32_t margin = half_width + 1;
-            const int32_t min_x = std::max(0, std::min({x0, x1}) - margin);
-            const int32_t max_x = std::min(static_cast<int32_t>(W) - 1, std::max({x0, x1}) + margin);
-            const int32_t min_y = std::max(0, std::min({y0, y1}) - margin);
-            const int32_t max_y = std::min(static_cast<int32_t>(H) - 1, std::max({y0, y1}) + margin);
-
-            if (min_x > max_x || min_y > max_y) {
-                return;
-            }
-
-            const int32_t line_dx = x1 - x0;
-            const int32_t line_dy = y1 - y0;
-            const int32_t line_length_sq = line_dx * line_dx + line_dy * line_dy;
-
-            if (line_length_sq == 0) {
-                if (x0 >= 0 && x0 < static_cast<int32_t>(W) && y0 >= 0 && y0 < static_cast<int32_t>(H)) {
-                    fill_circle(x0, y0, half_width, col);
-                }
-                return;
-            }
-
-            for (int32_t py = min_y; py <= max_y; py++) {
-                for (int32_t px = min_x; px <= max_x; px++) {
-                    const int32_t px_dx = px - x0;
-                    const int32_t px_dy = py - y0;
-
-                    const int32_t dot_product = px_dx * line_dx + px_dy * line_dy;
-                    const int32_t t_scaled = std::max(0, std::min(line_length_sq, dot_product));
-
-                    const int32_t closest_x = x0 + (t_scaled * line_dx) / line_length_sq;
-                    const int32_t closest_y = y0 + (t_scaled * line_dy) / line_length_sq;
-
-                    const int32_t dist_x = px - closest_x;
-                    const int32_t dist_y = py - closest_y;
-                    const int32_t distance_sq = dist_x * dist_x + dist_y * dist_y;
-                    const int32_t distance = static_cast<int32_t>(hidden::fast_sqrtf(static_cast<float>(distance_sq)));
-
-                    if (distance <= half_width) {
-                        plot(px, py, col);
-                    }
+                if (distance_sq <= half_width * half_width) {
+                    plot(px, py, col);
                 }
             }
         }

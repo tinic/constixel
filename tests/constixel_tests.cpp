@@ -581,7 +581,7 @@ void draw_functions_aa() {
         separator();
     }
     for (int32_t c = 0; c < static_cast<int32_t>(I); c++) {
-        image.draw_line_aa(16, 16, 64 + c * 42, 700, static_cast<uint8_t>(c));
+        image.draw_line_aa(16, 16, 64 + c * 42, 700, static_cast<uint8_t>(c), static_cast<float>(c));
         image.vt100_home();
         if constexpr (std::is_same_v<
                           T, constixel::image<constixel::format_32bit, T::width(), T::height(), T::grayscale()>> ||
