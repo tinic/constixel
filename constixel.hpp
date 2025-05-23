@@ -503,6 +503,7 @@ class quantize {
     }
 };
 
+
 }  // namespace hidden
 /// @endcond // DOXYGEN_EXCLUDE
 
@@ -1334,11 +1335,43 @@ class format_2bit : public format {
         return b;
     }
 
+    static constexpr void transpose2x8(std::array<uint8_t, 8> &data) {
+        for (size_t i = 0; i < 4; i++) {
+            for (size_t j = 0; j < 4; j++) {
+                auto shift = static_cast<uint32_t>(6U - j * 2U);
+                uint8_t pixel = (data[i] >> shift) & 0x03U;
+                auto ishift = static_cast<uint32_t>(6U - i * 2U);
+                data[j] = static_cast<uint8_t>((data[j] & ~(0x03U << ishift)) | (static_cast<uint32_t>(pixel) << ishift));
+            }
+        }
+        for (size_t i = 0; i < 4; i++) {
+            for (size_t j = 0; j < 4; j++) {
+                auto shift = static_cast<uint32_t>(6U - j * 2U);
+                uint8_t pixel = (data[i + 4] >> shift) & 0x03U;
+                auto ishift = static_cast<uint32_t>(6U - i * 2U);
+                data[j + 4] =
+                    static_cast<uint8_t>((data[j + 4] & ~(0x03U << ishift)) | (static_cast<uint32_t>(pixel) << ishift));
+            }
+        }
+    }
+
     template <bool FLIP_H = false, bool FLIP_V = false>
-    static constexpr void transpose(const uint8_t * /*src*/, uint8_t * /*dst*/) {
-#ifndef _MSC_VER
-        static_assert(false, "Not implemented yet.");
-#endif  // #ifndef _MSC_VER
+    static constexpr void transpose(const uint8_t *src, uint8_t *dst) {
+        for (size_t y = 0; y < H; y++) {
+            for (size_t x = 0; x < W; x++) {
+                size_t src_byte = y * bytes_per_line + (x / 4);
+                size_t src_shift = (3 - (x % 4)) * 2;
+                uint8_t pixel = (src[src_byte] >> src_shift) & 0x03;
+
+                size_t dst_x = FLIP_H ? (H - 1 - y) : y;
+                size_t dst_y = FLIP_V ? (W - 1 - x) : x;
+                size_t dst_byte = dst_y * ((H + 3) / 4) + (dst_x / 4);
+                size_t dst_shift = (3 - (dst_x % 4)) * 2;
+
+                dst[dst_byte] &= ~(0x03 << dst_shift);
+                dst[dst_byte] |= pixel << dst_shift;
+            }
+        }
     }
 
     static constexpr void compose(std::span<uint8_t, image_size> & /*data*/, size_t /*x*/, size_t /*y*/, float /*cola*/,
@@ -1574,11 +1607,61 @@ class format_4bit : public format {
         return b;
     }
 
+    static constexpr void transpose4x8(std::array<uint8_t, 8> &data) {
+        for (size_t i = 0; i < 2; i++) {
+            for (size_t j = 0; j < 2; j++) {
+                auto shift = static_cast<uint32_t>(4U - j * 4U);
+                uint8_t pixel = (data[i] >> shift) & 0x0FU;
+                auto ishift = static_cast<uint32_t>(4U - i * 4U);
+                data[j] = static_cast<uint8_t>((data[j] & ~(0x0FU << ishift)) | (static_cast<uint32_t>(pixel) << ishift));
+            }
+        }
+        for (size_t i = 0; i < 2; i++) {
+            for (size_t j = 0; j < 2; j++) {
+                auto shift = static_cast<uint32_t>(4U - j * 4U);
+                uint8_t pixel = (data[i + 2] >> shift) & 0x0FU;
+                auto ishift = static_cast<uint32_t>(4U - i * 4U);
+                data[j + 2] =
+                    static_cast<uint8_t>((data[j + 2] & ~(0x0FU << ishift)) | (static_cast<uint32_t>(pixel) << ishift));
+            }
+        }
+        for (size_t i = 0; i < 2; i++) {
+            for (size_t j = 0; j < 2; j++) {
+                auto shift = static_cast<uint32_t>(4U - j * 4U);
+                uint8_t pixel = (data[i + 4] >> shift) & 0x0FU;
+                auto ishift = static_cast<uint32_t>(4U - i * 4U);
+                data[j + 4] =
+                    static_cast<uint8_t>((data[j + 4] & ~(0x0FU << ishift)) | (static_cast<uint32_t>(pixel) << ishift));
+            }
+        }
+        for (size_t i = 0; i < 2; i++) {
+            for (size_t j = 0; j < 2; j++) {
+                auto shift = static_cast<uint32_t>(4U - j * 4U);
+                uint8_t pixel = (data[i + 6] >> shift) & 0x0FU;
+                auto ishift = static_cast<uint32_t>(4U - i * 4U);
+                data[j + 6] =
+                    static_cast<uint8_t>((data[j + 6] & ~(0x0FU << ishift)) | (static_cast<uint32_t>(pixel) << ishift));
+            }
+        }
+    }
+
     template <bool FLIP_H = false, bool FLIP_V = false>
-    static constexpr void transpose(const uint8_t * /*src*/, uint8_t * /*dst*/) {
-#ifndef _MSC_VER
-        static_assert(false, "Not implemented yet.");
-#endif  // #ifndef _MSC_VER
+    static constexpr void transpose(const uint8_t *src, uint8_t *dst) {
+        for (size_t y = 0; y < H; y++) {
+            for (size_t x = 0; x < W; x++) {
+                size_t src_byte = y * bytes_per_line + (x / 2);
+                size_t src_shift = (1 - (x % 2)) * 4;
+                uint8_t pixel = (src[src_byte] >> src_shift) & 0x0F;
+
+                size_t dst_x = FLIP_H ? (H - 1 - y) : y;
+                size_t dst_y = FLIP_V ? (W - 1 - x) : x;
+                size_t dst_byte = dst_y * ((H + 1) / 2) + (dst_x / 2);
+                size_t dst_shift = (1 - (dst_x % 2)) * 4;
+
+                dst[dst_byte] &= ~(0x0F << dst_shift);
+                dst[dst_byte] |= pixel << dst_shift;
+            }
+        }
     }
 
     static constexpr void compose(std::span<uint8_t, image_size> data, size_t x, size_t y, float cola, float colr,
