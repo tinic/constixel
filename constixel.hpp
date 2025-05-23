@@ -2643,56 +2643,195 @@ class format_32bit : public format {
 
 /**
  * @enum
- * @brief Enum class which contains a list of predefined color names and values to use with the drawing API. Not valid
- * when using grayscale formats.
+ * @brief Extended color enum with all 256 colors from the 8-bit palette.
+ * Provides named constants for common colors, gradients, and palette ranges.
  */
 enum color : uint8_t {
-    BLACK = 0,         /*!< Black */
-    TRANSPARENT = 0,   /*!< Transparent */
-    BLACK_OPAQUE = 16, /*!< Black, only valid for format_8bit */
-    WHITE = 1,         /*!< White */
-    RED = 2,           /*!< Red */
-    GREEN = 3,         /*!< Green */
-    BLUE = 4,          /*!< Blue */
-    YELLOW = 5,        /*!< Yellow */
-    CYAN = 6,          /*!< Cyan */
-    MAGENTA = 7,       /*!< Magenta */
-    GRAY_80 = 8,       /*!< Gray 80% */
-    GRAY_60 = 9,       /*!< Gray 60% */
-    GRAY_40 = 10,      /*!< Gray 40% */
-    GRAY_20 = 11,      /*!< Gray 20% */
-    DARK_RED = 12,     /*!< Dark Red (50%) */
-    DARK_GREEN = 13,   /*!< Dark Green (50%) */
-    DARK_BLUE = 14,    /*!< Dark Blue (50%) */
-    DARK_YELLOW = 15,  /*!< Dark Yellow (50%) */
-
+    // Basic colors (0-15)
+    BLACK = 0,                     /*!< Black */
+    TRANSPARENT = 0,               /*!< Transparent (alias for BLACK) */
+    WHITE = 1,                     /*!< White */
+    RED = 2,                       /*!< Red */
+    LIME = 3,                      /*!< Lime/Bright Green */
+    BLUE = 4,                      /*!< Blue */
+    YELLOW = 5,                    /*!< Yellow */
+    CYAN = 6,                      /*!< Cyan */
+    MAGENTA = 7,                   /*!< Magenta */
+    GRAY_20 = 8,                   /*!< Gray 20% */
+    GRAY_40 = 9,                   /*!< Gray 40% */
+    GRAY_60 = 10,                  /*!< Gray 60% */
+    GRAY_80 = 11,                  /*!< Gray 80% */
+    MAROON = 12,                   /*!< Maroon (Dark Red) */
+    GREEN = 13,                    /*!< Green (Dark Green) */
+    NAVY = 14,                     /*!< Navy (Dark Blue) */
+    OLIVE = 15,                    /*!< Olive (Dark Yellow) */
+    
+    // Gray ramp (16-31)
+    BLACK_OPAQUE = 16,             /*!< Black (same as BLACK but in gray ramp) */
+    GRAY_10 = 17,                  /*!< Gray 10% */
+    GRAY_11 = 18,                  /*!< Gray 13% */
+    GRAY_20_ALT = 19,              /*!< Gray 20% (alternative) */
+    GRAY_30 = 20,                  /*!< Gray 27% */
+    GRAY_33 = 21,                  /*!< Gray 33% */
+    GRAY_40_ALT = 22,              /*!< Gray 40% (alternative) */
+    GRAY_47 = 23,                  /*!< Gray 47% */
+    GRAY_53 = 24,                  /*!< Gray 53% */
+    GRAY_60_ALT = 25,              /*!< Gray 60% (alternative) */
+    DARK_GRAY = 26,                /*!< Dark Gray (67%) */
+    SILVER = 27,                   /*!< Silver (73%) */
+    GRAY_80_ALT = 28,              /*!< Gray 80% (alternative) */
+    GAINSBORO = 29,                /*!< Gainsboro (87%) */
+    LIGHT_GRAY = 30,               /*!< Light Gray (93%) */
+    WHITE_ALT = 31,                /*!< White (alternative) */
+    
+    // Red luminance ramp (32-47)
+    RED_DARK_1 = 32,               /*!< Very Dark Red */
+    RED_DARK_2 = 33,               /*!< Dark Red */
+    RED_DARK_3 = 34,               /*!< Medium Dark Red */
+    RED_MEDIUM_1 = 35,             /*!< Medium Red */
+    RED_MEDIUM_2 = 36,             /*!< Medium Bright Red */
+    RED_BRIGHT_1 = 37,             /*!< Bright Red */
+    RED_BRIGHT_2 = 38,             /*!< Very Bright Red */
+    RED_FULL = 39,                 /*!< Full Red */
+    RED_PINK_1 = 40,               /*!< Light Red/Pink */
+    RED_PINK_2 = 41,               /*!< Lighter Red/Pink */
+    RED_PINK_3 = 42,               /*!< Light Pink */
+    RED_PINK_4 = 43,               /*!< Very Light Pink */
+    RED_PINK_5 = 44,               /*!< Pale Pink */
+    RED_PINK_6 = 45,               /*!< Very Pale Pink */
+    RED_PALE_1 = 46,               /*!< Extremely Pale Pink */
+    RED_WHITE = 47,                /*!< Near White with Red tint */
+    
+    // Green luminance ramp (48-63)
+    GREEN_DARK_1 = 48,             /*!< Very Dark Green */
+    GREEN_DARK_2 = 49,             /*!< Dark Green */
+    GREEN_DARK_3 = 50,             /*!< Medium Dark Green */
+    GREEN_MEDIUM_1 = 51,           /*!< Medium Green */
+    GREEN_MEDIUM_2 = 52,           /*!< Medium Bright Green */
+    GREEN_BRIGHT_1 = 53,           /*!< Bright Green */
+    GREEN_BRIGHT_2 = 54,           /*!< Very Bright Green */
+    GREEN_FULL = 55,               /*!< Full Green */
+    GREEN_LIGHT_1 = 56,            /*!< Light Green */
+    GREEN_LIGHT_2 = 57,            /*!< Lighter Green */
+    GREEN_LIGHT_3 = 58,            /*!< Very Light Green */
+    GREEN_LIGHT_4 = 59,            /*!< Pale Green */
+    GREEN_PALE_1 = 60,             /*!< Very Pale Green */
+    GREEN_PALE_2 = 61,             /*!< Extremely Pale Green */
+    GREEN_PALE_3 = 62,             /*!< Near White with Green tint */
+    GREEN_WHITE = 63,              /*!< White with Green tint */
+    
+    // Blue luminance ramp (64-79)
+    BLUE_DARK_1 = 64,              /*!< Very Dark Blue */
+    BLUE_DARK_2 = 65,              /*!< Dark Blue */
+    BLUE_DARK_3 = 66,              /*!< Medium Dark Blue */
+    BLUE_MEDIUM_1 = 67,            /*!< Medium Blue */
+    BLUE_MEDIUM_2 = 68,            /*!< Medium Bright Blue */
+    BLUE_BRIGHT_1 = 69,            /*!< Bright Blue */
+    BLUE_BRIGHT_2 = 70,            /*!< Very Bright Blue */
+    BLUE_FULL = 71,                /*!< Full Blue */
+    BLUE_LIGHT_1 = 72,             /*!< Light Blue */
+    BLUE_LIGHT_2 = 73,             /*!< Lighter Blue */
+    BLUE_LIGHT_3 = 74,             /*!< Very Light Blue */
+    BLUE_LIGHT_4 = 75,             /*!< Pale Blue */
+    BLUE_PALE_1 = 76,              /*!< Very Pale Blue */
+    BLUE_PALE_2 = 77,              /*!< Extremely Pale Blue */
+    BLUE_PALE_3 = 78,              /*!< Near White with Blue tint */
+    BLUE_WHITE = 79,               /*!< White with Blue tint */
+    
+    // Yellow luminance ramp (80-95)
+    YELLOW_DARK_1 = 80,            /*!< Very Dark Yellow */
+    YELLOW_DARK_2 = 81,            /*!< Dark Yellow */
+    YELLOW_DARK_3 = 82,            /*!< Medium Dark Yellow */
+    YELLOW_MEDIUM_1 = 83,          /*!< Medium Yellow */
+    YELLOW_MEDIUM_2 = 84,          /*!< Medium Bright Yellow */
+    YELLOW_BRIGHT_1 = 85,          /*!< Bright Yellow */
+    YELLOW_BRIGHT_2 = 86,          /*!< Very Bright Yellow */
+    YELLOW_FULL = 87,              /*!< Full Yellow */
+    YELLOW_LIGHT_1 = 88,           /*!< Light Yellow */
+    YELLOW_LIGHT_2 = 89,           /*!< Lighter Yellow */
+    YELLOW_LIGHT_3 = 90,           /*!< Very Light Yellow */
+    YELLOW_LIGHT_4 = 91,           /*!< Pale Yellow */
+    YELLOW_PALE_1 = 92,            /*!< Very Pale Yellow */
+    YELLOW_PALE_2 = 93,            /*!< Extremely Pale Yellow */
+    YELLOW_PALE_3 = 94,            /*!< Near White with Yellow tint */
+    YELLOW_WHITE = 95,             /*!< White with Yellow tint */
+    
+    // Cyan luminance ramp (96-111)
+    CYAN_DARK_1 = 96,              /*!< Very Dark Cyan */
+    CYAN_DARK_2 = 97,              /*!< Dark Cyan */
+    CYAN_DARK_3 = 98,              /*!< Medium Dark Cyan */
+    CYAN_MEDIUM_1 = 99,            /*!< Medium Cyan */
+    CYAN_MEDIUM_2 = 100,           /*!< Medium Bright Cyan */
+    CYAN_BRIGHT_1 = 101,           /*!< Bright Cyan */
+    CYAN_BRIGHT_2 = 102,           /*!< Very Bright Cyan */
+    CYAN_FULL = 103,               /*!< Full Cyan */
+    CYAN_LIGHT_1 = 104,            /*!< Light Cyan */
+    CYAN_LIGHT_2 = 105,            /*!< Lighter Cyan */
+    CYAN_LIGHT_3 = 106,            /*!< Very Light Cyan */
+    CYAN_LIGHT_4 = 107,            /*!< Pale Cyan */
+    CYAN_PALE_1 = 108,             /*!< Very Pale Cyan */
+    CYAN_PALE_2 = 109,             /*!< Extremely Pale Cyan */
+    CYAN_PALE_3 = 110,             /*!< Near White with Cyan tint */
+    CYAN_WHITE = 111,              /*!< White with Cyan tint */
+    
+    // Magenta luminance ramp (112-127)
+    MAGENTA_DARK_1 = 112,          /*!< Very Dark Magenta */
+    MAGENTA_DARK_2 = 113,          /*!< Dark Magenta */
+    MAGENTA_DARK_3 = 114,          /*!< Medium Dark Magenta */
+    MAGENTA_MEDIUM_1 = 115,        /*!< Medium Magenta */
+    MAGENTA_MEDIUM_2 = 116,        /*!< Medium Bright Magenta */
+    MAGENTA_BRIGHT_1 = 117,        /*!< Bright Magenta */
+    MAGENTA_BRIGHT_2 = 118,        /*!< Very Bright Magenta */
+    MAGENTA_FULL = 119,            /*!< Full Magenta */
+    MAGENTA_LIGHT_1 = 120,         /*!< Light Magenta */
+    MAGENTA_LIGHT_2 = 121,         /*!< Lighter Magenta */
+    MAGENTA_LIGHT_3 = 122,         /*!< Very Light Magenta */
+    MAGENTA_LIGHT_4 = 123,         /*!< Pale Magenta */
+    MAGENTA_PALE_1 = 124,          /*!< Very Pale Magenta */
+    MAGENTA_PALE_2 = 125,          /*!< Extremely Pale Magenta */
+    MAGENTA_PALE_3 = 126,          /*!< Near White with Magenta tint */
+    MAGENTA_WHITE = 127,           /*!< White with Magenta tint */
+    
+    DARK_RED = 12,                 /*!< Dark Red (alias) */
+    DARK_GREEN = 13,               /*!< Dark Green (alias) */
+    DARK_BLUE = 14,                /*!< Dark Blue (alias) */
+    ORANGE = 38,                   /*!< Orange (closest match) */
+    PURPLE = 115,                  /*!< Purple (closest match) */
+    PINK = 125,                    /*!< Pink (closest match) */
+    BROWN = 83,                    /*!< Brown (closest match) */
+    TEAL = 99,                     /*!< Teal (closest match) */
+    
     GRAY_RAMP_START = 16,
     GRAY_RAMP_COUNT = 16,
     GRAY_RAMP_STOP = GRAY_RAMP_START + 15,
-
+    
     RED_LUMA_RAMP_START = 32,
     RED_LUMA_RAMP_COUNT = 16,
     RED_LUMA_RAMP_STOP = RED_LUMA_RAMP_START + 15,
-
+    
     GREEN_LUMA_RAMP_START = 48,
     GREEN_LUMA_RAMP_COUNT = 16,
     GREEN_LUMA_RAMP_STOP = GREEN_LUMA_RAMP_START + 15,
-
+    
     BLUE_LUMA_RAMP_START = 64,
     BLUE_LUMA_RAMP_COUNT = 16,
     BLUE_LUMA_RAMP_STOP = BLUE_LUMA_RAMP_START + 15,
-
+    
     YELLOW_LUMA_RAMP_START = 80,
     YELLOW_LUMA_RAMP_COUNT = 16,
     YELLOW_LUMA_RAMP_STOP = YELLOW_LUMA_RAMP_START + 15,
-
+    
     CYAN_LUMA_RAMP_START = 96,
     CYAN_LUMA_RAMP_COUNT = 16,
     CYAN_LUMA_RAMP_STOP = CYAN_LUMA_RAMP_START + 15,
-
+    
     MAGENTA_LUMA_RAMP_START = 112,
     MAGENTA_LUMA_RAMP_COUNT = 16,
-    MAGENTA_LUMA_RAMP_STOP = MAGENTA_LUMA_RAMP_START + 15
+    MAGENTA_LUMA_RAMP_STOP = MAGENTA_LUMA_RAMP_START + 15,
+    
+    OKLCH_RAMP_START = 128,
+    OKLCH_RAMP_COUNT = 128,
+    OKLCH_RAMP_STOP = 255
 };
 
 /**
