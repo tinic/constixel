@@ -3072,7 +3072,7 @@ class image {
                     const I dist_y = py - closest_y;
                     const I distance_sq = dist_x * dist_x + dist_y * dist_y;
 
-                    if (distance_sq <= half_width * half_width) {
+                    if (distance_sq <= static_cast<I>(half_width) * static_cast<I>(half_width)) {
                         plot(px, py, col);
                     }
                 }
