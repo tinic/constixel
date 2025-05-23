@@ -3232,7 +3232,7 @@ class image {
                         if (std::is_constant_evaluated()) {
                             dist = hidden::fast_sqrtf(dist);
                         } else {
-                            dist = std::sqrtf(dist);
+                            dist = std::sqrt(dist);
                         }
                         const float coverage = std::max(0.0f, std::min(1.0f, radius + 0.5f - dist));
                         if (coverage > hidden::epsilon_low) {
