@@ -2732,13 +2732,14 @@ class image {
     static_assert(W > 0 && H > 0);
     static_assert(W <= 65535 && H <= 65535);
 
+#if defined(__x86_64__) || defined(_M_X64) || defined(__aarch64__)
     static constexpr int32_t min_coord = -int32_t{1 << 28};
     static constexpr int32_t max_coord = +int32_t{1 << 28};
-
-#if defined(__x86_64__) || defined(_M_X64) || defined(__aarch64__)
-    static constexpr bool always_use_64bit = true;
-#else   // #if defined(__x86_64__) || defined(_M_X64) || defined(__aarch64__)
-    static constexpr bool always_use_64bit = false;
+    using calc_square_type = int64_t;
+#else   // #if defined(__x6_64__) || defined(_M_X64) || defined(__aarch64__)
+    static constexpr int32_t min_coord = -int32_t{1 << 13} + int32_t{1};
+    static constexpr int32_t max_coord = +int32_t{1 << 13} - int32_t{1};
+    using calc_square_type = int32_t;
 #endif  // #if defined(__x86_64__) || defined(_M_X64) || defined(__aarch64__)
 
  public:
@@ -2929,6 +2930,10 @@ class image {
             ystep = -1;
         }
 
+        if (stroke_width <= 0) {
+            return;
+        }
+
         if (stroke_width == 1) {
             for (; x0 <= x1; x0++) {
                 if (steep) {
@@ -2942,17 +2947,55 @@ class image {
                     err += dx;
                 }
             }
-        } else if (stroke_width > 1) {
-            const int32_t max_coord_val = std::max({abs(x0), abs(y0), abs(x1), abs(y1)});
-            const int32_t max_stroke =
-                std::min(stroke_width, std::max(static_cast<int32_t>(W), static_cast<int32_t>(H)));
+            return;
+        } 
 
-            if (max_coord_val < 16384 && max_stroke < 512) {
-                line_thick_int<int32_t>(x0, y0, x1, y1, col, max_stroke);
-            } else {
-                line_thick_int<int64_t>(x0, y0, x1, y1, col, max_stroke);
+        auto line_thick = [&]<typename I>() {
+            const int32_t half_width = stroke_width / 2;
+
+            const int32_t margin = half_width + 1;
+            const int32_t min_x = std::max(int32_t{0}, std::min({x0, x1}) - margin);
+            const int32_t max_x = std::min(static_cast<int32_t>(W) - 1, std::max({x0, x1}) + margin);
+            const int32_t min_y = std::max(int32_t{0}, std::min({y0, y1}) - margin);
+            const int32_t max_y = std::min(static_cast<int32_t>(H) - 1, std::max({y0, y1}) + margin);
+
+            if (min_x > max_x || min_y > max_y) {
+                return;
             }
-        }
+
+            const I line_dx = x1 - x0;
+            const I line_dy = y1 - y0;
+            const I line_length_sq = line_dx * line_dx + line_dy * line_dy;
+
+            if (line_length_sq == 0) {
+                if (x0 >= 0 && x0 < static_cast<int32_t>(W) && y0 >= 0 && y0 < static_cast<int32_t>(H)) {
+                    fill_circle(x0, y0, half_width, col);
+                }
+                return;
+            }
+
+            for (int32_t py = min_y; py <= max_y; py++) {
+                for (int32_t px = min_x; px <= max_x; px++) {
+                    const I px_dx = px - x0;
+                    const I px_dy = py - y0;
+
+                    const I dot_product = px_dx * line_dx + px_dy * line_dy;
+                    const I t_scaled = std::max(I{0}, std::min(line_length_sq, dot_product));
+
+                    const I closest_x = x0 + (t_scaled * line_dx) / line_length_sq;
+                    const I closest_y = y0 + (t_scaled * line_dy) / line_length_sq;
+
+                    const I dist_x = px - closest_x;
+                    const I dist_y = py - closest_y;
+                    const I distance_sq = dist_x * dist_x + dist_y * dist_y;
+
+                    if (distance_sq <= half_width * half_width) {
+                        plot(px, py, col);
+                    }
+                }
+            }
+        };
+        line_thick.template operator()<calc_square_type>();
     }
 
     /**
@@ -2983,9 +3026,18 @@ class image {
      * \param col Color palette index to use.
      * \param stroke_width Width of the line in pixels (can be fractional).
      */
-    constexpr void draw_line_aa(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, float stroke_width = 1.0f) {
+    constexpr void draw_line_aa(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col,
+                                float stroke_width = 1.0f) {
         auto minmax_check = std::minmax({x0, y0, x1, y1});
         if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
+            return;
+        }
+
+        const float Rl = format.quant.linear_palette().at((col & format.color_mask) * 3 + 0);
+        const float Gl = format.quant.linear_palette().at((col & format.color_mask) * 3 + 1);
+        const float Bl = format.quant.linear_palette().at((col & format.color_mask) * 3 + 2);
+
+        if (stroke_width <= 0.0f) {
             return;
         }
 
@@ -3003,10 +3055,6 @@ class image {
                 std::swap(x0, x1);
                 std::swap(y0, y1);
             }
-
-            const float Rl = format.quant.linear_palette().at((col & format.color_mask) * 3 + 0);
-            const float Gl = format.quant.linear_palette().at((col & format.color_mask) * 3 + 1);
-            const float Bl = format.quant.linear_palette().at((col & format.color_mask) * 3 + 2);
 
             const auto dx = static_cast<float>(x1 - x0);
             const auto dy = static_cast<float>(y1 - y0);
@@ -3087,22 +3135,22 @@ class image {
             return;
         }
 
-        const float Rl = format.quant.linear_palette().at((col & format.color_mask) * 3 + 0);
-        const float Gl = format.quant.linear_palette().at((col & format.color_mask) * 3 + 1);
-        const float Bl = format.quant.linear_palette().at((col & format.color_mask) * 3 + 2);
-
         const float dx = static_cast<float>(x1 - x0);
         const float dy = static_cast<float>(y1 - y0);
         const float line_length_sq = dx * dx + dy * dy;
 
-        if (line_length_sq < hidden::epsilon_low) {
+        if (line_length_sq < 1.0f) {
             const float radius = half_width;
             const int32_t r_ceil = static_cast<int32_t>(std::ceil(radius));
             for (int32_t py = y0 - r_ceil; py <= y0 + r_ceil; py++) {
                 for (int32_t px = x0 - r_ceil; px <= x0 + r_ceil; px++) {
                     if (px >= 0 && px < static_cast<int32_t>(W) && py >= 0 && py < static_cast<int32_t>(H)) {
-                        const float dist =
-                            hidden::fast_sqrtf(static_cast<float>((px - x0) * (px - x0) + (py - y0) * (py - y0)));
+                        float dist = static_cast<float>((px - x0) * (px - x0) + (py - y0) * (py - y0));
+                        if (std::is_constant_evaluated()) {
+                            dist = hidden::fast_sqrtf(dist);
+                        } else {
+                            dist = std::sqrtf(dist);
+                        }
                         const float coverage = std::max(0.0f, std::min(1.0f, radius + 0.5f - dist));
                         if (coverage > hidden::epsilon_low) {
                             if (coverage >= hidden::epsilon_high) {
@@ -3121,18 +3169,18 @@ class image {
             for (int32_t px = min_x; px <= max_x; px++) {
                 const float px_dx = static_cast<float>(px - x0);
                 const float px_dy = static_cast<float>(py - y0);
-
                 const float t = std::max(0.0f, std::min(1.0f, (px_dx * dx + px_dy * dy) / line_length_sq));
-
                 const float closest_x = static_cast<float>(x0) + t * dx;
                 const float closest_y = static_cast<float>(y0) + t * dy;
-
                 const float dist_x = static_cast<float>(px) - closest_x;
                 const float dist_y = static_cast<float>(py) - closest_y;
-                const float distance = hidden::fast_sqrtf(dist_x * dist_x + dist_y * dist_y);
-
-                const float coverage = std::max(0.0f, std::min(1.0f, half_width + 0.5f - distance));
-
+                float dist = dist_x * dist_x + dist_y * dist_y;
+                if (std::is_constant_evaluated()) {
+                    dist = hidden::fast_sqrtf(dist);
+                } else {
+                    dist = std::sqrt(dist);
+                }
+                const float coverage = std::max(0.0f, std::min(1.0f, half_width + 0.5f - dist));
                 if (coverage > hidden::epsilon_low) {
                     if (coverage >= hidden::epsilon_high) {
                         plot(px, py, col);
@@ -3528,12 +3576,13 @@ class image {
      * \param y Starting Y-coordinate in pixels.
      * \param w Width of the rectangle in pixels.
      * \param h Height of the rectangle in pixels.
-     * \param shader Lambda function taking (u, v, aspect_u, aspect_v) normalized coordinates 
+     * \param shader Lambda function taking (u, v, aspect_u, aspect_v) normalized coordinates
      *                    and returning RGBA color as std::array<float, 4>
      */
-    template<typename shader_func>
-    constexpr auto fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, const shader_func& shader) 
-        -> std::enable_if_t<std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float>, void> {
+    template <typename shader_func>
+    constexpr auto fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, const shader_func &shader)
+        -> std::enable_if_t<std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float>,
+                            void> {
         auto minmax_check = std::minmax({x, y, w, h});
         if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
             return;
@@ -3544,17 +3593,17 @@ class image {
         if (check_not_in_bounds(x, y, w, h)) {
             return;
         }
-        
+
         int32_t x0 = std::max(x, int32_t{0});
         int32_t y0 = std::max(y, int32_t{0});
         int32_t x1 = std::min(x + w, static_cast<int32_t>(W));
         int32_t y1 = std::min(y + h, static_cast<int32_t>(H));
-        
+
         for (int32_t py = y0; py < y1; py++) {
             for (int32_t px = x0; px < x1; px++) {
                 float u = static_cast<float>(px - x) / static_cast<float>(w);
                 float v = static_cast<float>(py - y) / static_cast<float>(h);
-                
+
                 float aspect_ratio = static_cast<float>(w) / static_cast<float>(h);
                 float au = u;
                 float av = v;
@@ -3563,9 +3612,9 @@ class image {
                 } else {
                     av = v / aspect_ratio;
                 }
-                
+
                 auto rgba = shader(u, v, au, av);
-                
+
                 compose(px, py, rgba[3], rgba[0], rgba[1], rgba[2]);
             }
         }
@@ -3574,10 +3623,11 @@ class image {
     /**
      * @private
      */
-    template<typename shader_func>
-    constexpr auto fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, const shader_func& shader,
-                             int32_t parent_x, int32_t parent_y, int32_t parent_w, int32_t parent_h) 
-        -> std::enable_if_t<std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float>, void> {
+    template <typename shader_func>
+    constexpr auto fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, const shader_func &shader, int32_t parent_x,
+                             int32_t parent_y, int32_t parent_w, int32_t parent_h)
+        -> std::enable_if_t<std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float>,
+                            void> {
         auto minmax_check = std::minmax({x, y, w, h});
         if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
             return;
@@ -3588,23 +3638,23 @@ class image {
         if (check_not_in_bounds(x, y, w, h)) {
             return;
         }
-        
+
         int32_t x0 = std::max(x, int32_t{0});
         int32_t y0 = std::max(y, int32_t{0});
         int32_t x1 = std::min(x + w, static_cast<int32_t>(W));
         int32_t y1 = std::min(y + h, static_cast<int32_t>(H));
-        
+
         const float parent_wF = static_cast<float>(parent_w);
         const float parent_hF = static_cast<float>(parent_h);
-        
+
         for (int32_t py = y0; py < y1; py++) {
             for (int32_t px = x0; px < x1; px++) {
                 float u = (static_cast<float>(px) - static_cast<float>(parent_x)) / parent_wF;
                 float v = (static_cast<float>(py) - static_cast<float>(parent_y)) / parent_hF;
-                
+
                 u = std::clamp(u, 0.0f, 1.0f);
                 v = std::clamp(v, 0.0f, 1.0f);
-                
+
                 float aspect_ratio = parent_wF / parent_hF;
                 float au = u;
                 float av = v;
@@ -3613,9 +3663,9 @@ class image {
                 } else {
                     au = u / aspect_ratio;
                 }
-                
+
                 auto rgba = shader(u, v, au, av);
-                
+
                 compose(px, py, rgba[3], rgba[0], rgba[1], rgba[2]);
             }
         }
@@ -3842,12 +3892,13 @@ class image {
      * \param cx Center X-coordinate of the circle in pixels.
      * \param cy Center Y-coordinate of the circle in pixels.
      * \param radius Radius of the circle in pixels.
-     * \param shader Lambda function taking (u, v, aspect_u, aspect_v) normalized coordinates 
+     * \param shader Lambda function taking (u, v, aspect_u, aspect_v) normalized coordinates
      *                    and returning RGBA color as std::array<float, 4>
      */
-    template<typename shader_func>
-    constexpr auto fill_circle_aa(int32_t cx, int32_t cy, int32_t radius, const shader_func& shader) 
-        -> std::enable_if_t<std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float>, void> {
+    template <typename shader_func>
+    constexpr auto fill_circle_aa(int32_t cx, int32_t cy, int32_t radius, const shader_func &shader)
+        -> std::enable_if_t<std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float>,
+                            void> {
         auto minmax_check = std::minmax({cx, cy, radius});
         if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
             return;
@@ -4019,12 +4070,14 @@ class image {
      * \param w Width of the rectangle in pixels.
      * \param h Height of the rectangle in pixels.
      * \param radius Radius of the rounded corners in pixels.
-     * \param shader Lambda function taking (u, v, aspect_u, aspect_v) normalized coordinates 
+     * \param shader Lambda function taking (u, v, aspect_u, aspect_v) normalized coordinates
      *                    and returning RGBA color as std::array<float, 4>
      */
-    template<typename shader_func>
-    constexpr auto fill_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, const shader_func& shader)
-        -> std::enable_if_t<std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float>, void> {
+    template <typename shader_func>
+    constexpr auto fill_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius,
+                                      const shader_func &shader)
+        -> std::enable_if_t<std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float>,
+                            void> {
         auto minmax_check = std::minmax({x, y, w, h, radius});
         if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
             return;
@@ -4036,9 +4089,9 @@ class image {
         int32_t cr = std::min({w / 2, h / 2, radius});
         int32_t dx = w - cr * 2;
         int32_t dy = h - cr * 2;
-        
+
         circle_int_shader(x + cr, y + cr, cr, dx, dy, shader, x, y, w, h);
-        
+
         fill_rect(x, y + cr, cr, dy, shader, x, y, w, h);
         fill_rect(x + w - cr, y + cr, cr, dy, shader, x, y, w, h);
         fill_rect(x + cr, y, dx, h, shader, x, y, w, h);
@@ -4513,11 +4566,6 @@ class image {
 
         uint32_t outcode0 = calc_code(x0, y0);
         uint32_t outcode1 = calc_code(x1, y1);
-
-        const int32_t max_value =
-            std::max({abs(x0), abs(y0), abs(x1), abs(y1), abs(xmin), abs(ymin), abs(xmax), abs(ymax)});
-        const bool use_int64 = always_use_64bit || max_value >= (std::numeric_limits<int16_t>::max() / int32_t{4});
-
         auto clip_loop = [&]<typename I>() -> bool {
             for (size_t i = 0; i < 4; i++) {
                 if ((outcode0 | outcode1) == INSIDE) {
@@ -4566,10 +4614,7 @@ class image {
             }
             return false;
         };
-        if (use_int64) {
-            return clip_loop.template operator()<int64_t>();
-        }
-        return clip_loop.template operator()<int32_t>();
+        return clip_loop.template operator()<calc_square_type>();
     }
 
     /**
@@ -4737,10 +4782,6 @@ class image {
         };
 
         if constexpr (!AA) {
-            const int32_t max_value = std::max(
-                {abs(x0), abs(y0), abs(x0r), abs(x0r2), abs(y0r), abs(y0r2), abs(r), abs(s), abs(cx), abs(cy)});
-            const bool use_int64 =
-                always_use_64bit || max_value >= ((std::numeric_limits<int16_t>::max() / int32_t{8}) - int16_t{1});
             if constexpr (!STROKE) {
                 auto plot_arc = [&, this]<typename I>(int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
                                                       int32_t y_off) {
@@ -4757,11 +4798,7 @@ class image {
                         }
                     }
                 };
-                if (!use_int64) {
-                    for_each_quadrant.template operator()<int32_t>(plot_arc);
-                } else {
-                    for_each_quadrant.template operator()<int64_t>(plot_arc);
-                }
+                for_each_quadrant.template operator()<calc_square_type>(plot_arc);
             } else {
                 auto plot_arc = [&, this]<typename I>(int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
                                                       int32_t y_off) {
@@ -4781,11 +4818,7 @@ class image {
                         }
                     }
                 };
-                if (!use_int64) {
-                    for_each_quadrant.template operator()<int32_t>(plot_arc);
-                } else {
-                    for_each_quadrant.template operator()<int64_t>(plot_arc);
-                }
+                for_each_quadrant.template operator()<calc_square_type>(plot_arc);
             }
         } else {
             const auto rF = static_cast<float>(r);
@@ -4886,8 +4919,9 @@ class image {
     /**
      * @private
      */
-    template<typename shader_func>
-    constexpr void circle_int_shader(int32_t cx, int32_t cy, int32_t r, int32_t ox, int32_t oy, const shader_func& shader) {
+    template <typename shader_func>
+    constexpr void circle_int_shader(int32_t cx, int32_t cy, int32_t r, int32_t ox, int32_t oy,
+                                     const shader_func &shader) {
         const int32_t x0 = std::max(cx - r - int32_t{1}, int32_t{0});
         const int32_t y0 = std::max(cy - r - int32_t{1}, int32_t{0});
 
@@ -4915,11 +4949,11 @@ class image {
         };
 
         const auto rF = static_cast<float>(r);
-        
+
         const float circle_left = static_cast<float>(cx - r);
         const float circle_top = static_cast<float>(cy - r);
         const float circle_size = static_cast<float>(r * 2);
-        
+
         auto plot_arc = [&, this]<typename I>(int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
                                               int32_t y_off) {
             limit_box(xx0, yy0, xx1, yy1, x_off, y_off);
@@ -4931,23 +4965,23 @@ class image {
                     if (dist_sq > (rF + 0.5f) * (rF + 0.5f)) {
                         continue;
                     }
-                    
+
                     float u = (static_cast<float>(x) - circle_left) / circle_size;
                     float v = (static_cast<float>(y) - circle_top) / circle_size;
-                    
+
                     u = std::clamp(u, 0.0f, 1.0f);
                     v = std::clamp(v, 0.0f, 1.0f);
-                    
+
                     float au = u;
                     float av = v;
-                    
+
                     auto rgba = shader(u, v, au, av);
-                    
+
                     if (dist_sq < (rF - 0.5f) * (rF - 0.5f)) {
                         compose_unsafe(x + x_off, y + y_off, rgba[3], rgba[0], rgba[1], rgba[2]);
                         continue;
                     }
-                    
+
                     float a = rF;
                     if (std::is_constant_evaluated()) {
                         a -= hidden::fast_sqrtf(dist_sq);
@@ -4968,9 +5002,10 @@ class image {
      * @private
      * Enhanced circle shader that maps UV coordinates to parent shape bounds
      */
-    template<typename shader_func>
-    constexpr void circle_int_shader(int32_t cx, int32_t cy, int32_t r, int32_t ox, int32_t oy, const shader_func& shader,
-                                     int32_t parent_x, int32_t parent_y, int32_t parent_w, int32_t parent_h) {
+    template <typename shader_func>
+    constexpr void circle_int_shader(int32_t cx, int32_t cy, int32_t r, int32_t ox, int32_t oy,
+                                     const shader_func &shader, int32_t parent_x, int32_t parent_y, int32_t parent_w,
+                                     int32_t parent_h) {
         const int32_t x0 = std::max(cx - r - int32_t{1}, int32_t{0});
         const int32_t y0 = std::max(cy - r - int32_t{1}, int32_t{0});
 
@@ -5001,7 +5036,7 @@ class image {
         const auto rF = static_cast<float>(r);
         const float parent_wF = static_cast<float>(parent_w);
         const float parent_hF = static_cast<float>(parent_h);
-        
+
         auto plot_arc = [&, this]<typename I>(int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
                                               int32_t y_off) {
             limit_box(xx0, yy0, xx1, yy1, x_off, y_off);
@@ -5013,13 +5048,13 @@ class image {
                     if (dist_sq > (rF + 0.5f) * (rF + 0.5f)) {
                         continue;
                     }
-                    
+
                     float u = (static_cast<float>(x + x_off) - static_cast<float>(parent_x)) / parent_wF;
                     float v = (static_cast<float>(y + y_off) - static_cast<float>(parent_y)) / parent_hF;
-                    
+
                     u = std::clamp(u, 0.0f, 1.0f);
                     v = std::clamp(v, 0.0f, 1.0f);
-                    
+
                     float aspect_ratio = parent_wF / parent_hF;
                     float au = u;
                     float av = v;
@@ -5028,14 +5063,14 @@ class image {
                     } else {
                         au = u / aspect_ratio;
                     }
-                    
+
                     auto rgba = shader(u, v, au, av);
-                    
+
                     if (dist_sq < (rF - 0.5f) * (rF - 0.5f)) {
                         compose_unsafe(x + x_off, y + y_off, rgba[3], rgba[0], rgba[1], rgba[2]);
                         continue;
                     }
-                    
+
                     float a = rF;
                     if (std::is_constant_evaluated()) {
                         a -= hidden::fast_sqrtf(dist_sq);
@@ -5050,56 +5085,6 @@ class image {
             }
         };
         for_each_quadrant.template operator()<float>(plot_arc);
-    }
-
-    /**
-     * @private
-     */
-    template <typename I>
-    constexpr void line_thick_int(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, int32_t stroke_width) {
-        const int32_t half_width = stroke_width / 2;
-
-        const int32_t margin = half_width + 1;
-        const int32_t min_x = std::max(int32_t{0}, std::min({x0, x1}) - margin);
-        const int32_t max_x = std::min(static_cast<int32_t>(W) - 1, std::max({x0, x1}) + margin);
-        const int32_t min_y = std::max(int32_t{0}, std::min({y0, y1}) - margin);
-        const int32_t max_y = std::min(static_cast<int32_t>(H) - 1, std::max({y0, y1}) + margin);
-
-        if (min_x > max_x || min_y > max_y) {
-            return;
-        }
-
-        const I line_dx = x1 - x0;
-        const I line_dy = y1 - y0;
-        const I line_length_sq = line_dx * line_dx + line_dy * line_dy;
-
-        if (line_length_sq == 0) {
-            if (x0 >= 0 && x0 < static_cast<int32_t>(W) && y0 >= 0 && y0 < static_cast<int32_t>(H)) {
-                //fill_circle(x0, y0, half_width, col);
-            }
-            return;
-        }
-
-        for (int32_t py = min_y; py <= max_y; py++) {
-            for (int32_t px = min_x; px <= max_x; px++) {
-                const I px_dx = px - x0;
-                const I px_dy = py - y0;
-
-                const I dot_product = px_dx * line_dx + px_dy * line_dy;
-                const I t_scaled = std::max(I{0}, std::min(line_length_sq, dot_product));
-
-                const I closest_x = x0 + (t_scaled * line_dx) / line_length_sq;
-                const I closest_y = y0 + (t_scaled * line_dy) / line_length_sq;
-
-                const I dist_x = px - closest_x;
-                const I dist_y = py - closest_y;
-                const I distance_sq = dist_x * dist_x + dist_y * dist_y;
-
-                if (distance_sq <= half_width * half_width) {
-                    plot(px, py, col);
-                }
-            }
-        }
     }
 
     /**
