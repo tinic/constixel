@@ -2930,6 +2930,272 @@ struct draw_string {
     uint8_t col = color::WHITE; /**< Color palette index to use. */
 };
 
+template <template <size_t, size_t, bool, bool> class T, size_t W, size_t H, bool GRAYSCALE, bool USE_SPAN>
+class image;
+
+/**
+ * @brief Fluent shape API classes for method chaining
+ */
+namespace shapes {
+
+template <template <size_t, size_t, bool, bool> class T, size_t W, size_t H, bool GRAYSCALE, bool USE_SPAN>
+class rect {
+    using image_type = image<T, W, H, GRAYSCALE, USE_SPAN>;
+    image_type& img;
+    int32_t x, y, w, h;
+    
+public:
+    constexpr rect(image_type& image, int32_t x_, int32_t y_, int32_t w_, int32_t h_) 
+        : img(image), x(x_), y(y_), w(w_), h(h_) {}
+    
+    constexpr rect& fill(uint8_t col) {
+        img.fill_rect(x, y, w, h, col);
+        return *this;
+    }
+    
+    template <typename shader_func>
+    constexpr auto fill_shader(const shader_func &shader)
+        -> std::enable_if_t<std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float>, rect&> {
+        img.fill_rect(x, y, w, h, shader);
+        return *this;
+    }
+    
+    constexpr rect& stroke(uint8_t col, int32_t stroke_width = 1) {
+        img.stroke_rect(x, y, w, h, col, stroke_width);
+        return *this;
+    }
+};
+
+template <template <size_t, size_t, bool, bool> class T, size_t W, size_t H, bool GRAYSCALE, bool USE_SPAN>
+class circle {
+    using image_type = image<T, W, H, GRAYSCALE, USE_SPAN>;
+    image_type& img;
+    int32_t cx, cy, r;
+    
+public:
+    constexpr circle(image_type& image, int32_t cx_, int32_t cy_, int32_t r_) 
+        : img(image), cx(cx_), cy(cy_), r(r_) {}
+    
+    constexpr circle& fill(uint8_t col) {
+        img.fill_circle(cx, cy, r, col);
+        return *this;
+    }
+    
+    constexpr circle& stroke(uint8_t col, int32_t stroke_width = 1) {
+        img.stroke_circle(cx, cy, r, col, stroke_width);
+        return *this;
+    }
+};
+
+template <template <size_t, size_t, bool, bool> class T, size_t W, size_t H, bool GRAYSCALE, bool USE_SPAN>
+class circle_aa {
+    using image_type = image<T, W, H, GRAYSCALE, USE_SPAN>;
+    image_type& img;
+    int32_t cx, cy, r;
+    
+public:
+    constexpr circle_aa(image_type& image, int32_t cx_, int32_t cy_, int32_t r_) 
+        : img(image), cx(cx_), cy(cy_), r(r_) {}
+    
+    constexpr circle_aa& fill(uint8_t col) {
+        img.fill_circle_aa(cx, cy, r, col);
+        return *this;
+    }
+    
+    template <typename shader_func>
+    constexpr auto fill_shader(const shader_func &shader)
+        -> std::enable_if_t<std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float>, circle_aa&> {
+        img.fill_circle_aa(cx, cy, r, shader);
+        return *this;
+    }
+    
+    constexpr circle_aa& stroke(uint8_t col, int32_t stroke_width = 1) {
+        img.stroke_circle_aa(cx, cy, r, col, stroke_width);
+        return *this;
+    }
+};
+
+template <template <size_t, size_t, bool, bool> class T, size_t W, size_t H, bool GRAYSCALE, bool USE_SPAN>
+class round_rect {
+    using image_type = image<T, W, H, GRAYSCALE, USE_SPAN>;
+    image_type& img;
+    int32_t x, y, w, h, radius;
+    
+public:
+    constexpr round_rect(image_type& image, int32_t x_, int32_t y_, int32_t w_, int32_t h_, int32_t radius_) 
+        : img(image), x(x_), y(y_), w(w_), h(h_), radius(radius_) {}
+    
+    constexpr round_rect& fill(uint8_t col) {
+        img.fill_round_rect(x, y, w, h, radius, col);
+        return *this;
+    }
+    
+    constexpr round_rect& stroke(uint8_t col, int32_t stroke_width = 1) {
+        img.stroke_round_rect(x, y, w, h, radius, col, stroke_width);
+        return *this;
+    }
+};
+
+template <template <size_t, size_t, bool, bool> class T, size_t W, size_t H, bool GRAYSCALE, bool USE_SPAN>
+class round_rect_aa {
+    using image_type = image<T, W, H, GRAYSCALE, USE_SPAN>;
+    image_type& img;
+    int32_t x, y, w, h, radius;
+    
+public:
+    constexpr round_rect_aa(image_type& image, int32_t x_, int32_t y_, int32_t w_, int32_t h_, int32_t radius_) 
+        : img(image), x(x_), y(y_), w(w_), h(h_), radius(radius_) {}
+    
+    constexpr round_rect_aa& fill(uint8_t col) {
+        img.fill_round_rect_aa(x, y, w, h, radius, col);
+        return *this;
+    }
+    
+    template <typename shader_func>
+    constexpr auto fill_shader(const shader_func &shader)
+        -> std::enable_if_t<std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float>, round_rect_aa&> {
+        img.fill_round_rect_aa(x, y, w, h, radius, shader);
+        return *this;
+    }
+    
+    constexpr round_rect_aa& stroke(uint8_t col, int32_t stroke_width = 1) {
+        img.stroke_round_rect_aa(x, y, w, h, radius, col, stroke_width);
+        return *this;
+    }
+};
+
+template <template <size_t, size_t, bool, bool> class T, size_t W, size_t H, bool GRAYSCALE, bool USE_SPAN>
+class line {
+    using image_type = image<T, W, H, GRAYSCALE, USE_SPAN>;
+    image_type& img;
+    int32_t x0, y0, x1, y1;
+    
+public:
+    constexpr line(image_type& image, int32_t x0_, int32_t y0_, int32_t x1_, int32_t y1_) 
+        : img(image), x0(x0_), y0(y0_), x1(x1_), y1(y1_) {}
+    
+    constexpr line& stroke(uint8_t col, int32_t stroke_width = 1) {
+        img.draw_line(x0, y0, x1, y1, col, stroke_width);
+        return *this;
+    }
+};
+
+template <template <size_t, size_t, bool, bool> class T, size_t W, size_t H, bool GRAYSCALE, bool USE_SPAN>
+class line_aa {
+    using image_type = image<T, W, H, GRAYSCALE, USE_SPAN>;
+    image_type& img;
+    int32_t x0, y0, x1, y1;
+    
+public:
+    constexpr line_aa(image_type& image, int32_t x0_, int32_t y0_, int32_t x1_, int32_t y1_) 
+        : img(image), x0(x0_), y0(y0_), x1(x1_), y1(y1_) {}
+    
+    constexpr line_aa& stroke(uint8_t col, float stroke_width = 1.0f) {
+        img.draw_line_aa(x0, y0, x1, y1, col, stroke_width);
+        return *this;
+    }
+};
+
+template <template <size_t, size_t, bool, bool> class T, size_t W, size_t H, bool GRAYSCALE, bool USE_SPAN>
+class point {
+    using image_type = image<T, W, H, GRAYSCALE, USE_SPAN>;
+    image_type& img;
+    int32_t x, y;
+    
+public:
+    constexpr point(image_type& image, int32_t x_, int32_t y_) 
+        : img(image), x(x_), y(y_) {}
+    
+    constexpr point& plot(uint8_t col) {
+        img.plot(x, y, col);
+        return *this;
+    }
+};
+
+template <typename FONT, template <size_t, size_t, bool, bool> class T, size_t W, size_t H, bool GRAYSCALE, bool USE_SPAN, 
+          bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+class text_mono {
+    using image_type = image<T, W, H, GRAYSCALE, USE_SPAN>;
+    image_type& img;
+    int32_t x, y;
+    const char* str;
+    
+public:
+    constexpr text_mono(image_type& image, int32_t x_, int32_t y_, const char* str_) 
+        : img(image), x(x_), y(y_), str(str_) {}
+    
+    constexpr int32_t draw(uint8_t col, size_t character_count = std::numeric_limits<size_t>::max(),
+                          size_t *character_actual = nullptr) {
+        return img.template draw_string_mono<FONT, KERNING, ROTATION>(x, y, str, col, character_count, character_actual);
+    }
+    
+    constexpr text_mono& color(uint8_t col) {
+        img.template draw_string_mono<FONT, KERNING, ROTATION>(x, y, str, col);
+        return *this;
+    }
+};
+
+template <typename FONT, template <size_t, size_t, bool, bool> class T, size_t W, size_t H, bool GRAYSCALE, bool USE_SPAN, 
+          bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+class text_aa {
+    using image_type = image<T, W, H, GRAYSCALE, USE_SPAN>;
+    image_type& img;
+    int32_t x, y;
+    const char* str;
+    
+public:
+    constexpr text_aa(image_type& image, int32_t x_, int32_t y_, const char* str_) 
+        : img(image), x(x_), y(y_), str(str_) {}
+    
+    constexpr int32_t draw(uint8_t col, size_t character_count = std::numeric_limits<size_t>::max(),
+                          size_t *character_actual = nullptr) {
+        return img.template draw_string_aa<FONT, KERNING, ROTATION>(x, y, str, col, character_count, character_actual);
+    }
+    
+    constexpr text_aa& color(uint8_t col) {
+        img.template draw_string_aa<FONT, KERNING, ROTATION>(x, y, str, col);
+        return *this;
+    }
+};
+
+template <typename FONT, template <size_t, size_t, bool, bool> class T, size_t W, size_t H, bool GRAYSCALE, bool USE_SPAN, 
+          bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+class text_centered_mono {
+    using image_type = image<T, W, H, GRAYSCALE, USE_SPAN>;
+    image_type& img;
+    int32_t x, y;
+    const char* str;
+    
+public:
+    constexpr text_centered_mono(image_type& image, int32_t x_, int32_t y_, const char* str_) 
+        : img(image), x(x_), y(y_), str(str_) {}
+    
+    constexpr text_centered_mono& color(uint8_t col) {
+        img.template draw_string_centered_mono<FONT, KERNING, ROTATION>(x, y, str, col);
+        return *this;
+    }
+};
+
+template <typename FONT, template <size_t, size_t, bool, bool> class T, size_t W, size_t H, bool GRAYSCALE, bool USE_SPAN, 
+          bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+class text_centered_aa {
+    using image_type = image<T, W, H, GRAYSCALE, USE_SPAN>;
+    image_type& img;
+    int32_t x, y;
+    const char* str;
+    
+public:
+    constexpr text_centered_aa(image_type& image, int32_t x_, int32_t y_, const char* str_) 
+        : img(image), x(x_), y(y_), str(str_) {}
+    
+    constexpr text_centered_aa& color(uint8_t col) {
+        img.template draw_string_centered_aa<FONT, KERNING, ROTATION>(x, y, str, col);
+        return *this;
+    }
+};
+
+} // namespace shapes
+
 /**
  * @class image
  * @brief Core class of constixel. Holds a buffer of an image width a certain size and format. Typical use:
@@ -4477,7 +4743,7 @@ class image {
      */
     constexpr void blit_RGBA(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih,
                              int32_t stride) {
-        rect<int32_t> blitrect{.x = x, .y = y, .w = w, .h = h};
+        constixel::rect<int32_t> blitrect{.x = x, .y = y, .w = w, .h = h};
         blitrect &= {.x = 0, .y = 0, .w = W, .h = H};
         blitrect &= {.x = x, .y = y, .w = iw, .h = ih};
         T<W, H, GRAYSCALE, USE_SPAN>::blit_RGBA(data, blitrect, ptr, stride);
@@ -4493,7 +4759,7 @@ class image {
      * \param stride Bytes per line of pixels of the RGBA8 buffer.
      */
     constexpr void blit_RGBA(const rect<int32_t> &dstrect, const uint8_t *ptr, int32_t iw, int32_t ih, int32_t stride) {
-        rect<int32_t> blitrect{dstrect};
+        constixel::rect<int32_t> blitrect{dstrect};
         blitrect &= {.x = 0, .y = 0, .w = W, .h = H};
         blitrect &= {.x = dstrect.x, .y = dstrect.y, .w = iw, .h = ih};
         T<W, H, GRAYSCALE, USE_SPAN>::blit_RGBA(data, blitrect, ptr, stride);
@@ -4513,7 +4779,7 @@ class image {
      */
     constexpr void blit_RGBA_diffused(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw,
                                       int32_t ih, int32_t stride) {
-        rect<int32_t> blitrect{.x = x, .y = y, .w = w, .h = h};
+        constixel::rect<int32_t> blitrect{.x = x, .y = y, .w = w, .h = h};
         blitrect &= {.x = 0, .y = 0, .w = W, .h = H};
         blitrect &= {.x = x, .y = y, .w = iw, .h = ih};
         T<W, H, GRAYSCALE, USE_SPAN>::blit_RGBA_diffused(data, blitrect, ptr, stride);
@@ -4531,7 +4797,7 @@ class image {
      */
     constexpr void blit_RGBA_diffused(const rect<int32_t> &dstrect, const uint8_t *ptr, int32_t iw, int32_t ih,
                                       int32_t stride) {
-        rect<int32_t> blitrect{dstrect};
+        constixel::rect<int32_t> blitrect{dstrect};
         blitrect &= {.x = 0, .y = 0, .w = W, .h = H};
         blitrect &= {.x = dstrect.x, .y = dstrect.y, .w = iw, .h = ih};
         T<W, H, GRAYSCALE, USE_SPAN>::blit_RGBA_diffused(data, blitrect, ptr, stride);
@@ -4551,7 +4817,7 @@ class image {
      */
     constexpr void blit_RGBA_diffused_linear(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw,
                                              int32_t ih, int32_t stride) {
-        rect<int32_t> blitrect{.x = x, .y = y, .w = w, .h = h};
+        constixel::rect<int32_t> blitrect{.x = x, .y = y, .w = w, .h = h};
         blitrect &= {.x = 0, .y = 0, .w = W, .h = H};
         blitrect &= {.x = x, .y = y, .w = iw, .h = ih};
         T<W, H, GRAYSCALE, USE_SPAN>::blit_RGBA_diffused_linear(data, blitrect, ptr, stride);
@@ -4569,7 +4835,7 @@ class image {
      */
     constexpr void blit_RGBA_diffused_linear(const rect<int32_t> &dstrect, const uint8_t *ptr, int32_t iw, int32_t ih,
                                              int32_t stride) {
-        rect<int32_t> blitrect{dstrect};
+        constixel::rect<int32_t> blitrect{dstrect};
         blitrect &= {.x = 0, .y = 0, .w = W, .h = H};
         blitrect &= {.x = dstrect.x, .y = dstrect.y, .w = iw, .h = ih};
         T<W, H, GRAYSCALE, USE_SPAN>::blit_RGBA_diffused_linear(data, blitrect, ptr, stride);
@@ -4749,12 +5015,203 @@ class image {
         }
     }
 
+    /**
+     * @brief Fluent shape API methods for method chaining
+     * These provide a more expressive way to create shapes compared to struct-based calls.
+     * 
+     * Example usage:
+     * \code{.cpp}
+     * image.rect(10, 10, 50, 30).fill(constixel::color::RED).stroke(constixel::color::BLACK, 2);
+     * image.circle(100, 100, 20).fill(constixel::color::BLUE);
+     * image.line(0, 0, 100, 100).stroke(constixel::color::WHITE, 3);
+     * \endcode
+     */
+    
+    /**
+     * \brief Create a rectangle shape for fluent method chaining.
+     * \param x Starting X-coordinate in pixels.
+     * \param y Starting Y-coordinate in pixels.
+     * \param w Width of the rectangle in pixels.
+     * \param h Height of the rectangle in pixels.
+     * \return A rect shape object that supports .fill() and .stroke() methods.
+     */
+    constexpr auto rect(int32_t x, int32_t y, int32_t w, int32_t h) {
+        return shapes::rect<T, W, H, GRAYSCALE, USE_SPAN>(*this, x, y, w, h);
+    }
+    
+    /**
+     * \brief Create a circle shape for fluent method chaining.
+     * \param cx Center X-coordinate in pixels.
+     * \param cy Center Y-coordinate in pixels.
+     * \param r Radius of the circle in pixels.
+     * \return A circle shape object that supports .fill() and .stroke() methods.
+     */
+    constexpr auto circle(int32_t cx, int32_t cy, int32_t r) {
+        return shapes::circle<T, W, H, GRAYSCALE, USE_SPAN>(*this, cx, cy, r);
+    }
+    
+    /**
+     * \brief Create an antialiased circle shape for fluent method chaining.
+     * Only format_8bit targets are supported.
+     * \param cx Center X-coordinate in pixels.
+     * \param cy Center Y-coordinate in pixels.
+     * \param r Radius of the circle in pixels.
+     * \return A circle_aa shape object that supports .fill() and .stroke() methods.
+     */
+    constexpr auto circle_aa(int32_t cx, int32_t cy, int32_t r) {
+        return shapes::circle_aa<T, W, H, GRAYSCALE, USE_SPAN>(*this, cx, cy, r);
+    }
+    
+    /**
+     * \brief Create a rounded rectangle shape for fluent method chaining.
+     * \param x Starting X-coordinate in pixels.
+     * \param y Starting Y-coordinate in pixels.
+     * \param w Width of the rectangle in pixels.
+     * \param h Height of the rectangle in pixels.
+     * \param radius Radius of the rounded corners in pixels.
+     * \return A round_rect shape object that supports .fill() and .stroke() methods.
+     */
+    constexpr auto round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius) {
+        return shapes::round_rect<T, W, H, GRAYSCALE, USE_SPAN>(*this, x, y, w, h, radius);
+    }
+    
+    /**
+     * \brief Create an antialiased rounded rectangle shape for fluent method chaining.
+     * Only format_8bit targets are supported.
+     * \param x Starting X-coordinate in pixels.
+     * \param y Starting Y-coordinate in pixels.
+     * \param w Width of the rectangle in pixels.
+     * \param h Height of the rectangle in pixels.
+     * \param radius Radius of the rounded corners in pixels.
+     * \return A round_rect_aa shape object that supports .fill() and .stroke() methods.
+     */
+    constexpr auto round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius) {
+        return shapes::round_rect_aa<T, W, H, GRAYSCALE, USE_SPAN>(*this, x, y, w, h, radius);
+    }
+    
+    /**
+     * \brief Create a line shape for fluent method chaining.
+     * \param x0 Starting X-coordinate in pixels.
+     * \param y0 Starting Y-coordinate in pixels.
+     * \param x1 Ending X-coordinate in pixels.
+     * \param y1 Ending Y-coordinate in pixels.
+     * \return A line shape object that supports .stroke() method.
+     */
+    constexpr auto line(int32_t x0, int32_t y0, int32_t x1, int32_t y1) {
+        return shapes::line<T, W, H, GRAYSCALE, USE_SPAN>(*this, x0, y0, x1, y1);
+    }
+    
+    /**
+     * \brief Create an antialiased line shape for fluent method chaining.
+     * Only format_8bit targets are supported.
+     * \param x0 Starting X-coordinate in pixels.
+     * \param y0 Starting Y-coordinate in pixels.
+     * \param x1 Ending X-coordinate in pixels.
+     * \param y1 Ending Y-coordinate in pixels.
+     * \return A line_aa shape object that supports .stroke() method.
+     */
+    constexpr auto line_aa(int32_t x0, int32_t y0, int32_t x1, int32_t y1) {
+        return shapes::line_aa<T, W, H, GRAYSCALE, USE_SPAN>(*this, x0, y0, x1, y1);
+    }
+    
+    /**
+     * \brief Create a point shape for fluent method chaining.
+     * \param x X-coordinate in pixels.
+     * \param y Y-coordinate in pixels.
+     * \return A point shape object that supports .plot() method.
+     */
+    constexpr auto point(int32_t x, int32_t y) {
+        return shapes::point<T, W, H, GRAYSCALE, USE_SPAN>(*this, x, y);
+    }
+    
+    /**
+     * \brief Create a text shape for fluent monospace string drawing with method chaining.
+     * \tparam FONT The font type to use for rendering.
+     * \tparam KERNING Enable kerning if true (default: false).
+     * \tparam ROTATION Text rotation (default: DEGREE_0).
+     * \param x Starting X-coordinate in pixels.
+     * \param y Starting Y-coordinate in pixels.
+     * \param str The string to draw.
+     * \return A text_mono shape object that supports .color() and .draw() methods.
+     * 
+     * Example usage:
+     * \code
+     * img.text_mono<constixel::ibmplexmono_regular_12_mono>(10, 20, "Hello").color(constixel::color::WHITE);
+     * \endcode
+     */
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+    constexpr auto text_mono(int32_t x, int32_t y, const char* str) {
+        return shapes::text_mono<FONT, T, W, H, GRAYSCALE, USE_SPAN, KERNING, ROTATION>(*this, x, y, str);
+    }
+    
+    /**
+     * \brief Create a text shape for fluent antialiased string drawing with method chaining.
+     * Only format_8bit targets are supported.
+     * \tparam FONT The font type to use for rendering.
+     * \tparam KERNING Enable kerning if true (default: false).
+     * \tparam ROTATION Text rotation (default: DEGREE_0).
+     * \param x Starting X-coordinate in pixels.
+     * \param y Starting Y-coordinate in pixels.
+     * \param str The string to draw.
+     * \return A text_aa shape object that supports .color() and .draw() methods.
+     * 
+     * Example usage:
+     * \code
+     * img.text_aa<constixel::ibmplexmono_regular_12_aa>(10, 20, "Hello").color(constixel::color::WHITE);
+     * \endcode
+     */
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+    constexpr auto text_aa(int32_t x, int32_t y, const char* str) {
+        return shapes::text_aa<FONT, T, W, H, GRAYSCALE, USE_SPAN, KERNING, ROTATION>(*this, x, y, str);
+    }
+    
+    /**
+     * \brief Create a text shape for fluent centered monospace string drawing with method chaining.
+     * \tparam FONT The font type to use for rendering.
+     * \tparam KERNING Enable kerning if true (default: false).
+     * \tparam ROTATION Text rotation (default: DEGREE_0).
+     * \param x Center X-coordinate in pixels.
+     * \param y Center Y-coordinate in pixels.
+     * \param str The string to draw.
+     * \return A text_centered_mono shape object that supports .color() method.
+     * 
+     * Example usage:
+     * \code
+     * img.text_centered_mono<constixel::ibmplexmono_regular_12_mono>(100, 50, "Centered").color(constixel::color::WHITE);
+     * \endcode
+     */
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+    constexpr auto text_centered_mono(int32_t x, int32_t y, const char* str) {
+        return shapes::text_centered_mono<FONT, T, W, H, GRAYSCALE, USE_SPAN, KERNING, ROTATION>(*this, x, y, str);
+    }
+    
+    /**
+     * \brief Create a text shape for fluent centered antialiased string drawing with method chaining.
+     * Only format_8bit targets are supported.
+     * \tparam FONT The font type to use for rendering.
+     * \tparam KERNING Enable kerning if true (default: false).
+     * \tparam ROTATION Text rotation (default: DEGREE_0).
+     * \param x Center X-coordinate in pixels.
+     * \param y Center Y-coordinate in pixels.
+     * \param str The string to draw.
+     * \return A text_centered_aa shape object that supports .color() method.
+     * 
+     * Example usage:
+     * \code
+     * img.text_centered_aa<constixel::ibmplexmono_regular_12_aa>(100, 50, "Centered").color(constixel::color::WHITE);
+     * \endcode
+     */
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+    constexpr auto text_centered_aa(int32_t x, int32_t y, const char* str) {
+        return shapes::text_centered_aa<FONT, T, W, H, GRAYSCALE, USE_SPAN, KERNING, ROTATION>(*this, x, y, str);
+    }
+
  private:
 #ifndef __INTELLISENSE__
     /// @cond DOXYGEN_EXCLUDE
     constexpr bool check_not_in_bounds(int32_t x, int32_t y, int32_t w, int32_t h) {
-        rect<int32_t> intersect_rect{.x = 0, .y = 0, .w = W, .h = H};
-        intersect_rect &= rect<int32_t>{.x = x, .y = y, .w = w, .h = h};
+        constixel::rect<int32_t> intersect_rect{.x = 0, .y = 0, .w = W, .h = H};
+        intersect_rect &= constixel::rect<int32_t>{.x = x, .y = y, .w = w, .h = h};
         if (intersect_rect.w <= 0 || intersect_rect.h <= 0) {
             return true;
         }
