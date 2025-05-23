@@ -4755,23 +4755,17 @@ class image {
      */
     template <bool AA, bool STROKE>
     constexpr void circle_int(int32_t cx, int32_t cy, int32_t r, int32_t ox, int32_t oy, uint8_t col, int32_t s) {
-        const int32_t x0 = std::max(cx - r - int32_t{1}, int32_t{0});
-        const int32_t y0 = std::max(cy - r - int32_t{1}, int32_t{0});
+        auto bounds = calculate_circle_bounds(cx, cy, r);
 
-        if (check_not_in_bounds(x0, y0, r * int32_t{2} + ox + int32_t{1}, r * int32_t{2} + oy + int32_t{1})) {
+        if (check_not_in_bounds(bounds.x0, bounds.y0, r * int32_t{2} + ox + int32_t{1}, r * int32_t{2} + oy + int32_t{1})) {
             return;
         }
 
-        const int32_t x0r = std::clamp(x0 + r, int32_t{0}, static_cast<int32_t>(W) - int32_t{1});
-        const int32_t x0r2 = std::clamp(x0 + r * int32_t{2}, int32_t{0}, static_cast<int32_t>(W) - int32_t{1});
-        const int32_t y0r = std::clamp(y0 + r, int32_t{0}, static_cast<int32_t>(H) - int32_t{1});
-        const int32_t y0r2 = std::clamp(y0 + r * int32_t{2}, int32_t{0}, static_cast<int32_t>(H) - int32_t{1});
-
         auto for_each_quadrant = [&]<typename I>(auto &&plot_arc) {
-            plot_arc.template operator()<I>(x0, y0, x0r, y0r, 0, 0);
-            plot_arc.template operator()<I>(x0r, y0, x0r2, y0r, ox, 0);
-            plot_arc.template operator()<I>(x0, y0r, x0r, y0r2, 0, oy);
-            plot_arc.template operator()<I>(x0r, y0r, x0r2, y0r2, ox, oy);
+            plot_arc.template operator()<I>(bounds.x0, bounds.y0, bounds.x0r, bounds.y0r, 0, 0);
+            plot_arc.template operator()<I>(bounds.x0r, bounds.y0, bounds.x0r2, bounds.y0r, ox, 0);
+            plot_arc.template operator()<I>(bounds.x0, bounds.y0r, bounds.x0r, bounds.y0r2, 0, oy);
+            plot_arc.template operator()<I>(bounds.x0r, bounds.y0r, bounds.x0r2, bounds.y0r2, ox, oy);
         };
 
         auto limit_box = [](int32_t &xmin, int32_t &ymin, int32_t &xmax, int32_t &ymax, int32_t x_off, int32_t y_off) {
@@ -4919,110 +4913,39 @@ class image {
     /**
      * @private
      */
-    template <typename shader_func>
-    constexpr void circle_int_shader(int32_t cx, int32_t cy, int32_t r, int32_t ox, int32_t oy,
-                                     const shader_func &shader) {
+    constexpr auto calculate_circle_bounds(int32_t cx, int32_t cy, int32_t r) const {
+        struct bounds {
+            int32_t x0, y0, x0r, x0r2, y0r, y0r2;
+        };
+        
         const int32_t x0 = std::max(cx - r - int32_t{1}, int32_t{0});
         const int32_t y0 = std::max(cy - r - int32_t{1}, int32_t{0});
-
-        if (check_not_in_bounds(x0, y0, r * int32_t{2} + ox + int32_t{1}, r * int32_t{2} + oy + int32_t{1})) {
-            return;
-        }
-
         const int32_t x0r = std::clamp(x0 + r, int32_t{0}, static_cast<int32_t>(W) - int32_t{1});
         const int32_t x0r2 = std::clamp(x0 + r * int32_t{2}, int32_t{0}, static_cast<int32_t>(W) - int32_t{1});
         const int32_t y0r = std::clamp(y0 + r, int32_t{0}, static_cast<int32_t>(H) - int32_t{1});
         const int32_t y0r2 = std::clamp(y0 + r * int32_t{2}, int32_t{0}, static_cast<int32_t>(H) - int32_t{1});
-
-        auto for_each_quadrant = [&]<typename I>(auto &&plot_arc) {
-            plot_arc.template operator()<I>(x0, y0, x0r, y0r, 0, 0);
-            plot_arc.template operator()<I>(x0r, y0, x0r2, y0r, ox, 0);
-            plot_arc.template operator()<I>(x0, y0r, x0r, y0r2, 0, oy);
-            plot_arc.template operator()<I>(x0r, y0r, x0r2, y0r2, ox, oy);
-        };
-
-        auto limit_box = [](int32_t &xmin, int32_t &ymin, int32_t &xmax, int32_t &ymax, int32_t x_off, int32_t y_off) {
-            xmin = std::max(xmin + x_off, int32_t{0}) - x_off;
-            xmax = std::min(xmax + x_off, static_cast<int32_t>(W) - int32_t{1}) - x_off;
-            ymin = std::max(ymin + y_off, int32_t{0}) - y_off;
-            ymax = std::min(ymax + y_off, static_cast<int32_t>(H) - int32_t{1}) - y_off;
-        };
-
-        const auto rF = static_cast<float>(r);
-
-        const float circle_left = static_cast<float>(cx - r);
-        const float circle_top = static_cast<float>(cy - r);
-        const float circle_size = static_cast<float>(r * 2);
-
-        auto plot_arc = [&, this]<typename I>(int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
-                                              int32_t y_off) {
-            limit_box(xx0, yy0, xx1, yy1, x_off, y_off);
-            for (int32_t y = yy0; y <= yy1; y++) {
-                for (int32_t x = xx0; x <= xx1; x++) {
-                    const float dx = (static_cast<float>(x) + 0.5f) - static_cast<float>(cx);
-                    const float dy = (static_cast<float>(y) + 0.5f) - static_cast<float>(cy);
-                    const float dist_sq = dx * dx + dy * dy;
-                    if (dist_sq > (rF + 0.5f) * (rF + 0.5f)) {
-                        continue;
-                    }
-
-                    float u = (static_cast<float>(x) - circle_left) / circle_size;
-                    float v = (static_cast<float>(y) - circle_top) / circle_size;
-
-                    u = std::clamp(u, 0.0f, 1.0f);
-                    v = std::clamp(v, 0.0f, 1.0f);
-
-                    float au = u;
-                    float av = v;
-
-                    auto rgba = shader(u, v, au, av);
-
-                    if (dist_sq < (rF - 0.5f) * (rF - 0.5f)) {
-                        compose_unsafe(x + x_off, y + y_off, rgba[3], rgba[0], rgba[1], rgba[2]);
-                        continue;
-                    }
-
-                    float a = rF;
-                    if (std::is_constant_evaluated()) {
-                        a -= hidden::fast_sqrtf(dist_sq);
-                    } else {
-                        a -= std::sqrt(dist_sq);
-                    }
-                    a = std::clamp(a + 0.5f, 0.0f, 1.0f);
-                    if (a >= hidden::epsilon_low) {
-                        compose_unsafe(x + x_off, y + y_off, a * rgba[3], rgba[0], rgba[1], rgba[2]);
-                    }
-                }
-            }
-        };
-        for_each_quadrant.template operator()<float>(plot_arc);
+        
+        return bounds{x0, y0, x0r, x0r2, y0r, y0r2};
     }
 
     /**
      * @private
-     * Enhanced circle shader that maps UV coordinates to parent shape bounds
      */
     template <typename shader_func>
     constexpr void circle_int_shader(int32_t cx, int32_t cy, int32_t r, int32_t ox, int32_t oy,
-                                     const shader_func &shader, int32_t parent_x, int32_t parent_y, int32_t parent_w,
-                                     int32_t parent_h) {
-        const int32_t x0 = std::max(cx - r - int32_t{1}, int32_t{0});
-        const int32_t y0 = std::max(cy - r - int32_t{1}, int32_t{0});
+                                     const shader_func &shader, int32_t parent_x = -1, int32_t parent_y = -1, 
+                                     int32_t parent_w = -1, int32_t parent_h = -1) {
+        auto bounds = calculate_circle_bounds(cx, cy, r);
 
-        if (check_not_in_bounds(x0, y0, r * int32_t{2} + ox + int32_t{1}, r * int32_t{2} + oy + int32_t{1})) {
+        if (check_not_in_bounds(bounds.x0, bounds.y0, r * int32_t{2} + ox + int32_t{1}, r * int32_t{2} + oy + int32_t{1})) {
             return;
         }
 
-        const int32_t x0r = std::clamp(x0 + r, int32_t{0}, static_cast<int32_t>(W) - int32_t{1});
-        const int32_t x0r2 = std::clamp(x0 + r * int32_t{2}, int32_t{0}, static_cast<int32_t>(W) - int32_t{1});
-        const int32_t y0r = std::clamp(y0 + r, int32_t{0}, static_cast<int32_t>(H) - int32_t{1});
-        const int32_t y0r2 = std::clamp(y0 + r * int32_t{2}, int32_t{0}, static_cast<int32_t>(H) - int32_t{1});
-
         auto for_each_quadrant = [&]<typename I>(auto &&plot_arc) {
-            plot_arc.template operator()<I>(x0, y0, x0r, y0r, 0, 0);
-            plot_arc.template operator()<I>(x0r, y0, x0r2, y0r, ox, 0);
-            plot_arc.template operator()<I>(x0, y0r, x0r, y0r2, 0, oy);
-            plot_arc.template operator()<I>(x0r, y0r, x0r2, y0r2, ox, oy);
+            plot_arc.template operator()<I>(bounds.x0, bounds.y0, bounds.x0r, bounds.y0r, 0, 0);
+            plot_arc.template operator()<I>(bounds.x0r, bounds.y0, bounds.x0r2, bounds.y0r, ox, 0);
+            plot_arc.template operator()<I>(bounds.x0, bounds.y0r, bounds.x0r, bounds.y0r2, 0, oy);
+            plot_arc.template operator()<I>(bounds.x0r, bounds.y0r, bounds.x0r2, bounds.y0r2, ox, oy);
         };
 
         auto limit_box = [](int32_t &xmin, int32_t &ymin, int32_t &xmax, int32_t &ymax, int32_t x_off, int32_t y_off) {
@@ -5032,10 +4955,14 @@ class image {
             ymax = std::min(ymax + y_off, static_cast<int32_t>(H) - int32_t{1}) - y_off;
         };
 
-        // Only AA fill shader version (no stroke support)
         const auto rF = static_cast<float>(r);
-        const float parent_wF = static_cast<float>(parent_w);
-        const float parent_hF = static_cast<float>(parent_h);
+        const int32_t actual_parent_x = (parent_x == -1) ? cx - r : parent_x;
+        const int32_t actual_parent_y = (parent_y == -1) ? cy - r : parent_y;
+        const int32_t actual_parent_w = (parent_w == -1) ? r * 2 : parent_w;
+        const int32_t actual_parent_h = (parent_h == -1) ? r * 2 : parent_h;
+        
+        const float parent_wF = static_cast<float>(actual_parent_w);
+        const float parent_hF = static_cast<float>(actual_parent_h);
 
         auto plot_arc = [&, this]<typename I>(int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
                                               int32_t y_off) {
@@ -5049,8 +4976,8 @@ class image {
                         continue;
                     }
 
-                    float u = (static_cast<float>(x + x_off) - static_cast<float>(parent_x)) / parent_wF;
-                    float v = (static_cast<float>(y + y_off) - static_cast<float>(parent_y)) / parent_hF;
+                    float u = (static_cast<float>(x + x_off) - static_cast<float>(actual_parent_x)) / parent_wF;
+                    float v = (static_cast<float>(y + y_off) - static_cast<float>(actual_parent_y)) / parent_hF;
 
                     u = std::clamp(u, 0.0f, 1.0f);
                     v = std::clamp(v, 0.0f, 1.0f);
