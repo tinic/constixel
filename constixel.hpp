@@ -4350,7 +4350,7 @@ class image {
      * \param y Starting Y-coordinate in pixels.
      * \param w Width of the rectangle in pixels.
      * \param h Height of the rectangle in pixels.
-     * \param shader Lambda function taking (u, v, aspect_u, aspect_v) normalized coordinates
+     * \param shader Lambda function taking (u, v, x, y) normalized coordinates
      *                    and returning RGBA color as std::array<float, 4>
      */
     template <typename shader_func>
@@ -4377,19 +4377,9 @@ class image {
             for (int32_t px = x0; px < x1; px++) {
                 float u = static_cast<float>(px - x) / static_cast<float>(w);
                 float v = static_cast<float>(py - y) / static_cast<float>(h);
-
-                float aspect_ratio = static_cast<float>(w) / static_cast<float>(h);
-                float au = u;
-                float av = v;
-                if (aspect_ratio > 1.0f) {
-                    au = u * aspect_ratio;
-                } else {
-                    av = v / aspect_ratio;
-                }
-
-                auto rgba = shader(u, v, au, av);
-                for (auto &v : rgba) {
-                    v = std::clamp(v, 0.0f, 1.0f);
+                auto rgba = shader(u, v, static_cast<float>(px), static_cast<float>(py));
+                for (auto &p : rgba) {
+                    p = std::clamp(p, 0.0f, 1.0f);
                 }
                 compose(px, py, rgba[3], rgba[0], rgba[1], rgba[2]);
             }
@@ -4431,18 +4421,9 @@ class image {
                 u = std::clamp(u, 0.0f, 1.0f);
                 v = std::clamp(v, 0.0f, 1.0f);
 
-                float aspect_ratio = parent_wF / parent_hF;
-                float au = u;
-                float av = v;
-                if (aspect_ratio > 1.0f) {
-                    av = v * aspect_ratio;
-                } else {
-                    au = u / aspect_ratio;
-                }
-
-                auto rgba = shader(u, v, au, av);
-                for (auto &v : rgba) {
-                    v = std::clamp(v, 0.0f, 1.0f);
+                auto rgba = shader(u, v, static_cast<float>(px), static_cast<float>(py));
+                for (auto &p : rgba) {
+                    p = std::clamp(p, 0.0f, 1.0f);
                 }
                 compose(px, py, rgba[3], rgba[0], rgba[1], rgba[2]);
             }
@@ -4670,7 +4651,7 @@ class image {
      * \param cx Center X-coordinate of the circle in pixels.
      * \param cy Center Y-coordinate of the circle in pixels.
      * \param radius Radius of the circle in pixels.
-     * \param shader Lambda function taking (u, v, aspect_u, aspect_v) normalized coordinates
+     * \param shader Lambda function taking (u, v, x, y) normalized coordinates
      *                    and returning RGBA color as std::array<float, 4>
      */
     template <typename shader_func>
@@ -4848,7 +4829,7 @@ class image {
      * \param w Width of the rectangle in pixels.
      * \param h Height of the rectangle in pixels.
      * \param radius Radius of the rounded corners in pixels.
-     * \param shader Lambda function taking (u, v, aspect_u, aspect_v) normalized coordinates
+     * \param shader Lambda function taking (u, v, x, y) normalized coordinates
      *                    and returning RGBA color as std::array<float, 4>
      */
     template <typename shader_func>
@@ -5953,20 +5934,11 @@ class image {
 
                     u = std::clamp(u, 0.0f, 1.0f);
                     v = std::clamp(v, 0.0f, 1.0f);
-
-                    float aspect_ratio = parent_wF / parent_hF;
-                    float au = u;
-                    float av = v;
-                    if (aspect_ratio > 1.0f) {
-                        av = v * aspect_ratio;
-                    } else {
-                        au = u / aspect_ratio;
+                    auto rgba = shader(u, v, static_cast<float>(x), static_cast<float>(y));
+                    for (auto &p : rgba) {
+                        p = std::clamp(p, 0.0f, 1.0f);
                     }
 
-                    auto rgba = shader(u, v, au, av);
-                    for (auto &v : rgba) {
-                        v = std::clamp(v, 0.0f, 1.0f);
-                    }
                     if (dist_sq < (rF - 0.5f) * (rF - 0.5f)) {
                         compose_unsafe(x + x_off, y + y_off, rgba[3], rgba[0], rgba[1], rgba[2]);
                         continue;
