@@ -47,12 +47,12 @@ for font in "$FONT_DIR"/*.{ttf,ttf}; do
     echo "Height 11->12"
   fi
   if [[ "$(echo "$base" | tr '[:upper:]' '[:lower:]')" == pxplus* ]]; then
-    ./fontbm/build/fontbm --font-file "$font" --output "build/${base}" --font-size ${height} --all-chars --force-auto-hinter --monochrome --extra-info --texture-crop-width --texture-crop-height
+    ./fontbm/build/fontbm --font-file "$font" --output "build/${base}" --font-size ${height} --all-chars --monochrome --extra-info --texture-crop-width --texture-crop-height
     ./build/genfont --font-file "build/${base}.fnt" --out-dir ../fonts
   else
-    ./fontbm/build/fontbm --font-file "$font" --output "build/${base}_full" --font-size ${height} --all-chars --force-auto-hinter --monochrome --extra-info --texture-crop-width --texture-crop-height
+    ./fontbm/build/fontbm --font-file "$font" --output "build/${base}_full" --font-size ${height} --all-chars --monochrome --extra-info --texture-crop-width --texture-crop-height
     ./build/genfont --font-file "build/${base}_full.fnt" --out-dir ../fonts
-    ./fontbm/build/fontbm --font-file "$font" --output "build/${base}" --font-size ${height} --chars "${CHARS}" --force-auto-hinter --monochrome --extra-info --texture-crop-width --texture-crop-height
+    ./fontbm/build/fontbm --font-file "$font" --output "build/${base}" --font-size ${height} --chars "${CHARS}" --monochrome --extra-info --texture-crop-width --texture-crop-height
     ./build/genfont --font-file "build/${base}.fnt" --out-dir ../fonts
   fi
 done

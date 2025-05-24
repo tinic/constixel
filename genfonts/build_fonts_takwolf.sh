@@ -35,6 +35,6 @@ for font in "$FONT_DIR"/*.{ttf,otf}; do
   if [[ "$base" =~ ([0-9]+)px ]]; then
       height="${BASH_REMATCH[1]}"
   fi
-  ./fontbm/build/fontbm --font-file "$font" --output "build/${base}" --font-size ${height} --all-chars --force-auto-hinter --monochrome --extra-info --texture-crop-width --texture-crop-height
+  ./fontbm/build/fontbm --font-file "$font" --output "build/${base}" --font-size ${height} --all-chars --monochrome --extra-info --texture-crop-width --texture-crop-height
   ./build/genfont --font-file "build/${base}.fnt" --out-dir ../fonts
 done

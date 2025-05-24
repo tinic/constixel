@@ -4,7 +4,7 @@ set -euo pipefail
 
 # Default values
 FONT_DIR="./otf"
-SIZES=(12 18 24 32 48)
+SIZES=(12 14 18 24 32 48)
 CHARSET="ascii"
 CUSTOM_CHARS=""
 VERBOSE=false
@@ -132,7 +132,6 @@ for i in "${!font_files[@]}"; do
             --chars "$CHARS" \
             --output "build/${base}_${size}" \
             --kerning-pairs extended \
-            --force-auto-hinter \
             --extra-info \
             --texture-crop-width \
             --texture-crop-height \
@@ -154,7 +153,6 @@ for i in "${!font_files[@]}"; do
             --output "build/${base}_${size}" \
             --kerning-pairs extended \
             --monochrome \
-            --force-auto-hinter \
             --extra-info \
             --texture-crop-width \
             --texture-crop-height \
