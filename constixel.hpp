@@ -503,7 +503,6 @@ class quantize {
     }
 };
 
-
 }  // namespace hidden
 /// @endcond // DOXYGEN_EXCLUDE
 
@@ -1341,7 +1340,8 @@ class format_2bit : public format {
                 auto shift = static_cast<uint32_t>(6U - j * 2U);
                 uint8_t pixel = (data[i] >> shift) & 0x03U;
                 auto ishift = static_cast<uint32_t>(6U - i * 2U);
-                data[j] = static_cast<uint8_t>((data[j] & ~(0x03U << ishift)) | (static_cast<uint32_t>(pixel) << ishift));
+                data[j] =
+                    static_cast<uint8_t>((data[j] & ~(0x03U << ishift)) | (static_cast<uint32_t>(pixel) << ishift));
             }
         }
         for (size_t i = 0; i < 4; i++) {
@@ -1613,7 +1613,8 @@ class format_4bit : public format {
                 auto shift = static_cast<uint32_t>(4U - j * 4U);
                 uint8_t pixel = (data[i] >> shift) & 0x0FU;
                 auto ishift = static_cast<uint32_t>(4U - i * 4U);
-                data[j] = static_cast<uint8_t>((data[j] & ~(0x0FU << ishift)) | (static_cast<uint32_t>(pixel) << ishift));
+                data[j] =
+                    static_cast<uint8_t>((data[j] & ~(0x0FU << ishift)) | (static_cast<uint32_t>(pixel) << ishift));
             }
         }
         for (size_t i = 0; i < 2; i++) {
@@ -2648,187 +2649,187 @@ class format_32bit : public format {
  */
 enum color : uint8_t {
     // Basic colors (0-15)
-    BLACK = 0,                     /*!< Black */
-    TRANSPARENT = 0,               /*!< Transparent (alias for BLACK) */
-    WHITE = 1,                     /*!< White */
-    RED = 2,                       /*!< Red */
-    LIME = 3,                      /*!< Lime/Bright Green */
-    BLUE = 4,                      /*!< Blue */
-    YELLOW = 5,                    /*!< Yellow */
-    CYAN = 6,                      /*!< Cyan */
-    MAGENTA = 7,                   /*!< Magenta */
-    GRAY_20 = 8,                   /*!< Gray 20% */
-    GRAY_40 = 9,                   /*!< Gray 40% */
-    GRAY_60 = 10,                  /*!< Gray 60% */
-    GRAY_80 = 11,                  /*!< Gray 80% */
-    MAROON = 12,                   /*!< Maroon (Dark Red) */
-    GREEN = 13,                    /*!< Green (Dark Green) */
-    NAVY = 14,                     /*!< Navy (Dark Blue) */
-    OLIVE = 15,                    /*!< Olive (Dark Yellow) */
-    
+    BLACK = 0,       /*!< Black */
+    TRANSPARENT = 0, /*!< Transparent (alias for BLACK) */
+    WHITE = 1,       /*!< White */
+    RED = 2,         /*!< Red */
+    LIME = 3,        /*!< Lime/Bright Green */
+    BLUE = 4,        /*!< Blue */
+    YELLOW = 5,      /*!< Yellow */
+    CYAN = 6,        /*!< Cyan */
+    MAGENTA = 7,     /*!< Magenta */
+    GRAY_20 = 8,     /*!< Gray 20% */
+    GRAY_40 = 9,     /*!< Gray 40% */
+    GRAY_60 = 10,    /*!< Gray 60% */
+    GRAY_80 = 11,    /*!< Gray 80% */
+    MAROON = 12,     /*!< Maroon (Dark Red) */
+    GREEN = 13,      /*!< Green (Dark Green) */
+    NAVY = 14,       /*!< Navy (Dark Blue) */
+    OLIVE = 15,      /*!< Olive (Dark Yellow) */
+
     // Gray ramp (16-31)
-    BLACK_OPAQUE = 16,             /*!< Black (same as BLACK but in gray ramp) */
-    GRAY_10 = 17,                  /*!< Gray 10% */
-    GRAY_11 = 18,                  /*!< Gray 13% */
-    GRAY_20_ALT = 19,              /*!< Gray 20% (alternative) */
-    GRAY_30 = 20,                  /*!< Gray 27% */
-    GRAY_33 = 21,                  /*!< Gray 33% */
-    GRAY_40_ALT = 22,              /*!< Gray 40% (alternative) */
-    GRAY_47 = 23,                  /*!< Gray 47% */
-    GRAY_53 = 24,                  /*!< Gray 53% */
-    GRAY_60_ALT = 25,              /*!< Gray 60% (alternative) */
-    DARK_GRAY = 26,                /*!< Dark Gray (67%) */
-    SILVER = 27,                   /*!< Silver (73%) */
-    GRAY_80_ALT = 28,              /*!< Gray 80% (alternative) */
-    GAINSBORO = 29,                /*!< Gainsboro (87%) */
-    LIGHT_GRAY = 30,               /*!< Light Gray (93%) */
-    WHITE_ALT = 31,                /*!< White (alternative) */
-    
+    BLACK_OPAQUE = 16, /*!< Black (same as BLACK but in gray ramp) */
+    GRAY_10 = 17,      /*!< Gray 10% */
+    GRAY_11 = 18,      /*!< Gray 13% */
+    GRAY_20_ALT = 19,  /*!< Gray 20% (alternative) */
+    GRAY_30 = 20,      /*!< Gray 27% */
+    GRAY_33 = 21,      /*!< Gray 33% */
+    GRAY_40_ALT = 22,  /*!< Gray 40% (alternative) */
+    GRAY_47 = 23,      /*!< Gray 47% */
+    GRAY_53 = 24,      /*!< Gray 53% */
+    GRAY_60_ALT = 25,  /*!< Gray 60% (alternative) */
+    DARK_GRAY = 26,    /*!< Dark Gray (67%) */
+    SILVER = 27,       /*!< Silver (73%) */
+    GRAY_80_ALT = 28,  /*!< Gray 80% (alternative) */
+    GAINSBORO = 29,    /*!< Gainsboro (87%) */
+    LIGHT_GRAY = 30,   /*!< Light Gray (93%) */
+    WHITE_ALT = 31,    /*!< White (alternative) */
+
     // Red luminance ramp (32-47)
-    RED_DARK_1 = 32,               /*!< Very Dark Red */
-    RED_DARK_2 = 33,               /*!< Dark Red */
-    RED_DARK_3 = 34,               /*!< Medium Dark Red */
-    RED_MEDIUM_1 = 35,             /*!< Medium Red */
-    RED_MEDIUM_2 = 36,             /*!< Medium Bright Red */
-    RED_BRIGHT_1 = 37,             /*!< Bright Red */
-    RED_BRIGHT_2 = 38,             /*!< Very Bright Red */
-    RED_FULL = 39,                 /*!< Full Red */
-    RED_PINK_1 = 40,               /*!< Light Red/Pink */
-    RED_PINK_2 = 41,               /*!< Lighter Red/Pink */
-    RED_PINK_3 = 42,               /*!< Light Pink */
-    RED_PINK_4 = 43,               /*!< Very Light Pink */
-    RED_PINK_5 = 44,               /*!< Pale Pink */
-    RED_PINK_6 = 45,               /*!< Very Pale Pink */
-    RED_PALE_1 = 46,               /*!< Extremely Pale Pink */
-    RED_WHITE = 47,                /*!< Near White with Red tint */
-    
+    RED_DARK_1 = 32,   /*!< Very Dark Red */
+    RED_DARK_2 = 33,   /*!< Dark Red */
+    RED_DARK_3 = 34,   /*!< Medium Dark Red */
+    RED_MEDIUM_1 = 35, /*!< Medium Red */
+    RED_MEDIUM_2 = 36, /*!< Medium Bright Red */
+    RED_BRIGHT_1 = 37, /*!< Bright Red */
+    RED_BRIGHT_2 = 38, /*!< Very Bright Red */
+    RED_FULL = 39,     /*!< Full Red */
+    RED_PINK_1 = 40,   /*!< Light Red/Pink */
+    RED_PINK_2 = 41,   /*!< Lighter Red/Pink */
+    RED_PINK_3 = 42,   /*!< Light Pink */
+    RED_PINK_4 = 43,   /*!< Very Light Pink */
+    RED_PINK_5 = 44,   /*!< Pale Pink */
+    RED_PINK_6 = 45,   /*!< Very Pale Pink */
+    RED_PALE_1 = 46,   /*!< Extremely Pale Pink */
+    RED_WHITE = 47,    /*!< Near White with Red tint */
+
     // Green luminance ramp (48-63)
-    GREEN_DARK_1 = 48,             /*!< Very Dark Green */
-    GREEN_DARK_2 = 49,             /*!< Dark Green */
-    GREEN_DARK_3 = 50,             /*!< Medium Dark Green */
-    GREEN_MEDIUM_1 = 51,           /*!< Medium Green */
-    GREEN_MEDIUM_2 = 52,           /*!< Medium Bright Green */
-    GREEN_BRIGHT_1 = 53,           /*!< Bright Green */
-    GREEN_BRIGHT_2 = 54,           /*!< Very Bright Green */
-    GREEN_FULL = 55,               /*!< Full Green */
-    GREEN_LIGHT_1 = 56,            /*!< Light Green */
-    GREEN_LIGHT_2 = 57,            /*!< Lighter Green */
-    GREEN_LIGHT_3 = 58,            /*!< Very Light Green */
-    GREEN_LIGHT_4 = 59,            /*!< Pale Green */
-    GREEN_PALE_1 = 60,             /*!< Very Pale Green */
-    GREEN_PALE_2 = 61,             /*!< Extremely Pale Green */
-    GREEN_PALE_3 = 62,             /*!< Near White with Green tint */
-    GREEN_WHITE = 63,              /*!< White with Green tint */
-    
+    GREEN_DARK_1 = 48,   /*!< Very Dark Green */
+    GREEN_DARK_2 = 49,   /*!< Dark Green */
+    GREEN_DARK_3 = 50,   /*!< Medium Dark Green */
+    GREEN_MEDIUM_1 = 51, /*!< Medium Green */
+    GREEN_MEDIUM_2 = 52, /*!< Medium Bright Green */
+    GREEN_BRIGHT_1 = 53, /*!< Bright Green */
+    GREEN_BRIGHT_2 = 54, /*!< Very Bright Green */
+    GREEN_FULL = 55,     /*!< Full Green */
+    GREEN_LIGHT_1 = 56,  /*!< Light Green */
+    GREEN_LIGHT_2 = 57,  /*!< Lighter Green */
+    GREEN_LIGHT_3 = 58,  /*!< Very Light Green */
+    GREEN_LIGHT_4 = 59,  /*!< Pale Green */
+    GREEN_PALE_1 = 60,   /*!< Very Pale Green */
+    GREEN_PALE_2 = 61,   /*!< Extremely Pale Green */
+    GREEN_PALE_3 = 62,   /*!< Near White with Green tint */
+    GREEN_WHITE = 63,    /*!< White with Green tint */
+
     // Blue luminance ramp (64-79)
-    BLUE_DARK_1 = 64,              /*!< Very Dark Blue */
-    BLUE_DARK_2 = 65,              /*!< Dark Blue */
-    BLUE_DARK_3 = 66,              /*!< Medium Dark Blue */
-    BLUE_MEDIUM_1 = 67,            /*!< Medium Blue */
-    BLUE_MEDIUM_2 = 68,            /*!< Medium Bright Blue */
-    BLUE_BRIGHT_1 = 69,            /*!< Bright Blue */
-    BLUE_BRIGHT_2 = 70,            /*!< Very Bright Blue */
-    BLUE_FULL = 71,                /*!< Full Blue */
-    BLUE_LIGHT_1 = 72,             /*!< Light Blue */
-    BLUE_LIGHT_2 = 73,             /*!< Lighter Blue */
-    BLUE_LIGHT_3 = 74,             /*!< Very Light Blue */
-    BLUE_LIGHT_4 = 75,             /*!< Pale Blue */
-    BLUE_PALE_1 = 76,              /*!< Very Pale Blue */
-    BLUE_PALE_2 = 77,              /*!< Extremely Pale Blue */
-    BLUE_PALE_3 = 78,              /*!< Near White with Blue tint */
-    BLUE_WHITE = 79,               /*!< White with Blue tint */
-    
+    BLUE_DARK_1 = 64,   /*!< Very Dark Blue */
+    BLUE_DARK_2 = 65,   /*!< Dark Blue */
+    BLUE_DARK_3 = 66,   /*!< Medium Dark Blue */
+    BLUE_MEDIUM_1 = 67, /*!< Medium Blue */
+    BLUE_MEDIUM_2 = 68, /*!< Medium Bright Blue */
+    BLUE_BRIGHT_1 = 69, /*!< Bright Blue */
+    BLUE_BRIGHT_2 = 70, /*!< Very Bright Blue */
+    BLUE_FULL = 71,     /*!< Full Blue */
+    BLUE_LIGHT_1 = 72,  /*!< Light Blue */
+    BLUE_LIGHT_2 = 73,  /*!< Lighter Blue */
+    BLUE_LIGHT_3 = 74,  /*!< Very Light Blue */
+    BLUE_LIGHT_4 = 75,  /*!< Pale Blue */
+    BLUE_PALE_1 = 76,   /*!< Very Pale Blue */
+    BLUE_PALE_2 = 77,   /*!< Extremely Pale Blue */
+    BLUE_PALE_3 = 78,   /*!< Near White with Blue tint */
+    BLUE_WHITE = 79,    /*!< White with Blue tint */
+
     // Yellow luminance ramp (80-95)
-    YELLOW_DARK_1 = 80,            /*!< Very Dark Yellow */
-    YELLOW_DARK_2 = 81,            /*!< Dark Yellow */
-    YELLOW_DARK_3 = 82,            /*!< Medium Dark Yellow */
-    YELLOW_MEDIUM_1 = 83,          /*!< Medium Yellow */
-    YELLOW_MEDIUM_2 = 84,          /*!< Medium Bright Yellow */
-    YELLOW_BRIGHT_1 = 85,          /*!< Bright Yellow */
-    YELLOW_BRIGHT_2 = 86,          /*!< Very Bright Yellow */
-    YELLOW_FULL = 87,              /*!< Full Yellow */
-    YELLOW_LIGHT_1 = 88,           /*!< Light Yellow */
-    YELLOW_LIGHT_2 = 89,           /*!< Lighter Yellow */
-    YELLOW_LIGHT_3 = 90,           /*!< Very Light Yellow */
-    YELLOW_LIGHT_4 = 91,           /*!< Pale Yellow */
-    YELLOW_PALE_1 = 92,            /*!< Very Pale Yellow */
-    YELLOW_PALE_2 = 93,            /*!< Extremely Pale Yellow */
-    YELLOW_PALE_3 = 94,            /*!< Near White with Yellow tint */
-    YELLOW_WHITE = 95,             /*!< White with Yellow tint */
-    
+    YELLOW_DARK_1 = 80,   /*!< Very Dark Yellow */
+    YELLOW_DARK_2 = 81,   /*!< Dark Yellow */
+    YELLOW_DARK_3 = 82,   /*!< Medium Dark Yellow */
+    YELLOW_MEDIUM_1 = 83, /*!< Medium Yellow */
+    YELLOW_MEDIUM_2 = 84, /*!< Medium Bright Yellow */
+    YELLOW_BRIGHT_1 = 85, /*!< Bright Yellow */
+    YELLOW_BRIGHT_2 = 86, /*!< Very Bright Yellow */
+    YELLOW_FULL = 87,     /*!< Full Yellow */
+    YELLOW_LIGHT_1 = 88,  /*!< Light Yellow */
+    YELLOW_LIGHT_2 = 89,  /*!< Lighter Yellow */
+    YELLOW_LIGHT_3 = 90,  /*!< Very Light Yellow */
+    YELLOW_LIGHT_4 = 91,  /*!< Pale Yellow */
+    YELLOW_PALE_1 = 92,   /*!< Very Pale Yellow */
+    YELLOW_PALE_2 = 93,   /*!< Extremely Pale Yellow */
+    YELLOW_PALE_3 = 94,   /*!< Near White with Yellow tint */
+    YELLOW_WHITE = 95,    /*!< White with Yellow tint */
+
     // Cyan luminance ramp (96-111)
-    CYAN_DARK_1 = 96,              /*!< Very Dark Cyan */
-    CYAN_DARK_2 = 97,              /*!< Dark Cyan */
-    CYAN_DARK_3 = 98,              /*!< Medium Dark Cyan */
-    CYAN_MEDIUM_1 = 99,            /*!< Medium Cyan */
-    CYAN_MEDIUM_2 = 100,           /*!< Medium Bright Cyan */
-    CYAN_BRIGHT_1 = 101,           /*!< Bright Cyan */
-    CYAN_BRIGHT_2 = 102,           /*!< Very Bright Cyan */
-    CYAN_FULL = 103,               /*!< Full Cyan */
-    CYAN_LIGHT_1 = 104,            /*!< Light Cyan */
-    CYAN_LIGHT_2 = 105,            /*!< Lighter Cyan */
-    CYAN_LIGHT_3 = 106,            /*!< Very Light Cyan */
-    CYAN_LIGHT_4 = 107,            /*!< Pale Cyan */
-    CYAN_PALE_1 = 108,             /*!< Very Pale Cyan */
-    CYAN_PALE_2 = 109,             /*!< Extremely Pale Cyan */
-    CYAN_PALE_3 = 110,             /*!< Near White with Cyan tint */
-    CYAN_WHITE = 111,              /*!< White with Cyan tint */
-    
+    CYAN_DARK_1 = 96,    /*!< Very Dark Cyan */
+    CYAN_DARK_2 = 97,    /*!< Dark Cyan */
+    CYAN_DARK_3 = 98,    /*!< Medium Dark Cyan */
+    CYAN_MEDIUM_1 = 99,  /*!< Medium Cyan */
+    CYAN_MEDIUM_2 = 100, /*!< Medium Bright Cyan */
+    CYAN_BRIGHT_1 = 101, /*!< Bright Cyan */
+    CYAN_BRIGHT_2 = 102, /*!< Very Bright Cyan */
+    CYAN_FULL = 103,     /*!< Full Cyan */
+    CYAN_LIGHT_1 = 104,  /*!< Light Cyan */
+    CYAN_LIGHT_2 = 105,  /*!< Lighter Cyan */
+    CYAN_LIGHT_3 = 106,  /*!< Very Light Cyan */
+    CYAN_LIGHT_4 = 107,  /*!< Pale Cyan */
+    CYAN_PALE_1 = 108,   /*!< Very Pale Cyan */
+    CYAN_PALE_2 = 109,   /*!< Extremely Pale Cyan */
+    CYAN_PALE_3 = 110,   /*!< Near White with Cyan tint */
+    CYAN_WHITE = 111,    /*!< White with Cyan tint */
+
     // Magenta luminance ramp (112-127)
-    MAGENTA_DARK_1 = 112,          /*!< Very Dark Magenta */
-    MAGENTA_DARK_2 = 113,          /*!< Dark Magenta */
-    MAGENTA_DARK_3 = 114,          /*!< Medium Dark Magenta */
-    MAGENTA_MEDIUM_1 = 115,        /*!< Medium Magenta */
-    MAGENTA_MEDIUM_2 = 116,        /*!< Medium Bright Magenta */
-    MAGENTA_BRIGHT_1 = 117,        /*!< Bright Magenta */
-    MAGENTA_BRIGHT_2 = 118,        /*!< Very Bright Magenta */
-    MAGENTA_FULL = 119,            /*!< Full Magenta */
-    MAGENTA_LIGHT_1 = 120,         /*!< Light Magenta */
-    MAGENTA_LIGHT_2 = 121,         /*!< Lighter Magenta */
-    MAGENTA_LIGHT_3 = 122,         /*!< Very Light Magenta */
-    MAGENTA_LIGHT_4 = 123,         /*!< Pale Magenta */
-    MAGENTA_PALE_1 = 124,          /*!< Very Pale Magenta */
-    MAGENTA_PALE_2 = 125,          /*!< Extremely Pale Magenta */
-    MAGENTA_PALE_3 = 126,          /*!< Near White with Magenta tint */
-    MAGENTA_WHITE = 127,           /*!< White with Magenta tint */
-    
-    DARK_RED = 12,                 /*!< Dark Red (alias) */
-    DARK_GREEN = 13,               /*!< Dark Green (alias) */
-    DARK_BLUE = 14,                /*!< Dark Blue (alias) */
-    ORANGE = 38,                   /*!< Orange (closest match) */
-    PURPLE = 115,                  /*!< Purple (closest match) */
-    PINK = 125,                    /*!< Pink (closest match) */
-    BROWN = 83,                    /*!< Brown (closest match) */
-    TEAL = 99,                     /*!< Teal (closest match) */
-    
+    MAGENTA_DARK_1 = 112,   /*!< Very Dark Magenta */
+    MAGENTA_DARK_2 = 113,   /*!< Dark Magenta */
+    MAGENTA_DARK_3 = 114,   /*!< Medium Dark Magenta */
+    MAGENTA_MEDIUM_1 = 115, /*!< Medium Magenta */
+    MAGENTA_MEDIUM_2 = 116, /*!< Medium Bright Magenta */
+    MAGENTA_BRIGHT_1 = 117, /*!< Bright Magenta */
+    MAGENTA_BRIGHT_2 = 118, /*!< Very Bright Magenta */
+    MAGENTA_FULL = 119,     /*!< Full Magenta */
+    MAGENTA_LIGHT_1 = 120,  /*!< Light Magenta */
+    MAGENTA_LIGHT_2 = 121,  /*!< Lighter Magenta */
+    MAGENTA_LIGHT_3 = 122,  /*!< Very Light Magenta */
+    MAGENTA_LIGHT_4 = 123,  /*!< Pale Magenta */
+    MAGENTA_PALE_1 = 124,   /*!< Very Pale Magenta */
+    MAGENTA_PALE_2 = 125,   /*!< Extremely Pale Magenta */
+    MAGENTA_PALE_3 = 126,   /*!< Near White with Magenta tint */
+    MAGENTA_WHITE = 127,    /*!< White with Magenta tint */
+
+    DARK_RED = 12,   /*!< Dark Red (alias) */
+    DARK_GREEN = 13, /*!< Dark Green (alias) */
+    DARK_BLUE = 14,  /*!< Dark Blue (alias) */
+    ORANGE = 38,     /*!< Orange (closest match) */
+    PURPLE = 115,    /*!< Purple (closest match) */
+    PINK = 125,      /*!< Pink (closest match) */
+    BROWN = 83,      /*!< Brown (closest match) */
+    TEAL = 99,       /*!< Teal (closest match) */
+
     GRAY_RAMP_START = 16,
     GRAY_RAMP_COUNT = 16,
     GRAY_RAMP_STOP = GRAY_RAMP_START + 15,
-    
+
     RED_LUMA_RAMP_START = 32,
     RED_LUMA_RAMP_COUNT = 16,
     RED_LUMA_RAMP_STOP = RED_LUMA_RAMP_START + 15,
-    
+
     GREEN_LUMA_RAMP_START = 48,
     GREEN_LUMA_RAMP_COUNT = 16,
     GREEN_LUMA_RAMP_STOP = GREEN_LUMA_RAMP_START + 15,
-    
+
     BLUE_LUMA_RAMP_START = 64,
     BLUE_LUMA_RAMP_COUNT = 16,
     BLUE_LUMA_RAMP_STOP = BLUE_LUMA_RAMP_START + 15,
-    
+
     YELLOW_LUMA_RAMP_START = 80,
     YELLOW_LUMA_RAMP_COUNT = 16,
     YELLOW_LUMA_RAMP_STOP = YELLOW_LUMA_RAMP_START + 15,
-    
+
     CYAN_LUMA_RAMP_START = 96,
     CYAN_LUMA_RAMP_COUNT = 16,
     CYAN_LUMA_RAMP_STOP = CYAN_LUMA_RAMP_START + 15,
-    
+
     MAGENTA_LUMA_RAMP_START = 112,
     MAGENTA_LUMA_RAMP_COUNT = 16,
     MAGENTA_LUMA_RAMP_STOP = MAGENTA_LUMA_RAMP_START + 15,
-    
+
     OKLCH_RAMP_START = 128,
     OKLCH_RAMP_COUNT = 128,
     OKLCH_RAMP_STOP = 255
@@ -2866,8 +2867,8 @@ enum device_format {
  * A struct which can be passed to: plot().
  */
 struct plot {
-    int32_t x = 0;               /**< X coordinate in pixels. */
-    int32_t y = 0;               /**< Y coordinate in pixels. */
+    int32_t x = 0;              /**< X coordinate in pixels. */
+    int32_t y = 0;              /**< Y coordinate in pixels. */
     uint8_t col = color::WHITE; /**< Color palette index to use. */
 };
 
@@ -2875,35 +2876,35 @@ struct plot {
  * A struct which can be passed to: draw_line(), draw_line_aa().
  */
 struct draw_line {
-    int32_t x0 = 0;              /**< First X coordinate in pixels. */
-    int32_t y0 = 0;              /**< First Y coordinate in pixels. */
-    int32_t x1 = 0;              /**< Second X coordinate in pixels. */
-    int32_t y1 = 0;              /**< Second Y coordinate in pixels. */
+    int32_t x0 = 0;             /**< First X coordinate in pixels. */
+    int32_t y0 = 0;             /**< First Y coordinate in pixels. */
+    int32_t x1 = 0;             /**< Second X coordinate in pixels. */
+    int32_t y1 = 0;             /**< Second Y coordinate in pixels. */
     uint8_t col = color::WHITE; /**< Color palette index to use. */
-    float sw = 1;                /**< Width of the stroke in pixels. */
+    float sw = 1;               /**< Width of the stroke in pixels. */
 };
 
 /**
  * A struct which can be passed to: fill_rect(), stroke_rect(), .
  */
 struct draw_rect {
-    int32_t x = 0;               /**< X coordinate in pixels. */
-    int32_t y = 0;               /**< Y coordinate in pixels. */
-    int32_t w = 0;               /**< Width in pixels. */
-    int32_t h = 0;               /**< Height in pixels. */
+    int32_t x = 0;              /**< X coordinate in pixels. */
+    int32_t y = 0;              /**< Y coordinate in pixels. */
+    int32_t w = 0;              /**< Width in pixels. */
+    int32_t h = 0;              /**< Height in pixels. */
     uint8_t col = color::WHITE; /**< Color palette index to use. */
-    int32_t sw = 1;              /**< Width of the stroke in pixels. */
+    int32_t sw = 1;             /**< Width of the stroke in pixels. */
 };
 
 /**
  * A struct which can be passed to: fill_circle(), stroke_circle(), fill_circle_aa(), stroke_circle_aa().
  */
 struct draw_circle {
-    int32_t cx = 0;              /**< Center X coordinate in pixels. */
-    int32_t cy = 0;              /**< Center Y coordinate in pixels. */
-    int32_t r = 0;               /**< Radius of the circle in pixels. */
+    int32_t cx = 0;             /**< Center X coordinate in pixels. */
+    int32_t cy = 0;             /**< Center Y coordinate in pixels. */
+    int32_t r = 0;              /**< Radius of the circle in pixels. */
     uint8_t col = color::WHITE; /**< Color palette index to use. */
-    int32_t sw = 1;              /**< Width of the stroke in pixels. */
+    int32_t sw = 1;             /**< Width of the stroke in pixels. */
 };
 
 /**
@@ -2911,22 +2912,22 @@ struct draw_circle {
  * stroke_round_rect_aa().
  */
 struct draw_round_rect {
-    int32_t x = 0;               /**< X coordinate in pixels. */
-    int32_t y = 0;               /**< Y coordinate in pixels. */
-    int32_t w = 0;               /**< Width in pixels. */
-    int32_t h = 0;               /**< Height in pixels. */
-    int32_t r = 0;               /**< Radius of the corners in pixels. */
+    int32_t x = 0;              /**< X coordinate in pixels. */
+    int32_t y = 0;              /**< Y coordinate in pixels. */
+    int32_t w = 0;              /**< Width in pixels. */
+    int32_t h = 0;              /**< Height in pixels. */
+    int32_t r = 0;              /**< Radius of the corners in pixels. */
     uint8_t col = color::WHITE; /**< Color palette index to use. */
-    int32_t sw = 1;              /**< Width of the stroke in pixels. */
+    int32_t sw = 1;             /**< Width of the stroke in pixels. */
 };
 
 /**
  * A struct which can be passed to: draw_string_mono(), draw_string_centered_mono().
  */
 struct draw_string {
-    int32_t x = 0;               /**< X coordinate in pixels. */
-    int32_t y = 0;               /**< Y coordinate in pixels. */
-    const char *str = nullptr;   /**< UTF8 string */
+    int32_t x = 0;              /**< X coordinate in pixels. */
+    int32_t y = 0;              /**< Y coordinate in pixels. */
+    const char *str = nullptr;  /**< UTF8 string */
     uint8_t col = color::WHITE; /**< Color palette index to use. */
 };
 
@@ -2940,16 +2941,16 @@ namespace shapes {
 
 /**
  * @brief Fluent API for drawing rectangles
- * 
+ *
  * Provides a chainable interface for drawing filled and stroked rectangles.
  */
 template <template <size_t, size_t, bool, bool> class T, size_t W, size_t H, bool GRAYSCALE, bool USE_SPAN>
 class rect {
     using image_type = image<T, W, H, GRAYSCALE, USE_SPAN>;
-    image_type& img;
+    image_type &img;
     int32_t x, y, w, h;
-    
-public:
+
+ public:
     /**
      * @brief Construct a rectangle shape
      * @param image Target image to draw on
@@ -2958,38 +2959,40 @@ public:
      * @param w_ Width of rectangle
      * @param h_ Height of rectangle
      */
-    constexpr rect(image_type& image, int32_t x_, int32_t y_, int32_t w_, int32_t h_) 
-        : img(image), x(x_), y(y_), w(w_), h(h_) {}
-    
+    constexpr rect(image_type &image, int32_t x_, int32_t y_, int32_t w_, int32_t h_)
+        : img(image), x(x_), y(y_), w(w_), h(h_) {
+    }
+
     /**
      * @brief Fill the rectangle with a solid color
      * @param col Color value
      * @return Reference to this rectangle for chaining
      */
-    constexpr rect& fill(uint8_t col) {
+    constexpr rect &fill(uint8_t col) {
         img.fill_rect(x, y, w, h, col);
         return *this;
     }
-    
+
     /**
      * @brief Fill the rectangle using a shader function
      * @param shader Function that returns RGBA values based on normalized coordinates
      * @return Reference to this rectangle for chaining
      */
     template <typename shader_func>
-    constexpr auto fill_shader(const shader_func &shader) -> rect&
-        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float> {
+    constexpr auto fill_shader(const shader_func &shader) -> rect &
+        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float>
+    {
         img.fill_rect(x, y, w, h, shader);
         return *this;
     }
-    
+
     /**
      * @brief Draw the rectangle outline
      * @param col Color value
      * @param stroke_width Width of the stroke (default: 1)
      * @return Reference to this rectangle for chaining
      */
-    constexpr rect& stroke(uint8_t col, int32_t stroke_width = 1) {
+    constexpr rect &stroke(uint8_t col, int32_t stroke_width = 1) {
         img.stroke_rect(x, y, w, h, col, stroke_width);
         return *this;
     }
@@ -2997,16 +3000,16 @@ public:
 
 /**
  * @brief Fluent API for drawing circles
- * 
+ *
  * Provides a chainable interface for drawing filled and stroked circles.
  */
 template <template <size_t, size_t, bool, bool> class T, size_t W, size_t H, bool GRAYSCALE, bool USE_SPAN>
 class circle {
     using image_type = image<T, W, H, GRAYSCALE, USE_SPAN>;
-    image_type& img;
+    image_type &img;
     int32_t cx, cy, r;
-    
-public:
+
+ public:
     /**
      * @brief Construct a circle shape
      * @param image Target image to draw on
@@ -3014,26 +3017,26 @@ public:
      * @param cy_ Y coordinate of center
      * @param r_ Radius of circle
      */
-    constexpr circle(image_type& image, int32_t cx_, int32_t cy_, int32_t r_) 
-        : img(image), cx(cx_), cy(cy_), r(r_) {}
-    
+    constexpr circle(image_type &image, int32_t cx_, int32_t cy_, int32_t r_) : img(image), cx(cx_), cy(cy_), r(r_) {
+    }
+
     /**
      * @brief Fill the circle with a solid color
      * @param col Color value
      * @return Reference to this circle for chaining
      */
-    constexpr circle& fill(uint8_t col) {
+    constexpr circle &fill(uint8_t col) {
         img.fill_circle(cx, cy, r, col);
         return *this;
     }
-    
+
     /**
      * @brief Draw the circle outline
      * @param col Color value
      * @param stroke_width Width of the stroke (default: 1)
      * @return Reference to this circle for chaining
      */
-    constexpr circle& stroke(uint8_t col, int32_t stroke_width = 1) {
+    constexpr circle &stroke(uint8_t col, int32_t stroke_width = 1) {
         img.stroke_circle(cx, cy, r, col, stroke_width);
         return *this;
     }
@@ -3041,16 +3044,16 @@ public:
 
 /**
  * @brief Fluent API for drawing anti-aliased circles
- * 
+ *
  * Provides a chainable interface for drawing filled and stroked circles with anti-aliasing.
  */
 template <template <size_t, size_t, bool, bool> class T, size_t W, size_t H, bool GRAYSCALE, bool USE_SPAN>
 class circle_aa {
     using image_type = image<T, W, H, GRAYSCALE, USE_SPAN>;
-    image_type& img;
+    image_type &img;
     int32_t cx, cy, r;
-    
-public:
+
+ public:
     /**
      * @brief Construct an anti-aliased circle shape
      * @param image Target image to draw on
@@ -3058,38 +3061,39 @@ public:
      * @param cy_ Y coordinate of center
      * @param r_ Radius of circle
      */
-    constexpr circle_aa(image_type& image, int32_t cx_, int32_t cy_, int32_t r_) 
-        : img(image), cx(cx_), cy(cy_), r(r_) {}
-    
+    constexpr circle_aa(image_type &image, int32_t cx_, int32_t cy_, int32_t r_) : img(image), cx(cx_), cy(cy_), r(r_) {
+    }
+
     /**
      * @brief Fill the circle with a solid color
      * @param col Color value
      * @return Reference to this circle for chaining
      */
-    constexpr circle_aa& fill(uint8_t col) {
+    constexpr circle_aa &fill(uint8_t col) {
         img.fill_circle_aa(cx, cy, r, col);
         return *this;
     }
-    
+
     /**
      * @brief Fill the circle using a shader function
      * @param shader Function that returns RGBA values based on normalized coordinates
      * @return Reference to this circle for chaining
      */
     template <typename shader_func>
-    constexpr auto fill_shader(const shader_func &shader) -> circle_aa&
-        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float> {
+    constexpr auto fill_shader(const shader_func &shader) -> circle_aa &
+        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float>
+    {
         img.fill_circle_aa(cx, cy, r, shader);
         return *this;
     }
-    
+
     /**
      * @brief Draw the circle outline
      * @param col Color value
      * @param stroke_width Width of the stroke (default: 1)
      * @return Reference to this circle for chaining
      */
-    constexpr circle_aa& stroke(uint8_t col, int32_t stroke_width = 1) {
+    constexpr circle_aa &stroke(uint8_t col, int32_t stroke_width = 1) {
         img.stroke_circle_aa(cx, cy, r, col, stroke_width);
         return *this;
     }
@@ -3097,16 +3101,16 @@ public:
 
 /**
  * @brief Fluent API for drawing rounded rectangles
- * 
+ *
  * Provides a chainable interface for drawing filled and stroked rounded rectangles.
  */
 template <template <size_t, size_t, bool, bool> class T, size_t W, size_t H, bool GRAYSCALE, bool USE_SPAN>
 class round_rect {
     using image_type = image<T, W, H, GRAYSCALE, USE_SPAN>;
-    image_type& img;
+    image_type &img;
     int32_t x, y, w, h, radius;
-    
-public:
+
+ public:
     /**
      * @brief Construct a rounded rectangle shape
      * @param image Target image to draw on
@@ -3116,26 +3120,27 @@ public:
      * @param h_ Height of rectangle
      * @param radius_ Corner radius
      */
-    constexpr round_rect(image_type& image, int32_t x_, int32_t y_, int32_t w_, int32_t h_, int32_t radius_) 
-        : img(image), x(x_), y(y_), w(w_), h(h_), radius(radius_) {}
-    
+    constexpr round_rect(image_type &image, int32_t x_, int32_t y_, int32_t w_, int32_t h_, int32_t radius_)
+        : img(image), x(x_), y(y_), w(w_), h(h_), radius(radius_) {
+    }
+
     /**
      * @brief Fill the rounded rectangle with a solid color
      * @param col Color value
      * @return Reference to this rounded rectangle for chaining
      */
-    constexpr round_rect& fill(uint8_t col) {
+    constexpr round_rect &fill(uint8_t col) {
         img.fill_round_rect(x, y, w, h, radius, col);
         return *this;
     }
-    
+
     /**
      * @brief Draw the rounded rectangle outline
      * @param col Color value
      * @param stroke_width Width of the stroke (default: 1)
      * @return Reference to this rounded rectangle for chaining
      */
-    constexpr round_rect& stroke(uint8_t col, int32_t stroke_width = 1) {
+    constexpr round_rect &stroke(uint8_t col, int32_t stroke_width = 1) {
         img.stroke_round_rect(x, y, w, h, radius, col, stroke_width);
         return *this;
     }
@@ -3143,16 +3148,16 @@ public:
 
 /**
  * @brief Fluent API for drawing anti-aliased rounded rectangles
- * 
+ *
  * Provides a chainable interface for drawing filled and stroked rounded rectangles with anti-aliasing.
  */
 template <template <size_t, size_t, bool, bool> class T, size_t W, size_t H, bool GRAYSCALE, bool USE_SPAN>
 class round_rect_aa {
     using image_type = image<T, W, H, GRAYSCALE, USE_SPAN>;
-    image_type& img;
+    image_type &img;
     int32_t x, y, w, h, radius;
-    
-public:
+
+ public:
     /**
      * @brief Construct an anti-aliased rounded rectangle shape
      * @param image Target image to draw on
@@ -3162,38 +3167,40 @@ public:
      * @param h_ Height of rectangle
      * @param radius_ Corner radius
      */
-    constexpr round_rect_aa(image_type& image, int32_t x_, int32_t y_, int32_t w_, int32_t h_, int32_t radius_) 
-        : img(image), x(x_), y(y_), w(w_), h(h_), radius(radius_) {}
-    
+    constexpr round_rect_aa(image_type &image, int32_t x_, int32_t y_, int32_t w_, int32_t h_, int32_t radius_)
+        : img(image), x(x_), y(y_), w(w_), h(h_), radius(radius_) {
+    }
+
     /**
      * @brief Fill the rounded rectangle with a solid color
      * @param col Color value
      * @return Reference to this rounded rectangle for chaining
      */
-    constexpr round_rect_aa& fill(uint8_t col) {
+    constexpr round_rect_aa &fill(uint8_t col) {
         img.fill_round_rect_aa(x, y, w, h, radius, col);
         return *this;
     }
-    
+
     /**
      * @brief Fill the rounded rectangle using a shader function
      * @param shader Function that returns RGBA values based on normalized coordinates
      * @return Reference to this rounded rectangle for chaining
      */
     template <typename shader_func>
-    constexpr auto fill_shader(const shader_func &shader) -> round_rect_aa&
-        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float> {
+    constexpr auto fill_shader(const shader_func &shader) -> round_rect_aa &
+        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float>
+    {
         img.fill_round_rect_aa(x, y, w, h, radius, shader);
         return *this;
     }
-    
+
     /**
      * @brief Draw the rounded rectangle outline
      * @param col Color value
      * @param stroke_width Width of the stroke (default: 1)
      * @return Reference to this rounded rectangle for chaining
      */
-    constexpr round_rect_aa& stroke(uint8_t col, int32_t stroke_width = 1) {
+    constexpr round_rect_aa &stroke(uint8_t col, int32_t stroke_width = 1) {
         img.stroke_round_rect_aa(x, y, w, h, radius, col, stroke_width);
         return *this;
     }
@@ -3201,16 +3208,16 @@ public:
 
 /**
  * @brief Fluent API for drawing lines
- * 
+ *
  * Provides a chainable interface for drawing stroked lines.
  */
 template <template <size_t, size_t, bool, bool> class T, size_t W, size_t H, bool GRAYSCALE, bool USE_SPAN>
 class line {
     using image_type = image<T, W, H, GRAYSCALE, USE_SPAN>;
-    image_type& img;
+    image_type &img;
     int32_t x0, y0, x1, y1;
-    
-public:
+
+ public:
     /**
      * @brief Construct a line shape
      * @param image Target image to draw on
@@ -3219,16 +3226,17 @@ public:
      * @param x1_ X coordinate of end point
      * @param y1_ Y coordinate of end point
      */
-    constexpr line(image_type& image, int32_t x0_, int32_t y0_, int32_t x1_, int32_t y1_) 
-        : img(image), x0(x0_), y0(y0_), x1(x1_), y1(y1_) {}
-    
+    constexpr line(image_type &image, int32_t x0_, int32_t y0_, int32_t x1_, int32_t y1_)
+        : img(image), x0(x0_), y0(y0_), x1(x1_), y1(y1_) {
+    }
+
     /**
      * @brief Draw the line
      * @param col Color value
      * @param stroke_width Width of the stroke (default: 1)
      * @return Reference to this line for chaining
      */
-    constexpr line& stroke(uint8_t col, int32_t stroke_width = 1) {
+    constexpr line &stroke(uint8_t col, int32_t stroke_width = 1) {
         img.draw_line(x0, y0, x1, y1, col, stroke_width);
         return *this;
     }
@@ -3236,16 +3244,16 @@ public:
 
 /**
  * @brief Fluent API for drawing anti-aliased lines
- * 
+ *
  * Provides a chainable interface for drawing stroked lines with anti-aliasing.
  */
 template <template <size_t, size_t, bool, bool> class T, size_t W, size_t H, bool GRAYSCALE, bool USE_SPAN>
 class line_aa {
     using image_type = image<T, W, H, GRAYSCALE, USE_SPAN>;
-    image_type& img;
+    image_type &img;
     int32_t x0, y0, x1, y1;
-    
-public:
+
+ public:
     /**
      * @brief Construct an anti-aliased line shape
      * @param image Target image to draw on
@@ -3254,16 +3262,17 @@ public:
      * @param x1_ X coordinate of end point
      * @param y1_ Y coordinate of end point
      */
-    constexpr line_aa(image_type& image, int32_t x0_, int32_t y0_, int32_t x1_, int32_t y1_) 
-        : img(image), x0(x0_), y0(y0_), x1(x1_), y1(y1_) {}
-    
+    constexpr line_aa(image_type &image, int32_t x0_, int32_t y0_, int32_t x1_, int32_t y1_)
+        : img(image), x0(x0_), y0(y0_), x1(x1_), y1(y1_) {
+    }
+
     /**
      * @brief Draw the anti-aliased line
      * @param col Color value
      * @param stroke_width Width of the stroke (default: 1.0f)
      * @return Reference to this line for chaining
      */
-    constexpr line_aa& stroke(uint8_t col, float stroke_width = 1.0f) {
+    constexpr line_aa &stroke(uint8_t col, float stroke_width = 1.0f) {
         img.draw_line_aa(x0, y0, x1, y1, col, stroke_width);
         return *this;
     }
@@ -3271,31 +3280,31 @@ public:
 
 /**
  * @brief Fluent API for drawing points
- * 
+ *
  * Provides a chainable interface for plotting individual pixels.
  */
 template <template <size_t, size_t, bool, bool> class T, size_t W, size_t H, bool GRAYSCALE, bool USE_SPAN>
 class point {
     using image_type = image<T, W, H, GRAYSCALE, USE_SPAN>;
-    image_type& img;
+    image_type &img;
     int32_t x, y;
-    
-public:
+
+ public:
     /**
      * @brief Construct a point shape
      * @param image Target image to draw on
      * @param x_ X coordinate of the point
      * @param y_ Y coordinate of the point
      */
-    constexpr point(image_type& image, int32_t x_, int32_t y_) 
-        : img(image), x(x_), y(y_) {}
-    
+    constexpr point(image_type &image, int32_t x_, int32_t y_) : img(image), x(x_), y(y_) {
+    }
+
     /**
      * @brief Plot the point with the specified color
      * @param col Color value
      * @return Reference to this point for chaining
      */
-    constexpr point& plot(uint8_t col) {
+    constexpr point &plot(uint8_t col) {
         img.plot(x, y, col);
         return *this;
     }
@@ -3303,18 +3312,18 @@ public:
 
 /**
  * @brief Fluent API for drawing monospace text
- * 
+ *
  * Provides a chainable interface for drawing text using monospace fonts.
  */
-template <typename FONT, template <size_t, size_t, bool, bool> class T, size_t W, size_t H, bool GRAYSCALE, bool USE_SPAN, 
-          bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+template <typename FONT, template <size_t, size_t, bool, bool> class T, size_t W, size_t H, bool GRAYSCALE,
+          bool USE_SPAN, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
 class text_mono {
     using image_type = image<T, W, H, GRAYSCALE, USE_SPAN>;
-    image_type& img;
+    image_type &img;
     int32_t x, y;
-    const char* str;
-    
-public:
+    const char *str;
+
+ public:
     /**
      * @brief Construct a monospace text shape
      * @param image Target image to draw on
@@ -3322,9 +3331,10 @@ public:
      * @param y_ Y coordinate of text position
      * @param str_ Text string to draw
      */
-    constexpr text_mono(image_type& image, int32_t x_, int32_t y_, const char* str_) 
-        : img(image), x(x_), y(y_), str(str_) {}
-    
+    constexpr text_mono(image_type &image, int32_t x_, int32_t y_, const char *str_)
+        : img(image), x(x_), y(y_), str(str_) {
+    }
+
     /**
      * @brief Draw the text and return the width
      * @param col Color value
@@ -3333,16 +3343,17 @@ public:
      * @return Width of the drawn text in pixels
      */
     constexpr int32_t draw(uint8_t col, size_t character_count = std::numeric_limits<size_t>::max(),
-                          size_t *character_actual = nullptr) {
-        return img.template draw_string_mono<FONT, KERNING, ROTATION>(x, y, str, col, character_count, character_actual);
+                           size_t *character_actual = nullptr) {
+        return img.template draw_string_mono<FONT, KERNING, ROTATION>(x, y, str, col, character_count,
+                                                                      character_actual);
     }
-    
+
     /**
      * @brief Draw the text with the specified color
      * @param col Color value
      * @return Reference to this text for chaining
      */
-    constexpr text_mono& color(uint8_t col) {
+    constexpr text_mono &color(uint8_t col) {
         img.template draw_string_mono<FONT, KERNING, ROTATION>(x, y, str, col);
         return *this;
     }
@@ -3350,18 +3361,18 @@ public:
 
 /**
  * @brief Fluent API for drawing anti-aliased text
- * 
+ *
  * Provides a chainable interface for drawing text using anti-aliased fonts.
  */
-template <typename FONT, template <size_t, size_t, bool, bool> class T, size_t W, size_t H, bool GRAYSCALE, bool USE_SPAN, 
-          bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+template <typename FONT, template <size_t, size_t, bool, bool> class T, size_t W, size_t H, bool GRAYSCALE,
+          bool USE_SPAN, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
 class text_aa {
     using image_type = image<T, W, H, GRAYSCALE, USE_SPAN>;
-    image_type& img;
+    image_type &img;
     int32_t x, y;
-    const char* str;
-    
-public:
+    const char *str;
+
+ public:
     /**
      * @brief Construct an anti-aliased text shape
      * @param image Target image to draw on
@@ -3369,9 +3380,10 @@ public:
      * @param y_ Y coordinate of text position
      * @param str_ Text string to draw
      */
-    constexpr text_aa(image_type& image, int32_t x_, int32_t y_, const char* str_) 
-        : img(image), x(x_), y(y_), str(str_) {}
-    
+    constexpr text_aa(image_type &image, int32_t x_, int32_t y_, const char *str_)
+        : img(image), x(x_), y(y_), str(str_) {
+    }
+
     /**
      * @brief Draw the text and return the width
      * @param col Color value
@@ -3380,16 +3392,16 @@ public:
      * @return Width of the drawn text in pixels
      */
     constexpr int32_t draw(uint8_t col, size_t character_count = std::numeric_limits<size_t>::max(),
-                          size_t *character_actual = nullptr) {
+                           size_t *character_actual = nullptr) {
         return img.template draw_string_aa<FONT, KERNING, ROTATION>(x, y, str, col, character_count, character_actual);
     }
-    
+
     /**
      * @brief Draw the text with the specified color
      * @param col Color value
      * @return Reference to this text for chaining
      */
-    constexpr text_aa& color(uint8_t col) {
+    constexpr text_aa &color(uint8_t col) {
         img.template draw_string_aa<FONT, KERNING, ROTATION>(x, y, str, col);
         return *this;
     }
@@ -3397,18 +3409,18 @@ public:
 
 /**
  * @brief Fluent API for drawing centered monospace text
- * 
+ *
  * Provides a chainable interface for drawing centered text using monospace fonts.
  */
-template <typename FONT, template <size_t, size_t, bool, bool> class T, size_t W, size_t H, bool GRAYSCALE, bool USE_SPAN, 
-          bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+template <typename FONT, template <size_t, size_t, bool, bool> class T, size_t W, size_t H, bool GRAYSCALE,
+          bool USE_SPAN, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
 class text_centered_mono {
     using image_type = image<T, W, H, GRAYSCALE, USE_SPAN>;
-    image_type& img;
+    image_type &img;
     int32_t x, y;
-    const char* str;
-    
-public:
+    const char *str;
+
+ public:
     /**
      * @brief Construct a centered monospace text shape
      * @param image Target image to draw on
@@ -3416,15 +3428,16 @@ public:
      * @param y_ Y coordinate of center position
      * @param str_ Text string to draw
      */
-    constexpr text_centered_mono(image_type& image, int32_t x_, int32_t y_, const char* str_) 
-        : img(image), x(x_), y(y_), str(str_) {}
-    
+    constexpr text_centered_mono(image_type &image, int32_t x_, int32_t y_, const char *str_)
+        : img(image), x(x_), y(y_), str(str_) {
+    }
+
     /**
      * @brief Draw the centered text with the specified color
      * @param col Color value
      * @return Reference to this text for chaining
      */
-    constexpr text_centered_mono& color(uint8_t col) {
+    constexpr text_centered_mono &color(uint8_t col) {
         img.template draw_string_centered_mono<FONT, KERNING, ROTATION>(x, y, str, col);
         return *this;
     }
@@ -3432,18 +3445,18 @@ public:
 
 /**
  * @brief Fluent API for drawing centered anti-aliased text
- * 
+ *
  * Provides a chainable interface for drawing centered text using anti-aliased fonts.
  */
-template <typename FONT, template <size_t, size_t, bool, bool> class T, size_t W, size_t H, bool GRAYSCALE, bool USE_SPAN, 
-          bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+template <typename FONT, template <size_t, size_t, bool, bool> class T, size_t W, size_t H, bool GRAYSCALE,
+          bool USE_SPAN, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
 class text_centered_aa {
     using image_type = image<T, W, H, GRAYSCALE, USE_SPAN>;
-    image_type& img;
+    image_type &img;
     int32_t x, y;
-    const char* str;
-    
-public:
+    const char *str;
+
+ public:
     /**
      * @brief Construct a centered anti-aliased text shape
      * @param image Target image to draw on
@@ -3451,21 +3464,22 @@ public:
      * @param y_ Y coordinate of center position
      * @param str_ Text string to draw
      */
-    constexpr text_centered_aa(image_type& image, int32_t x_, int32_t y_, const char* str_) 
-        : img(image), x(x_), y(y_), str(str_) {}
-    
+    constexpr text_centered_aa(image_type &image, int32_t x_, int32_t y_, const char *str_)
+        : img(image), x(x_), y(y_), str(str_) {
+    }
+
     /**
      * @brief Draw the centered text with the specified color
      * @param col Color value
      * @return Reference to this text for chaining
      */
-    constexpr text_centered_aa& color(uint8_t col) {
+    constexpr text_centered_aa &color(uint8_t col) {
         img.template draw_string_centered_aa<FONT, KERNING, ROTATION>(x, y, str, col);
         return *this;
     }
 };
 
-} // namespace shapes
+}  // namespace shapes
 
 /**
  * @class image
@@ -3475,7 +3489,8 @@ public:
  * constixel::image<constixel::format_8bit, 640, 480> image;
  * \endcode
  *
- * @tparam T Type of the image buffer. One of format_1bit, format_2bit, format_4bit, format_8bit, format_24bit or format_32bit.
+ * @tparam T Type of the image buffer. One of format_1bit, format_2bit, format_4bit, format_8bit, format_24bit or
+ * format_32bit.
  * @tparam W Width in pixels.
  * @tparam H Height in pixels.
  * @tparam GRAYSCALE boolean to indicate if palette should be grayscale. Otherwise a colored palette will be used.
@@ -4340,7 +4355,8 @@ class image {
      */
     template <typename shader_func>
     constexpr auto fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, const shader_func &shader) -> void
-        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float> {
+        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float>
+    {
         auto minmax_check = std::minmax({x, y, w, h});
         if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
             return;
@@ -4372,10 +4388,9 @@ class image {
                 }
 
                 auto rgba = shader(u, v, au, av);
-                rgba[0] = std::clamp(rgba[0], 0.0f, 1.0f);
-                rgba[1] = std::clamp(rgba[1], 0.0f, 1.0f);
-                rgba[2] = std::clamp(rgba[2], 0.0f, 1.0f);
-                rgba[3] = std::clamp(rgba[3], 0.0f, 1.0f);
+                for (auto &v : rgba) {
+                    v = std::clamp(v, 0.0f, 1.0f);
+                }
                 compose(px, py, rgba[3], rgba[0], rgba[1], rgba[2]);
             }
         }
@@ -4387,7 +4402,8 @@ class image {
     template <typename shader_func>
     constexpr auto fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, const shader_func &shader, int32_t parent_x,
                              int32_t parent_y, int32_t parent_w, int32_t parent_h) -> void
-        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float> {
+        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float>
+    {
         auto minmax_check = std::minmax({x, y, w, h});
         if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
             return;
@@ -4425,10 +4441,9 @@ class image {
                 }
 
                 auto rgba = shader(u, v, au, av);
-                rgba[0] = std::clamp(rgba[0], 0.0f, 1.0f);
-                rgba[1] = std::clamp(rgba[1], 0.0f, 1.0f);
-                rgba[2] = std::clamp(rgba[2], 0.0f, 1.0f);
-                rgba[3] = std::clamp(rgba[3], 0.0f, 1.0f);
+                for (auto &v : rgba) {
+                    v = std::clamp(v, 0.0f, 1.0f);
+                }
                 compose(px, py, rgba[3], rgba[0], rgba[1], rgba[2]);
             }
         }
@@ -4660,7 +4675,8 @@ class image {
      */
     template <typename shader_func>
     constexpr auto fill_circle_aa(int32_t cx, int32_t cy, int32_t radius, const shader_func &shader) -> void
-        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float> {
+        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float>
+    {
         auto minmax_check = std::minmax({cx, cy, radius});
         if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
             return;
@@ -4838,7 +4854,8 @@ class image {
     template <typename shader_func>
     constexpr auto fill_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius,
                                       const shader_func &shader) -> void
-        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float> {
+        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float>
+    {
         auto minmax_check = std::minmax({x, y, w, h, radius});
         if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
             return;
@@ -5291,7 +5308,7 @@ class image {
     /**
      * @brief Fluent shape API methods for method chaining
      * These provide a more expressive way to create shapes compared to struct-based calls.
-     * 
+     *
      * Example usage:
      * \code{.cpp}
      * image.rect(10, 10, 50, 30).fill(constixel::color::RED).stroke(constixel::color::BLACK, 2);
@@ -5299,7 +5316,7 @@ class image {
      * image.line(0, 0, 100, 100).stroke(constixel::color::WHITE, 3);
      * \endcode
      */
-    
+
     /**
      * \brief Create a rectangle shape for fluent method chaining.
      * \param x Starting X-coordinate in pixels.
@@ -5311,7 +5328,7 @@ class image {
     constexpr auto rect(int32_t x, int32_t y, int32_t w, int32_t h) {
         return shapes::rect<T, W, H, GRAYSCALE, USE_SPAN>(*this, x, y, w, h);
     }
-    
+
     /**
      * \brief Create a circle shape for fluent method chaining.
      * \param cx Center X-coordinate in pixels.
@@ -5322,7 +5339,7 @@ class image {
     constexpr auto circle(int32_t cx, int32_t cy, int32_t r) {
         return shapes::circle<T, W, H, GRAYSCALE, USE_SPAN>(*this, cx, cy, r);
     }
-    
+
     /**
      * \brief Create an antialiased circle shape for fluent method chaining.
      * Only format_8bit targets are supported.
@@ -5334,7 +5351,7 @@ class image {
     constexpr auto circle_aa(int32_t cx, int32_t cy, int32_t r) {
         return shapes::circle_aa<T, W, H, GRAYSCALE, USE_SPAN>(*this, cx, cy, r);
     }
-    
+
     /**
      * \brief Create a rounded rectangle shape for fluent method chaining.
      * \param x Starting X-coordinate in pixels.
@@ -5347,7 +5364,7 @@ class image {
     constexpr auto round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius) {
         return shapes::round_rect<T, W, H, GRAYSCALE, USE_SPAN>(*this, x, y, w, h, radius);
     }
-    
+
     /**
      * \brief Create an antialiased rounded rectangle shape for fluent method chaining.
      * Only format_8bit targets are supported.
@@ -5361,7 +5378,7 @@ class image {
     constexpr auto round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius) {
         return shapes::round_rect_aa<T, W, H, GRAYSCALE, USE_SPAN>(*this, x, y, w, h, radius);
     }
-    
+
     /**
      * \brief Create a line shape for fluent method chaining.
      * \param x0 Starting X-coordinate in pixels.
@@ -5373,7 +5390,7 @@ class image {
     constexpr auto line(int32_t x0, int32_t y0, int32_t x1, int32_t y1) {
         return shapes::line<T, W, H, GRAYSCALE, USE_SPAN>(*this, x0, y0, x1, y1);
     }
-    
+
     /**
      * \brief Create an antialiased line shape for fluent method chaining.
      * Only format_8bit targets are supported.
@@ -5386,7 +5403,7 @@ class image {
     constexpr auto line_aa(int32_t x0, int32_t y0, int32_t x1, int32_t y1) {
         return shapes::line_aa<T, W, H, GRAYSCALE, USE_SPAN>(*this, x0, y0, x1, y1);
     }
-    
+
     /**
      * \brief Create a point shape for fluent method chaining.
      * \param x X-coordinate in pixels.
@@ -5396,7 +5413,7 @@ class image {
     constexpr auto point(int32_t x, int32_t y) {
         return shapes::point<T, W, H, GRAYSCALE, USE_SPAN>(*this, x, y);
     }
-    
+
     /**
      * \brief Create a text shape for fluent monospace string drawing with method chaining.
      * \tparam FONT The font type to use for rendering.
@@ -5406,17 +5423,17 @@ class image {
      * \param y Starting Y-coordinate in pixels.
      * \param str The string to draw.
      * \return A text_mono shape object that supports .color() and .draw() methods.
-     * 
+     *
      * Example usage:
      * \code
      * img.text_mono<constixel::ibmplexmono_regular_12_mono>(10, 20, "Hello").color(constixel::color::WHITE);
      * \endcode
      */
     template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr auto text_mono(int32_t x, int32_t y, const char* str) {
+    constexpr auto text_mono(int32_t x, int32_t y, const char *str) {
         return shapes::text_mono<FONT, T, W, H, GRAYSCALE, USE_SPAN, KERNING, ROTATION>(*this, x, y, str);
     }
-    
+
     /**
      * \brief Create a text shape for fluent antialiased string drawing with method chaining.
      * Only format_8bit targets are supported.
@@ -5427,17 +5444,17 @@ class image {
      * \param y Starting Y-coordinate in pixels.
      * \param str The string to draw.
      * \return A text_aa shape object that supports .color() and .draw() methods.
-     * 
+     *
      * Example usage:
      * \code
      * img.text_aa<constixel::ibmplexmono_regular_12_aa>(10, 20, "Hello").color(constixel::color::WHITE);
      * \endcode
      */
     template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr auto text_aa(int32_t x, int32_t y, const char* str) {
+    constexpr auto text_aa(int32_t x, int32_t y, const char *str) {
         return shapes::text_aa<FONT, T, W, H, GRAYSCALE, USE_SPAN, KERNING, ROTATION>(*this, x, y, str);
     }
-    
+
     /**
      * \brief Create a text shape for fluent centered monospace string drawing with method chaining.
      * \tparam FONT The font type to use for rendering.
@@ -5447,17 +5464,18 @@ class image {
      * \param y Center Y-coordinate in pixels.
      * \param str The string to draw.
      * \return A text_centered_mono shape object that supports .color() method.
-     * 
+     *
      * Example usage:
      * \code
-     * img.text_centered_mono<constixel::ibmplexmono_regular_12_mono>(100, 50, "Centered").color(constixel::color::WHITE);
+     * img.text_centered_mono<constixel::ibmplexmono_regular_12_mono>(100, 50,
+     * "Centered").color(constixel::color::WHITE);
      * \endcode
      */
     template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr auto text_centered_mono(int32_t x, int32_t y, const char* str) {
+    constexpr auto text_centered_mono(int32_t x, int32_t y, const char *str) {
         return shapes::text_centered_mono<FONT, T, W, H, GRAYSCALE, USE_SPAN, KERNING, ROTATION>(*this, x, y, str);
     }
-    
+
     /**
      * \brief Create a text shape for fluent centered antialiased string drawing with method chaining.
      * Only format_8bit targets are supported.
@@ -5468,14 +5486,14 @@ class image {
      * \param y Center Y-coordinate in pixels.
      * \param str The string to draw.
      * \return A text_centered_aa shape object that supports .color() method.
-     * 
+     *
      * Example usage:
      * \code
      * img.text_centered_aa<constixel::ibmplexmono_regular_12_aa>(100, 50, "Centered").color(constixel::color::WHITE);
      * \endcode
      */
     template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr auto text_centered_aa(int32_t x, int32_t y, const char* str) {
+    constexpr auto text_centered_aa(int32_t x, int32_t y, const char *str) {
         return shapes::text_centered_aa<FONT, T, W, H, GRAYSCALE, USE_SPAN, KERNING, ROTATION>(*this, x, y, str);
     }
 
@@ -5946,10 +5964,9 @@ class image {
                     }
 
                     auto rgba = shader(u, v, au, av);
-                    rgba[0] = std::clamp(rgba[0], 0.0f, 1.0f);
-                    rgba[1] = std::clamp(rgba[1], 0.0f, 1.0f);
-                    rgba[2] = std::clamp(rgba[2], 0.0f, 1.0f);
-                    rgba[3] = std::clamp(rgba[3], 0.0f, 1.0f);
+                    for (auto &v : rgba) {
+                        v = std::clamp(v, 0.0f, 1.0f);
+                    }
                     if (dist_sq < (rF - 0.5f) * (rF - 0.5f)) {
                         compose_unsafe(x + x_off, y + y_off, rgba[3], rgba[0], rgba[1], rgba[2]);
                         continue;
