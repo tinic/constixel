@@ -2250,7 +2250,7 @@ class format_24bit : public format {
 
     static constexpr void compose(std::span<uint8_t, image_size> data, size_t x, size_t y, float cola, float colr,
                                   float colg, float colb) {
-#if 0   // defined(__ARM_NEON)
+#if defined(__ARM_NEON)
         if (!std::is_constant_evaluated()) {
             const size_t off = y * bytes_per_line + x * 3;
             uint8x8_t px = vld1_u8(&data[off]);
@@ -2977,8 +2977,8 @@ public:
      * @return Reference to this rectangle for chaining
      */
     template <typename shader_func>
-    constexpr auto fill_shader(const shader_func &shader)
-        -> std::enable_if_t<std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float>, rect&> {
+    constexpr auto fill_shader(const shader_func &shader) -> rect&
+        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float> {
         img.fill_rect(x, y, w, h, shader);
         return *this;
     }
@@ -3077,8 +3077,8 @@ public:
      * @return Reference to this circle for chaining
      */
     template <typename shader_func>
-    constexpr auto fill_shader(const shader_func &shader)
-        -> std::enable_if_t<std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float>, circle_aa&> {
+    constexpr auto fill_shader(const shader_func &shader) -> circle_aa&
+        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float> {
         img.fill_circle_aa(cx, cy, r, shader);
         return *this;
     }
@@ -3181,8 +3181,8 @@ public:
      * @return Reference to this rounded rectangle for chaining
      */
     template <typename shader_func>
-    constexpr auto fill_shader(const shader_func &shader)
-        -> std::enable_if_t<std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float>, round_rect_aa&> {
+    constexpr auto fill_shader(const shader_func &shader) -> round_rect_aa&
+        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float> {
         img.fill_round_rect_aa(x, y, w, h, radius, shader);
         return *this;
     }
@@ -3884,7 +3884,7 @@ class image {
 
         const float half_width = stroke_width * 0.5f;
 
-        const int32_t margin = static_cast<int32_t>(std::ceil(half_width + 1.0f));
+        const auto margin = static_cast<int32_t>(std::ceil(half_width + 1.0f));
         const int32_t min_x = std::max(int32_t{0}, std::min({x0, x1}) - margin);
         const int32_t max_x = std::min(static_cast<int32_t>(W) - 1, std::max({x0, x1}) + margin);
         const int32_t min_y = std::max(int32_t{0}, std::min({y0, y1}) - margin);
@@ -3894,17 +3894,17 @@ class image {
             return;
         }
 
-        const float dx = static_cast<float>(x1 - x0);
-        const float dy = static_cast<float>(y1 - y0);
+        const auto dx = static_cast<float>(x1 - x0);
+        const auto dy = static_cast<float>(y1 - y0);
         const float line_length_sq = dx * dx + dy * dy;
 
         if (line_length_sq <= 1.0f) {
             const float radius = half_width;
-            const int32_t r_ceil = static_cast<int32_t>(std::ceil(radius));
+            const auto r_ceil = static_cast<int32_t>(std::ceil(radius));
             for (int32_t py = y0 - r_ceil; py <= y0 + r_ceil; py++) {
                 for (int32_t px = x0 - r_ceil; px <= x0 + r_ceil; px++) {
                     if (px >= 0 && px < static_cast<int32_t>(W) && py >= 0 && py < static_cast<int32_t>(H)) {
-                        float dist = static_cast<float>((px - x0) * (px - x0) + (py - y0) * (py - y0));
+                        auto dist = static_cast<float>((px - x0) * (px - x0) + (py - y0) * (py - y0));
                         if (std::is_constant_evaluated()) {
                             dist = hidden::fast_sqrtf(dist);
                         } else {
@@ -3926,8 +3926,8 @@ class image {
 
         for (int32_t py = min_y; py <= max_y; py++) {
             for (int32_t px = min_x; px <= max_x; px++) {
-                const float px_dx = static_cast<float>(px - x0);
-                const float px_dy = static_cast<float>(py - y0);
+                const auto px_dx = static_cast<float>(px - x0);
+                const auto px_dy = static_cast<float>(py - y0);
                 const float t = std::max(0.0f, std::min(1.0f, (px_dx * dx + px_dy * dy) / line_length_sq));
                 const float closest_x = static_cast<float>(x0) + t * dx;
                 const float closest_y = static_cast<float>(y0) + t * dy;
@@ -4339,9 +4339,8 @@ class image {
      *                    and returning RGBA color as std::array<float, 4>
      */
     template <typename shader_func>
-    constexpr auto fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, const shader_func &shader)
-        -> std::enable_if_t<std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float>,
-                            void> {
+    constexpr auto fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, const shader_func &shader) -> void
+        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float> {
         auto minmax_check = std::minmax({x, y, w, h});
         if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
             return;
@@ -4373,7 +4372,10 @@ class image {
                 }
 
                 auto rgba = shader(u, v, au, av);
-
+                rgba[0] = std::clamp(rgba[0], 0.0f, 1.0f);
+                rgba[1] = std::clamp(rgba[1], 0.0f, 1.0f);
+                rgba[2] = std::clamp(rgba[2], 0.0f, 1.0f);
+                rgba[3] = std::clamp(rgba[3], 0.0f, 1.0f);
                 compose(px, py, rgba[3], rgba[0], rgba[1], rgba[2]);
             }
         }
@@ -4384,9 +4386,8 @@ class image {
      */
     template <typename shader_func>
     constexpr auto fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, const shader_func &shader, int32_t parent_x,
-                             int32_t parent_y, int32_t parent_w, int32_t parent_h)
-        -> std::enable_if_t<std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float>,
-                            void> {
+                             int32_t parent_y, int32_t parent_w, int32_t parent_h) -> void
+        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float> {
         auto minmax_check = std::minmax({x, y, w, h});
         if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
             return;
@@ -4403,8 +4404,8 @@ class image {
         int32_t x1 = std::min(x + w, static_cast<int32_t>(W));
         int32_t y1 = std::min(y + h, static_cast<int32_t>(H));
 
-        const float parent_wF = static_cast<float>(parent_w);
-        const float parent_hF = static_cast<float>(parent_h);
+        const auto parent_wF = static_cast<float>(parent_w);
+        const auto parent_hF = static_cast<float>(parent_h);
 
         for (int32_t py = y0; py < y1; py++) {
             for (int32_t px = x0; px < x1; px++) {
@@ -4424,7 +4425,10 @@ class image {
                 }
 
                 auto rgba = shader(u, v, au, av);
-
+                rgba[0] = std::clamp(rgba[0], 0.0f, 1.0f);
+                rgba[1] = std::clamp(rgba[1], 0.0f, 1.0f);
+                rgba[2] = std::clamp(rgba[2], 0.0f, 1.0f);
+                rgba[3] = std::clamp(rgba[3], 0.0f, 1.0f);
                 compose(px, py, rgba[3], rgba[0], rgba[1], rgba[2]);
             }
         }
@@ -4655,9 +4659,8 @@ class image {
      *                    and returning RGBA color as std::array<float, 4>
      */
     template <typename shader_func>
-    constexpr auto fill_circle_aa(int32_t cx, int32_t cy, int32_t radius, const shader_func &shader)
-        -> std::enable_if_t<std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float>,
-                            void> {
+    constexpr auto fill_circle_aa(int32_t cx, int32_t cy, int32_t radius, const shader_func &shader) -> void
+        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float> {
         auto minmax_check = std::minmax({cx, cy, radius});
         if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
             return;
@@ -4834,9 +4837,8 @@ class image {
      */
     template <typename shader_func>
     constexpr auto fill_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius,
-                                      const shader_func &shader)
-        -> std::enable_if_t<std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float>,
-                            void> {
+                                      const shader_func &shader) -> void
+        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float> {
         auto minmax_check = std::minmax({x, y, w, h, radius});
         if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
             return;
@@ -5913,8 +5915,8 @@ class image {
         const int32_t actual_parent_w = (parent_w == -1) ? r * 2 : parent_w;
         const int32_t actual_parent_h = (parent_h == -1) ? r * 2 : parent_h;
 
-        const float parent_wF = static_cast<float>(actual_parent_w);
-        const float parent_hF = static_cast<float>(actual_parent_h);
+        const auto parent_wF = static_cast<float>(actual_parent_w);
+        const auto parent_hF = static_cast<float>(actual_parent_h);
 
         auto plot_arc = [&, this]<typename I>(int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
                                               int32_t y_off) {
@@ -5944,7 +5946,10 @@ class image {
                     }
 
                     auto rgba = shader(u, v, au, av);
-
+                    rgba[0] = std::clamp(rgba[0], 0.0f, 1.0f);
+                    rgba[1] = std::clamp(rgba[1], 0.0f, 1.0f);
+                    rgba[2] = std::clamp(rgba[2], 0.0f, 1.0f);
+                    rgba[3] = std::clamp(rgba[3], 0.0f, 1.0f);
                     if (dist_sq < (rF - 0.5f) * (rF - 0.5f)) {
                         compose_unsafe(x + x_off, y + y_off, rgba[3], rgba[0], rgba[1], rgba[2]);
                         continue;
