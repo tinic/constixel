@@ -7,9 +7,6 @@ CompileFlags:
     - -mthumb
     - -mcpu=*
 
-Completion:
-  AllScopes: false
-
 InlayHints:
   Enabled: false
   ParameterNames: false
