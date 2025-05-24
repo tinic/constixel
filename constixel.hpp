@@ -2980,7 +2980,7 @@ class rect {
      */
     template <typename shader_func>
     constexpr auto fill_shader(const shader_func &shader) -> rect &
-        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float>
+        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, int32_t, int32_t>
     {
         img.fill_rect(x, y, w, h, shader);
         return *this;
@@ -3081,7 +3081,7 @@ class circle_aa {
      */
     template <typename shader_func>
     constexpr auto fill_shader(const shader_func &shader) -> circle_aa &
-        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float>
+        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, int32_t, int32_t>
     {
         img.fill_circle_aa(cx, cy, r, shader);
         return *this;
@@ -3188,7 +3188,7 @@ class round_rect_aa {
      */
     template <typename shader_func>
     constexpr auto fill_shader(const shader_func &shader) -> round_rect_aa &
-        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float>
+        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, int32_t, int32_t>
     {
         img.fill_round_rect_aa(x, y, w, h, radius, shader);
         return *this;
@@ -4355,7 +4355,7 @@ class image {
      */
     template <typename shader_func>
     constexpr auto fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, const shader_func &shader) -> void
-        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float>
+        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, int32_t, int32_t>
     {
         auto minmax_check = std::minmax({x, y, w, h});
         if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
@@ -4377,7 +4377,7 @@ class image {
             for (int32_t px = x0; px < x1; px++) {
                 float u = static_cast<float>(px - x) / static_cast<float>(w);
                 float v = static_cast<float>(py - y) / static_cast<float>(h);
-                auto rgba = shader(u, v, static_cast<float>(px), static_cast<float>(py));
+                auto rgba = shader(u, v, px, py);
                 for (auto &p : rgba) {
                     p = std::clamp(p, 0.0f, 1.0f);
                 }
@@ -4392,7 +4392,7 @@ class image {
     template <typename shader_func>
     constexpr auto fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, const shader_func &shader, int32_t parent_x,
                              int32_t parent_y, int32_t parent_w, int32_t parent_h) -> void
-        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float>
+        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, int32_t, int32_t>
     {
         auto minmax_check = std::minmax({x, y, w, h});
         if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
@@ -4421,7 +4421,7 @@ class image {
                 u = std::clamp(u, 0.0f, 1.0f);
                 v = std::clamp(v, 0.0f, 1.0f);
 
-                auto rgba = shader(u, v, static_cast<float>(px), static_cast<float>(py));
+                auto rgba = shader(u, v, px, py);
                 for (auto &p : rgba) {
                     p = std::clamp(p, 0.0f, 1.0f);
                 }
@@ -4656,7 +4656,7 @@ class image {
      */
     template <typename shader_func>
     constexpr auto fill_circle_aa(int32_t cx, int32_t cy, int32_t radius, const shader_func &shader) -> void
-        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float>
+        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, int32_t, int32_t>
     {
         auto minmax_check = std::minmax({cx, cy, radius});
         if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
@@ -4835,7 +4835,7 @@ class image {
     template <typename shader_func>
     constexpr auto fill_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius,
                                       const shader_func &shader) -> void
-        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, float, float>
+        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, int32_t, int32_t>
     {
         auto minmax_check = std::minmax({x, y, w, h, radius});
         if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
@@ -5934,7 +5934,7 @@ class image {
 
                     u = std::clamp(u, 0.0f, 1.0f);
                     v = std::clamp(v, 0.0f, 1.0f);
-                    auto rgba = shader(u, v, static_cast<float>(x), static_cast<float>(y));
+                    auto rgba = shader(u, v, x + x_off, y + y_off);
                     for (auto &p : rgba) {
                         p = std::clamp(p, 0.0f, 1.0f);
                     }
