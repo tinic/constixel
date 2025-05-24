@@ -1,0 +1,15 @@
+CompileFlags:
+  CompilationDatabase: build/
+  Add:
+    - -xc++
+    - -std=c++23
+  Remove:
+    - -mthumb
+    - -mcpu=*
+
+Completion:
+  AllScopes: false
+
+InlayHints:
+  Enabled: false
+  ParameterNames: false
