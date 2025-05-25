@@ -4387,50 +4387,6 @@ class image {
     }
 
     /**
-     * @private
-     */
-    template <typename shader_func>
-    constexpr auto fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, const shader_func &shader, int32_t parent_x,
-                             int32_t parent_y, int32_t parent_w, int32_t parent_h) -> void
-        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, int32_t, int32_t>
-    {
-        auto minmax_check = std::minmax({x, y, w, h});
-        if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
-            return;
-        }
-        if (w <= 0 || h <= 0) {
-            return;
-        }
-        if (check_not_in_bounds(x, y, w, h)) {
-            return;
-        }
-
-        int32_t x0 = std::max(x, int32_t{0});
-        int32_t y0 = std::max(y, int32_t{0});
-        int32_t x1 = std::min(x + w, static_cast<int32_t>(W));
-        int32_t y1 = std::min(y + h, static_cast<int32_t>(H));
-
-        const auto parent_wF = static_cast<float>(parent_w);
-        const auto parent_hF = static_cast<float>(parent_h);
-
-        for (int32_t py = y0; py < y1; py++) {
-            for (int32_t px = x0; px < x1; px++) {
-                float u = (static_cast<float>(px) - static_cast<float>(parent_x)) / parent_wF;
-                float v = (static_cast<float>(py) - static_cast<float>(parent_y)) / parent_hF;
-
-                u = std::clamp(u, 0.0f, 1.0f);
-                v = std::clamp(v, 0.0f, 1.0f);
-
-                auto rgba = shader(u, v, px, py);
-                for (auto &p : rgba) {
-                    p = std::clamp(p, 0.0f, 1.0f);
-                }
-                compose(px, py, rgba[3], rgba[0], rgba[1], rgba[2]);
-            }
-        }
-    }
-
-    /**
      * \brief Draw a stroked rectangle with the specified color and stroke width. Example:
      *
      * \code{.cpp}
@@ -4851,9 +4807,9 @@ class image {
 
         circle_int_shader(x + cr, y + cr, cr, dx, dy, shader, x, y, w, h);
 
-        fill_rect(x, y + cr, cr, dy, shader, x, y, w, h);
-        fill_rect(x + w - cr, y + cr, cr, dy, shader, x, y, w, h);
-        fill_rect(x + cr, y, dx, h, shader, x, y, w, h);
+        fill_rect_int(x, y + cr, cr, dy, shader, x, y, w, h);
+        fill_rect_int(x + w - cr, y + cr, cr, dy, shader, x, y, w, h);
+        fill_rect_int(x + cr, y, dx, h, shader, x, y, w, h);
     }
 
     /**
@@ -5717,6 +5673,50 @@ class image {
         const int32_t y0r2 = std::clamp(y0 + r * int32_t{2}, int32_t{0}, static_cast<int32_t>(H) - int32_t{1});
 
         return bounds{x0, y0, x0r, x0r2, y0r, y0r2};
+    }
+
+    /**
+     * @private
+     */
+    template <typename shader_func>
+    constexpr auto fill_rect_int(int32_t x, int32_t y, int32_t w, int32_t h, const shader_func &shader, int32_t parent_x,
+                             int32_t parent_y, int32_t parent_w, int32_t parent_h) -> void
+        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, int32_t, int32_t>
+    {
+        auto minmax_check = std::minmax({x, y, w, h});
+        if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
+            return;
+        }
+        if (w <= 0 || h <= 0) {
+            return;
+        }
+        if (check_not_in_bounds(x, y, w, h)) {
+            return;
+        }
+
+        int32_t x0 = std::max(x, int32_t{0});
+        int32_t y0 = std::max(y, int32_t{0});
+        int32_t x1 = std::min(x + w, static_cast<int32_t>(W));
+        int32_t y1 = std::min(y + h, static_cast<int32_t>(H));
+
+        const auto parent_wF = static_cast<float>(parent_w);
+        const auto parent_hF = static_cast<float>(parent_h);
+
+        for (int32_t py = y0; py < y1; py++) {
+            for (int32_t px = x0; px < x1; px++) {
+                float u = (static_cast<float>(px) - static_cast<float>(parent_x)) / parent_wF;
+                float v = (static_cast<float>(py) - static_cast<float>(parent_y)) / parent_hF;
+
+                u = std::clamp(u, 0.0f, 1.0f);
+                v = std::clamp(v, 0.0f, 1.0f);
+
+                auto rgba = shader(u, v, px, py);
+                for (auto &p : rgba) {
+                    p = std::clamp(p, 0.0f, 1.0f);
+                }
+                compose(px, py, rgba[3], rgba[0], rgba[1], rgba[2]);
+            }
+        }
     }
 
     /**
