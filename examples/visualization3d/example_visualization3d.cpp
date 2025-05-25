@@ -295,7 +295,7 @@ int main() {
     drawLabels(img);
     
     // Output
-    img.sixel_to_cout<2>();
+    img.sixel_to_cout<1>();
     
     return 0;
 }
