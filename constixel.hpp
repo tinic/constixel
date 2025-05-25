@@ -4357,33 +4357,7 @@ class image {
     constexpr auto fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, const shader_func &shader) -> void
         requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, int32_t, int32_t>
     {
-        auto minmax_check = std::minmax({x, y, w, h});
-        if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
-            return;
-        }
-        if (w <= 0 || h <= 0) {
-            return;
-        }
-        if (check_not_in_bounds(x, y, w, h)) {
-            return;
-        }
-
-        int32_t x0 = std::max(x, int32_t{0});
-        int32_t y0 = std::max(y, int32_t{0});
-        int32_t x1 = std::min(x + w, static_cast<int32_t>(W));
-        int32_t y1 = std::min(y + h, static_cast<int32_t>(H));
-
-        for (int32_t py = y0; py < y1; py++) {
-            for (int32_t px = x0; px < x1; px++) {
-                float u = static_cast<float>(px - x) / static_cast<float>(w);
-                float v = static_cast<float>(py - y) / static_cast<float>(h);
-                auto rgba = shader(u, v, px, py);
-                for (auto &p : rgba) {
-                    p = std::clamp(p, 0.0f, 1.0f);
-                }
-                compose(px, py, rgba[3], rgba[0], rgba[1], rgba[2]);
-            }
-        }
+        fill_rect_int(x, y, w, h, shader, x, y, w, h);
     }
 
     /**
