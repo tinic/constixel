@@ -192,11 +192,11 @@ constexpr void&#160;</td><td class="memItemRight" valign="bottom"><b>clear</b> (
 <tr class="memitem:a8e11fd05c71f1d708fc7c9694da42cb4" id="r_a8e11fd05c71f1d708fc7c9694da42cb4"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8e11fd05c71f1d708fc7c9694da42cb4">fill_rect</a> (const struct <a class="el" href="structconstixel_1_1draw__rect.html">draw_rect</a> &amp;d)</td></tr>
 <tr class="memdesc:a8e11fd05c71f1d708fc7c9694da42cb4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill a rectangle with the specified color. Example:  <br /></td></tr>
 <tr class="separator:a8e11fd05c71f1d708fc7c9694da42cb4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad862dc95f4b8f8f12f87485153ee5a3a" id="r_ad862dc95f4b8f8f12f87485153ee5a3a"><td class="memTemplParams" colspan="2">template&lt;typename shader_func&gt; <br />
-requires std::is_invocable_r_v&lt;std::array&lt;float, 4&gt;, shader_func, float, float, float, float&gt;</td></tr>
-<tr class="memitem:ad862dc95f4b8f8f12f87485153ee5a3a"><td class="memTemplItemLeft" align="right" valign="top">constexpr auto&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#ad862dc95f4b8f8f12f87485153ee5a3a">fill_rect</a> (int32_t x, int32_t y, int32_t w, int32_t h, const shader_func &amp;shader) -&gt; void</td></tr>
-<tr class="memdesc:ad862dc95f4b8f8f12f87485153ee5a3a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill a rectangle with a shader function that generates colors per pixel.  <br /></td></tr>
-<tr class="separator:ad862dc95f4b8f8f12f87485153ee5a3a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8bdfd85b872f8751a759659d4eff25a8" id="r_a8bdfd85b872f8751a759659d4eff25a8"><td class="memTemplParams" colspan="2">template&lt;typename shader_func&gt; <br />
+requires std::is_invocable_r_v&lt;std::array&lt;float, 4&gt;, shader_func, float, float, int32_t, int32_t&gt;</td></tr>
+<tr class="memitem:a8bdfd85b872f8751a759659d4eff25a8"><td class="memTemplItemLeft" align="right" valign="top">constexpr auto&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a8bdfd85b872f8751a759659d4eff25a8">fill_rect</a> (int32_t x, int32_t y, int32_t w, int32_t h, const shader_func &amp;shader) -&gt; void</td></tr>
+<tr class="memdesc:a8bdfd85b872f8751a759659d4eff25a8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill a rectangle with a shader function that generates colors per pixel.  <br /></td></tr>
+<tr class="separator:a8bdfd85b872f8751a759659d4eff25a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af693d6d18d59a5021009b7cb8f2c2df2" id="r_af693d6d18d59a5021009b7cb8f2c2df2"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af693d6d18d59a5021009b7cb8f2c2df2">stroke_rect</a> (int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col, int32_t stroke_width=1)</td></tr>
 <tr class="memdesc:af693d6d18d59a5021009b7cb8f2c2df2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw a stroked rectangle with the specified color and stroke width. Example:  <br /></td></tr>
 <tr class="separator:af693d6d18d59a5021009b7cb8f2c2df2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -227,11 +227,11 @@ requires std::is_invocable_r_v&lt;std::array&lt;float, 4&gt;, shader_func, float
 <tr class="memitem:a704567ae39b38f2a151e72bf15446aaa" id="r_a704567ae39b38f2a151e72bf15446aaa"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a704567ae39b38f2a151e72bf15446aaa">fill_circle_aa</a> (const struct <a class="el" href="structconstixel_1_1draw__circle.html">draw_circle</a> &amp;d)</td></tr>
 <tr class="memdesc:a704567ae39b38f2a151e72bf15446aaa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill a circle using antialiasing with the specified radius and color. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported. Example:  <br /></td></tr>
 <tr class="separator:a704567ae39b38f2a151e72bf15446aaa"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a21689ce775850b39e98f6dcaf400a051" id="r_a21689ce775850b39e98f6dcaf400a051"><td class="memTemplParams" colspan="2">template&lt;typename shader_func&gt; <br />
-requires std::is_invocable_r_v&lt;std::array&lt;float, 4&gt;, shader_func, float, float, float, float&gt;</td></tr>
-<tr class="memitem:a21689ce775850b39e98f6dcaf400a051"><td class="memTemplItemLeft" align="right" valign="top">constexpr auto&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a21689ce775850b39e98f6dcaf400a051">fill_circle_aa</a> (int32_t cx, int32_t cy, int32_t radius, const shader_func &amp;shader) -&gt; void</td></tr>
-<tr class="memdesc:a21689ce775850b39e98f6dcaf400a051"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill a circle using antialiasing with a shader function that generates colors per pixel.  <br /></td></tr>
-<tr class="separator:a21689ce775850b39e98f6dcaf400a051"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4768718b467fd140bea5dd9cba3a9bde" id="r_a4768718b467fd140bea5dd9cba3a9bde"><td class="memTemplParams" colspan="2">template&lt;typename shader_func&gt; <br />
+requires std::is_invocable_r_v&lt;std::array&lt;float, 4&gt;, shader_func, float, float, int32_t, int32_t&gt;</td></tr>
+<tr class="memitem:a4768718b467fd140bea5dd9cba3a9bde"><td class="memTemplItemLeft" align="right" valign="top">constexpr auto&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a4768718b467fd140bea5dd9cba3a9bde">fill_circle_aa</a> (int32_t cx, int32_t cy, int32_t radius, const shader_func &amp;shader) -&gt; void</td></tr>
+<tr class="memdesc:a4768718b467fd140bea5dd9cba3a9bde"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill a circle using antialiasing with a shader function that generates colors per pixel.  <br /></td></tr>
+<tr class="separator:a4768718b467fd140bea5dd9cba3a9bde"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab4278b16aff84e29e63be021734e689a" id="r_ab4278b16aff84e29e63be021734e689a"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab4278b16aff84e29e63be021734e689a">stroke_round_rect</a> (int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col, int32_t stroke_width=1)</td></tr>
 <tr class="memdesc:ab4278b16aff84e29e63be021734e689a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stroke a rounded rectangle with the specified color. Example:  <br /></td></tr>
 <tr class="separator:ab4278b16aff84e29e63be021734e689a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -250,11 +250,11 @@ requires std::is_invocable_r_v&lt;std::array&lt;float, 4&gt;, shader_func, float
 <tr class="memitem:adbb2f2c51431c5cb701544cf650bd222" id="r_adbb2f2c51431c5cb701544cf650bd222"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adbb2f2c51431c5cb701544cf650bd222">fill_round_rect_aa</a> (const struct <a class="el" href="structconstixel_1_1draw__round__rect.html">draw_round_rect</a> &amp;d)</td></tr>
 <tr class="memdesc:adbb2f2c51431c5cb701544cf650bd222"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill a rounded rectangle using antialiasing with the specified color. Only <a class="el" href="classconstixel_1_1format__8bit.html" title="8-bit format, 256 colors total. Use as template parameter for image. Example:">format_8bit</a> targets are supported.  <br /></td></tr>
 <tr class="separator:adbb2f2c51431c5cb701544cf650bd222"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab488d77ef6c7ca780fd3391130e47cfa" id="r_ab488d77ef6c7ca780fd3391130e47cfa"><td class="memTemplParams" colspan="2">template&lt;typename shader_func&gt; <br />
-requires std::is_invocable_r_v&lt;std::array&lt;float, 4&gt;, shader_func, float, float, float, float&gt;</td></tr>
-<tr class="memitem:ab488d77ef6c7ca780fd3391130e47cfa"><td class="memTemplItemLeft" align="right" valign="top">constexpr auto&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#ab488d77ef6c7ca780fd3391130e47cfa">fill_round_rect_aa</a> (int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, const shader_func &amp;shader) -&gt; void</td></tr>
-<tr class="memdesc:ab488d77ef6c7ca780fd3391130e47cfa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill a rounded rectangle using antialiasing with a shader function that generates colors per pixel.  <br /></td></tr>
-<tr class="separator:ab488d77ef6c7ca780fd3391130e47cfa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abf1f475b57ae52a6d8810748f459bef2" id="r_abf1f475b57ae52a6d8810748f459bef2"><td class="memTemplParams" colspan="2">template&lt;typename shader_func&gt; <br />
+requires std::is_invocable_r_v&lt;std::array&lt;float, 4&gt;, shader_func, float, float, int32_t, int32_t&gt;</td></tr>
+<tr class="memitem:abf1f475b57ae52a6d8810748f459bef2"><td class="memTemplItemLeft" align="right" valign="top">constexpr auto&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#abf1f475b57ae52a6d8810748f459bef2">fill_round_rect_aa</a> (int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, const shader_func &amp;shader) -&gt; void</td></tr>
+<tr class="memdesc:abf1f475b57ae52a6d8810748f459bef2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill a rounded rectangle using antialiasing with a shader function that generates colors per pixel.  <br /></td></tr>
+<tr class="separator:abf1f475b57ae52a6d8810748f459bef2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aeb6ad4928abcd3a15b2c6f1ba3a1df8e" id="r_aeb6ad4928abcd3a15b2c6f1ba3a1df8e"><td class="memItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aeb6ad4928abcd3a15b2c6f1ba3a1df8e">stroke_round_rect_aa</a> (int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col, int32_t stroke_width=1)</td></tr>
 <tr class="memdesc:aeb6ad4928abcd3a15b2c6f1ba3a1df8e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stroke a rounded rectangle using antialiasing with the specified color. Example:  <br /></td></tr>
 <tr class="separator:aeb6ad4928abcd3a15b2c6f1ba3a1df8e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1928,8 +1928,8 @@ template&lt;template&lt; size_t, size_t, bool, bool &gt; class T, size_t W, size
 
 </div>
 </div>
-<a id="a21689ce775850b39e98f6dcaf400a051" name="a21689ce775850b39e98f6dcaf400a051"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a21689ce775850b39e98f6dcaf400a051">&#9670;&#160;</a></span>fill_circle_aa() <span class="overload">[2/3]</span></h2>
+<a id="a4768718b467fd140bea5dd9cba3a9bde" name="a4768718b467fd140bea5dd9cba3a9bde"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4768718b467fd140bea5dd9cba3a9bde">&#9670;&#160;</a></span>fill_circle_aa() <span class="overload">[2/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1937,7 +1937,7 @@ template&lt;template&lt; size_t, size_t, bool, bool &gt; class T, size_t W, size
 template&lt;template&lt; size_t, size_t, bool, bool &gt; class T, size_t W, size_t H, bool GRAYSCALE = false, bool USE_SPAN = false&gt; </div>
 <div class="memtemplate">
 template&lt;typename shader_func&gt; <br />
-requires std::is_invocable_r_v&lt;std::array&lt;float, 4&gt;, shader_func, float, float, float, float&gt;</div>
+requires std::is_invocable_r_v&lt;std::array&lt;float, 4&gt;, shader_func, float, float, int32_t, int32_t&gt;</div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -2079,8 +2079,8 @@ template&lt;template&lt; size_t, size_t, bool, bool &gt; class T, size_t W, size
 
 </div>
 </div>
-<a id="ad862dc95f4b8f8f12f87485153ee5a3a" name="ad862dc95f4b8f8f12f87485153ee5a3a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad862dc95f4b8f8f12f87485153ee5a3a">&#9670;&#160;</a></span>fill_rect() <span class="overload">[2/3]</span></h2>
+<a id="a8bdfd85b872f8751a759659d4eff25a8" name="a8bdfd85b872f8751a759659d4eff25a8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8bdfd85b872f8751a759659d4eff25a8">&#9670;&#160;</a></span>fill_rect() <span class="overload">[2/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2088,7 +2088,7 @@ template&lt;template&lt; size_t, size_t, bool, bool &gt; class T, size_t W, size
 template&lt;template&lt; size_t, size_t, bool, bool &gt; class T, size_t W, size_t H, bool GRAYSCALE = false, bool USE_SPAN = false&gt; </div>
 <div class="memtemplate">
 template&lt;typename shader_func&gt; <br />
-requires std::is_invocable_r_v&lt;std::array&lt;float, 4&gt;, shader_func, float, float, float, float&gt;</div>
+requires std::is_invocable_r_v&lt;std::array&lt;float, 4&gt;, shader_func, float, float, int32_t, int32_t&gt;</div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -2341,8 +2341,8 @@ template&lt;template&lt; size_t, size_t, bool, bool &gt; class T, size_t W, size
 
 </div>
 </div>
-<a id="ab488d77ef6c7ca780fd3391130e47cfa" name="ab488d77ef6c7ca780fd3391130e47cfa"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab488d77ef6c7ca780fd3391130e47cfa">&#9670;&#160;</a></span>fill_round_rect_aa() <span class="overload">[2/3]</span></h2>
+<a id="abf1f475b57ae52a6d8810748f459bef2" name="abf1f475b57ae52a6d8810748f459bef2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abf1f475b57ae52a6d8810748f459bef2">&#9670;&#160;</a></span>fill_round_rect_aa() <span class="overload">[2/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2350,7 +2350,7 @@ template&lt;template&lt; size_t, size_t, bool, bool &gt; class T, size_t W, size
 template&lt;template&lt; size_t, size_t, bool, bool &gt; class T, size_t W, size_t H, bool GRAYSCALE = false, bool USE_SPAN = false&gt; </div>
 <div class="memtemplate">
 template&lt;typename shader_func&gt; <br />
-requires std::is_invocable_r_v&lt;std::array&lt;float, 4&gt;, shader_func, float, float, float, float&gt;</div>
+requires std::is_invocable_r_v&lt;std::array&lt;float, 4&gt;, shader_func, float, float, int32_t, int32_t&gt;</div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">

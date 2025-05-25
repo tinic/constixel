@@ -118,11 +118,11 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ade380cc1cb7c0ed2e5ba38a98efff731" id="r_ade380cc1cb7c0ed2e5ba38a98efff731"><td class="memItemLeft" align="right" valign="top">constexpr <a class="el" href="classconstixel_1_1shapes_1_1round__rect__aa.html">round_rect_aa</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ade380cc1cb7c0ed2e5ba38a98efff731">fill</a> (uint8_t col)</td></tr>
 <tr class="memdesc:ade380cc1cb7c0ed2e5ba38a98efff731"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill the rounded rectangle with a solid color.  <br /></td></tr>
 <tr class="separator:ade380cc1cb7c0ed2e5ba38a98efff731"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1784df254f184a4b071b696c99730b0a" id="r_a1784df254f184a4b071b696c99730b0a"><td class="memTemplParams" colspan="2">template&lt;typename shader_func&gt; <br />
-requires std::is_invocable_r_v&lt;std::array&lt;float, 4&gt;, shader_func, float, float, float, float&gt;</td></tr>
-<tr class="memitem:a1784df254f184a4b071b696c99730b0a"><td class="memTemplItemLeft" align="right" valign="top">constexpr auto&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a1784df254f184a4b071b696c99730b0a">fill_shader</a> (const shader_func &amp;shader) -&gt; <a class="el" href="classconstixel_1_1shapes_1_1round__rect__aa.html">round_rect_aa</a> &amp;</td></tr>
-<tr class="memdesc:a1784df254f184a4b071b696c99730b0a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill the rounded rectangle using a shader function.  <br /></td></tr>
-<tr class="separator:a1784df254f184a4b071b696c99730b0a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a74e75d049bd012056dc1b00efe6bc4e9" id="r_a74e75d049bd012056dc1b00efe6bc4e9"><td class="memTemplParams" colspan="2">template&lt;typename shader_func&gt; <br />
+requires std::is_invocable_r_v&lt;std::array&lt;float, 4&gt;, shader_func, float, float, int32_t, int32_t&gt;</td></tr>
+<tr class="memitem:a74e75d049bd012056dc1b00efe6bc4e9"><td class="memTemplItemLeft" align="right" valign="top">constexpr auto&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a74e75d049bd012056dc1b00efe6bc4e9">fill_shader</a> (const shader_func &amp;shader) -&gt; <a class="el" href="classconstixel_1_1shapes_1_1round__rect__aa.html">round_rect_aa</a> &amp;</td></tr>
+<tr class="memdesc:a74e75d049bd012056dc1b00efe6bc4e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill the rounded rectangle using a shader function.  <br /></td></tr>
+<tr class="separator:a74e75d049bd012056dc1b00efe6bc4e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab8694fc5e55e31c9fd8b6d976ec5ce79" id="r_ab8694fc5e55e31c9fd8b6d976ec5ce79"><td class="memItemLeft" align="right" valign="top">constexpr <a class="el" href="classconstixel_1_1shapes_1_1round__rect__aa.html">round_rect_aa</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab8694fc5e55e31c9fd8b6d976ec5ce79">stroke</a> (uint8_t col, int32_t stroke_width=1)</td></tr>
 <tr class="memdesc:ab8694fc5e55e31c9fd8b6d976ec5ce79"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw the rounded rectangle outline.  <br /></td></tr>
 <tr class="separator:ab8694fc5e55e31c9fd8b6d976ec5ce79"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -233,8 +233,8 @@ template&lt;template&lt; size_t, size_t, bool, bool &gt; class T, size_t W, size
 
 </div>
 </div>
-<a id="a1784df254f184a4b071b696c99730b0a" name="a1784df254f184a4b071b696c99730b0a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1784df254f184a4b071b696c99730b0a">&#9670;&#160;</a></span>fill_shader()</h2>
+<a id="a74e75d049bd012056dc1b00efe6bc4e9" name="a74e75d049bd012056dc1b00efe6bc4e9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a74e75d049bd012056dc1b00efe6bc4e9">&#9670;&#160;</a></span>fill_shader()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -242,7 +242,7 @@ template&lt;template&lt; size_t, size_t, bool, bool &gt; class T, size_t W, size
 template&lt;template&lt; size_t, size_t, bool, bool &gt; class T, size_t W, size_t H, bool GRAYSCALE, bool USE_SPAN&gt; </div>
 <div class="memtemplate">
 template&lt;typename shader_func&gt; <br />
-requires std::is_invocable_r_v&lt;std::array&lt;float, 4&gt;, shader_func, float, float, float, float&gt;</div>
+requires std::is_invocable_r_v&lt;std::array&lt;float, 4&gt;, shader_func, float, float, int32_t, int32_t&gt;</div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
