@@ -87,7 +87,7 @@ void drawProgressBar(UI &img, int x, int y, int w, int h, float pct, uint8_t bgC
     if (label) {
         char buf[32];
         snprintf(buf, sizeof(buf), "%s: %3.0f%%", label, pct * 100.0f);
-        img.draw_string_aa<smallfont>(x + 5, y + h/2 + 5 - smallfont::ascent, buf, Colors::text_primary);
+        img.draw_string_aa<smallfont, true>(x + 5, y + h/2 + 5 - smallfont::ascent, buf, Colors::text_primary);
     }
 }
 
@@ -119,10 +119,10 @@ void drawGauge(UI &img, int cx, int cy, int radius, float value, float min_val, 
     img.fill_circle_aa(cx, cy, 8, Colors::panel_border);
     img.stroke_circle_aa(cx, cy, 8, Colors::text_primary, 1);
     
-    img.draw_string_aa<smallfont>(cx - 30, cy + radius + 20 - smallfont::ascent, label, Colors::text_primary);
+    img.draw_string_aa<smallfont, true>(cx - 30, cy + radius + 20 - smallfont::ascent, label, Colors::text_primary);
     char val_str[32];
     snprintf(val_str, sizeof(val_str), "%.1f %s", value, unit);
-    img.draw_string_aa<smallfont>(cx - 25, cy + radius + 35 - smallfont::ascent, val_str, Colors::accent_cyan);
+    img.draw_string_aa<smallfont, true>(cx - 25, cy + radius + 35 - smallfont::ascent, val_str, Colors::accent_cyan);
 }
 
 void drawEquipmentPanel(UI &img, int x, int y, int w, int h, const char* name, 
@@ -130,13 +130,13 @@ void drawEquipmentPanel(UI &img, int x, int y, int w, int h, const char* name,
     img.fill_round_rect_aa(x, y, w, h, 12, Colors::panel_bg);
     img.stroke_round_rect_aa(x, y, w, h, 12, Colors::panel_border, 1);
     
-    img.draw_string_aa<myfont>(x + 10, y + 25 - myfont::ascent, name, Colors::text_primary);
+    img.draw_string_aa<myfont, true>(x + 10, y + 25 - myfont::ascent, name, Colors::text_primary);
     
     drawStatusLED(img, x + w - 25, y + 20, 8, online);
     
     char status_text[16];
     strcpy(status_text, online ? "ONLINE" : "OFFLINE");
-    img.draw_string_aa<smallfont>(x + w - 80, y + 40 - smallfont::ascent, status_text, online ? Colors::success_green : Colors::danger_red);
+    img.draw_string_aa<smallfont, true>(x + w - 80, y + 40 - smallfont::ascent, status_text, online ? Colors::success_green : Colors::danger_red);
     
     drawProgressBar(img, x + 10, y + 50, w - 20, 15, temp / 100.0f, Colors::background, Colors::accent_blue, "TEMP");
     drawProgressBar(img, x + 10, y + 75, w - 20, 15, pressure / 10.0f, Colors::background, Colors::accent_green, "PRES");
@@ -152,9 +152,9 @@ void drawAlarmPanel(UI &img, int x, int y, int w, int h) {
     
     if (alarm_active) {
         drawStatusLED(img, x + 20, y + h/2, 8, true, Colors::danger_red);
-        img.draw_string_aa<myfont>(x + 40, y + h/2 - myfont::ascent, "CRITICAL: Pump 2 Overpressure", Colors::text_primary);
+        img.draw_string_aa<myfont, true>(x + 40, y + h/2 - myfont::ascent, "CRITICAL: Pump 2 Overpressure", Colors::text_primary);
     } else {
-        img.draw_string_aa<myfont>(x + 20, y + h/2 - myfont::ascent, "All Systems Normal", Colors::success_green);
+        img.draw_string_aa<myfont, true>(x + 20, y + h/2 - myfont::ascent, "All Systems Normal", Colors::success_green);
     }
 }
 
@@ -177,10 +177,10 @@ int main() {
     img.fill_rect(0, 0, 1024, 768, Colors::background);
     
     img.fill_round_rect_aa(0, 0, 1024, 60, 0, Colors::panel_bg);
-    img.draw_string_aa<myfont>(20, 35 - myfont::ascent, "ACME Industries - Control Center", Colors::text_primary);
+    img.draw_string_aa<myfont, true>(20, 35 - myfont::ascent, "ACME Industries - Control Center", Colors::text_primary);
     
     auto time_str = getCurrentTime();
-    img.draw_string_aa<myfont>(800, 35 - myfont::ascent, time_str.c_str(), Colors::text_secondary);
+    img.draw_string_aa<myfont, true>(800, 35 - myfont::ascent, time_str.c_str(), Colors::text_secondary);
     
     drawEquipmentPanel(img, 20, 80, 240, 130, "Pump Station 1", true, 72.5f, 8.2f, 35.7f);
     drawEquipmentPanel(img, 280, 80, 240, 130, "Pump Station 2", false, 45.3f, 12.8f, 0.0f);
@@ -196,7 +196,7 @@ int main() {
     int graph_x = 50, graph_y = 450, graph_w = 400, graph_h = 150;
     img.fill_round_rect_aa(graph_x, graph_y, graph_w, graph_h, 12, Colors::panel_bg);
     img.stroke_round_rect_aa(graph_x, graph_y, graph_w, graph_h, 12, Colors::panel_border, 1);
-    img.draw_string_aa<smallfont>(graph_x + 10, graph_y + 20 - smallfont::ascent, "System Performance (24h)", Colors::text_primary);
+    img.draw_string_aa<smallfont, true>(graph_x + 10, graph_y + 20 - smallfont::ascent, "System Performance (24h)", Colors::text_primary);
     
     for (int i = 0; i < graph_w - 20; i += 2) {
         float t = i / float(graph_w - 20);
@@ -218,7 +218,7 @@ int main() {
     int status_x = 470, status_y = 450, status_w = 300, status_h = 150;
     img.fill_round_rect_aa(status_x, status_y, status_w, status_h, 12, Colors::panel_bg);
     img.stroke_round_rect_aa(status_x, status_y, status_w, status_h, 12, Colors::panel_border, 1);
-    img.draw_string_aa<smallfont>(status_x + 10, status_y + 20 - smallfont::ascent, "System Status", Colors::text_primary);
+    img.draw_string_aa<smallfont, true>(status_x + 10, status_y + 20 - smallfont::ascent, "System Status", Colors::text_primary);
     
     const char* status_items[] = {
         "Primary Power: OK",
@@ -233,7 +233,7 @@ int main() {
     for (int i = 0; i < 5; i++) {
         int item_y = status_y + 40 + i * 20;
         drawStatusLED(img, status_x + 15, item_y, 5, status_ok[i]);
-        img.draw_string_aa<smallfont>(status_x + 30, item_y + 5 - smallfont::ascent, status_items[i], Colors::text_primary);
+        img.draw_string_aa<smallfont, true>(status_x + 30, item_y + 5 - smallfont::ascent, status_items[i], Colors::text_primary);
     }
     
     int btn_y = 620;
@@ -248,7 +248,7 @@ int main() {
         const char* btn_labels[] = {"START", "STOP", "EMERGENCY", "RESET"};
         uint8_t text_colors[] = {Colors::text_primary, Colors::text_primary, Colors::danger_red, Colors::text_primary};
         
-        img.draw_string_aa<smallfont>(btn_x + 20, btn_y + 25 - smallfont::ascent, btn_labels[i], text_colors[i]);
+        img.draw_string_aa<smallfont, true>(btn_x + 20, btn_y + 25 - smallfont::ascent, btn_labels[i], text_colors[i]);
     }
     
     drawAlarmPanel(img, 50, 680, 700, 40);
@@ -261,7 +261,7 @@ int main() {
         drawStatusLED(img, led_x, led_y, 6, state);
     }
     
-    img.sixel_to_cout<2>();
+    img.sixel_to_cout<1>();
     
     
     return 0;
