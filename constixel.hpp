@@ -5680,10 +5680,7 @@ class image {
             for (int32_t px = x0; px < x1; px++) {
                 float u = (static_cast<float>(px) - static_cast<float>(parent_x)) / parent_wF;
                 float v = (static_cast<float>(py) - static_cast<float>(parent_y)) / parent_hF;
-
-                u = std::clamp(u, 0.0f, 1.0f);
-                v = std::clamp(v, 0.0f, 1.0f);
-
+                
                 auto rgba = shader(u, v, px, py);
                 for (auto &p : rgba) {
                     p = std::clamp(p, 0.0f, 1.0f);
@@ -5906,8 +5903,6 @@ class image {
                     float u = (static_cast<float>(x + x_off) - static_cast<float>(actual_parent_x)) / parent_wF;
                     float v = (static_cast<float>(y + y_off) - static_cast<float>(actual_parent_y)) / parent_hF;
 
-                    u = std::clamp(u, 0.0f, 1.0f);
-                    v = std::clamp(v, 0.0f, 1.0f);
                     auto rgba = shader(u, v, x + x_off, y + y_off);
                     for (auto &p : rgba) {
                         p = std::clamp(p, 0.0f, 1.0f);
