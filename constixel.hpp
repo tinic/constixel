@@ -1190,8 +1190,8 @@ class format_1bit : public format {
 
     static constexpr void blit_RGBA(std::span<uint8_t, image_size> data, const rect<int32_t> &r, const uint8_t *ptr,
                                     int32_t stride) {
-        auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
-        auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
+        const auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
+        const auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
         for (size_t y = 0; y < r_h; y++) {
             for (size_t x = 0; x < r_w; x++) {
                 const uint32_t R = ptr[y * static_cast<size_t>(stride) + x * 4 + 0];
@@ -1205,8 +1205,8 @@ class format_1bit : public format {
 
     static constexpr void blit_RGBA_diffused(std::span<uint8_t, image_size> data, const rect<int32_t> &r,
                                              const uint8_t *ptr, int32_t stride) {
-        auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
-        auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
+        const auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
+        const auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
         for (size_t y = 0; y < r_h; y++) {
             int32_t err = 0;
             for (size_t x = 0; x < r_w; x++) {
@@ -1224,8 +1224,8 @@ class format_1bit : public format {
 
     static constexpr void blit_RGBA_diffused_linear(std::span<uint8_t, image_size> data, const rect<int32_t> &r,
                                                     const uint8_t *ptr, int32_t stride) {
-        auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
-        auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
+        const auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
+        const auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
         for (size_t y = 0; y < r_h; y++) {
             float err_r = 0;
             float err_g = 0;
@@ -1240,7 +1240,7 @@ class format_1bit : public format {
                 Rl = Rl + err_r;
                 Gl = Gl + err_g;
                 Bl = Bl + err_b;
-                uint8_t n = (Rl * 2 * +Gl * 3 + Bl * 1) > 3.0f ? 1 : 0;
+                const uint8_t n = (Rl * 2 * +Gl * 3 + Bl * 1) > 3.0f ? 1 : 0;
                 plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
                 const float c = 0.75;
                 err_r = std::clamp(Rl - ((n != uint8_t{0}) ? 1.0f : 0.0f), -c, c);
@@ -1339,18 +1339,18 @@ class format_2bit : public format {
     static constexpr void transpose2x8(std::array<uint8_t, 8> &data) {
         for (size_t i = 0; i < 4; i++) {
             for (size_t j = 0; j < 4; j++) {
-                auto shift = static_cast<uint32_t>(6U - j * 2U);
-                uint8_t pixel = (data[i] >> shift) & 0x03U;
-                auto ishift = static_cast<uint32_t>(6U - i * 2U);
+                const auto shift = static_cast<uint32_t>(6U - j * 2U);
+                const uint8_t pixel = (data[i] >> shift) & 0x03U;
+                const auto ishift = static_cast<uint32_t>(6U - i * 2U);
                 data[j] =
                     static_cast<uint8_t>((data[j] & ~(0x03U << ishift)) | (static_cast<uint32_t>(pixel) << ishift));
             }
         }
         for (size_t i = 0; i < 4; i++) {
             for (size_t j = 0; j < 4; j++) {
-                auto shift = static_cast<uint32_t>(6U - j * 2U);
-                uint8_t pixel = (data[i + 4] >> shift) & 0x03U;
-                auto ishift = static_cast<uint32_t>(6U - i * 2U);
+                const auto shift = static_cast<uint32_t>(6U - j * 2U);
+                const uint8_t pixel = (data[i + 4] >> shift) & 0x03U;
+                const auto ishift = static_cast<uint32_t>(6U - i * 2U);
                 data[j + 4] =
                     static_cast<uint8_t>((data[j + 4] & ~(0x03U << ishift)) | (static_cast<uint32_t>(pixel) << ishift));
             }
@@ -1361,14 +1361,14 @@ class format_2bit : public format {
     static constexpr void transpose(const uint8_t *src, uint8_t *dst) {
         for (size_t y = 0; y < H; y++) {
             for (size_t x = 0; x < W; x++) {
-                size_t src_byte = y * bytes_per_line + (x / 4);
-                size_t src_shift = (3 - (x % 4)) * 2;
-                uint8_t pixel = static_cast<uint8_t>((src[src_byte] >> src_shift) & 0x03);
+                const size_t src_byte = y * bytes_per_line + (x / 4);
+                const size_t src_shift = (3 - (x % 4)) * 2;
+                const auto pixel = static_cast<uint8_t>((src[src_byte] >> src_shift) & 0x03);
 
-                size_t dst_x = FLIP_H ? (H - 1 - y) : y;
-                size_t dst_y = FLIP_V ? (W - 1 - x) : x;
-                size_t dst_byte = dst_y * ((H + 3) / 4) + (dst_x / 4);
-                size_t dst_shift = (3 - (dst_x % 4)) * 2;
+                const size_t dst_x = FLIP_H ? (H - 1 - y) : y;
+                const size_t dst_y = FLIP_V ? (W - 1 - x) : x;
+                const size_t dst_byte = dst_y * ((H + 3) / 4) + (dst_x / 4);
+                const size_t dst_shift = (3 - (dst_x % 4)) * 2;
 
                 dst[dst_byte] &= ~(0x03 << dst_shift);
                 dst[dst_byte] |= pixel << dst_shift;
@@ -1454,8 +1454,8 @@ class format_2bit : public format {
 
     static constexpr void blit_RGBA(std::span<uint8_t, image_size> data, const rect<int32_t> &r, const uint8_t *ptr,
                                     int32_t stride) {
-        auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
-        auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
+        const auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
+        const auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
         for (size_t y = 0; y < r_h; y++) {
             for (size_t x = 0; x < r_w; x++) {
                 plot(data, (x + static_cast<uint32_t>(r.x)), (y + static_cast<uint32_t>(r.y)),
@@ -1468,8 +1468,8 @@ class format_2bit : public format {
 
     static constexpr void blit_RGBA_diffused(std::span<uint8_t, image_size> data, const rect<int32_t> &r,
                                              const uint8_t *ptr, int32_t stride) {
-        auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
-        auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
+        const auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
+        const auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
         for (size_t y = 0; y < r_h; y++) {
             int32_t err_r = 0;
             int32_t err_g = 0;
@@ -1481,7 +1481,7 @@ class format_2bit : public format {
                 R = R + err_r;
                 G = G + err_g;
                 B = B + err_b;
-                uint8_t n = quant.nearest(R, G, B);
+                const uint8_t n = quant.nearest(R, G, B);
                 plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
                 err_r = std::clamp(R - static_cast<int32_t>((quant.palette().at(n) >> 0) & 0xFF), int32_t{-255},
                                    int32_t{255});
@@ -1495,8 +1495,8 @@ class format_2bit : public format {
 
     static constexpr void blit_RGBA_diffused_linear(std::span<uint8_t, image_size> data, const rect<int32_t> &r,
                                                     const uint8_t *ptr, int32_t stride) {
-        auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
-        auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
+        const auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
+        const auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
         for (size_t y = 0; y < r_h; y++) {
             float err_r = 0;
             float err_g = 0;
@@ -1511,7 +1511,7 @@ class format_2bit : public format {
                 Rl = Rl + err_r;
                 Gl = Gl + err_g;
                 Bl = Bl + err_b;
-                uint8_t n = quant.nearest_linear(Rl, Gl, Bl);
+                const uint8_t n = quant.nearest_linear(Rl, Gl, Bl);
                 plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
                 err_r = std::clamp(Rl - quant.linear_palette().at(n * size_t{3} + size_t{0}), -1.0f, 1.0f);
                 err_g = std::clamp(Gl - quant.linear_palette().at(n * size_t{3} + size_t{1}), -1.0f, 1.0f);
@@ -1613,36 +1613,36 @@ class format_4bit : public format {
     static constexpr void transpose4x8(std::array<uint8_t, 8> &data) {
         for (size_t i = 0; i < 2; i++) {
             for (size_t j = 0; j < 2; j++) {
-                auto shift = static_cast<uint32_t>(4U - j * 4U);
-                uint8_t pixel = (data[i] >> shift) & 0x0FU;
-                auto ishift = static_cast<uint32_t>(4U - i * 4U);
+                const auto shift = static_cast<uint32_t>(4U - j * 4U);
+                const uint8_t pixel = (data[i] >> shift) & 0x0FU;
+                const auto ishift = static_cast<uint32_t>(4U - i * 4U);
                 data[j] =
                     static_cast<uint8_t>((data[j] & ~(0x0FU << ishift)) | (static_cast<uint32_t>(pixel) << ishift));
             }
         }
         for (size_t i = 0; i < 2; i++) {
             for (size_t j = 0; j < 2; j++) {
-                auto shift = static_cast<uint32_t>(4U - j * 4U);
-                uint8_t pixel = (data[i + 2] >> shift) & 0x0FU;
-                auto ishift = static_cast<uint32_t>(4U - i * 4U);
+                const auto shift = static_cast<uint32_t>(4U - j * 4U);
+                const uint8_t pixel = (data[i + 2] >> shift) & 0x0FU;
+                const auto ishift = static_cast<uint32_t>(4U - i * 4U);
                 data[j + 2] =
                     static_cast<uint8_t>((data[j + 2] & ~(0x0FU << ishift)) | (static_cast<uint32_t>(pixel) << ishift));
             }
         }
         for (size_t i = 0; i < 2; i++) {
             for (size_t j = 0; j < 2; j++) {
-                auto shift = static_cast<uint32_t>(4U - j * 4U);
-                uint8_t pixel = (data[i + 4] >> shift) & 0x0FU;
-                auto ishift = static_cast<uint32_t>(4U - i * 4U);
+                const auto shift = static_cast<uint32_t>(4U - j * 4U);
+                const uint8_t pixel = (data[i + 4] >> shift) & 0x0FU;
+                const auto ishift = static_cast<uint32_t>(4U - i * 4U);
                 data[j + 4] =
                     static_cast<uint8_t>((data[j + 4] & ~(0x0FU << ishift)) | (static_cast<uint32_t>(pixel) << ishift));
             }
         }
         for (size_t i = 0; i < 2; i++) {
             for (size_t j = 0; j < 2; j++) {
-                auto shift = static_cast<uint32_t>(4U - j * 4U);
-                uint8_t pixel = (data[i + 6] >> shift) & 0x0FU;
-                auto ishift = static_cast<uint32_t>(4U - i * 4U);
+                const auto shift = static_cast<uint32_t>(4U - j * 4U);
+                const uint8_t pixel = (data[i + 6] >> shift) & 0x0FU;
+                const auto ishift = static_cast<uint32_t>(4U - i * 4U);
                 data[j + 6] =
                     static_cast<uint8_t>((data[j + 6] & ~(0x0FU << ishift)) | (static_cast<uint32_t>(pixel) << ishift));
             }
@@ -1653,14 +1653,14 @@ class format_4bit : public format {
     static constexpr void transpose(const uint8_t *src, uint8_t *dst) {
         for (size_t y = 0; y < H; y++) {
             for (size_t x = 0; x < W; x++) {
-                size_t src_byte = y * bytes_per_line + (x / 2);
-                size_t src_shift = (1 - (x % 2)) * 4;
-                uint8_t pixel = static_cast<uint8_t>((src[src_byte] >> src_shift) & 0x0F);
+                const size_t src_byte = y * bytes_per_line + (x / 2);
+                const size_t src_shift = (1 - (x % 2)) * 4;
+                const auto pixel = static_cast<uint8_t>((src[src_byte] >> src_shift) & 0x0F);
 
-                size_t dst_x = FLIP_H ? (H - 1 - y) : y;
-                size_t dst_y = FLIP_V ? (W - 1 - x) : x;
-                size_t dst_byte = dst_y * ((H + 1) / 2) + (dst_x / 2);
-                size_t dst_shift = (1 - (dst_x % 2)) * 4;
+                const size_t dst_x = FLIP_H ? (H - 1 - y) : y;
+                const size_t dst_y = FLIP_V ? (W - 1 - x) : x;
+                const size_t dst_byte = dst_y * ((H + 1) / 2) + (dst_x / 2);
+                const size_t dst_shift = (1 - (dst_x % 2)) * 4;
 
                 dst[dst_byte] &= ~(0x0F << dst_shift);
                 dst[dst_byte] |= pixel << dst_shift;
@@ -1756,8 +1756,8 @@ class format_4bit : public format {
 
     static constexpr void blit_RGBA(std::span<uint8_t, image_size> data, const rect<int32_t> &r, const uint8_t *ptr,
                                     int32_t stride) {
-        auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
-        auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
+        const auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
+        const auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
         for (size_t y = 0; y < r_h; y++) {
             for (size_t x = 0; x < r_w; x++) {
                 plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)),
@@ -1770,8 +1770,8 @@ class format_4bit : public format {
 
     static constexpr void blit_RGBA_diffused(std::span<uint8_t, image_size> data, const rect<int32_t> &r,
                                              const uint8_t *ptr, int32_t stride) {
-        auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
-        auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
+        const auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
+        const auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
         for (size_t y = 0; y < r_h; y++) {
             int32_t err_r = 0;
             int32_t err_g = 0;
@@ -1783,7 +1783,7 @@ class format_4bit : public format {
                 R = R + err_r;
                 G = G + err_g;
                 B = B + err_b;
-                uint8_t n = quant.nearest(R, G, B);
+                const uint8_t n = quant.nearest(R, G, B);
                 plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
                 err_r = std::clamp(R - static_cast<int32_t>((quant.palette().at(n) >> 0) & 0xFF), int32_t{-255},
                                    int32_t{255});
@@ -1797,8 +1797,8 @@ class format_4bit : public format {
 
     static constexpr void blit_RGBA_diffused_linear(std::span<uint8_t, image_size> data, const rect<int32_t> &r,
                                                     const uint8_t *ptr, int32_t stride) {
-        auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
-        auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
+        const auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
+        const auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
         for (size_t y = 0; y < r_h; y++) {
             float err_r = 0;
             float err_g = 0;
@@ -1813,7 +1813,7 @@ class format_4bit : public format {
                 Rl = Rl + err_r;
                 Gl = Gl + err_g;
                 Bl = Bl + err_b;
-                uint8_t n = quant.nearest_linear(Rl, Gl, Bl);
+                const uint8_t n = quant.nearest_linear(Rl, Gl, Bl);
                 plot(data, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
                 err_r = std::clamp(Rl - quant.linear_palette().at(n * size_t{3} + size_t{0}), -1.0f, 1.0f);
                 err_g = std::clamp(Gl - quant.linear_palette().at(n * size_t{3} + size_t{1}), -1.0f, 1.0f);
@@ -2063,8 +2063,8 @@ class format_8bit : public format {
 
     static constexpr void blit_RGBA(std::span<uint8_t, image_size> data, const rect<int32_t> &r, const uint8_t *ptr,
                                     int32_t stride) {
-        auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
-        auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
+        const auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
+        const auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
         for (size_t y = 0; y < r_h; y++) {
             for (size_t x = 0; x < r_w; x++) {
                 data.data()[(y + static_cast<size_t>(r.y)) * bytes_per_line + (x + static_cast<size_t>(r.x))] =
@@ -2077,8 +2077,8 @@ class format_8bit : public format {
 
     static constexpr void blit_RGBA_diffused(std::span<uint8_t, image_size> data, const rect<int32_t> &r,
                                              const uint8_t *ptr, int32_t stride) {
-        auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
-        auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
+        const auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
+        const auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
         for (size_t y = 0; y < r_h; y++) {
             int32_t err_r = 0;
             int32_t err_g = 0;
@@ -2090,7 +2090,7 @@ class format_8bit : public format {
                 R = R + err_r;
                 G = G + err_g;
                 B = B + err_b;
-                uint8_t n = quant.nearest(R, G, B);
+                const uint8_t n = quant.nearest(R, G, B);
                 data.data()[(y + static_cast<size_t>(r.y)) * bytes_per_line + (x + static_cast<size_t>(r.x))] = n;
                 err_r = std::clamp(R - static_cast<int32_t>((quant.palette().at(n) >> 0) & 0xFF), int32_t{-255},
                                    int32_t{255});
@@ -2104,8 +2104,8 @@ class format_8bit : public format {
 
     static constexpr void blit_RGBA_diffused_linear(std::span<uint8_t, image_size> data, const rect<int32_t> &r,
                                                     const uint8_t *ptr, int32_t stride) {
-        auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
-        auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
+        const auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
+        const auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
         for (size_t y = 0; y < r_h; y++) {
             float err_r = 0;
             float err_g = 0;
@@ -2120,7 +2120,7 @@ class format_8bit : public format {
                 Rl = Rl + err_r;
                 Gl = Gl + err_g;
                 Bl = Bl + err_b;
-                uint8_t n = quant.nearest_linear(Rl, Gl, Bl);
+                const uint8_t n = quant.nearest_linear(Rl, Gl, Bl);
                 data.data()[(y + static_cast<size_t>(r.y)) * bytes_per_line + (x + static_cast<size_t>(r.x))] = n;
                 err_r = std::clamp(Rl - quant.linear_palette().at(n * size_t{3} + size_t{0}), -1.0f, 1.0f);
                 err_g = std::clamp(Gl - quant.linear_palette().at(n * size_t{3} + size_t{1}), -1.0f, 1.0f);
