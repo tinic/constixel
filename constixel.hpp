@@ -2506,7 +2506,7 @@ class format_32bit : public format {
             out[2] = static_cast<uint8_t>(final[2] * 255.0f);
             out[3] = static_cast<uint8_t>(outa * 255.0f);
 
-            vst1_lane_u32(reinterpret_cast<uint32_t *>(&data[off]), vreinterpret_u32_u8(out), 0);
+            vst1_lane_u32(&data[off], vreinterpret_u32_u8(out), 0);
             return;
         }
 #endif  // #if defined(__ARM_NEON)
@@ -3093,7 +3093,8 @@ class circle_aa {
      * @param cy_ Y coordinate of center
      * @param r_ Radius of circle
      */
-    constexpr circle_aa(image_type &image, int32_t cx_, int32_t cy_, int32_t r_) : img(&image), cx(cx_), cy(cy_), r(r_) {
+    constexpr circle_aa(image_type &image, int32_t cx_, int32_t cy_, int32_t r_)
+        : img(&image), cx(cx_), cy(cy_), r(r_) {
     }
 
     /**
@@ -3377,7 +3378,7 @@ class text_mono {
     constexpr int32_t draw(uint8_t col, size_t character_count = std::numeric_limits<size_t>::max(),
                            size_t *character_actual = nullptr) {
         return img->template draw_string_mono<FONT, KERNING, ROTATION>(x, y, str, col, character_count,
-                                                                      character_actual);
+                                                                       character_actual);
     }
 
     /**
