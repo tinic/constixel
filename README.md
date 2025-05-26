@@ -13,7 +13,7 @@ constixel is a single header minimalistic constexpr C++20 palette based 2D graph
 [Text drawing example](#text-drawing-example)  
 [Consteval sixel example](#consteval-sixel-example)  
 [Consteval image example](#consteval-embedded-image-data-example)  
-[Saving a PNG to disk example](#saving-a-png-to-disk-example)  
+[Saving a PNG to a file example](#saving-a-png-to-a-file-example)  
 [API](#api)  
 
 ## Primary features and goals
