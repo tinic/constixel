@@ -1363,7 +1363,7 @@ class format_2bit : public format {
             for (size_t x = 0; x < W; x++) {
                 size_t src_byte = y * bytes_per_line + (x / 4);
                 size_t src_shift = (3 - (x % 4)) * 2;
-                uint8_t pixel = (src[src_byte] >> src_shift) & 0x03;
+                uint8_t pixel = static_cast<uint8_t>((src[src_byte] >> src_shift) & 0x03);
 
                 size_t dst_x = FLIP_H ? (H - 1 - y) : y;
                 size_t dst_y = FLIP_V ? (W - 1 - x) : x;
@@ -1655,7 +1655,7 @@ class format_4bit : public format {
             for (size_t x = 0; x < W; x++) {
                 size_t src_byte = y * bytes_per_line + (x / 2);
                 size_t src_shift = (1 - (x % 2)) * 4;
-                uint8_t pixel = (src[src_byte] >> src_shift) & 0x0F;
+                uint8_t pixel = static_cast<uint8_t>((src[src_byte] >> src_shift) & 0x0F);
 
                 size_t dst_x = FLIP_H ? (H - 1 - y) : y;
                 size_t dst_y = FLIP_V ? (W - 1 - x) : x;
