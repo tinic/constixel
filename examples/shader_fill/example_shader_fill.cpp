@@ -22,13 +22,13 @@ int main() {
     img.draw_string_mono<font>(20, 50, "Rectangles:", color::CYAN);
     
     // Linear gradient rectangle
-    img.fill_rect(50, 70, 150, 80, [](float u, float /* v */, float /* au */, float /* av */) -> std::array<float, 4> {
+    img.fill_rect(50, 70, 150, 80, [](float u, float /* v */, int32_t /* px */, int32_t /* py */) -> std::array<float, 4> {
         return {1.0f - u, 0.0f, u, 1.0f}; // Red to blue horizontally
     });
     img.draw_string_mono<font>(50, 155, "Linear Gradient", color::WHITE);
     
     // Radial gradient rectangle
-    img.fill_rect(220, 70, 150, 80, [](float u, float v, float /* au */, float /* av */) -> std::array<float, 4> {
+    img.fill_rect(220, 70, 150, 80, [](float u, float v, int32_t /* px */, int32_t /* py */) -> std::array<float, 4> {
         float cx = 0.5f, cy = 0.5f;
         float dist = std::sqrt((u - cx) * (u - cx) + (v - cy) * (v - cy));
         float intensity = std::max(0.0f, 1.0f - dist * 2.0f);
@@ -37,7 +37,7 @@ int main() {
     img.draw_string_mono<font>(220, 155, "Radial Gradient", color::WHITE);
     
     // Checkerboard rectangle
-    img.fill_rect(390, 70, 150, 80, [](float u, float v, float /* au */, float /* av */) -> std::array<float, 4> {
+    img.fill_rect(390, 70, 150, 80, [](float u, float v, int32_t /* px */, int32_t /* py */) -> std::array<float, 4> {
         int checker = (int(u * 8) + int(v * 8)) % 2;
         float gray = checker ? 1.0f : 0.2f;
         return {gray, gray, gray, 1.0f};
@@ -48,7 +48,7 @@ int main() {
     img.draw_string_mono<font>(20, 185, "Circles:", color::CYAN);
     
     // Radial gradient circle
-    img.fill_circle_aa(125, 240, 40, [](float u, float v, float /* au */, float /* av */) -> std::array<float, 4> {
+    img.fill_circle_aa(125, 240, 40, [](float u, float v, int32_t /* px */, int32_t /* py */) -> std::array<float, 4> {
         float cx = 0.5f, cy = 0.5f;
         float dist = std::sqrt((u - cx) * (u - cx) + (v - cy) * (v - cy));
         float intensity = std::max(0.0f, 1.0f - dist * 2.0f);
@@ -57,14 +57,14 @@ int main() {
     img.draw_string_mono<font>(85, 290, "Radial Circle", color::WHITE);
     
     // Pattern circle
-    img.fill_circle_aa(295, 240, 40, [](float u, float v, float /* au */, float /* av */) -> std::array<float, 4> {
+    img.fill_circle_aa(295, 240, 40, [](float u, float v, int32_t /* px */, int32_t /* py */) -> std::array<float, 4> {
         float rings = std::sin((u + v) * 10.0f) * 0.5f + 0.5f;
         return {rings, 1.0f - rings, rings * 0.5f, 1.0f};
     });
     img.draw_string_mono<font>(250, 290, "Pattern Circle", color::WHITE);
     
     // Spiral circle
-    img.fill_circle_aa(465, 240, 40, [](float u, float v, float /* au */, float /* av */) -> std::array<float, 4> {
+    img.fill_circle_aa(465, 240, 40, [](float u, float v, int32_t /* px */, int32_t /* py */) -> std::array<float, 4> {
         float cx = 0.5f, cy = 0.5f;
         float dx = u - cx, dy = v - cy;
         float angle = std::atan2(dy, dx);
@@ -78,20 +78,20 @@ int main() {
     img.draw_string_mono<font>(20, 320, "Rounded Rectangles:", color::CYAN);
     
     // Gradient rounded rectangle
-    img.fill_round_rect_aa(50, 350, 150, 80, 20, [](float u, float v, float /* au */, float /* av */) -> std::array<float, 4> {
+    img.fill_round_rect_aa(50, 350, 150, 80, 20, [](float u, float v, int32_t /* px */, int32_t /* py */) -> std::array<float, 4> {
         return {u, v, 1.0f - u, 1.0f}; // Corner-to-corner gradient
     });
     img.draw_string_mono<font>(50, 440, "Gradient RoundRect", color::WHITE);
     
     // Wave pattern rounded rectangle
-    img.fill_round_rect_aa(220, 350, 150, 80, 20, [](float u, float v, float /* au */, float /* av */) -> std::array<float, 4> {
+    img.fill_round_rect_aa(220, 350, 150, 80, 20, [](float u, float v, int32_t /* px */, int32_t /* py */) -> std::array<float, 4> {
         float wave = (std::sin(u * 8.0f) + std::sin(v * 8.0f)) * 0.5f + 0.5f;
         return {wave, wave * 0.5f, 1.0f - wave, 1.0f};
     });
     img.draw_string_mono<font>(220, 440, "Wave RoundRect", color::WHITE);
     
     // Complex pattern rounded rectangle
-    img.fill_round_rect_aa(390, 350, 150, 80, 20, [](float u, float v, float /* au */, float /* av */) -> std::array<float, 4> {
+    img.fill_round_rect_aa(390, 350, 150, 80, 20, [](float u, float v, int32_t /* px */, int32_t /* py */) -> std::array<float, 4> {
         float x = (u - 0.5f) * 4.0f;
         float y = (v - 0.5f) * 4.0f;
         float r = std::sqrt(x * x + y * y);
@@ -104,7 +104,7 @@ int main() {
     img.draw_string_mono<font>(20, 470, "Complex Showcase:", color::CYAN);
     
     // Large complex mathematical pattern
-    img.fill_rect(50, 500, 350, 120, [](float u, float v, float /* au */, float /* av */) -> std::array<float, 4> {
+    img.fill_rect(50, 500, 350, 120, [](float u, float v, int32_t /* px */, int32_t /* py */) -> std::array<float, 4> {
         float x = (u - 0.5f) * 8.0f;
         float y = (v - 0.5f) * 8.0f;
         float r = std::sqrt(x * x + y * y);
@@ -123,7 +123,7 @@ int main() {
     img.draw_string_mono<font>(50, 630, "Combined: Ripple + Spiral + Waves", color::WHITE);
     
     // Large showcase circle
-    img.fill_circle_aa(500, 560, 60, [](float u, float v, float /* au */, float /* av */) -> std::array<float, 4> {
+    img.fill_circle_aa(500, 560, 60, [](float u, float v, int32_t /* px */, int32_t /* py */) -> std::array<float, 4> {
         float cx = 0.5f, cy = 0.5f;
         float dx = u - cx, dy = v - cy;
         float dist = std::sqrt(dx * dx + dy * dy);
