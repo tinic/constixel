@@ -2255,61 +2255,6 @@ class format_24bit : public format {
 
     static constexpr void compose(std::span<uint8_t, image_size> data, size_t x, size_t y, float cola, float colr,
                                   float colg, float colb) {
-#if defined(__ARM_NEON)
-        if (!std::is_constant_evaluated()) {
-            const size_t off = y * bytes_per_line + x * 3;
-            uint8x8_t px = vld1_u8(&data[off]);
-            float32x4_t src = {colr, colg, colb, cola};
-            float32x4_t dst = {hidden::a2al_8bit[px[0]], hidden::a2al_8bit[px[1]], hidden::a2al_8bit[px[2]], 1.0f};
-            float32x4_t one = vdupq_n_f32(1.0f);
-            float32x4_t inv_srca = vsubq_f32(one, vdupq_n_f32(cola));
-            float32x4_t blended = vmlaq_f32(vmulq_n_f32(src, cola), dst, inv_srca);
-
-            float outa = cola + dst[3] * (1.0f - cola);
-            float32x4_t norm = vmulq_f32(blended, vdupq_n_f32(1.0f / outa));
-            float32x4_t final = hidden::linear_to_srgb_approx_neon(norm);
-
-            uint8x8_t out;
-            out[0] = static_cast<uint8_t>(final[0] * 255.0f);
-            out[1] = static_cast<uint8_t>(final[1] * 255.0f);
-            out[2] = static_cast<uint8_t>(final[2] * 255.0f);
-            vst1_lane_u32(reinterpret_cast<uint32_t *>(&data[off]), vreinterpret_u32_u8(out), 0);
-            return;
-        }
-#endif  // #if defined(__ARM_NEON)
-#if defined(__AVX2__)
-        if (!std::is_constant_evaluated()) {
-            const size_t off = y * bytes_per_line + x * 3;
-
-            const float lr = hidden::a2al_8bit[data[off + 0]];
-            const float lg = hidden::a2al_8bit[data[off + 1]];
-            const float lb = hidden::a2al_8bit[data[off + 2]];
-            const float la = 1.0;
-
-            const float as = cola + la * (1.0f - cola);
-            const float inv_cola = 1.0f - cola;
-
-            __m128 dst = _mm_set_ps(0.0f, lb, lg, lr);
-            __m128 src = _mm_set_ps(0.0f, colb, colg, colr);
-
-            __m128 blended = _mm_add_ps(_mm_mul_ps(src, _mm_set1_ps(cola)), _mm_mul_ps(dst, _mm_set1_ps(inv_cola)));
-
-            __m128 denom = _mm_set_ss(as);
-            __m128 inv_as = _mm_rcp_ss(denom);
-            inv_as = _mm_shuffle_ps(inv_as, inv_as, _MM_SHUFFLE(0, 0, 0, 0));
-
-            __m128 scaled = _mm_mul_ps(blended, inv_as);
-            __m128 srgb = hidden::linear_to_srgb_approx_sse(scaled);
-
-            alignas(16) float out[4];
-            _mm_store_ps(out, srgb);
-
-            data[off + 0] = static_cast<uint8_t>(out[0] * 255.0f);
-            data[off + 1] = static_cast<uint8_t>(out[1] * 255.0f);
-            data[off + 2] = static_cast<uint8_t>(out[2] * 255.0f);
-            return;
-        }
-#endif  // #if defined(__AVX2__)
         const size_t off = y * bytes_per_line + x * 3;
 
         const float lr = hidden::a2al_8bit[data[off + 0]];
@@ -2317,10 +2262,9 @@ class format_24bit : public format {
         const float lb = hidden::a2al_8bit[data[off + 2]];
         const float la = 1.0f;
 
-        const float as = cola + la * (1.0f - cola);
-        const float rs = hidden::linear_to_srgb(colr * cola + lr * (1.0f - cola)) * (1.0f / as);
-        const float gs = hidden::linear_to_srgb(colg * cola + lg * (1.0f - cola)) * (1.0f / as);
-        const float bs = hidden::linear_to_srgb(colb * cola + lb * (1.0f - cola)) * (1.0f / as);
+        const float rs = hidden::linear_to_srgb(colr * cola + lr * (1.0f - cola));
+        const float gs = hidden::linear_to_srgb(colg * cola + lg * (1.0f - cola));
+        const float bs = hidden::linear_to_srgb(colb * cola + lb * (1.0f - cola));
 
         data[off + 0] = static_cast<uint8_t>(rs * 255.0f);
         data[off + 1] = static_cast<uint8_t>(gs * 255.0f);
@@ -2401,16 +2345,16 @@ class format_24bit : public format {
             [](const uint8_t *data_raw, size_t x, size_t col, size_t y) {
                 static std::array<uint8_t, W * 6> line_cache{};
                 static auto line_cache_line = std::numeric_limits<size_t>::max();
-                if (line_cache_line != y) {
-                    line_cache_line = y;
-                    const uint8_t *ptr = &data_raw[y * bytes_per_line];
+                if (line_cache_line != (y / S)) {
+                    line_cache_line = (y / S);
+                    const uint8_t *ptr = &data_raw[(y / S) * bytes_per_line];
                     for (size_t y6 = 0; y6 < 6; y6++) {
-                        if ((y + y6) < H) {
+                        if (((y / S) + y6) < H) {
                             for (size_t xx = 0; xx < W; xx++) {
                                 line_cache[y6 * W + xx] =
                                     quant.nearest(ptr[xx * 3 + 0], ptr[xx * 3 + 1], ptr[xx * 3 + 2]);
                             }
-                            if ((y + y6) != (H - 1)) {
+                            if (((y / S) + y6) != (H - 1)) {
                                 ptr += bytes_per_line;
                             }
                         }
@@ -2419,8 +2363,9 @@ class format_24bit : public format {
                 uint8_t out = 0;
                 for (size_t y6 = 0; y6 < 6; y6++) {
                     out >>= 1;
-                    if ((y + y6) < H) {
-                        const uint8_t *ptr = &line_cache[y6 * W + x / S];
+                    if ((y + y6) < (H * S)) {
+                        size_t y6_l = (((y + y6) % 6) / S);
+                        const uint8_t *ptr = &line_cache[y6_l * W + x / S];
                         out |= static_cast<uint8_t>((*ptr == col) ? (1UL << 5) : 0);
                     }
                 }
@@ -2700,7 +2645,8 @@ class format_32bit : public format {
                 for (size_t y6 = 0; y6 < 6; y6++) {
                     out >>= 1;
                     if ((y + y6) < (H * S)) {
-                        const uint8_t *ptr = &line_cache[y6 * W + x / S];
+                        size_t y6_l = (((y + y6) % 6) / S);
+                        const uint8_t *ptr = &line_cache[y6_l * W + x / S];
                         out |= static_cast<uint8_t>((*ptr == col) ? (1UL << 5) : 0);
                     }
                 }
