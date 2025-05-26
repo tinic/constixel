@@ -978,8 +978,8 @@ class format {
         }
         const auto r = rect<int32_t>{.x = _r.x * S, .y = _r.y * S, .w = _r.w * S, .h = _r.h * S} &
                        rect<int32_t>{.x = 0, .y = 0, .w = W * S, .h = H * S};
-        std::array<PBT, std::max(32UL, 1UL << PBS)> stack{};
-        palette_bitset<PBT, std::max(32UL, 1UL << PBS)> pset{};
+        std::array<PBT, PBS> stack{};
+        palette_bitset<PBT, PBS> pset{};
         for (int32_t y = r.y; y < (r.y + r.h); y += 6) {
             pset.clear();
             set6(data, static_cast<size_t>(r.x), static_cast<size_t>(r.w), static_cast<size_t>(y), pset);
@@ -1030,6 +1030,7 @@ template <size_t W, size_t H, bool GRAYSCALE, bool USE_SPAN>
 class format_1bit : public format {
  public:
     /// @cond DOXYGEN_EXCLUDE
+    static constexpr size_t sixel_bitset_size = 32;
     static constexpr size_t bits_per_pixel = 1;
     static constexpr size_t bytes_per_line = (W * bits_per_pixel + 7) / 8;
     static constexpr size_t image_size = H * bytes_per_line;
@@ -1260,7 +1261,7 @@ class format_1bit : public format {
 
     template <size_t S, typename F>
     static constexpr void sixel(const std::span<const uint8_t, image_size> data, F &&char_out, const rect<int32_t> &r) {
-        sixel_image<W, H, S, uint8_t, bits_per_pixel>(
+        sixel_image<W, H, S, uint8_t, sixel_bitset_size>(
             data.data(), quant.palette(), std::forward<F>(char_out), r,
             [](const uint8_t *data_raw, size_t x, size_t col, size_t y) {
                 const uint8_t *ptr = &data_raw[(y / S) * bytes_per_line + (x / S) / 8];
@@ -1282,7 +1283,7 @@ class format_1bit : public format {
                 }
                 return out;
             },
-            [](const uint8_t *data_raw, size_t x, size_t w, size_t y, palette_bitset<uint8_t, 32> &set) {
+            [](const uint8_t *data_raw, size_t x, size_t w, size_t y, palette_bitset<uint8_t, sixel_bitset_size> &set) {
                 size_t inc = y % S;
                 for (size_t y6 = 0; y6 < 6; y6++) {
                     if ((y + y6) < H * S) {
@@ -1316,6 +1317,7 @@ template <size_t W, size_t H, bool GRAYSCALE, bool USE_SPAN>
 class format_2bit : public format {
  public:
     /// @cond DOXYGEN_EXCLUDE
+    static constexpr size_t sixel_bitset_size = 32;
     static constexpr size_t bits_per_pixel = 2;
     static constexpr size_t bytes_per_line = (W * bits_per_pixel + 7) / 8;
     static constexpr size_t image_size = H * bytes_per_line;
@@ -1529,7 +1531,7 @@ class format_2bit : public format {
 
     template <size_t S, typename F>
     static constexpr void sixel(const std::span<const uint8_t, image_size> data, F &&char_out, const rect<int32_t> &r) {
-        sixel_image<W, H, S, uint8_t, bits_per_pixel>(
+        sixel_image<W, H, S, uint8_t, sixel_bitset_size>(
             data.data(), quant.palette(), std::forward<F>(char_out), r,
             [](const uint8_t *data_raw, size_t x, size_t col, size_t y) {
                 const uint8_t *ptr = &data_raw[(y / S) * bytes_per_line + (x / S) / 4];
@@ -1551,7 +1553,7 @@ class format_2bit : public format {
                 }
                 return out;
             },
-            [](const uint8_t *data_raw, size_t x, size_t w, size_t y, palette_bitset<uint8_t, 32> &set) {
+            [](const uint8_t *data_raw, size_t x, size_t w, size_t y, palette_bitset<uint8_t, sixel_bitset_size> &set) {
                 size_t inc = y % S;
                 for (size_t y6 = 0; y6 < 6; y6++) {
                     if ((y + y6) < H * S) {
@@ -1585,6 +1587,7 @@ template <size_t W, size_t H, bool GRAYSCALE, bool USE_SPAN>
 class format_4bit : public format {
  public:
     /// @cond DOXYGEN_EXCLUDE
+    static constexpr size_t sixel_bitset_size = 32;
     static constexpr size_t bits_per_pixel = 4;
     static constexpr size_t bytes_per_line = (W * bits_per_pixel + 7) / 8;
     static constexpr size_t image_size = H * bytes_per_line;
@@ -1830,7 +1833,7 @@ class format_4bit : public format {
 
     template <size_t S, typename F>
     static constexpr void sixel(const std::span<const uint8_t, image_size> data, F &&char_out, const rect<int32_t> &r) {
-        sixel_image<W, H, S, uint8_t, bits_per_pixel>(
+        sixel_image<W, H, S, uint8_t, sixel_bitset_size>(
             data.data(), quant.palette(), std::forward<F>(char_out), r,
             [](const uint8_t *data_raw, size_t x, size_t col, size_t y) {
                 const uint8_t *ptr = &data_raw[(y / S) * bytes_per_line + (x / S) / 2];
@@ -1852,7 +1855,7 @@ class format_4bit : public format {
                 }
                 return out;
             },
-            [](const uint8_t *data_raw, size_t x, size_t w, size_t y, palette_bitset<uint8_t, 32> &set) {
+            [](const uint8_t *data_raw, size_t x, size_t w, size_t y, palette_bitset<uint8_t, sixel_bitset_size> &set) {
                 size_t inc = y % S;
                 for (size_t y6 = 0; y6 < 6; y6++) {
                     if ((y + y6) < H * S) {
@@ -1886,6 +1889,7 @@ template <size_t W, size_t H, bool GRAYSCALE, bool USE_SPAN>
 class format_8bit : public format {
  public:
     /// @cond DOXYGEN_EXCLUDE
+    static constexpr size_t sixel_bitset_size = 256;
     static constexpr size_t bits_per_pixel = 8;
     static constexpr size_t bytes_per_line = W;
     static constexpr size_t image_size = H * bytes_per_line;
@@ -2136,7 +2140,7 @@ class format_8bit : public format {
 
     template <size_t S, typename F>
     static constexpr void sixel(const std::span<const uint8_t, image_size> data, F &&char_out, const rect<int32_t> &r) {
-        sixel_image<W, H, S, uint8_t, bits_per_pixel>(
+        sixel_image<W, H, S, uint8_t, sixel_bitset_size>(
             data.data(), quant.palette(), std::forward<F>(char_out), r,
             [](const uint8_t *data_raw, size_t x, size_t col, size_t y) {
                 const uint8_t *ptr = &data_raw[(y / S) * bytes_per_line + x / S];
@@ -2157,7 +2161,7 @@ class format_8bit : public format {
                 return out;
             },
             [](const uint8_t *data_raw, size_t x, size_t w, size_t y,
-               palette_bitset<uint8_t, 1UL << bits_per_pixel> &set) {
+               palette_bitset<uint8_t, sixel_bitset_size> &set) {
                 const uint8_t *ptr = &data_raw[(y / S) * bytes_per_line + x / S];
                 size_t inc = y % S;
                 for (size_t y6 = 0; y6 < 6; y6++) {
@@ -2193,6 +2197,7 @@ template <size_t W, size_t H, bool GRAYSCALE, bool USE_SPAN>
 class format_24bit : public format {
  public:
     /// @cond DOXYGEN_EXCLUDE
+    static constexpr size_t sixel_bitset_size = 256;
     static constexpr size_t bits_per_pixel = 24;
     static constexpr size_t bytes_per_line = W * 3;
     static constexpr size_t image_size = H * bytes_per_line;
@@ -2391,11 +2396,48 @@ class format_24bit : public format {
     }
 
     template <size_t S, typename F>
-    static constexpr void sixel(const std::span<const uint8_t, image_size> & /*data*/, F && /*char_out*/,
-                                const rect<int32_t> & /*r*/) {
-#ifndef _MSC_VER
-        static_assert(false, "Sixel not available for format_24bit.");
-#endif  // #ifndef _MSC_VER
+    static constexpr void sixel(const std::span<const uint8_t, image_size> data, F &&char_out, const rect<int32_t> &r) {
+        sixel_image<W, H, S, uint8_t, sixel_bitset_size>(
+            data.data(), quant.palette(), std::forward<F>(char_out), r,
+            [](const uint8_t *data_raw, size_t x, size_t col, size_t y) {
+                const uint8_t *ptr = &data_raw[(y / S) * bytes_per_line + (x / S) * 3];
+                uint8_t out = 0;
+                size_t inc = y % S;
+                for (size_t y6 = 0; y6 < 6; y6++) {
+                    out >>= 1;
+                    if ((y + y6) < H * S) {
+                        uint8_t ncol = quant.nearest(ptr[0], ptr[1], ptr[2]);
+                        out |= static_cast<uint8_t>((ncol == col) ? (1UL << 5) : 0);
+                        if ((y + y6) != ((H * S) - 1)) {
+                            if (++inc >= S) {
+                                inc = 0;
+                                ptr += bytes_per_line;
+                            }
+                        }
+                    }
+                }
+                return out;
+            },
+            [](const uint8_t *data_raw, size_t x, size_t w, size_t y,
+               palette_bitset<uint8_t, sixel_bitset_size> &set) {
+                const uint8_t *ptr = &data_raw[(y / S) * bytes_per_line + (x / S) * 3];
+                size_t inc = y % S;
+                for (size_t y6 = 0; y6 < 6; y6++) {
+                    if ((y + y6) < H * S) {
+                        for (size_t xx = 0; xx < (w + S - 1) / S; xx++) {
+                            uint8_t ncol =
+                                quant.nearest(ptr[(xx + x) * 3 + 0], ptr[(xx + x) * 3 + 1], ptr[(xx + x) * 3 + 2]);
+                            set.mark(ncol);
+                        }
+                        if ((y + y6) != ((H * S) - 1)) {
+                            if (++inc >= S) {
+                                inc = 0;
+                                ptr += bytes_per_line;
+                            }
+                        }
+                    }
+                }
+            });
     }
     /// @endcond
 };
@@ -2415,6 +2457,7 @@ template <size_t W, size_t H, bool GRAYSCALE, bool USE_SPAN>
 class format_32bit : public format {
  public:
     /// @cond DOXYGEN_EXCLUDE
+    static constexpr size_t sixel_bitset_size = 256;
     static constexpr size_t bits_per_pixel = 32;
     static constexpr size_t bytes_per_line = W * 4;
     static constexpr size_t image_size = H * bytes_per_line;
@@ -2633,11 +2676,48 @@ class format_32bit : public format {
     }
 
     template <size_t S, typename F>
-    static constexpr void sixel(const std::span<const uint8_t, image_size> & /*data*/, F && /*char_out*/,
-                                const rect<int32_t> & /*r*/) {
-#ifndef _MSC_VER
-        static_assert(false, "Sixel not available for format_32bit.");
-#endif  // #ifndef _MSC_VER
+    static constexpr void sixel(const std::span<const uint8_t, image_size> data, F &&char_out, const rect<int32_t> &r) {
+        sixel_image<W, H, S, uint8_t, sixel_bitset_size>(
+            data.data(), quant.palette(), std::forward<F>(char_out), r,
+            [](const uint8_t *data_raw, size_t x, size_t col, size_t y) {
+                const uint8_t *ptr = &data_raw[(y / S) * bytes_per_line + (x / S) * 4];
+                uint8_t out = 0;
+                size_t inc = y % S;
+                for (size_t y6 = 0; y6 < 6; y6++) {
+                    out >>= 1;
+                    if ((y + y6) < H * S) {
+                        uint8_t ncol = quant.nearest(ptr[0], ptr[1], ptr[2]);
+                        out |= static_cast<uint8_t>((ncol == col) ? (1UL << 5) : 0);
+                        if ((y + y6) != ((H * S) - 1)) {
+                            if (++inc >= S) {
+                                inc = 0;
+                                ptr += bytes_per_line;
+                            }
+                        }
+                    }
+                }
+                return out;
+            },
+            [](const uint8_t *data_raw, size_t x, size_t w, size_t y,
+               palette_bitset<uint8_t, sixel_bitset_size> &set) {
+                const uint8_t *ptr = &data_raw[(y / S) * bytes_per_line + (x / S) * 4];
+                size_t inc = y % S;
+                for (size_t y6 = 0; y6 < 6; y6++) {
+                    if ((y + y6) < H * S) {
+                        for (size_t xx = 0; xx < (w + S - 1) / S; xx++) {
+                            uint8_t ncol =
+                                quant.nearest(ptr[(xx + x) * 4 + 0], ptr[(xx + x) * 4 + 1], ptr[(xx + x) * 4 + 2]);
+                            set.mark(ncol);
+                        }
+                        if ((y + y6) != ((H * S) - 1)) {
+                            if (++inc >= S) {
+                                inc = 0;
+                                ptr += bytes_per_line;
+                            }
+                        }
+                    }
+                }
+            });
     }
     /// @endcond
 };
@@ -5653,8 +5733,8 @@ class image {
      * @private
      */
     template <typename shader_func>
-    constexpr auto fill_rect_int(int32_t x, int32_t y, int32_t w, int32_t h, const shader_func &shader, int32_t parent_x,
-                             int32_t parent_y, int32_t parent_w, int32_t parent_h) -> void
+    constexpr auto fill_rect_int(int32_t x, int32_t y, int32_t w, int32_t h, const shader_func &shader,
+                                 int32_t parent_x, int32_t parent_y, int32_t parent_w, int32_t parent_h) -> void
         requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, int32_t, int32_t>
     {
         auto minmax_check = std::minmax({x, y, w, h});
@@ -5680,7 +5760,7 @@ class image {
             for (int32_t px = x0; px < x1; px++) {
                 float u = (static_cast<float>(px) - static_cast<float>(parent_x)) / parent_wF;
                 float v = (static_cast<float>(py) - static_cast<float>(parent_y)) / parent_hF;
-                
+
                 auto rgba = shader(u, v, px, py);
                 for (auto &p : rgba) {
                     p = std::clamp(p, 0.0f, 1.0f);
