@@ -2917,6 +2917,21 @@ struct draw_line {
 };
 
 /**
+ * A struct which can be passed to: draw_dashed_line(), draw_dashed_line_aa().
+ */
+struct draw_dashed_line {
+    int32_t x0 = 0;             /**< First X coordinate in pixels. */
+    int32_t y0 = 0;             /**< First Y coordinate in pixels. */
+    int32_t x1 = 0;             /**< Second X coordinate in pixels. */
+    int32_t y1 = 0;             /**< Second Y coordinate in pixels. */
+    uint8_t col = color::WHITE; /**< Color palette index to use. */
+    float sw = 1.0f;            /**< Width of the stroke in pixels. */
+    std::array<float, 16> dash_pattern = {}; /**< Array of dash lengths (dash, gap, dash, gap, ...). */
+    size_t dash_count = 0;      /**< Number of elements in dash_pattern array to use. */
+    float dash_offset = 0.0f;   /**< Starting offset in the dash pattern. */
+};
+
+/**
  * A struct which can be passed to: fill_rect(), stroke_rect(), .
  */
 struct draw_rect {
@@ -3307,6 +3322,112 @@ class line_aa {
      */
     constexpr line_aa &stroke(uint8_t col, float stroke_width = 1.0f) {
         img->draw_line_aa(x0, y0, x1, y1, col, stroke_width);
+        return *this;
+    }
+};
+
+/**
+ * @brief Fluent API for drawing dashed lines
+ *
+ * Provides a chainable interface for drawing dashed lines with pattern continuity.
+ */
+template <template <size_t, size_t, bool, bool> class T, size_t W, size_t H, bool GRAYSCALE, bool USE_SPAN>
+class dashed_line {
+    using image_type = image<T, W, H, GRAYSCALE, USE_SPAN>;
+    image_type *img;
+    int32_t x0, y0, x1, y1;
+    std::array<int32_t, 16> dash_pattern;
+    size_t dash_count;
+    int32_t dash_offset;
+
+ public:
+    /**
+     * @brief Construct a dashed line shape
+     * @param image Target image to draw on
+     * @param x0_ X coordinate of start point
+     * @param y0_ Y coordinate of start point
+     * @param x1_ X coordinate of end point
+     * @param y1_ Y coordinate of end point
+     * @param dash_pattern_ Array of dash lengths
+     * @param dash_count_ Number of elements in dash pattern
+     * @param dash_offset_ Starting offset in pattern
+     */
+    constexpr dashed_line(image_type &image, int32_t x0_, int32_t y0_, int32_t x1_, int32_t y1_,
+                         const std::array<int32_t, 16> &dash_pattern_, size_t dash_count_, int32_t dash_offset_ = 0)
+        : img(&image), x0(x0_), y0(y0_), x1(x1_), y1(y1_), 
+          dash_pattern(dash_pattern_), dash_count(dash_count_), dash_offset(dash_offset_) {
+    }
+
+    /**
+     * @brief Draw the dashed line
+     * @param col Color value
+     * @param stroke_width Width of the stroke (default: 1)
+     * @return Updated dash offset for pattern continuity
+     */
+    constexpr int32_t stroke(uint8_t col, int32_t stroke_width = 1) {
+        return img->draw_dashed_line(x0, y0, x1, y1, col, stroke_width, dash_pattern, dash_count, dash_offset);
+    }
+
+    /**
+     * @brief Update the dash offset for pattern continuity
+     * @param new_offset New dash offset value
+     * @return Reference to this dashed line for chaining
+     */
+    constexpr dashed_line &offset(int32_t new_offset) {
+        dash_offset = new_offset;
+        return *this;
+    }
+};
+
+/**
+ * @brief Fluent API for drawing antialiased dashed lines
+ *
+ * Provides a chainable interface for drawing dashed lines with anti-aliasing and pattern continuity.
+ */
+template <template <size_t, size_t, bool, bool> class T, size_t W, size_t H, bool GRAYSCALE, bool USE_SPAN>
+class dashed_line_aa {
+    using image_type = image<T, W, H, GRAYSCALE, USE_SPAN>;
+    image_type *img;
+    int32_t x0, y0, x1, y1;
+    std::array<float, 16> dash_pattern;
+    size_t dash_count;
+    float dash_offset;
+
+ public:
+    /**
+     * @brief Construct an anti-aliased dashed line shape
+     * @param image Target image to draw on
+     * @param x0_ X coordinate of start point
+     * @param y0_ Y coordinate of start point
+     * @param x1_ X coordinate of end point
+     * @param y1_ Y coordinate of end point
+     * @param dash_pattern_ Array of dash lengths
+     * @param dash_count_ Number of elements in dash pattern
+     * @param dash_offset_ Starting offset in pattern
+     */
+    constexpr dashed_line_aa(image_type &image, int32_t x0_, int32_t y0_, int32_t x1_, int32_t y1_,
+                            const std::array<float, 16> &dash_pattern_, size_t dash_count_, float dash_offset_ = 0.0f)
+        : img(&image), x0(x0_), y0(y0_), x1(x1_), y1(y1_), 
+          dash_pattern(dash_pattern_), dash_count(dash_count_), dash_offset(dash_offset_) {
+    }
+
+    /**
+     * @brief Draw the anti-aliased dashed line
+     * @param col Color value
+     * @param stroke_width Width of the stroke (default: 1.0f)
+     * @return Updated dash offset for pattern continuity
+     */
+    constexpr float stroke(uint8_t col, float stroke_width = 1.0f) {
+        return img->draw_dashed_line_aa(x0, y0, x1, y1, col, stroke_width, dash_pattern, dash_count, dash_offset);
+    }
+
+    /**
+     * @brief Update the dash offset for pattern continuity
+     * @param new_offset New dash offset value
+     * @return Reference to this dashed line for chaining
+     */
+    constexpr dashed_line_aa &offset(float new_offset) {
+        dash_offset = new_offset;
         return *this;
     }
 };
@@ -3819,6 +3940,101 @@ class image {
     }
 
     /**
+     * \brief Draw a dashed line with integer stroke width using only integer arithmetic.
+     * Example:
+     *
+     * \code{.cpp}
+     * std::array<int32_t, 16> dash_pattern = {10, 5, 3, 5}; // long dash, gap, short dash, gap
+     * int32_t offset = image.draw_dashed_line(0, 0, 200, 100, constixel::color::WHITE, 2, 
+     *                                        dash_pattern, 4, 0);
+     * // Use offset for next line to maintain pattern continuity
+     * \endcode
+     *
+     * \param x0 Starting X-coordinate in pixels.
+     * \param y0 Starting Y-coordinate in pixels.
+     * \param x1 Ending X-coordinate in pixels.
+     * \param y1 Ending Y-coordinate in pixels.
+     * \param col Color palette index to use.
+     * \param stroke_width Width of the line in pixels (integer).
+     * \param dash_pattern Array of dash lengths (dash, gap, dash, gap, ...).
+     * \param dash_count Number of elements in dash_pattern array.
+     * \param dash_offset Starting offset in the dash pattern.
+     * \return Updated dash offset for pattern continuity in subsequent calls.
+     */
+    constexpr int32_t draw_dashed_line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col,
+                                      int32_t stroke_width = 1, const std::array<int32_t, 16> &dash_pattern = {},
+                                      size_t dash_count = 0, int32_t dash_offset = 0) {
+        if (dash_count == 0) {
+            draw_line(x0, y0, x1, y1, col, stroke_width);
+            return dash_offset;
+        }
+
+        auto minmax_check = std::minmax({x0, y0, x1, y1, stroke_width, dash_offset});
+        if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
+            return dash_offset;
+        }
+
+        // Use integer approximation for line length (Manhattan distance approximation)
+        const int32_t dx = x1 - x0;
+        const int32_t dy = y1 - y0;
+        const int32_t abs_dx = dx < 0 ? -dx : dx;
+        const int32_t abs_dy = dy < 0 ? -dy : dy;
+        const int32_t line_length = abs_dx > abs_dy ? abs_dx + abs_dy / 2 : abs_dy + abs_dx / 2;
+        
+        if (line_length <= 0) {
+            return dash_offset;
+        }
+        
+        int32_t total_dash_length = 0;
+        for (size_t i = 0; i < dash_count; ++i) {
+            total_dash_length += dash_pattern[i];
+        }
+        
+        if (total_dash_length <= 0) {
+            draw_line(x0, y0, x1, y1, col, stroke_width);
+            return dash_offset;
+        }
+        
+        int32_t current_offset = dash_offset % total_dash_length;
+        if (current_offset < 0) current_offset += total_dash_length;
+        int32_t distance_drawn = 0;
+        
+        while (distance_drawn < line_length) {
+            size_t dash_index = 0;
+            int32_t pattern_pos = current_offset;
+            
+            while (pattern_pos >= dash_pattern[dash_index] && dash_index < dash_count) {
+                pattern_pos -= dash_pattern[dash_index];
+                dash_index = (dash_index + 1) % dash_count;
+            }
+            
+            const int32_t remaining_in_segment = dash_pattern[dash_index] - pattern_pos;
+            const int32_t segment_length = remaining_in_segment < (line_length - distance_drawn) ? 
+                                         remaining_in_segment : (line_length - distance_drawn);
+            
+            if (dash_index % 2 == 0) {
+                // Calculate segment endpoints using integer arithmetic
+                const int32_t seg_x0 = x0 + (distance_drawn * dx) / line_length;
+                const int32_t seg_y0 = y0 + (distance_drawn * dy) / line_length;
+                const int32_t seg_x1 = x0 + ((distance_drawn + segment_length) * dx) / line_length;
+                const int32_t seg_y1 = y0 + ((distance_drawn + segment_length) * dy) / line_length;
+                
+                draw_line(seg_x0, seg_y0, seg_x1, seg_y1, col, stroke_width);
+            }
+            
+            distance_drawn += segment_length;
+            current_offset += segment_length;
+            
+            // Wrap offset when we complete a pattern cycle
+            if (current_offset >= total_dash_length) {
+                current_offset -= total_dash_length;
+            }
+        }
+        
+        return current_offset;
+    }
+
+    /**
      * \brief Draw an antialiased line with variable stroke width. Only format_8bit targets are supported.
      * Example:
      *
@@ -3840,7 +4056,7 @@ class image {
             return;
         }
         if (!std::isnormal(stroke_width) || stroke_width < static_cast<float>(min_coord) ||
-            stroke_width > static_cast<float>(min_coord)) {
+            stroke_width > static_cast<float>(max_coord)) {
             return;
         }
 
@@ -4015,6 +4231,140 @@ class image {
      */
     constexpr void draw_line_aa(const struct draw_line &d) {
         draw_line_aa(d.x0, d.y0, d.x1, d.y1, d.col, d.sw);
+    }
+
+    /**
+     * \brief Draw an antialiased dashed line with variable stroke width. Only format_8bit targets are supported.
+     * Example:
+     *
+     * \code{.cpp}
+     * std::array<float, 16> dash_pattern = {10.0f, 5.0f, 3.0f, 5.0f}; // long dash, gap, short dash, gap
+     * float offset = image.draw_dashed_line_aa(0, 0, 200, 100, constixel::color::WHITE, 2.0f, 
+     *                                         dash_pattern, 4, 0.0f);
+     * // Use offset for next line to maintain pattern continuity
+     * \endcode
+     *
+     * \param x0 Starting X-coordinate in pixels.
+     * \param y0 Starting Y-coordinate in pixels.
+     * \param x1 Ending X-coordinate in pixels.
+     * \param y1 Ending Y-coordinate in pixels.
+     * \param col Color palette index to use.
+     * \param stroke_width Width of the line in pixels (can be fractional).
+     * \param dash_pattern Array of dash lengths (dash, gap, dash, gap, ...).
+     * \param dash_count Number of elements in dash_pattern array.
+     * \param dash_offset Starting offset in the dash pattern.
+     * \return Updated dash offset for pattern continuity in subsequent calls.
+     */
+    constexpr float draw_dashed_line_aa(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col,
+                                       float stroke_width = 1.0f, const std::array<float, 16> &dash_pattern = {},
+                                       size_t dash_count = 0, float dash_offset = 0.0f) {
+        if (dash_count == 0) {
+            draw_line_aa(x0, y0, x1, y1, col, stroke_width);
+            return dash_offset;
+        }
+
+        auto minmax_check = std::minmax({x0, y0, x1, y1});
+        if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
+            return dash_offset;
+        }
+
+        const auto dx = static_cast<float>(x1 - x0);
+        const auto dy = static_cast<float>(y1 - y0);
+        const float line_length = std::sqrt(dx * dx + dy * dy);
+        
+        if (line_length <= 0.0f) {
+            return dash_offset;
+        }
+        
+        float total_dash_length = 0.0f;
+        for (size_t i = 0; i < dash_count; ++i) {
+            total_dash_length += dash_pattern[i];
+        }
+        
+        if (total_dash_length <= 0.0f) {
+            draw_line_aa(x0, y0, x1, y1, col, stroke_width);
+            return dash_offset;
+        }
+        
+        float current_offset = std::fmod(dash_offset, total_dash_length);
+        if (current_offset < 0.0f) current_offset += total_dash_length;
+        float distance_drawn = 0.0f;
+        
+        while (distance_drawn < line_length) {
+            size_t dash_index = 0;
+            float pattern_pos = current_offset;
+            
+            while (pattern_pos >= dash_pattern[dash_index] && dash_index < dash_count) {
+                pattern_pos -= dash_pattern[dash_index];
+                dash_index = (dash_index + 1) % dash_count;
+            }
+            
+            const float remaining_in_segment = dash_pattern[dash_index] - pattern_pos;
+            const float segment_length = std::min(remaining_in_segment, line_length - distance_drawn);
+            
+            if (dash_index % 2 == 0) {
+                const float t0 = distance_drawn / line_length;
+                const float t1 = (distance_drawn + segment_length) / line_length;
+                
+                const auto seg_x0 = static_cast<int32_t>(static_cast<float>(x0) + t0 * dx);
+                const auto seg_y0 = static_cast<int32_t>(static_cast<float>(y0) + t0 * dy);
+                const auto seg_x1 = static_cast<int32_t>(static_cast<float>(x0) + t1 * dx);
+                const auto seg_y1 = static_cast<int32_t>(static_cast<float>(y0) + t1 * dy);
+                
+                draw_line_aa(seg_x0, seg_y0, seg_x1, seg_y1, col, stroke_width);
+            }
+            
+            distance_drawn += segment_length;
+            current_offset += segment_length;
+            
+            // Wrap offset when we complete a pattern cycle
+            if (current_offset >= total_dash_length) {
+                current_offset -= total_dash_length;
+            }
+        }
+        
+        return current_offset;
+    }
+
+    /**
+     * \brief Draw a dashed line using a struct.
+     * Example:
+     *
+     * \code{.cpp}
+     * float dash_pattern[] = {10.0f, 5.0f, 3.0f, 5.0f};
+     * float offset = image.draw_dashed_line({.x0=0, .y0=0, .x1=200, .y1=100, .col=color::WHITE, 
+     *                                       .sw=2.0f, .dash_pattern=dash_pattern, .dash_count=4, 
+     *                                       .dash_offset=0.0f});
+     * \endcode
+     *
+     * \param d \ref draw_dashed_line initializer struct
+     * \return Updated dash offset for pattern continuity in subsequent calls.
+     */
+    constexpr int32_t draw_dashed_line(const struct draw_dashed_line &d) {
+        std::array<int32_t, 16> int_pattern {};
+        for (size_t i = 0; i < d.dash_count && i < 16; ++i) {
+            int_pattern[i] = static_cast<int32_t>(d.dash_pattern[i]);
+        }
+        return draw_dashed_line(d.x0, d.y0, d.x1, d.y1, d.col, static_cast<int32_t>(d.sw), 
+                               int_pattern, d.dash_count, static_cast<int32_t>(d.dash_offset));
+    }
+
+    /**
+     * \brief Draw an antialiased dashed line using a struct. Only format_8bit targets are supported.
+     * Example:
+     *
+     * \code{.cpp}
+     * std::array<float, 16> dash_pattern = {10.0f, 5.0f, 3.0f, 5.0f};
+     * float offset = image.draw_dashed_line_aa({.x0=0, .y0=0, .x1=200, .y1=100, .col=color::WHITE, 
+     *                                          .sw=2.0f, .dash_pattern=dash_pattern, .dash_count=4, 
+     *                                          .dash_offset=0.0f});
+     * \endcode
+     *
+     * \param d \ref draw_dashed_line initializer struct
+     * \return Updated dash offset for pattern continuity in subsequent calls.
+     */
+    constexpr float draw_dashed_line_aa(const struct draw_dashed_line &d) {
+        return draw_dashed_line_aa(d.x0, d.y0, d.x1, d.y1, d.col, d.sw, d.dash_pattern, d.dash_count, d.dash_offset);
     }
 
     /**
@@ -5350,6 +5700,39 @@ class image {
      */
     constexpr auto line_aa(int32_t x0, int32_t y0, int32_t x1, int32_t y1) {
         return shapes::line_aa<T, W, H, GRAYSCALE, USE_SPAN>(*this, x0, y0, x1, y1);
+    }
+
+    /**
+     * \brief Create a dashed line shape for fluent method chaining.
+     * \param x0 Starting X-coordinate in pixels.
+     * \param y0 Starting Y-coordinate in pixels.
+     * \param x1 Ending X-coordinate in pixels.
+     * \param y1 Ending Y-coordinate in pixels.
+     * \param dash_pattern Array of dash lengths (dash, gap, dash, gap, ...).
+     * \param dash_count Number of elements in dash_pattern array.
+     * \param dash_offset Starting offset in the dash pattern.
+     * \return A dashed_line shape object that supports .stroke() and .offset() methods.
+     */
+    constexpr auto dashed_line(int32_t x0, int32_t y0, int32_t x1, int32_t y1,
+                              const std::array<int32_t, 16> &dash_pattern, size_t dash_count, int32_t dash_offset = 0) {
+        return shapes::dashed_line<T, W, H, GRAYSCALE, USE_SPAN>(*this, x0, y0, x1, y1, dash_pattern, dash_count, dash_offset);
+    }
+
+    /**
+     * \brief Create an antialiased dashed line shape for fluent method chaining.
+     * Only format_8bit targets are supported.
+     * \param x0 Starting X-coordinate in pixels.
+     * \param y0 Starting Y-coordinate in pixels.
+     * \param x1 Ending X-coordinate in pixels.
+     * \param y1 Ending Y-coordinate in pixels.
+     * \param dash_pattern Array of dash lengths (dash, gap, dash, gap, ...).
+     * \param dash_count Number of elements in dash_pattern array.
+     * \param dash_offset Starting offset in the dash pattern.
+     * \return A dashed_line_aa shape object that supports .stroke() and .offset() methods.
+     */
+    constexpr auto dashed_line_aa(int32_t x0, int32_t y0, int32_t x1, int32_t y1,
+                                 const std::array<float, 16> &dash_pattern, size_t dash_count, float dash_offset = 0.0f) {
+        return shapes::dashed_line_aa<T, W, H, GRAYSCALE, USE_SPAN>(*this, x0, y0, x1, y1, dash_pattern, dash_count, dash_offset);
     }
 
     /**
