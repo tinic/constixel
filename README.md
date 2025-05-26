@@ -214,7 +214,7 @@ int main() {
 
 ![constixel](./media/constixel_1bit.jpg "Example in iTerm")
 
-## Saving a PNG to disk example
+## Saving a PNG to a file example
 
 ```c++
 #include "constixel.hpp"
