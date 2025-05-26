@@ -220,7 +220,6 @@ int main() {
 #include "constixel.hpp"
 #include <iostream>
 #include <fstream>
-#include <filesystem>
 
 int main() {
     static constixel::image<constixel::format_8bit, 256, 256> image;
@@ -231,13 +230,8 @@ int main() {
         }
     }
 
-    std::vector<char> out{};
-    image.png([&out](char ch) mutable {
-        out.push_back(ch);
-    });
-
     std::ofstream file("constixel.png", std::ios::binary);
-    file.write(reinterpret_cast<const char*>(out.data()), static_cast<std::streamsize>(out.size()));
+    img.png([&](char ch){ fout.put(ch); });
 }
 
 ```
