@@ -3996,7 +3996,9 @@ class image {
         }
         
         int32_t current_offset = dash_offset % total_dash_length;
-        if (current_offset < 0) current_offset += total_dash_length;
+        if (current_offset < 0) {
+            current_offset += total_dash_length;
+        }
         int32_t distance_drawn = 0;
         
         while (distance_drawn < line_length) {
@@ -4287,7 +4289,9 @@ class image {
         }
         
         float current_offset = std::fmod(dash_offset, total_dash_length);
-        if (current_offset < 0.0f) current_offset += total_dash_length;
+        if (current_offset < 0.0f) {
+            current_offset += total_dash_length;
+        }
         float distance_drawn = 0.0f;
         
         while (distance_drawn < line_length) {
