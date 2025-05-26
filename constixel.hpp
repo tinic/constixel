@@ -2548,7 +2548,7 @@ class format_32bit : public format {
             uint8x8_t px = vld1_u8(&data[off]);
             float32x4_t src = {colr, colg, colb, cola};
             float32x4_t dst = {hidden::a2al_8bit[px[0]], hidden::a2al_8bit[px[1]], hidden::a2al_8bit[px[2]],
-                               hidden::a2al_8bit[px[3]]};
+                               static_cast<float>(px[3]) * (1.0f / 255.0f)};
             float32x4_t one = vdupq_n_f32(1.0f);
             float32x4_t inv_srca = vsubq_f32(one, vdupq_n_f32(cola));
             float32x4_t blended = vmlaq_f32(vmulq_n_f32(src, cola), dst, inv_srca);
