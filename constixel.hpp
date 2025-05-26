@@ -2420,7 +2420,7 @@ class format_24bit : public format {
                 for (size_t y6 = 0; y6 < 6; y6++) {
                     out >>= 1;
                     if ((y + y6) < H) {
-                        const uint8_t *ptr = &line_cache[y6 * W + x];
+                        const uint8_t *ptr = &line_cache[y6 * W + x / S];
                         out |= static_cast<uint8_t>((*ptr == col) ? (1UL << 5) : 0);
                     }
                 }
@@ -2690,15 +2690,15 @@ class format_32bit : public format {
             [](const uint8_t *data_raw, size_t x, size_t col, size_t y) {
                 static std::array<uint8_t, W * 6> line_cache{};
                 static size_t line_cache_line = static_cast<size_t>(~0); 
-                if (line_cache_line != y) {
-                    line_cache_line = y;
-                    const uint8_t *ptr = &data_raw[y * bytes_per_line];
+                if (line_cache_line != (y / S)) {
+                    line_cache_line = (y / S);
+                    const uint8_t *ptr = &data_raw[(y / S) * bytes_per_line];
                     for (size_t y6 = 0; y6 < 6; y6++) {
-                        if ((y + y6) < H) {
+                        if (((y / S ) + y6) < H) {
                             for (size_t xx = 0; xx < W; xx++) {
                                 line_cache[y6 * W + xx] = quant.nearest(ptr[xx * 4 + 0], ptr[xx * 4 + 1], ptr[xx * 4 + 2]);
                             }
-                            if ((y + y6) != (H - 1)) {
+                            if (((y / S) + y6) != (H - 1)) {
                                 ptr += bytes_per_line;
                             }
                         }
@@ -2707,8 +2707,8 @@ class format_32bit : public format {
                 uint8_t out = 0;
                 for (size_t y6 = 0; y6 < 6; y6++) {
                     out >>= 1;
-                    if ((y + y6) < H) {
-                        const uint8_t *ptr = &line_cache[y6 * W + x];
+                    if ((y + y6) < (H * S)) {
+                        const uint8_t *ptr = &line_cache[y6 * W + x / S];
                         out |= static_cast<uint8_t>((*ptr == col) ? (1UL << 5) : 0);
                     }
                 }
