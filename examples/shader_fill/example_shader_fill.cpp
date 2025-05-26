@@ -139,7 +139,11 @@ int main() {
     });
     img->draw_string_mono<font>(440, 630, "Mandala Circle", color::WHITE);
     
+#ifdef _MSC_VER
     img->sixel_to_cout();
+#else  // #ifdef _MSC_VER
+    img->png_to_iterm();
+#endif  // #ifdef _MSC_VER
     
     return 0;
 }
