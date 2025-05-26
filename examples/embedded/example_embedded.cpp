@@ -3,8 +3,8 @@
 #include <string>
 #include <stdio.h>
 
-#include "fonts/ibmplexsans_regular_18_mono.hpp"
-using font = constixel::ibmplexsans_regular_18_mono;
+#include "fonts/ibmplexsans_bold_18_mono.hpp"
+using font = constixel::ibmplexsans_bold_18_mono;
 
 //
 // An example which targets a screen like an ERM19264DNS-4

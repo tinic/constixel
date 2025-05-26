@@ -2260,7 +2260,6 @@ class format_24bit : public format {
         const float lr = hidden::a2al_8bit[data[off + 0]];
         const float lg = hidden::a2al_8bit[data[off + 1]];
         const float lb = hidden::a2al_8bit[data[off + 2]];
-        const float la = 1.0f;
 
         const float rs = hidden::linear_to_srgb(colr * cola + lr * (1.0f - cola));
         const float gs = hidden::linear_to_srgb(colg * cola + lg * (1.0f - cola));
