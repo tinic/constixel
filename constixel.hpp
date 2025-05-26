@@ -2160,8 +2160,7 @@ class format_8bit : public format {
                 }
                 return out;
             },
-            [](const uint8_t *data_raw, size_t x, size_t w, size_t y,
-               palette_bitset<uint8_t, sixel_bitset_size> &set) {
+            [](const uint8_t *data_raw, size_t x, size_t w, size_t y, palette_bitset<uint8_t, sixel_bitset_size> &set) {
                 const uint8_t *ptr = &data_raw[(y / S) * bytes_per_line + x / S];
                 size_t inc = y % S;
                 for (size_t y6 = 0; y6 < 6; y6++) {
@@ -2401,14 +2400,15 @@ class format_24bit : public format {
             data.data(), quant.palette(), std::forward<F>(char_out), r,
             [](const uint8_t *data_raw, size_t x, size_t col, size_t y) {
                 static std::array<uint8_t, W * 6> line_cache{};
-                static size_t line_cache_line = static_cast<size_t>(~0); 
+                static auto line_cache_line = std::numeric_limits<size_t>::max();
                 if (line_cache_line != y) {
                     line_cache_line = y;
                     const uint8_t *ptr = &data_raw[y * bytes_per_line];
                     for (size_t y6 = 0; y6 < 6; y6++) {
                         if ((y + y6) < H) {
                             for (size_t xx = 0; xx < W; xx++) {
-                                line_cache[y6 * W + xx] = quant.nearest(ptr[xx * 3 + 0], ptr[xx * 3 + 1], ptr[xx * 3 + 2]);
+                                line_cache[y6 * W + xx] =
+                                    quant.nearest(ptr[xx * 3 + 0], ptr[xx * 3 + 1], ptr[xx * 3 + 2]);
                             }
                             if ((y + y6) != (H - 1)) {
                                 ptr += bytes_per_line;
@@ -2426,8 +2426,7 @@ class format_24bit : public format {
                 }
                 return out;
             },
-            [](const uint8_t *data_raw, size_t x, size_t w, size_t y,
-               palette_bitset<uint8_t, sixel_bitset_size> &set) {
+            [](const uint8_t *data_raw, size_t x, size_t w, size_t y, palette_bitset<uint8_t, sixel_bitset_size> &set) {
                 const uint8_t *ptr = &data_raw[(y / S) * bytes_per_line + (x / S) * 3];
                 size_t inc = y % S;
                 for (size_t y6 = 0; y6 < 6; y6++) {
@@ -2555,8 +2554,7 @@ class format_32bit : public format {
             float32x4_t blended = vmlaq_f32(vmulq_n_f32(src, cola), dst, inv_srca);
 
             float outa = cola + dst[3] * (1.0f - cola);
-            float32x4_t norm = vmulq_f32(blended, vdupq_n_f32(1.0f / outa));
-            float32x4_t final = hidden::linear_to_srgb_approx_neon(norm);
+            float32x4_t final = hidden::linear_to_srgb_approx_neon(blended);
 
             uint8x8_t out;
             out[0] = static_cast<uint8_t>(final[0] * 255.0f);
@@ -2582,15 +2580,8 @@ class format_32bit : public format {
 
             __m128 dst = _mm_set_ps(0.0f, lb, lg, lr);
             __m128 src = _mm_set_ps(0.0f, colb, colg, colr);
-
             __m128 blended = _mm_add_ps(_mm_mul_ps(src, _mm_set1_ps(cola)), _mm_mul_ps(dst, _mm_set1_ps(inv_cola)));
-
-            __m128 denom = _mm_set_ss(as);
-            __m128 inv_as = _mm_rcp_ss(denom);
-            inv_as = _mm_shuffle_ps(inv_as, inv_as, _MM_SHUFFLE(0, 0, 0, 0));
-
-            __m128 scaled = _mm_mul_ps(blended, inv_as);
-            __m128 srgb = hidden::linear_to_srgb_approx_sse(scaled);
+            __m128 srgb = hidden::linear_to_srgb_approx_sse(blended);
 
             alignas(16) float out[4];
             _mm_store_ps(out, srgb);
@@ -2610,9 +2601,9 @@ class format_32bit : public format {
         const float la = data[off + 3] * (1.0f / 255.0f);
 
         const float as = cola + la * (1.0f - cola);
-        const float rs = hidden::linear_to_srgb(colr * cola + lr * (1.0f - cola)) * (1.0f / as);
-        const float gs = hidden::linear_to_srgb(colg * cola + lg * (1.0f - cola)) * (1.0f / as);
-        const float bs = hidden::linear_to_srgb(colb * cola + lb * (1.0f - cola)) * (1.0f / as);
+        const float rs = hidden::linear_to_srgb(colr * cola + lr * (1.0f - cola));
+        const float gs = hidden::linear_to_srgb(colg * cola + lg * (1.0f - cola));
+        const float bs = hidden::linear_to_srgb(colb * cola + lb * (1.0f - cola));
 
         data[off + 0] = static_cast<uint8_t>(rs * 255.0f);
         data[off + 1] = static_cast<uint8_t>(gs * 255.0f);
@@ -2689,14 +2680,15 @@ class format_32bit : public format {
             data.data(), quant.palette(), std::forward<F>(char_out), r,
             [](const uint8_t *data_raw, size_t x, size_t col, size_t y) {
                 static std::array<uint8_t, W * 6> line_cache{};
-                static size_t line_cache_line = static_cast<size_t>(~0); 
+                static auto line_cache_line = std::numeric_limits<size_t>::max();
                 if (line_cache_line != (y / S)) {
                     line_cache_line = (y / S);
                     const uint8_t *ptr = &data_raw[(y / S) * bytes_per_line];
                     for (size_t y6 = 0; y6 < 6; y6++) {
-                        if (((y / S ) + y6) < H) {
+                        if (((y / S) + y6) < H) {
                             for (size_t xx = 0; xx < W; xx++) {
-                                line_cache[y6 * W + xx] = quant.nearest(ptr[xx * 4 + 0], ptr[xx * 4 + 1], ptr[xx * 4 + 2]);
+                                line_cache[y6 * W + xx] =
+                                    quant.nearest(ptr[xx * 4 + 0], ptr[xx * 4 + 1], ptr[xx * 4 + 2]);
                             }
                             if (((y / S) + y6) != (H - 1)) {
                                 ptr += bytes_per_line;
@@ -2714,8 +2706,7 @@ class format_32bit : public format {
                 }
                 return out;
             },
-            [](const uint8_t *data_raw, size_t x, size_t w, size_t y,
-               palette_bitset<uint8_t, sixel_bitset_size> &set) {
+            [](const uint8_t *data_raw, size_t x, size_t w, size_t y, palette_bitset<uint8_t, sixel_bitset_size> &set) {
                 const uint8_t *ptr = &data_raw[(y / S) * bytes_per_line + (x / S) * 4];
                 size_t inc = y % S;
                 for (size_t y6 = 0; y6 < 6; y6++) {

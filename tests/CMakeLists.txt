@@ -98,9 +98,9 @@ file(WRITE "${GENERATED_HDR}" "${_includes_aa}${_includes_mono}")
 
 # --- make the header usable --------------------------------------------------
 
-#add_executable(constixel_fonts constixel_fonts.cpp)
-#target_include_directories(constixel_fonts PRIVATE
-#    ${CMAKE_BINARY_DIR}
-#    ${PROJECT_SOURCE_DIR}/..
-#    ${PROJECT_SOURCE_DIR}/../fonts
-#)
+add_executable(constixel_fonts constixel_fonts.cpp)
+target_include_directories(constixel_fonts PRIVATE
+    ${CMAKE_BINARY_DIR}
+    ${PROJECT_SOURCE_DIR}/..
+    ${PROJECT_SOURCE_DIR}/../fonts
+)
