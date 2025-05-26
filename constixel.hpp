@@ -3839,6 +3839,10 @@ class image {
         if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
             return;
         }
+        if (!std::isnormal(stroke_width) || stroke_width < static_cast<float>(min_coord) ||
+            stroke_width > static_cast<float>(min_coord)) {
+            return;
+        }
 
         const float Rl = format.quant.linear_palette().at((col & format.color_mask) * 3 + 0);
         const float Gl = format.quant.linear_palette().at((col & format.color_mask) * 3 + 1);
