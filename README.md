@@ -32,7 +32,7 @@ constixel is a single header minimalistic constexpr C++20 palette based 2D graph
 - Various other simple image manipulation operations.
 
 > [!NOTE]
-> This library is not designed for high fidelity graphics generation and should be more thought of a utility library for software development purposes. Despite that, on HiDPI screens like on Macs the results generally look fairly good.
+> This library is not designed for high fidelity graphics generation and should be more thought of a utility library for software development purposes and embedded devices. Despite that, on HiDPI screens like on Macs the results generally look fairly good. If you want a high fidelity header only 2D C++ rendering library I recommend [canvas_ity](https://github.com/a-e-k/canvas_ity)
 
 ## Applications
 
