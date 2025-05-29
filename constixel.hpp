@@ -2916,7 +2916,6 @@ struct draw_line {
     float sw = 1;               /**< Width of the stroke in pixels. */
 };
 
-
 /**
  * A struct which can be passed to: fill_rect(), stroke_rect(), .
  */
@@ -3311,8 +3310,6 @@ class line_aa {
         return *this;
     }
 };
-
-
 
 /**
  * @brief Fluent API for drawing points
@@ -3821,7 +3818,6 @@ class image {
         draw_line(d.x0, d.y0, d.x1, d.y1, d.col, static_cast<int32_t>(d.sw));
     }
 
-
     /**
      * \brief Draw an antialiased line with variable stroke width. Only format_8bit targets are supported.
      * Example:
@@ -4020,9 +4016,6 @@ class image {
     constexpr void draw_line_aa(const struct draw_line &d) {
         draw_line_aa(d.x0, d.y0, d.x1, d.y1, d.col, d.sw);
     }
-
-
-
 
     /**
      * \brief Return the width of a string using the specified font in the template parameter. Typical use:
@@ -5358,8 +5351,6 @@ class image {
     constexpr auto line_aa(int32_t x0, int32_t y0, int32_t x1, int32_t y1) {
         return shapes::line_aa<T, W, H, GRAYSCALE, USE_SPAN>(*this, x0, y0, x1, y1);
     }
-
-
 
     /**
      * \brief Create a point shape for fluent method chaining.
