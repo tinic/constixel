@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['saving_20a_20png_20to_20disk_20example_0',['Saving a PNG to disk example',['../md__r_e_a_d_m_e.html#autotoc_md10',1,'']]],
+  ['saving_20a_20png_20to_20a_20file_20example_0',['Saving a PNG to a file example',['../md__r_e_a_d_m_e.html#autotoc_md10',1,'']]],
   ['sixel_1',['sixel',['../classconstixel_1_1image.html#a5861d809e14823b71640b0104bdd46d1',1,'constixel::image::sixel(F &amp;&amp;char_out) const'],['../classconstixel_1_1image.html#a07774a298459b7ec3e457ec4df27869e',1,'constixel::image::sixel(F &amp;&amp;char_out, const rect&lt; int32_t &gt; &amp;rect) const']]],
   ['sixel_20example_2',['Consteval sixel example',['../md__r_e_a_d_m_e.html#autotoc_md8',1,'']]],
   ['sixel_5fto_5fcout_3',['sixel_to_cout',['../classconstixel_1_1image.html#a518612cc47067c27654de327cd9cb6b3',1,'constixel::image']]],

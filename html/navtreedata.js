@@ -34,7 +34,7 @@ var NAVTREE =
       [ "Text drawing example", "md__r_e_a_d_m_e.html#autotoc_md7", null ],
       [ "Consteval sixel example", "md__r_e_a_d_m_e.html#autotoc_md8", null ],
       [ "Consteval embedded image data example", "md__r_e_a_d_m_e.html#autotoc_md9", null ],
-      [ "Saving a PNG to disk example", "md__r_e_a_d_m_e.html#autotoc_md10", null ],
+      [ "Saving a PNG to a file example", "md__r_e_a_d_m_e.html#autotoc_md10", null ],
       [ "API", "md__r_e_a_d_m_e.html#autotoc_md11", null ]
     ] ],
     [ "Namespaces", "namespaces.html", [
