@@ -231,7 +231,7 @@ int main() {
     }
 
     std::ofstream file("constixel.png", std::ios::binary);
-    img.png([&](char ch){ fout.put(ch); });
+    img.png([&](char ch){ file.put(ch); });
 }
 
 ```
