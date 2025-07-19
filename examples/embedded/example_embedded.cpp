@@ -11,6 +11,8 @@ using font = constixel::ibmplexsans_bold_18_mono;
 // We show the status of a nitrogen generator on this screen.
 // In production this runs on a STM32G030F6 (32K Flash, 8K RAM)
 //
+// Production code in actual use: https://github.com/tinic/NitrogenGenerator
+//
 // RAM use: 1585 bytes, (192*64/8) bytes pixel data + 49 bytes instance data
 // Flash use: 3269 bytes, all of it the interdisplay_bold_18_mono data
 //
