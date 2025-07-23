@@ -1,3 +1,5 @@
+#define CONSTIXEL_ENABLE_COUT
+
 #include "constixel.hpp"
 #include "fonts/ibmplexsans_bold_24_aa.hpp"
 #include "fonts/ibmplexsans_semibold_18_aa.hpp"

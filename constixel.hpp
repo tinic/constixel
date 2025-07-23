@@ -31,13 +31,16 @@ SOFTWARE.
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
-#include <iostream>
 #include <limits>
 #include <span>
 #include <string>
 #include <type_traits>
 #include <utility>
 #include <vector>
+
+#ifdef CONSTIXEL_ENABLE_COUT
+#include <iostream>
+#endif  // #ifdef CONSTIXEL_ENABLE_COUT
 
 #if defined(__ARM_NEON)
 #include <arm_neon.h>
@@ -5133,6 +5136,7 @@ class image {
         T<W, H, GRAYSCALE, USE_SPAN>::template sixel<S>(data, std::forward<F>(char_out), rect);
     }
 
+#ifdef CONSTIXEL_ENABLE_COUT
     /**
      * \brief Convert the current instance into a sixel stream and output it to std::cout.
      *
@@ -5204,6 +5208,8 @@ class image {
         }
         std::cout << output << '\n';
     }
+
+#endif // #ifdef CONSTIXEL_ENABLE_COUT
 
     /**
      * \brief Convert the current instance into a byte stream formatted for embedded displays.

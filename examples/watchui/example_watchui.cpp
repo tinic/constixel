@@ -1,3 +1,5 @@
+#define CONSTIXEL_ENABLE_COUT
+
 #include "constixel.hpp"
 #include "fonts/ibmplexsans_regular_18_aa.hpp"
 #include "fonts/notosanssymbols2_regular_aa.hpp"

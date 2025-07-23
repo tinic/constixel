@@ -1,3 +1,6 @@
+
+#define CONSTIXEL_ENABLE_COUT
+
 #include "constixel.hpp"
 
 #include "fonts/pxplus_toshibasat_9x16_mono.hpp"

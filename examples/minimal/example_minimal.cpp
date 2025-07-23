@@ -1,3 +1,5 @@
+#define CONSTIXEL_ENABLE_COUT
+
 #include "constixel.hpp"
 
 int main() {

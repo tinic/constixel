@@ -85,6 +85,7 @@ set(CMAKE_CXX_STANDARD 20)
 ## Minimal example
 
 ```c++
+#define CONSTIXEL_ENABLE_COUT
 #include "constixel.hpp"
 
 int main() {
@@ -108,6 +109,7 @@ int main() {
 Include a text font and pass the struct name as a template parameter to the draw_string function. The pre-made available fonts in this repo are viewable [here](./tests/constixel_fonts.png "Fonts"). More can be easily added/modified, for instance if you need more than just ASCII character ranges or want symbols/icons.
 
 ```c++
+#define CONSTIXEL_ENABLE_COUT
 #include "constixel.hpp"
 #include "fonts/ibmplexsans_medium_48_mono.hpp"
 using large_font = constixel::ibmplexsans_medium_48_mono;
@@ -217,6 +219,7 @@ int main() {
 ## Saving a PNG to a file example
 
 ```c++
+#define CONSTIXEL_ENABLE_COUT
 #include "constixel.hpp"
 #include <iostream>
 #include <fstream>

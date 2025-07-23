@@ -8,6 +8,8 @@
 #include <print>
 #endif  // #if __cplusplus >= 202302L
 
+#define CONSTIXEL_ENABLE_COUT
+
 #include "constixel.hpp"
 #include "fontslist.hpp"
 

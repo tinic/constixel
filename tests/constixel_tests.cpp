@@ -36,6 +36,8 @@ SOFTWARE.
 #define MAINLINE_TESTS 1
 #define JP_TESTS 0
 
+#define CONSTIXEL_ENABLE_COUT
+
 #include "constixel.hpp"
 
 #if MAINLINE_TESTS

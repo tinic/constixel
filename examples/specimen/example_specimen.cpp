@@ -1,5 +1,7 @@
 #include <format>
 
+#define CONSTIXEL_ENABLE_COUT
+
 #include "constixel.hpp"
 
 //
