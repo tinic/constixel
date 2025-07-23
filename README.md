@@ -148,6 +148,7 @@ Compile as such (clang needs -fconstexpr-steps=33554432):
 ```c++
 #include "constixel.hpp"
 
+#include <iostream>
 #include <cstring>
 
 consteval auto gen_sixel() {
