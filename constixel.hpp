@@ -52,7 +52,7 @@ namespace constixel {
 /// @cond DOXYGEN_EXCLUDE
 namespace hidden {
 
-[[nodiscard]] static consteval double consteval_cos(double x, int32_t terms = 10) {
+[[nodiscard]] inline consteval double consteval_cos(double x, int32_t terms = 10) {
     x = x - 6.283185307179586 * static_cast<int32_t>(x / 6.283185307179586);  // wrap x to [0, 2π)
     double res = 1.0;
     double term = 1.0;
@@ -64,7 +64,7 @@ namespace hidden {
     return res;
 }
 
-[[nodiscard]] static consteval double consteval_sin(double x, int32_t terms = 10) {
+[[nodiscard]] inline consteval double consteval_sin(double x, int32_t terms = 10) {
     x = x - 6.283185307179586 * static_cast<int32_t>(x / 6.283185307179586);  // wrap x to [0, 2π)
     double res = x;
     double term = x;
@@ -76,7 +76,7 @@ namespace hidden {
     return res;
 }
 
-static constexpr float fast_sqrtf(const float x) {
+inline constexpr float fast_sqrtf(const float x) {
     auto i = std::bit_cast<int32_t>(x);
     const int k = i & 0x00800000;
     float y = 0.0f;
@@ -95,7 +95,7 @@ static constexpr float fast_sqrtf(const float x) {
     return y;
 }
 
-[[nodiscard]] static constexpr float fast_exp2(const float p) {
+[[nodiscard]] inline constexpr float fast_exp2(const float p) {
     const float offset = (p < 0) ? 1.0f : 0.0f;
     const float clipp = (p < -126) ? -126.0f : p;
     const float z = clipp - static_cast<float>(static_cast<int32_t>(clipp)) + offset;
@@ -103,18 +103,18 @@ static constexpr float fast_sqrtf(const float x) {
         static_cast<uint32_t>((1 << 23) * (clipp + 121.2740575f + 27.7280233f / (4.84252568f - z) - 1.49012907f * z)));
 }
 
-[[nodiscard]] static constexpr float fast_log2(const float x) {
+[[nodiscard]] inline constexpr float fast_log2(const float x) {
     const auto xi = std::bit_cast<uint32_t>(x);
     const auto xf = std::bit_cast<float>((xi & 0x007FFFFF) | 0x3f000000);
     const float y = static_cast<float>(xi) * 1.1920928955078125e-7f;
     return y - 124.22551499f - 1.498030302f * xf - 1.72587999f / (0.3520887068f + xf);
 }
 
-[[nodiscard]] static constexpr float fast_pow(const float x, const float p) {
+[[nodiscard]] inline constexpr float fast_pow(const float x, const float p) {
     return fast_exp2(p * fast_log2(x));
 }
 
-[[nodiscard]] static constexpr float linear_to_srgb(float c) {
+[[nodiscard]] inline constexpr float linear_to_srgb(float c) {
     if (c <= 0.0031308f) {
         return 12.92f * c;
     }
@@ -124,7 +124,7 @@ static constexpr float fast_sqrtf(const float x) {
     return 1.055f * std::pow(c, 1.0f / 2.4f) - 0.055f;
 }
 
-[[nodiscard]] static constexpr float srgb_to_linear(float s) {
+[[nodiscard]] inline constexpr float srgb_to_linear(float s) {
     if (s <= 0.040449936f) {
         return s / 12.92f;
     }
@@ -257,7 +257,7 @@ struct srgb {
     double b = 0.0;
 };
 
-[[nodiscard]] static consteval srgb oklab_to_srgb_consteval(const oklab &oklab) {
+[[nodiscard]] inline consteval srgb oklab_to_srgb_consteval(const oklab &oklab) {
     const double l = oklab.l;
     const double a = oklab.a;
     const double b = oklab.b;
@@ -275,16 +275,16 @@ struct srgb {
             .b = static_cast<double>(linear_to_srgb(std::max(0.0f, std::min(1.0f, static_cast<float>(bl)))))};
 }
 
-[[nodiscard]] static consteval oklab oklch_to_oklab_consteval(const oklch &oklch) {
+[[nodiscard]] inline consteval oklab oklch_to_oklab_consteval(const oklch &oklch) {
     return {.l = oklch.l,
             .a = oklch.c * consteval_cos(oklch.h * 3.14159265358979323846 / 180.0),
             .b = oklch.c * consteval_sin(oklch.h * 3.14159265358979323846 / 180.0)};
 }
 
-static constexpr const float epsilon_low = srgb_to_linear(0.5f / 255.0f);
-static constexpr const float epsilon_high = srgb_to_linear(254.5f / 255.0f);
+inline constexpr const float epsilon_low = srgb_to_linear(0.5f / 255.0f);
+inline constexpr const float epsilon_high = srgb_to_linear(254.5f / 255.0f);
 
-static consteval auto gen_a2al_4bit_consteval() {
+inline consteval auto gen_a2al_4bit_consteval() {
     std::array<float, 16> a2al{};
     for (size_t c = 0; c < 16; c++) {
         a2al[c] = srgb_to_linear(static_cast<float>(c) * (1.0f / 15.0f));
@@ -292,9 +292,9 @@ static consteval auto gen_a2al_4bit_consteval() {
     return a2al;
 }
 
-static constexpr const std::array<float, 16> a2al_4bit = gen_a2al_4bit_consteval();
+inline constexpr const std::array<float, 16> a2al_4bit = gen_a2al_4bit_consteval();
 
-static consteval auto gen_a2al_8bit_consteval() {
+inline consteval auto gen_a2al_8bit_consteval() {
     std::array<float, 256> a2al{};
     for (size_t c = 0; c < 256; c++) {
         a2al[c] = srgb_to_linear(static_cast<float>(c) * (1.0f / 255.0f));
@@ -302,7 +302,7 @@ static consteval auto gen_a2al_8bit_consteval() {
     return a2al;
 }
 
-static constexpr const std::array<float, 256> a2al_8bit = gen_a2al_8bit_consteval();
+inline constexpr const std::array<float, 256> a2al_8bit = gen_a2al_8bit_consteval();
 
 template <size_t S>
 class quantize {
