@@ -219,7 +219,6 @@ int main() {
 ## Saving a PNG to a file example
 
 ```c++
-#define CONSTIXEL_ENABLE_COUT
 #include "constixel.hpp"
 #include <iostream>
 #include <fstream>
