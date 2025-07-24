@@ -33,13 +33,13 @@ SOFTWARE.
 #include <cstring>
 #include <limits>
 #include <span>
-#include <string>
 #include <type_traits>
 #include <utility>
 #include <vector>
 
 #ifdef CONSTIXEL_ENABLE_COUT
 #include <iostream>
+#include <string>
 #endif  // #ifdef CONSTIXEL_ENABLE_COUT
 
 #if defined(__ARM_NEON)
@@ -5208,8 +5208,7 @@ class image {
         }
         std::cout << output << '\n';
     }
-
-#endif // #ifdef CONSTIXEL_ENABLE_COUT
+#endif  // #ifdef CONSTIXEL_ENABLE_COUT
 
     /**
      * \brief Convert the current instance into a byte stream formatted for embedded displays.
@@ -5645,6 +5644,7 @@ class image {
         T<W, H, GRAYSCALE, USE_SPAN>::plot(data, static_cast<uint32_t>(x), static_cast<uint32_t>(y), col);
     }
 
+#ifdef CONSTIXEL_ENABLE_COUT
     /**
      * @private
      */
@@ -5673,6 +5673,7 @@ class image {
             };
         });
     }
+#endif // #ifdef CONSTIXEL_ENABLE_COUT
 
     /**
      * @private
