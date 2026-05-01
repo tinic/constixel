@@ -6259,6 +6259,183 @@ class image {
 #endif  // #ifndef __INTELLISENSE__
 };
 
+// ---------------------------------------------------------------------------
+// Runtime-sized sixel output
+// ---------------------------------------------------------------------------
+//
+// The image<> template requires compile-time W and H, which is awkward for
+// callers that produce arbitrary-resolution frames at runtime (terminal
+// previews, decoded video, etc.). The free functions below take RGBA bytes
+// plus runtime width/height and emit a sixel stream via a char-callback,
+// mirroring the per-format image::sixel(F&&) entry point but without the
+// compile-time-size constraint.
+//
+// Two overloads:
+//   * rgba_to_sixel(rgba, w, h, char_out)
+//       Quantises to constixel's built-in 256-color palette
+//       (format_8bit::quant). Use when input has more than 256 distinct
+//       colors or when the caller has no preferred palette.
+//   * rgba_to_sixel(rgba, w, h, palette, char_out)
+//       Uses a caller-supplied palette of <= 256 sRGB byte triples. The
+//       built-in quantiser is bypassed; each pixel maps to its
+//       squared-sRGB-distance nearest entry. Use when the caller already
+//       knows the exact palette of the source data.
+
+namespace runtime_sixel_detail {
+
+inline void emit_decimal(auto &&char_out, std::uint16_t u) {
+    if (u < 10) {
+        char_out(static_cast<char>('0' + u));
+        return;
+    }
+    char buf[6];
+    int n = 0;
+    while (u > 0) {
+        buf[n++] = static_cast<char>('0' + (u % 10));
+        u = static_cast<std::uint16_t>(u / 10);
+    }
+    while (n--) char_out(buf[n]);
+}
+
+inline std::uint8_t nearest_in_palette(std::uint8_t r, std::uint8_t g, std::uint8_t b,
+                                       std::span<const std::array<std::uint8_t, 3>> palette) {
+    int best_d = std::numeric_limits<int>::max();
+    std::uint8_t best_i = 0;
+    for (std::size_t i = 0; i < palette.size(); ++i) {
+        const int dr = static_cast<int>(r) - static_cast<int>(palette[i][0]);
+        const int dg = static_cast<int>(g) - static_cast<int>(palette[i][1]);
+        const int db = static_cast<int>(b) - static_cast<int>(palette[i][2]);
+        const int d = dr * dr + dg * dg + db * db;
+        if (d < best_d) {
+            best_d = d;
+            best_i = static_cast<std::uint8_t>(i);
+            if (d == 0) break;
+        }
+    }
+    return best_i;
+}
+
+template <typename F>
+inline void encode_indexed(const std::uint8_t *indexed, std::size_t w, std::size_t h,
+                           std::span<const std::array<std::uint8_t, 3>> palette,
+                           F &&char_out) {
+    char_out(static_cast<char>(0x1b));
+    char_out('P');
+    char_out('q');
+
+    char_out('"');
+    emit_decimal(char_out, 1);
+    char_out(';');
+    emit_decimal(char_out, 1);
+    char_out(';');
+    emit_decimal(char_out, static_cast<std::uint16_t>(w));
+    char_out(';');
+    emit_decimal(char_out, static_cast<std::uint16_t>(h));
+
+    for (std::size_t c = 0; c < palette.size(); ++c) {
+        char_out('#');
+        emit_decimal(char_out, static_cast<std::uint16_t>(c));
+        char_out(';');
+        char_out('2');
+        char_out(';');
+        emit_decimal(char_out, static_cast<std::uint16_t>((static_cast<int>(palette[c][0]) * 100) / 255));
+        char_out(';');
+        emit_decimal(char_out, static_cast<std::uint16_t>((static_cast<int>(palette[c][1]) * 100) / 255));
+        char_out(';');
+        emit_decimal(char_out, static_cast<std::uint16_t>((static_cast<int>(palette[c][2]) * 100) / 255));
+    }
+
+    std::array<bool, 256> used{};
+    for (std::size_t y = 0; y < h; y += 6) {
+        used.fill(false);
+        const std::size_t y_end = std::min(y + 6, h);
+        for (std::size_t yy = y; yy < y_end; ++yy) {
+            for (std::size_t x = 0; x < w; ++x) {
+                used[indexed[yy * w + x]] = true;
+            }
+        }
+
+        bool first_color = true;
+        for (std::size_t c = 0; c < palette.size(); ++c) {
+            if (!used[c]) continue;
+            if (!first_color) char_out('$');
+            first_color = false;
+            char_out('#');
+            emit_decimal(char_out, static_cast<std::uint16_t>(c));
+
+            auto bits_at = [&](std::size_t x) -> std::uint8_t {
+                std::uint8_t bits = 0;
+                for (std::size_t y6 = 0; y6 < 6; ++y6) {
+                    const std::size_t yy = y + y6;
+                    if (yy >= h) break;
+                    if (indexed[yy * w + x] == static_cast<std::uint8_t>(c)) {
+                        bits = static_cast<std::uint8_t>(bits | (1u << y6));
+                    }
+                }
+                return bits;
+            };
+
+            std::size_t x = 0;
+            while (x < w) {
+                const std::uint8_t bits6 = bits_at(x);
+                std::size_t run = 0;
+                while (x + 1 + run < w && bits_at(x + 1 + run) == bits6 && run < 254) ++run;
+                if (run > 3) {
+                    char_out('!');
+                    emit_decimal(char_out, static_cast<std::uint16_t>(run + 1));
+                    x += run;
+                }
+                char_out(static_cast<char>('?' + bits6));
+                ++x;
+            }
+        }
+        char_out('-');
+    }
+
+    char_out(static_cast<char>(0x1b));
+    char_out('\\');
+}
+
+}  // namespace runtime_sixel_detail
+
+template <typename F>
+inline void rgba_to_sixel(std::span<const std::uint8_t> rgba,
+                          std::size_t w, std::size_t h,
+                          std::span<const std::array<std::uint8_t, 3>> palette,
+                          F &&char_out) {
+    if (palette.empty() || palette.size() > 256) return;
+    if (rgba.size() < w * h * 4) return;
+    std::vector<std::uint8_t> indexed(w * h);
+    for (std::size_t y = 0; y < h; ++y) {
+        for (std::size_t x = 0; x < w; ++x) {
+            const std::uint8_t *px = &rgba[(y * w + x) * 4];
+            indexed[y * w + x] = runtime_sixel_detail::nearest_in_palette(px[0], px[1], px[2], palette);
+        }
+    }
+    runtime_sixel_detail::encode_indexed(indexed.data(), w, h, palette, std::forward<F>(char_out));
+}
+
+template <typename F>
+inline void rgba_to_sixel(std::span<const std::uint8_t> rgba,
+                          std::size_t w, std::size_t h,
+                          F &&char_out) {
+    // Pull constixel's built-in 256-color palette via any format_8bit
+    // instantiation — quant is static constexpr and W/H-independent.
+    // Internal pal[] storage is byte-0=R, byte-1=G, byte-2=B (post-swap
+    // in hidden::quantize ctor), so we read it directly.
+    using pal_t = format_8bit<1, 1, false, false>;
+    constexpr const auto &raw = pal_t::quant.palette();
+    std::array<std::array<std::uint8_t, 3>, 256> pal{};
+    for (std::size_t i = 0; i < 256; ++i) {
+        pal[i][0] = static_cast<std::uint8_t>((raw[i] >> 0) & 0xFF);
+        pal[i][1] = static_cast<std::uint8_t>((raw[i] >> 8) & 0xFF);
+        pal[i][2] = static_cast<std::uint8_t>((raw[i] >> 16) & 0xFF);
+    }
+    rgba_to_sixel(rgba, w, h,
+                  std::span<const std::array<std::uint8_t, 3>>(pal),
+                  std::forward<F>(char_out));
+}
+
 }  // namespace constixel
 
 #endif  // CONSTIXEL_HPP_
