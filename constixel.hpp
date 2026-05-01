@@ -6387,7 +6387,14 @@ class format_8bit_dyn : public format {
     template <typename F>
     static void sixel(const uint8_t *data, size_t w, size_t h,
                       const runtime_palette *rp, F &&char_out) {
-        sixel_header(std::forward<F>(char_out));
+        // \033P;1q — P2=1 (unset pixels transparent). Avoids Microsoft
+        // Terminal #17887 where omitted P2 fills cell-padding rows with
+        // arbitrary color. Visually equivalent for fully-painted images.
+        std::forward<F>(char_out)(char(0x1b));
+        std::forward<F>(char_out)('P');
+        std::forward<F>(char_out)(';');
+        std::forward<F>(char_out)('1');
+        std::forward<F>(char_out)('q');
         std::forward<F>(char_out)('"');
         sixel_number(std::forward<F>(char_out), 1); std::forward<F>(char_out)(';');
         sixel_number(std::forward<F>(char_out), 1); std::forward<F>(char_out)(';');
