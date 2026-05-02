@@ -6417,7 +6417,7 @@ class format_8bit_dyn : public format {
             const size_t stack_count = pset.genstack(stack);
             for (size_t s = 0; s < stack_count; ++s) {
                 const uint8_t col = stack[s];
-                if (col != 0) std::forward<F>(char_out)('$');
+                if (s != 0) std::forward<F>(char_out)('$');
                 std::forward<F>(char_out)('#');
                 sixel_number(std::forward<F>(char_out), uint16_t(col));
                 auto bits_at = [&](size_t x) -> uint8_t {
