@@ -1879,24 +1879,27 @@ class format_4bit : public format {
 
 /// @cond DOXYGEN_EXCLUDE
 class format_8bit_dyn;
-/// Runtime palette (<=256 sRGB entries, BGR-packed). Shared by
-/// image<format_8bit,...> and dynamic_image<format_8bit_dyn>.
+/// Runtime palette (<=255 caller entries, BGR-packed). Index 0 is reserved
+/// as a sentinel because the DEC sixel spec treats color 0 as transparent
+/// when the introducer's P2=1 — pixels mapped to #0 would render as
+/// terminal background. Caller entries are stored at [1..count_].
 struct runtime_palette {
     std::array<uint32_t, 256> pal{};
     size_t count_{0};
     constexpr runtime_palette() = default;
     explicit runtime_palette(std::span<const std::array<uint8_t, 3>> rgb) {
-        count_ = std::min(rgb.size(), size_t{256});
-        for (size_t i = 0; i < count_; ++i) {
-            pal[i] = uint32_t(rgb[i][0]) | (uint32_t(rgb[i][1]) << 8) | (uint32_t(rgb[i][2]) << 16);
+        const size_t n = std::min(rgb.size(), size_t{255});
+        for (size_t i = 0; i < n; ++i) {
+            pal[i + 1] = uint32_t(rgb[i][0]) | (uint32_t(rgb[i][1]) << 8) | (uint32_t(rgb[i][2]) << 16);
         }
+        count_ = n + 1;
     }
     [[nodiscard]] size_t size() const noexcept { return count_; }
     [[nodiscard]] uint32_t at(size_t i) const noexcept { return pal[i]; }
     [[nodiscard]] uint8_t nearest(int32_t r, int32_t g, int32_t b) const {
         int32_t best_d = std::numeric_limits<int32_t>::max();
-        uint8_t best_i = 0;
-        for (size_t i = 0; i < count_; ++i) {
+        uint8_t best_i = 1;
+        for (size_t i = 1; i < count_; ++i) {
             const int32_t dr = r - int32_t((pal[i] >> 0) & 0xFF);
             const int32_t dg = g - int32_t((pal[i] >> 8) & 0xFF);
             const int32_t db = b - int32_t((pal[i] >> 16) & 0xFF);
