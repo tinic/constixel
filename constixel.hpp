@@ -861,23 +861,30 @@ class format {
         png_write_crc32(std::forward<F>(char_out), header, i);
     }
 
+    // Emit DCS sixel introducer `\eP;1q` — P2=1 marks unset pixels
+    // as transparent, which avoids Microsoft Terminal #17887's
+    // arbitrary-color cell-padding artifact. P2=1 is visually
+    // equivalent to the default for fully-painted images, so it's
+    // safe to use universally (compile-time + runtime palettes).
     template <typename F>
     static constexpr void sixel_header(F &&char_out) {
         std::forward<F>(char_out)(0x1b);
         std::forward<F>(char_out)('P');
+        std::forward<F>(char_out)(';');
+        std::forward<F>(char_out)('1');
         std::forward<F>(char_out)('q');
     }
 
-    template <size_t W, size_t H, size_t S, typename F>
-    static constexpr void sixel_raster_attributes(F &&char_out) {
+    template <typename F>
+    static constexpr void sixel_raster_attributes(F &&char_out, size_t w, size_t h, size_t s) {
         std::forward<F>(char_out)('\"');
         sixel_number(std::forward<F>(char_out), 1);
         std::forward<F>(char_out)(';');
         sixel_number(std::forward<F>(char_out), 1);
         std::forward<F>(char_out)(';');
-        sixel_number(std::forward<F>(char_out), W * S);
+        sixel_number(std::forward<F>(char_out), static_cast<uint16_t>(w * s));
         std::forward<F>(char_out)(';');
-        sixel_number(std::forward<F>(char_out), H * S);
+        sixel_number(std::forward<F>(char_out), static_cast<uint16_t>(h * s));
     }
 
     template <typename F>
@@ -971,16 +978,28 @@ class format {
         png_end(std::forward<F>(char_out));
     }
 
-    template <size_t W, size_t H, int32_t S, typename PBT, size_t PBS, typename P, typename F, typename C, typename D>
-    static constexpr void sixel_image(const uint8_t *data, const P &palette, F &&char_out, const rect<int32_t> &_r,
+    // Single sixel emission body — shared between compile-time call
+    // sites (format_1bit/2bit/4bit/8bit/16bit/24bit) and the
+    // runtime-sized format_8bit_dyn. W/H/S are runtime parameters
+    // so the same code drives both paths; the optimiser folds them
+    // back to constants at the compile-time call sites.
+    template <typename PBT, size_t PBS, typename P, typename F, typename C, typename D>
+    static constexpr void sixel_image(const uint8_t *data, const P &palette, F &&char_out,
+                                      const rect<int32_t> &_r,
+                                      size_t W, size_t H, size_t S,
                                       const C &collect6, const D &set6) {
         sixel_header(std::forward<F>(char_out));
-        sixel_raster_attributes<W, H, S>(std::forward<F>(char_out));
+        sixel_raster_attributes(std::forward<F>(char_out), W, H, S);
         for (size_t c = 0; c < palette.size(); c++) {
             sixel_color(std::forward<F>(char_out), static_cast<uint16_t>(c), palette[c]);
         }
-        const auto r = rect<int32_t>{.x = _r.x * S, .y = _r.y * S, .w = _r.w * S, .h = _r.h * S} &
-                       rect<int32_t>{.x = 0, .y = 0, .w = W * S, .h = H * S};
+        const auto r = rect<int32_t>{.x = _r.x * static_cast<int32_t>(S),
+                                     .y = _r.y * static_cast<int32_t>(S),
+                                     .w = _r.w * static_cast<int32_t>(S),
+                                     .h = _r.h * static_cast<int32_t>(S)} &
+                       rect<int32_t>{.x = 0, .y = 0,
+                                     .w = static_cast<int32_t>(W * S),
+                                     .h = static_cast<int32_t>(H * S)};
         std::array<PBT, PBS> stack{};
         palette_bitset<PBT, PBS> pset{};
         for (int32_t y = r.y; y < (r.y + r.h); y += 6) {
@@ -989,7 +1008,15 @@ class format {
             const size_t stack_count = pset.genstack(stack);
             for (size_t s = 0; s < stack_count; s++) {
                 const PBT col = stack[s];
-                if (col != 0) {
+                // Carriage-return-within-band ($) ONLY between layers,
+                // never before the first. The previous `col != 0` test
+                // assumed the built-in palette always has color 0 at
+                // stack[0]; that's false for runtime palettes whose
+                // index 0 is a reserved sentinel never marked into the
+                // pset, so the wrong test emitted a stray $ at every
+                // band start and Windows Terminal rendered black
+                // artifacts for it.
+                if (s != 0) {
                     std::forward<F>(char_out)('$');
                 }
                 std::forward<F>(char_out)('#');
@@ -1264,8 +1291,8 @@ class format_1bit : public format {
 
     template <size_t S, typename F>
     static constexpr void sixel(const std::span<const uint8_t, image_size> data, F &&char_out, const rect<int32_t> &r) {
-        sixel_image<W, H, S, uint8_t, sixel_bitset_size>(
-            data.data(), quant.palette(), std::forward<F>(char_out), r,
+        sixel_image<uint8_t, sixel_bitset_size>(
+            data.data(), quant.palette(), std::forward<F>(char_out), r, W, H, S,
             [](const uint8_t *data_raw, size_t x, size_t col, size_t y) {
                 const uint8_t *ptr = &data_raw[(y / S) * bytes_per_line + (x / S) / 8];
                 const size_t x8 = (x / S) % 8;
@@ -1534,8 +1561,8 @@ class format_2bit : public format {
 
     template <size_t S, typename F>
     static constexpr void sixel(const std::span<const uint8_t, image_size> data, F &&char_out, const rect<int32_t> &r) {
-        sixel_image<W, H, S, uint8_t, sixel_bitset_size>(
-            data.data(), quant.palette(), std::forward<F>(char_out), r,
+        sixel_image<uint8_t, sixel_bitset_size>(
+            data.data(), quant.palette(), std::forward<F>(char_out), r, W, H, S,
             [](const uint8_t *data_raw, size_t x, size_t col, size_t y) {
                 const uint8_t *ptr = &data_raw[(y / S) * bytes_per_line + (x / S) / 4];
                 const size_t x4 = (x / S) % 4;
@@ -1836,8 +1863,8 @@ class format_4bit : public format {
 
     template <size_t S, typename F>
     static constexpr void sixel(const std::span<const uint8_t, image_size> data, F &&char_out, const rect<int32_t> &r) {
-        sixel_image<W, H, S, uint8_t, sixel_bitset_size>(
-            data.data(), quant.palette(), std::forward<F>(char_out), r,
+        sixel_image<uint8_t, sixel_bitset_size>(
+            data.data(), quant.palette(), std::forward<F>(char_out), r, W, H, S,
             [](const uint8_t *data_raw, size_t x, size_t col, size_t y) {
                 const uint8_t *ptr = &data_raw[(y / S) * bytes_per_line + (x / S) / 2];
                 const size_t x2 = (x / S) % 2;
@@ -2179,8 +2206,8 @@ class format_8bit : public format {
 
     template <size_t S, typename F>
     static constexpr void sixel(const std::span<const uint8_t, image_size> data, F &&char_out, const rect<int32_t> &r) {
-        sixel_image<W, H, S, uint8_t, sixel_bitset_size>(
-            data.data(), quant.palette(), std::forward<F>(char_out), r,
+        sixel_image<uint8_t, sixel_bitset_size>(
+            data.data(), quant.palette(), std::forward<F>(char_out), r, W, H, S,
             [](const uint8_t *data_raw, size_t x, size_t col, size_t y) {
                 const uint8_t *ptr = &data_raw[(y / S) * bytes_per_line + x / S];
                 uint8_t out = 0;
@@ -2218,10 +2245,16 @@ class format_8bit : public format {
             });
     }
 
+    // MSVC C2244 (a hard error, not suppressible via #pragma warning)
+    // mismatches the in-class declaration vs. out-of-class definition
+    // when `std::span<T, image_size>` carries a dependent NTTP. Use
+    // dynamic extent here — the static extent was a bonus check, not
+    // load-bearing; call sites already pass a span and dynamic-extent
+    // accepts both fixed- and dynamic-extent inputs.
     template <typename F>
-    static void sixel_with_palette(std::span<const uint8_t, image_size> data,
+    static void sixel_with_palette(std::span<const uint8_t> data,
                                    const runtime_palette &rp, F &&char_out);
-    static void blit_RGBA_with_palette(std::span<uint8_t, image_size> data,
+    static void blit_RGBA_with_palette(std::span<uint8_t> data,
                                        const rect<int32_t> &r,
                                        const uint8_t *ptr, int32_t stride,
                                        const runtime_palette &rp);
@@ -2386,8 +2419,8 @@ class format_24bit : public format {
 
     template <size_t S, typename F>
     static constexpr void sixel(const std::span<const uint8_t, image_size> data, F &&char_out, const rect<int32_t> &r) {
-        sixel_image<W, H, S, uint8_t, sixel_bitset_size>(
-            data.data(), quant.palette(), std::forward<F>(char_out), r,
+        sixel_image<uint8_t, sixel_bitset_size>(
+            data.data(), quant.palette(), std::forward<F>(char_out), r, W, H, S,
             [](const uint8_t *data_raw, size_t x, size_t col, size_t y) {
                 static std::array<uint8_t, W * 6> line_cache{};
                 static auto line_cache_line = std::numeric_limits<size_t>::max();
@@ -2667,8 +2700,8 @@ class format_32bit : public format {
 
     template <size_t S, typename F>
     static constexpr void sixel(const std::span<const uint8_t, image_size> data, F &&char_out, const rect<int32_t> &r) {
-        sixel_image<W, H, S, uint8_t, sixel_bitset_size>(
-            data.data(), quant.palette(), std::forward<F>(char_out), r,
+        sixel_image<uint8_t, sixel_bitset_size>(
+            data.data(), quant.palette(), std::forward<F>(char_out), r, W, H, S,
             [](const uint8_t *data_raw, size_t x, size_t col, size_t y) {
                 static std::array<uint8_t, W * 6> line_cache{};
                 static auto line_cache_line = std::numeric_limits<size_t>::max();
@@ -6387,65 +6420,53 @@ class format_8bit_dyn : public format {
         }
     }
 
+    // Adapter that gives the runtime palette the same shape
+    // (`size()` + `operator[]`) as `quant.palette()` (a fixed-size
+    // std::array), so a single `sixel_image` body drives both paths.
+    struct runtime_palette_view {
+        const runtime_palette *rp;
+        constexpr size_t size() const { return rp ? rp->size() : 256; }
+        constexpr uint32_t operator[](size_t i) const {
+            return rp ? rp->at(i)
+                      : format_8bit<1, 1, false, false>::quant.palette()[i];
+        }
+    };
+
+    // Delegate to the shared `sixel_image` template — same byte stream
+    // as the compile-time format_8bit::sixel path. The reinvented
+    // body that used to live here drifted from sixel_image and missed
+    // the `s != 0` guard against stray `$` at band start; sharing the
+    // body eliminates that class of bug for good.
     template <typename F>
     static void sixel(const uint8_t *data, size_t w, size_t h,
                       const runtime_palette *rp, F &&char_out) {
-        // \033P;1q — P2=1 (unset pixels transparent). Avoids Microsoft
-        // Terminal #17887 where omitted P2 fills cell-padding rows with
-        // arbitrary color. Visually equivalent for fully-painted images.
-        std::forward<F>(char_out)(char(0x1b));
-        std::forward<F>(char_out)('P');
-        std::forward<F>(char_out)(';');
-        std::forward<F>(char_out)('1');
-        std::forward<F>(char_out)('q');
-        std::forward<F>(char_out)('"');
-        sixel_number(std::forward<F>(char_out), 1); std::forward<F>(char_out)(';');
-        sixel_number(std::forward<F>(char_out), 1); std::forward<F>(char_out)(';');
-        sixel_number(std::forward<F>(char_out), uint16_t(w)); std::forward<F>(char_out)(';');
-        sixel_number(std::forward<F>(char_out), uint16_t(h));
-        const size_t pal_n = palette_size(rp);
-        for (size_t c = 0; c < pal_n; ++c) {
-            sixel_color(std::forward<F>(char_out), uint16_t(c), palette_at(c, rp));
-        }
-        palette_bitset<uint8_t, sixel_bitset_size> pset{};
-        std::array<uint8_t, sixel_bitset_size> stack{};
-        for (size_t y = 0; y < h; y += 6) {
-            pset.clear();
-            const size_t y_end = std::min(y + 6, h);
-            for (size_t yy = y; yy < y_end; ++yy)
-                for (size_t x = 0; x < w; ++x) pset.mark(data[yy * w + x]);
-            const size_t stack_count = pset.genstack(stack);
-            for (size_t s = 0; s < stack_count; ++s) {
-                const uint8_t col = stack[s];
-                if (s != 0) std::forward<F>(char_out)('$');
-                std::forward<F>(char_out)('#');
-                sixel_number(std::forward<F>(char_out), uint16_t(col));
-                auto bits_at = [&](size_t x) -> uint8_t {
-                    uint8_t bits = 0;
-                    for (size_t y6 = 0; y6 < 6; ++y6) {
-                        const size_t yy = y + y6;
-                        if (yy >= h) break;
-                        if (data[yy * w + x] == col) bits = uint8_t(bits | (1u << y6));
+        sixel_image<uint8_t, sixel_bitset_size>(
+            data, runtime_palette_view{rp}, std::forward<F>(char_out),
+            rect<int32_t>{.x = 0, .y = 0,
+                          .w = static_cast<int32_t>(w),
+                          .h = static_cast<int32_t>(h)},
+            w, h, /*S=*/1,
+            [w, h](const uint8_t *d, size_t x, size_t col, size_t y) -> uint8_t {
+                uint8_t bits = 0;
+                for (size_t y6 = 0; y6 < 6; ++y6) {
+                    const size_t yy = y + y6;
+                    if (yy >= h) break;
+                    if (d[yy * w + x] == col) {
+                        bits = static_cast<uint8_t>(bits | (1u << y6));
                     }
-                    return bits;
-                };
-                size_t x = 0;
-                while (x < w) {
-                    const uint8_t bits6 = bits_at(x);
-                    size_t run = 0;
-                    while (x + 1 + run < w && bits_at(x + 1 + run) == bits6 && run < 254) ++run;
-                    if (run > 3) {
-                        std::forward<F>(char_out)('!');
-                        sixel_number(std::forward<F>(char_out), uint16_t(run + 1));
-                        x += run;
-                    }
-                    std::forward<F>(char_out)(char('?' + bits6));
-                    ++x;
                 }
-            }
-            std::forward<F>(char_out)('-');
-        }
-        sixel_end(std::forward<F>(char_out));
+                return bits;
+            },
+            [w, h](const uint8_t *d, size_t x, size_t rw, size_t y,
+                   palette_bitset<uint8_t, sixel_bitset_size> &set) {
+                for (size_t y6 = 0; y6 < 6; ++y6) {
+                    const size_t yy = y + y6;
+                    if (yy >= h) break;
+                    for (size_t xx = 0; xx < rw; ++xx) {
+                        set.mark(d[yy * w + (x + xx)]);
+                    }
+                }
+            });
     }
     /// @endcond
 };
@@ -6454,13 +6475,13 @@ class format_8bit_dyn : public format {
 template <size_t W, size_t H, bool GRAYSCALE, bool USE_SPAN>
 template <typename F>
 void format_8bit<W, H, GRAYSCALE, USE_SPAN>::sixel_with_palette(
-    std::span<const uint8_t, format_8bit<W, H, GRAYSCALE, USE_SPAN>::image_size> data,
+    std::span<const uint8_t> data,
     const runtime_palette &rp, F &&char_out) {
     format_8bit_dyn::sixel(data.data(), W, H, &rp, std::forward<F>(char_out));
 }
 template <size_t W, size_t H, bool GRAYSCALE, bool USE_SPAN>
 void format_8bit<W, H, GRAYSCALE, USE_SPAN>::blit_RGBA_with_palette(
-    std::span<uint8_t, format_8bit<W, H, GRAYSCALE, USE_SPAN>::image_size> data,
+    std::span<uint8_t> data,
     const rect<int32_t> &r, const uint8_t *ptr, int32_t stride,
     const runtime_palette &rp) {
     format_8bit_dyn::blit_RGBA(data.data(), W, H, r, ptr, stride, &rp);
