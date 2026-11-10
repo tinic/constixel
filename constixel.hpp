@@ -964,6 +964,15 @@ class format {
         std::forward<F>(char_out)('\\');
     }
 
+    // 24/32-bit sixel output caches palette indices for this many columns on the stack. Images up to this width
+    // quantize every pixel once, wider ones once per color of a band.
+    static constexpr size_t sixel_cache_columns = 1024;
+
+    // First cached column for a window which has to hold column x.
+    [[nodiscard]] static constexpr size_t sixel_cache_start(size_t x, size_t width) {
+        return std::min(x, width > sixel_cache_columns ? width - sixel_cache_columns : size_t{0});
+    }
+
     template <typename PBT, size_t PBS>
     struct palette_bitset {
         constexpr void mark(PBT col) {
@@ -2419,24 +2428,26 @@ class pixel_24bit : public format {
         png_image<bits_per_pixel>(pix, bytes_per_line(pix.width), quant.palette(), std::forward<F>(char_out));
     }
 
-    // Palette indices of the six lines of a sixel band.
-    [[nodiscard]] static constexpr size_t sixel_cache_size(size_t w) {
-        return w * 6;
-    }
-
     template <size_t S, typename F>
-    static constexpr void sixel(const const_raster &pix, F &&char_out, const rect<int32_t> &r, uint8_t *line_cache) {
+    static constexpr void sixel(const const_raster &pix, F &&char_out, const rect<int32_t> &r) {
+        // Palette indices of the six lines of a band, for a window of columns.
+        std::array<uint8_t, sixel_cache_columns * 6> line_cache{};
         auto line_cache_line = std::numeric_limits<size_t>::max();
+        size_t line_cache_x = 0;
         sixel_image<uint8_t, sixel_bitset_size>(
             pix.data, quant.palette(), std::forward<F>(char_out), r, pix.width, pix.height, S,
-            [&pix, &line_cache_line, line_cache](const uint8_t *data_raw, size_t x, size_t col, size_t y) {
-                if (line_cache_line != (y / S)) {
+            [&pix, &line_cache, &line_cache_line, &line_cache_x](const uint8_t *data_raw, size_t x, size_t col,
+                                                                  size_t y) {
+                const size_t xs = x / S;
+                if (line_cache_line != (y / S) || xs < line_cache_x || xs >= line_cache_x + sixel_cache_columns) {
                     line_cache_line = (y / S);
-                    const uint8_t *ptr = &data_raw[(y / S) * pix.stride];
+                    line_cache_x = sixel_cache_start(xs, pix.width);
+                    const size_t columns = std::min(sixel_cache_columns, pix.width - line_cache_x);
+                    const uint8_t *ptr = &data_raw[(y / S) * pix.stride + line_cache_x * 3];
                     for (size_t y6 = 0; y6 < 6; y6++) {
                         if (((y / S) + y6) < pix.height) {
-                            for (size_t xx = 0; xx < pix.width; xx++) {
-                                line_cache[y6 * pix.width + xx] =
+                            for (size_t xx = 0; xx < columns; xx++) {
+                                line_cache[y6 * sixel_cache_columns + xx] =
                                     quant.nearest(ptr[xx * 3 + 0], ptr[xx * 3 + 1], ptr[xx * 3 + 2]);
                             }
                             if (((y / S) + y6) != (pix.height - 1)) {
@@ -2450,7 +2461,7 @@ class pixel_24bit : public format {
                     out >>= 1;
                     if ((y + y6) < (pix.height * S)) {
                         size_t y6_l = (((y + y6) % 6) / S);
-                        const uint8_t *ptr = &line_cache[y6_l * pix.width + x / S];
+                        const uint8_t *ptr = &line_cache[y6_l * sixel_cache_columns + xs - line_cache_x];
                         out |= static_cast<uint8_t>((*ptr == col) ? (1UL << 5) : 0);
                     }
                 }
@@ -2701,24 +2712,26 @@ class pixel_32bit : public format {
         png_image<bits_per_pixel>(pix, bytes_per_line(pix.width), quant.palette(), std::forward<F>(char_out));
     }
 
-    // Palette indices of the six lines of a sixel band.
-    [[nodiscard]] static constexpr size_t sixel_cache_size(size_t w) {
-        return w * 6;
-    }
-
     template <size_t S, typename F>
-    static constexpr void sixel(const const_raster &pix, F &&char_out, const rect<int32_t> &r, uint8_t *line_cache) {
+    static constexpr void sixel(const const_raster &pix, F &&char_out, const rect<int32_t> &r) {
+        // Palette indices of the six lines of a band, for a window of columns.
+        std::array<uint8_t, sixel_cache_columns * 6> line_cache{};
         auto line_cache_line = std::numeric_limits<size_t>::max();
+        size_t line_cache_x = 0;
         sixel_image<uint8_t, sixel_bitset_size>(
             pix.data, quant.palette(), std::forward<F>(char_out), r, pix.width, pix.height, S,
-            [&pix, &line_cache_line, line_cache](const uint8_t *data_raw, size_t x, size_t col, size_t y) {
-                if (line_cache_line != (y / S)) {
+            [&pix, &line_cache, &line_cache_line, &line_cache_x](const uint8_t *data_raw, size_t x, size_t col,
+                                                                  size_t y) {
+                const size_t xs = x / S;
+                if (line_cache_line != (y / S) || xs < line_cache_x || xs >= line_cache_x + sixel_cache_columns) {
                     line_cache_line = (y / S);
-                    const uint8_t *ptr = &data_raw[(y / S) * pix.stride];
+                    line_cache_x = sixel_cache_start(xs, pix.width);
+                    const size_t columns = std::min(sixel_cache_columns, pix.width - line_cache_x);
+                    const uint8_t *ptr = &data_raw[(y / S) * pix.stride + line_cache_x * 4];
                     for (size_t y6 = 0; y6 < 6; y6++) {
                         if (((y / S) + y6) < pix.height) {
-                            for (size_t xx = 0; xx < pix.width; xx++) {
-                                line_cache[y6 * pix.width + xx] =
+                            for (size_t xx = 0; xx < columns; xx++) {
+                                line_cache[y6 * sixel_cache_columns + xx] =
                                     quant.nearest(ptr[xx * 4 + 0], ptr[xx * 4 + 1], ptr[xx * 4 + 2]);
                             }
                             if (((y / S) + y6) != (pix.height - 1)) {
@@ -2732,7 +2745,7 @@ class pixel_32bit : public format {
                     out >>= 1;
                     if ((y + y6) < (pix.height * S)) {
                         size_t y6_l = (((y + y6) % 6) / S);
-                        const uint8_t *ptr = &line_cache[y6_l * pix.width + x / S];
+                        const uint8_t *ptr = &line_cache[y6_l * sixel_cache_columns + xs - line_cache_x];
                         out |= static_cast<uint8_t>((*ptr == col) ? (1UL << 5) : 0);
                     }
                 }
@@ -2895,8 +2908,6 @@ using format_8bit_dyn = pixel_8bit<false>;
 namespace hidden {
 template <typename PF>
 concept has_runtime_palette = requires { typename PF::runtime_palette; };
-template <typename PF>
-concept has_sixel_cache = requires { PF::sixel_cache_size(size_t{0}); };
 }  // namespace hidden
 /// @endcond
 
@@ -3946,9 +3957,6 @@ class basic_surface : private hidden::palette_slot<PF> {
     constexpr void sixel(F &&char_out, const constixel::rect<int32_t> &rect) const {
         if constexpr (hidden::has_runtime_palette<PF>) {
             PF::template sixel<S>(pix, std::forward<F>(char_out), rect, palette());
-        } else if constexpr (hidden::has_sixel_cache<PF>) {
-            std::vector<uint8_t> line_cache(PF::sixel_cache_size(pix.width));
-            PF::template sixel<S>(pix, std::forward<F>(char_out), rect, line_cache.data());
         } else {
             PF::template sixel<S>(pix, std::forward<F>(char_out), rect);
         }
