@@ -739,6 +739,14 @@ class format {
         }
     }
 
+    // Writes a chunk: the length, the type and data (the first bytes of array) and their CRC.
+    template <typename F, typename A>
+    static constexpr void png_chunk(F &&char_out, const A &array, size_t bytes) {
+        png_write_be(std::forward<F>(char_out), static_cast<uint32_t>(bytes - 4));
+        png_write_array(std::forward<F>(char_out), array, bytes);
+        png_write_crc32(std::forward<F>(char_out), array, bytes);
+    }
+
     template <typename F>
     static constexpr void png_marker(F &&char_out) {
         std::forward<F>(char_out)(static_cast<char>(0x89));
@@ -781,9 +789,7 @@ class format {
         header.at(i++) = 0;
         header.at(i++) = 0;
         header.at(i++) = 0;
-        png_write_be(std::forward<F>(char_out), static_cast<uint32_t>(i - 4));
-        png_write_array(std::forward<F>(char_out), header, i);
-        png_write_crc32(std::forward<F>(char_out), header, i);
+        png_chunk(std::forward<F>(char_out), header, i);
     }
 
     template <typename F, typename P>
@@ -799,9 +805,7 @@ class format {
             header.at(i++) = static_cast<char>((palette[c] >> 8) & 0xFF);
             header.at(i++) = static_cast<char>((palette[c] >> 16) & 0xFF);
         }
-        png_write_be(std::forward<F>(char_out), static_cast<uint32_t>(i - 4));
-        png_write_array(std::forward<F>(char_out), header, i);
-        png_write_crc32(std::forward<F>(char_out), header, i);
+        png_chunk(std::forward<F>(char_out), header, i);
     }
 
     template <typename F>
@@ -812,9 +816,7 @@ class format {
         header.at(i++) = 'E';
         header.at(i++) = 'N';
         header.at(i++) = 'D';
-        png_write_be(std::forward<F>(char_out), static_cast<uint32_t>(i - 4));
-        png_write_array(std::forward<F>(char_out), header, i);
-        png_write_crc32(std::forward<F>(char_out), header, i);
+        png_chunk(std::forward<F>(char_out), header, i);
     }
 
     template <typename F>
@@ -827,9 +829,7 @@ class format {
         header.at(i++) = 'T';
         header.at(i++) = 0x78;
         header.at(i++) = 0x01;
-        png_write_be(std::forward<F>(char_out), static_cast<uint32_t>(i - 4));
-        png_write_array(std::forward<F>(char_out), header, i);
-        png_write_crc32(std::forward<F>(char_out), header, i);
+        png_chunk(std::forward<F>(char_out), header, i);
     }
 
     template <typename F>
@@ -866,9 +866,7 @@ class format {
             }
             adler32_sum = adler32(&header[adlersum32_start_pos], i - adlersum32_start_pos, adler32_sum);
 
-            png_write_be(std::forward<F>(char_out), static_cast<uint32_t>(i - 4));
-            png_write_array(std::forward<F>(char_out), header, i);
-            png_write_crc32(std::forward<F>(char_out), header, i);
+            png_chunk(std::forward<F>(char_out), header, i);
 
             bytes -= bytes_to_copy;
         }
@@ -888,9 +886,7 @@ class format {
         header.at(i++) = static_cast<char>((adler32_sum >> 16) & 0xFF);
         header.at(i++) = static_cast<char>((adler32_sum >> 8) & 0xFF);
         header.at(i++) = static_cast<char>((adler32_sum >> 0) & 0xFF);
-        png_write_be(std::forward<F>(char_out), static_cast<uint32_t>(i - 4));
-        png_write_array(std::forward<F>(char_out), header, i);
-        png_write_crc32(std::forward<F>(char_out), header, i);
+        png_chunk(std::forward<F>(char_out), header, i);
     }
 
     // Emit DCS sixel introducer `\eP;1q` — P2=1 marks unset pixels
@@ -921,26 +917,14 @@ class format {
 
     template <typename F>
     static constexpr void sixel_number(F &&char_out, uint16_t u) {
-        if (u < 10) {
-            std::forward<F>(char_out)(static_cast<char>('0' + u));
-        } else if (u < 100) {
-            std::forward<F>(char_out)(static_cast<char>('0' + (((u / 10) % 10))));
-            std::forward<F>(char_out)(static_cast<char>('0' + (u % 10)));
-        } else if (u < 1000) {
-            std::forward<F>(char_out)(static_cast<char>('0' + ((u / 100) % 10)));
-            std::forward<F>(char_out)(static_cast<char>('0' + ((u / 10) % 10)));
-            std::forward<F>(char_out)(static_cast<char>('0' + (u % 10)));
-        } else if (u < 10000) {
-            std::forward<F>(char_out)(static_cast<char>('0' + ((u / 1000) % 10)));
-            std::forward<F>(char_out)(static_cast<char>('0' + ((u / 100) % 10)));
-            std::forward<F>(char_out)(static_cast<char>('0' + ((u / 10) % 10)));
-            std::forward<F>(char_out)(static_cast<char>('0' + (u % 10)));
-        } else {
-            std::forward<F>(char_out)(static_cast<char>('0' + ((u / 10000) % 10)));
-            std::forward<F>(char_out)(static_cast<char>('0' + ((u / 1000) % 10)));
-            std::forward<F>(char_out)(static_cast<char>('0' + ((u / 100) % 10)));
-            std::forward<F>(char_out)(static_cast<char>('0' + ((u / 10) % 10)));
-            std::forward<F>(char_out)(static_cast<char>('0' + (u % 10)));
+        std::array<char, 5> digits{};
+        size_t count = 0;
+        do {
+            digits.at(count++) = static_cast<char>('0' + (u % 10));
+            u /= 10;
+        } while (u != 0);
+        while (count > 0) {
+            std::forward<F>(char_out)(digits.at(--count));
         }
     }
 
@@ -1985,6 +1969,19 @@ using pixel_24bit = pixel_rgb<3, GRAYSCALE>;
 template <bool GRAYSCALE>
 using pixel_32bit = pixel_rgb<4, GRAYSCALE>;
 /// @endcond
+/// @cond DOXYGEN_EXCLUDE
+namespace hidden {
+// What the format_Nbit<W, H, ...> classes add to their pixel class: the sizes of an image of W x H pixels.
+template <typename PIXEL, size_t W, size_t H>
+class format_shell : public PIXEL {
+ public:
+    using pixel_type = PIXEL;
+    static constexpr size_t bytes_per_line = PIXEL::bytes_per_line(W);
+    static constexpr size_t image_size = PIXEL::image_size(W, H);
+};
+}  // namespace hidden
+/// @endcond
+
 /** @brief 1-bit format, just b/w. Use as template parameter for image. Example:
  *
  * \code{.cpp}
@@ -1996,14 +1993,7 @@ using pixel_32bit = pixel_rgb<4, GRAYSCALE>;
  * @tparam GRAYSCALE Grayscale palette.
  */
 template <size_t W, size_t H, bool GRAYSCALE, bool USE_SPAN>
-class format_1bit : public pixel_1bit {
- public:
-    /// @cond DOXYGEN_EXCLUDE
-    using pixel_type = pixel_1bit;
-    static constexpr size_t bytes_per_line = pixel_type::bytes_per_line(W);
-    static constexpr size_t image_size = pixel_type::image_size(W, H);
-    /// @endcond
-};
+class format_1bit : public hidden::format_shell<pixel_1bit, W, H> {};
 
 /**
  * @brief 2-bit color format, 4 colors total. Use as template parameter for image.
@@ -2017,14 +2007,7 @@ class format_1bit : public pixel_1bit {
  * @tparam GRAYSCALE Grayscale palette.
  */
 template <size_t W, size_t H, bool GRAYSCALE, bool USE_SPAN>
-class format_2bit : public pixel_2bit<GRAYSCALE> {
- public:
-    /// @cond DOXYGEN_EXCLUDE
-    using pixel_type = pixel_2bit<GRAYSCALE>;
-    static constexpr size_t bytes_per_line = pixel_type::bytes_per_line(W);
-    static constexpr size_t image_size = pixel_type::image_size(W, H);
-    /// @endcond
-};
+class format_2bit : public hidden::format_shell<pixel_2bit<GRAYSCALE>, W, H> {};
 
 /**
  * @brief 4-bit color format, 16 colors total. Use as template parameter for image.
@@ -2038,14 +2021,7 @@ class format_2bit : public pixel_2bit<GRAYSCALE> {
  * @tparam GRAYSCALE Grayscale palette.
  */
 template <size_t W, size_t H, bool GRAYSCALE, bool USE_SPAN>
-class format_4bit : public pixel_4bit<GRAYSCALE> {
- public:
-    /// @cond DOXYGEN_EXCLUDE
-    using pixel_type = pixel_4bit<GRAYSCALE>;
-    static constexpr size_t bytes_per_line = pixel_type::bytes_per_line(W);
-    static constexpr size_t image_size = pixel_type::image_size(W, H);
-    /// @endcond
-};
+class format_4bit : public hidden::format_shell<pixel_4bit<GRAYSCALE>, W, H> {};
 
 /**
  * @brief 8-bit format, 256 colors total. Use as template parameter for image. Example:
@@ -2059,14 +2035,7 @@ class format_4bit : public pixel_4bit<GRAYSCALE> {
  * @tparam GRAYSCALE Grayscale palette.
  */
 template <size_t W, size_t H, bool GRAYSCALE, bool USE_SPAN>
-class format_8bit : public pixel_8bit<GRAYSCALE> {
- public:
-    /// @cond DOXYGEN_EXCLUDE
-    using pixel_type = pixel_8bit<GRAYSCALE>;
-    static constexpr size_t bytes_per_line = pixel_type::bytes_per_line(W);
-    static constexpr size_t image_size = pixel_type::image_size(W, H);
-    /// @endcond
-};
+class format_8bit : public hidden::format_shell<pixel_8bit<GRAYSCALE>, W, H> {};
 
 /**
  * @brief 24-bit format. Use as template parameter for image. Example:
@@ -2080,14 +2049,7 @@ class format_8bit : public pixel_8bit<GRAYSCALE> {
  * @tparam GRAYSCALE Grayscale palette.
  */
 template <size_t W, size_t H, bool GRAYSCALE, bool USE_SPAN>
-class format_24bit : public pixel_24bit<GRAYSCALE> {
- public:
-    /// @cond DOXYGEN_EXCLUDE
-    using pixel_type = pixel_24bit<GRAYSCALE>;
-    static constexpr size_t bytes_per_line = pixel_type::bytes_per_line(W);
-    static constexpr size_t image_size = pixel_type::image_size(W, H);
-    /// @endcond
-};
+class format_24bit : public hidden::format_shell<pixel_24bit<GRAYSCALE>, W, H> {};
 
 /**
  * @brief 32-bit format. Use as template parameter for image. Example:
@@ -2101,14 +2063,7 @@ class format_24bit : public pixel_24bit<GRAYSCALE> {
  * @tparam GRAYSCALE Grayscale palette.
  */
 template <size_t W, size_t H, bool GRAYSCALE, bool USE_SPAN>
-class format_32bit : public pixel_32bit<GRAYSCALE> {
- public:
-    /// @cond DOXYGEN_EXCLUDE
-    using pixel_type = pixel_32bit<GRAYSCALE>;
-    static constexpr size_t bytes_per_line = pixel_type::bytes_per_line(W);
-    static constexpr size_t image_size = pixel_type::image_size(W, H);
-    /// @endcond
-};
+class format_32bit : public hidden::format_shell<pixel_32bit<GRAYSCALE>, W, H> {};
 
 /// @cond DOXYGEN_EXCLUDE
 // Former runtime-sized 8-bit format; the pixel classes are all runtime-sized.
@@ -2442,6 +2397,10 @@ class surface;
 
 /// @cond DOXYGEN_EXCLUDE
 namespace hidden {
+// A shader: called with the normalized position u, v and the pixel x, y, returns RGBA.
+template <typename shader_func>
+concept shader_function = std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, int32_t, int32_t>;
+
 // View of a NUL-terminated string, empty for nullptr.
 [[nodiscard]] constexpr std::string_view cstr_view(const char *str) {
     return str != nullptr ? std::string_view{str} : std::string_view{};
@@ -2453,11 +2412,6 @@ namespace hidden {
  * @brief Fluent shape API classes for method chaining
  */
 namespace shapes {
-
-/// @cond DOXYGEN_EXCLUDE
-template <typename shader_func>
-concept shader_function = std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, int32_t, int32_t>;
-/// @endcond
 
 /**
  * @brief Fluent API for drawing rectangles
@@ -2497,7 +2451,7 @@ class rect {
      * @param shader Function that returns RGBA values based on normalized coordinates
      * @return Reference to this rectangle for chaining
      */
-    constexpr rect &fill_shader(const shader_function auto &shader) {
+    constexpr rect &fill_shader(const hidden::shader_function auto &shader) {
         img.fill_rect(x, y, w, h, shader);
         return *this;
     }
@@ -2556,7 +2510,7 @@ class basic_circle {
      * @param shader Function that returns RGBA values based on normalized coordinates
      * @return Reference to this circle for chaining
      */
-    constexpr basic_circle &fill_shader(const shader_function auto &shader)
+    constexpr basic_circle &fill_shader(const hidden::shader_function auto &shader)
         requires AA
     {
         img.fill_circle_aa(cx, cy, r, shader);
@@ -2631,7 +2585,7 @@ class basic_round_rect {
      * @param shader Function that returns RGBA values based on normalized coordinates
      * @return Reference to this rounded rectangle for chaining
      */
-    constexpr basic_round_rect &fill_shader(const shader_function auto &shader)
+    constexpr basic_round_rect &fill_shader(const hidden::shader_function auto &shader)
         requires AA
     {
         img.fill_round_rect_aa(x, y, w, h, radius, shader);
@@ -4100,6 +4054,36 @@ class surface_extras {
         return self().template text_centered_aa<FONT, KERNING, ROTATION>(x, y, hidden::cstr_view(str));
     }
 
+    /**
+     * \brief Blit an RGBA8 buffer into this instance using brute force color mapping. Simple integer based diffusion is
+     * applied.
+     * \param dstrect Rectangular area in the target buffer to blit into. If the rectangle is smaller than the RGBA8
+     * buffer, clipping occurs.
+     * \param ptr Pointer to the RGBA8 buffer.
+     * \param iw Width in pixels of the RGBA8 buffer.
+     * \param ih Weight in pixels of the RGBA8 buffer.
+     * \param stride Bytes per line of pixels of the RGBA8 buffer.
+     */
+    constexpr void blit_RGBA_diffused(const constixel::rect<int32_t> &dstrect, const uint8_t *ptr, int32_t iw,
+                                      int32_t ih, int32_t stride) {
+        self().blit_RGBA_diffused(dstrect.x, dstrect.y, dstrect.w, dstrect.h, ptr, iw, ih, stride);
+    }
+
+    /**
+     * \brief Blit an RGBA8 buffer into this instance using brute force color mapping. Diffusion in linear color space
+     * is applied.
+     * \param dstrect Rectangular area in the target buffer to blit into. If the rectangle is smaller than the RGBA8
+     * buffer, clipping occurs.
+     * \param ptr Pointer to the RGBA8 buffer.
+     * \param iw Width in pixels of the RGBA8 buffer.
+     * \param ih Weight in pixels of the RGBA8 buffer.
+     * \param stride Bytes per line of pixels of the RGBA8 buffer.
+     */
+    constexpr void blit_RGBA_diffused_linear(const constixel::rect<int32_t> &dstrect, const uint8_t *ptr, int32_t iw,
+                                             int32_t ih, int32_t stride) {
+        self().blit_RGBA_diffused_linear(dstrect.x, dstrect.y, dstrect.w, dstrect.h, ptr, iw, ih, stride);
+    }
+
  private:
     [[nodiscard]] constexpr D &self() {
         return static_cast<D &>(*this);
@@ -4148,6 +4132,7 @@ class surface : public basic_surface<PF, uint8_t>, public surface_extras<surface
     using extras::fill_circle, extras::stroke_circle, extras::stroke_circle_aa, extras::fill_circle_aa;
     using extras::stroke_round_rect, extras::fill_round_rect, extras::fill_round_rect_aa;
     using extras::stroke_round_rect_aa, extras::string_width, extras::draw_string;
+    using extras::blit_RGBA_diffused, extras::blit_RGBA_diffused_linear;
 
     /**
      * \brief This surface. image and dynamic_image have the same function.
@@ -4604,10 +4589,7 @@ class surface : public basic_surface<PF, uint8_t>, public surface_extras<surface
      * \param shader Lambda function taking (u, v, x, y) normalized coordinates
      *                    and returning RGBA color as std::array<float, 4>
      */
-    template <typename shader_func>
-    constexpr auto fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, const shader_func &shader) -> void
-        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, int32_t, int32_t>
-    {
+    constexpr void fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, const hidden::shader_function auto &shader) {
         fill_rect_int(x, y, w, h, shader, x, y, w, h);
     }
 
@@ -4737,10 +4719,7 @@ class surface : public basic_surface<PF, uint8_t>, public surface_extras<surface
      * \param shader Lambda function taking (u, v, x, y) normalized coordinates
      *                    and returning RGBA color as std::array<float, 4>
      */
-    template <typename shader_func>
-    constexpr auto fill_circle_aa(int32_t cx, int32_t cy, int32_t radius, const shader_func &shader) -> void
-        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, int32_t, int32_t>
-    {
+    constexpr void fill_circle_aa(int32_t cx, int32_t cy, int32_t radius, const hidden::shader_function auto &shader) {
         if (!in_range({cx, cy, radius})) {
             return;
         }
@@ -4823,11 +4802,8 @@ class surface : public basic_surface<PF, uint8_t>, public surface_extras<surface
      * \param shader Lambda function taking (u, v, x, y) normalized coordinates
      *                    and returning RGBA color as std::array<float, 4>
      */
-    template <typename shader_func>
-    constexpr auto fill_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius,
-                                      const shader_func &shader) -> void
-        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, int32_t, int32_t>
-    {
+    constexpr void fill_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius,
+                                      const hidden::shader_function auto &shader) {
         if (!in_range({x, y, w, h, radius})) {
             return;
         }
@@ -5011,24 +4987,6 @@ class surface : public basic_surface<PF, uint8_t>, public surface_extras<surface
     }
 
     /**
-     * \brief Blit an RGBA8 buffer into this instance using brute force color mapping. Simple integer based diffusion is
-     * applied.
-     * \param dstrect Rectangular area in the target buffer to blit into. If the rectangle is smaller than the RGBA8
-     * buffer, clipping occurs.
-     * \param ptr Pointer to the RGBA8 buffer.
-     * \param iw Width in pixels of the RGBA8 buffer.
-     * \param ih Weight in pixels of the RGBA8 buffer.
-     * \param stride Bytes per line of pixels of the RGBA8 buffer.
-     */
-    constexpr void blit_RGBA_diffused(const constixel::rect<int32_t> &dstrect, const uint8_t *ptr, int32_t iw,
-                                      int32_t ih, int32_t stride) {
-        constixel::rect<int32_t> blitrect{dstrect};
-        blitrect &= {.x = 0, .y = 0, .w = static_cast<int32_t>(pix.width), .h = static_cast<int32_t>(pix.height)};
-        blitrect &= {.x = dstrect.x, .y = dstrect.y, .w = iw, .h = ih};
-        PF::blit_RGBA_diffused(pix, blitrect, ptr, stride);
-    }
-
-    /**
      * \brief Blit an RGBA8 buffer into this instance using brute force color mapping. Diffusion in linear color space
      * is applied.
      * \param x Starting X-coordinate position in the target instance in pixels.
@@ -5045,24 +5003,6 @@ class surface : public basic_surface<PF, uint8_t>, public surface_extras<surface
         constixel::rect<int32_t> blitrect{.x = x, .y = y, .w = w, .h = h};
         blitrect &= {.x = 0, .y = 0, .w = static_cast<int32_t>(pix.width), .h = static_cast<int32_t>(pix.height)};
         blitrect &= {.x = x, .y = y, .w = iw, .h = ih};
-        PF::blit_RGBA_diffused_linear(pix, blitrect, ptr, stride);
-    }
-
-    /**
-     * \brief Blit an RGBA8 buffer into this instance using brute force color mapping. Diffusion in linear color space
-     * is applied.
-     * \param dstrect Rectangular area in the target buffer to blit into. If the rectangle is smaller than the RGBA8
-     * buffer, clipping occurs.
-     * \param ptr Pointer to the RGBA8 buffer.
-     * \param iw Width in pixels of the RGBA8 buffer.
-     * \param ih Weight in pixels of the RGBA8 buffer.
-     * \param stride Bytes per line of pixels of the RGBA8 buffer.
-     */
-    constexpr void blit_RGBA_diffused_linear(const constixel::rect<int32_t> &dstrect, const uint8_t *ptr, int32_t iw,
-                                             int32_t ih, int32_t stride) {
-        constixel::rect<int32_t> blitrect{dstrect};
-        blitrect &= {.x = 0, .y = 0, .w = static_cast<int32_t>(pix.width), .h = static_cast<int32_t>(pix.height)};
-        blitrect &= {.x = dstrect.x, .y = dstrect.y, .w = iw, .h = ih};
         PF::blit_RGBA_diffused_linear(pix, blitrect, ptr, stride);
     }
 
@@ -5312,11 +5252,8 @@ class surface : public basic_surface<PF, uint8_t>, public surface_extras<surface
     /**
      * @private
      */
-    template <typename shader_func>
-    constexpr auto fill_rect_int(int32_t x, int32_t y, int32_t w, int32_t h, const shader_func &shader,
-                                 int32_t parent_x, int32_t parent_y, int32_t parent_w, int32_t parent_h) -> void
-        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, int32_t, int32_t>
-    {
+    constexpr void fill_rect_int(int32_t x, int32_t y, int32_t w, int32_t h, const hidden::shader_function auto &shader,
+                                 int32_t parent_x, int32_t parent_y, int32_t parent_w, int32_t parent_h) {
         const auto dst = pix;
         if (!in_range({x, y, w, h})) {
             return;
@@ -5613,26 +5550,18 @@ class surface : public basic_surface<PF, uint8_t>, public surface_extras<surface
             if (lookup_glyph<FONT>(utf32, &index)) {
                 const char_info<typename FONT::char_info_type> &ch_info = FONT::char_table.at(index);
                 draw_char<FONT, ROTATION>(x, y, ch_info, col);
+                auto advance = static_cast<int32_t>(ch_info.xadvance);
+                if constexpr (KERNING) {
+                    advance += get_kerning<FONT>(utf32, ptr, end);
+                }
                 if constexpr (ROTATION == DEGREE_0) {
-                    x += static_cast<int32_t>(ch_info.xadvance);
-                    if constexpr (KERNING) {
-                        x += get_kerning<FONT>(utf32, ptr, end);
-                    }
+                    x += advance;
                 } else if constexpr (ROTATION == DEGREE_90) {
-                    y += static_cast<int32_t>(ch_info.xadvance);
-                    if constexpr (KERNING) {
-                        y += get_kerning<FONT>(utf32, ptr, end);
-                    }
+                    y += advance;
                 } else if constexpr (ROTATION == DEGREE_180) {
-                    x -= static_cast<int32_t>(ch_info.xadvance);
-                    if constexpr (KERNING) {
-                        x -= get_kerning<FONT>(utf32, ptr, end);
-                    }
+                    x -= advance;
                 } else if constexpr (ROTATION == DEGREE_270) {
-                    y -= static_cast<int32_t>(ch_info.xadvance);
-                    if constexpr (KERNING) {
-                        y -= get_kerning<FONT>(utf32, ptr, end);
-                    }
+                    y -= advance;
                 }
             }
         }
@@ -5785,6 +5714,7 @@ class surface_api : public surface_extras<D, PF> {
     using extras::fill_circle, extras::stroke_circle, extras::stroke_circle_aa, extras::fill_circle_aa;
     using extras::stroke_round_rect, extras::fill_round_rect, extras::fill_round_rect_aa;
     using extras::stroke_round_rect_aa, extras::string_width, extras::draw_string;
+    using extras::blit_RGBA_diffused, extras::blit_RGBA_diffused_linear;
 
 
     /// @copydoc surface::plot(int32_t,int32_t,uint8_t)
@@ -5826,11 +5756,8 @@ class surface_api : public surface_extras<D, PF> {
         derived().view().fill_rect(x, y, w, h, col);
     }
 
-    /// @copydoc surface::fill_rect(int32_t,int32_t,int32_t,int32_t,const shader_func &)
-    template <typename shader_func>
-    constexpr auto fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, const shader_func &shader) -> void
-        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, int32_t, int32_t>
-    {
+    /// @copydoc surface::fill_rect(int32_t,int32_t,int32_t,int32_t,const hidden::shader_function auto &)
+    constexpr void fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, const hidden::shader_function auto &shader) {
         derived().view().fill_rect(x, y, w, h, shader);
     }
 
@@ -5859,11 +5786,8 @@ class surface_api : public surface_extras<D, PF> {
         derived().view().fill_circle_aa(cx, cy, radius, col);
     }
 
-    /// @copydoc surface::fill_circle_aa(int32_t,int32_t,int32_t,const shader_func &)
-    template <typename shader_func>
-    constexpr auto fill_circle_aa(int32_t cx, int32_t cy, int32_t radius, const shader_func &shader) -> void
-        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, int32_t, int32_t>
-    {
+    /// @copydoc surface::fill_circle_aa(int32_t,int32_t,int32_t,const hidden::shader_function auto &)
+    constexpr void fill_circle_aa(int32_t cx, int32_t cy, int32_t radius, const hidden::shader_function auto &shader) {
         derived().view().fill_circle_aa(cx, cy, radius, shader);
     }
 
@@ -5883,12 +5807,9 @@ class surface_api : public surface_extras<D, PF> {
         derived().view().fill_round_rect_aa(x, y, w, h, radius, col);
     }
 
-    /// @copydoc surface::fill_round_rect_aa(int32_t,int32_t,int32_t,int32_t,int32_t,const shader_func &)
-    template <typename shader_func>
-    constexpr auto fill_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius,
-                                      const shader_func &shader) -> void
-        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, int32_t, int32_t>
-    {
+    /// @copydoc surface::fill_round_rect_aa(int32_t,int32_t,int32_t,int32_t,int32_t,const hidden::shader_function auto &)
+    constexpr void fill_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius,
+                                      const hidden::shader_function auto &shader) {
         derived().view().fill_round_rect_aa(x, y, w, h, radius, shader);
     }
 
@@ -5931,22 +5852,10 @@ class surface_api : public surface_extras<D, PF> {
         derived().view().blit_RGBA_diffused(x, y, w, h, ptr, iw, ih, stride);
     }
 
-    /// @copydoc surface::blit_RGBA_diffused(const constixel::rect<int32_t> &,const uint8_t *,int32_t,int32_t,int32_t)
-    constexpr void blit_RGBA_diffused(const constixel::rect<int32_t> &dstrect, const uint8_t *ptr, int32_t iw,
-                                      int32_t ih, int32_t stride) {
-        derived().view().blit_RGBA_diffused(dstrect, ptr, iw, ih, stride);
-    }
-
     /// @copydoc surface::blit_RGBA_diffused_linear(int32_t,int32_t,int32_t,int32_t,const uint8_t *,int32_t,int32_t,int32_t)
     constexpr void blit_RGBA_diffused_linear(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw,
                                              int32_t ih, int32_t stride) {
         derived().view().blit_RGBA_diffused_linear(x, y, w, h, ptr, iw, ih, stride);
-    }
-
-    /// @copydoc surface::blit_RGBA_diffused_linear(const constixel::rect<int32_t> &,const uint8_t *,int32_t,int32_t,int32_t)
-    constexpr void blit_RGBA_diffused_linear(const constixel::rect<int32_t> &dstrect, const uint8_t *ptr, int32_t iw,
-                                             int32_t ih, int32_t stride) {
-        derived().view().blit_RGBA_diffused_linear(dstrect, ptr, iw, ih, stride);
     }
 
     /// @copydoc basic_surface::get_nearest_color(uint8_t,uint8_t,uint8_t)
