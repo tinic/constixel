@@ -3387,6 +3387,725 @@ template <typename PF>
 using const_surface = basic_surface<PF, const uint8_t>;
 
 /**
+ * @class surface_extras
+ * @brief The drawing functions of surface, image and dynamic_image which are another drawing function in a different
+ * form: the param struct overloads, the NUL-terminated string overloads, the _mono, _aa and centered text names and
+ * the fluent shapes. They are written here once and call the functions of D.
+ *
+ * @tparam D surface, or the storage class.
+ * @tparam PF Pixel class of the format, see basic_surface.
+ */
+template <typename D, typename PF>
+class surface_extras {
+ public:
+    /**
+     * \brief Plot a single pixel at the specified coordinates using the supplied color.
+     *
+     * \param p \ref plot initializer struct
+     */
+    constexpr void plot(const struct plot &p) {
+        self().plot(p.x, p.y, p.col);
+    }
+
+    /**
+     * \brief Draw a line with the specified color and thickness. Example:
+     *
+     * \code{.cpp}
+     * image.draw_line({.x0=0, .y0=0, .x1=200, .y1=100, .col=color::WHITE, .sw=2});
+     * \endcode
+     *
+     * \param d \ref draw_line initializer struct
+     */
+    constexpr void draw_line(const struct draw_line &d) {
+        self().draw_line(d.x0, d.y0, d.x1, d.y1, d.col, static_cast<int32_t>(d.sw));
+    }
+
+    /**
+     * \brief Draw a 1-pixel wide antialiased line with the specified color. Only format_8bit targets are supported.
+     * Example:
+     *
+     * \code{.cpp}
+     * image.draw_line_aa({.x0=0, .y0=0, .x1=200, .y1=100, .col=color::WHITE, .sw=2.5f});
+     * \endcode
+     *
+     * \param d \ref draw_line initializer struct
+     */
+    constexpr void draw_line_aa(const struct draw_line &d) {
+        self().draw_line_aa(d.x0, d.y0, d.x1, d.y1, d.col, d.sw);
+    }
+
+    /**
+     * \brief Return the width of a NUL-terminated string. See string_width(std::string_view, size_t, size_t *).
+     * \param str UTF-8 string.
+     * \param character_count How many utf32 characters in the string should be measured.
+     * \param character_actual How many utf32 characters in the string were measured.
+     * \return Width of the string in pixels.
+     */
+    template <typename FONT, bool KERNING = false>
+    [[nodiscard]] constexpr int32_t string_width(const char *str,
+                                                 size_t character_count = std::numeric_limits<size_t>::max(),
+                                                 size_t *character_actual = nullptr) {
+        return self().template string_width<FONT, KERNING>(std::string_view{str}, character_count, character_actual);
+    }
+
+    /**
+     * \brief Draw a NUL-terminated string. See draw_string(int32_t, int32_t, std::string_view, uint8_t, text_align,
+     * size_t, size_t *).
+     * \param x X-coordinate in pixels.
+     * \param y Y-coordinate in pixels.
+     * \param str UTF-8 string. nullptr draws nothing.
+     * \param col Color palette index to use.
+     * \param align Placement relative to x/y.
+     * \param character_count How many utf32 characters in the string should be drawn.
+     * \param character_actual How many utf32 characters in the string were drawn.
+     * \return Returns the new caret position.
+     */
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+    constexpr int32_t draw_string(int32_t x, int32_t y, const char *str, uint8_t col, text_align align = ALIGN_LEFT,
+                                  size_t character_count = std::numeric_limits<size_t>::max(),
+                                  size_t *character_actual = nullptr) {
+        if (str == nullptr) {
+            return 0;
+        }
+        return self().template draw_string<FONT, KERNING, ROTATION>(x, y, std::string_view{str}, col, align,
+                                                                    character_count, character_actual);
+    }
+
+    /**
+     * \brief Draw text at the specified coordinate. Example:
+     *
+     * \code{.cpp}
+     * image.draw_string<constixel::some_font_mono>({.x=191, .y=0, .str="MyText", .col=1, .align=ALIGN_RIGHT});
+     * \endcode
+     *
+     * \tparam FONT The font struct name.
+     * \tparam KERNING Boolean, use kerning information if available. Default to false.
+     * \tparam ROTATION Rotation around the x/y coordinate.
+     * \param d \ref draw_string initializer struct
+     * \param character_count How many utf32 characters in the string should be drawn.
+     * \param character_actual How many utf32 characters in the string were drawn.
+     * \return Returns the new caret position.
+     */
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+    constexpr int32_t draw_string(const struct draw_string &d,
+                                  size_t character_count = std::numeric_limits<size_t>::max(),
+                                  size_t *character_actual = nullptr) {
+        return self().template draw_string<FONT, KERNING, ROTATION>(d.x, d.y, d.str, d.col, d.align, character_count,
+                                                                    character_actual);
+    }
+
+    /**
+     * \brief Draw text at the specified coordinate. The template parameter selects which mono font to use. Only
+     * format_8bit targets are supported.
+
+     * \code{.cpp}
+     * #include "some_font_mono.h"
+     * ...
+     *     image.draw_string_mono<constixel::some_font_mono>(0, 0, "MyText", constixel::color::WHITE);
+     * ...
+     * \endcode
+     *
+     * \tparam FONT The font struct name.
+     * \tparam KERNING Boolean, use kerning information if available. Default to false.
+     * \tparam ROTATION Rotation around the x/y coordinate. Defaults to text_rotation::DEGREE_0. Can be
+     * text_rotation::DEGREE_0, text_rotation::DEGREE_90, text_rotation::DEGREE_180 or text_rotation::DEGREE_270
+     * \param x Starting X-coordinate in pixels.
+     * \param y Starting Y-coordinate in pixels.
+     * \param str UTF-8 string. Does not have to be NUL-terminated.
+     * \param col Color palette index to use.
+     * \param character_count How many utf32 characters in the string should be drawn.
+     * \param character_actual How many utf32 characters in the string were drawn.
+     * \return Returns the new caret X-coordinate position. Pass this value to the next draw_string call to get
+     * continious text.
+     */
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+    constexpr int32_t draw_string_mono(int32_t x, int32_t y, std::string_view str, uint8_t col,
+                                       size_t character_count = std::numeric_limits<size_t>::max(),
+                                       size_t *character_actual = nullptr) {
+        static_assert(FONT::mono == true, "Can't use an antialiased font to draw mono/pixelized text.");
+        return self().template draw_string<FONT, KERNING, ROTATION>(x, y, str, col, ALIGN_LEFT, character_count,
+                                                                    character_actual);
+    }
+
+    /**
+     * \brief Draw a NUL-terminated string. See draw_string_mono(int32_t, int32_t, std::string_view, uint8_t, size_t,
+     * size_t *).
+     * \param x Starting X-coordinate in pixels.
+     * \param y Starting Y-coordinate in pixels.
+     * \param str UTF-8 string. nullptr draws nothing.
+     * \param col Color palette index to use.
+     * \param character_count How many utf32 characters in the string should be drawn.
+     * \param character_actual How many utf32 characters in the string were drawn.
+     * \return Returns the new caret position.
+     */
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+    constexpr int32_t draw_string_mono(int32_t x, int32_t y, const char *str, uint8_t col,
+                                       size_t character_count = std::numeric_limits<size_t>::max(),
+                                       size_t *character_actual = nullptr) {
+        if (str == nullptr) {
+            return 0;
+        }
+        return self().template draw_string_mono<FONT, KERNING, ROTATION>(x, y, std::string_view{str}, col,
+                                                                         character_count, character_actual);
+    }
+
+    /**
+     * \brief Draw text at the specified coordinate. The template parameter selects which mono font to use. Only
+     * format_8bit targets are supported.
+
+     * \code{.cpp}
+     * #include "some_font_mono.h"
+     * ...
+     *     image.draw_string_mono<constixel::some_font_mono>({.x=0, .y=0, .str="MyText", .col=constixel::color::WHITE});
+     * ...
+     * \endcode
+     *
+     * \tparam FONT The font struct name.
+     * \tparam KERNING Boolean, use kerning information if available. Default to false.
+     * \tparam ROTATION Rotation around the x/y coordinate. Defaults to text_rotation::DEGREE_0. Can be
+     * text_rotation::DEGREE_0, text_rotation::DEGREE_90, text_rotation::DEGREE_180 or text_rotation::DEGREE_270
+     * \param d \ref draw_string initializer struct.
+     * \param character_count How many utf32 characters in the string should be drawn.
+     * \param character_actual How many utf32 characters in the string were drawn.
+     * \return Returns the new caret X-coordinate position. Pass this value to the next draw_string call to get
+     * continious text.
+     */
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+    constexpr int32_t draw_string_mono(const struct draw_string &d,
+                                       size_t character_count = std::numeric_limits<size_t>::max(),
+                                       size_t *character_actual = nullptr) {
+        static_assert(FONT::mono == true, "Can't use an antialiased font to draw mono/pixelized text.");
+        return self().template draw_string<FONT, KERNING, ROTATION>(d, character_count, character_actual);
+    }
+
+    /**
+     * \brief Draw text centered at the specified coordinate. The template parameter selects which mono font to use.
+     * Only format_8bit targets are supported.
+     * \tparam FONT The font struct name.
+     * \tparam KERNING Boolean, use kerning information if available. Default to false.
+     * \tparam ROTATION Rotation around the x/y coordinate. Can be text_rotation::DEGREE_0, text_rotation::DEGREE_90,
+     * text_rotation::DEGREE_180 or text_rotation::DEGREE_270
+     * \param x Center/Starting X-coordinate in pixels.
+     * \param y Center/Starting Y-coordinate in pixels.
+     * \param str UTF-8 string. Does not have to be NUL-terminated.
+     * \param col Color palette index to use.
+     */
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+    constexpr void draw_string_centered_mono(int32_t x, int32_t y, std::string_view str, uint8_t col) {
+        static_assert(FONT::mono == true, "Can't use an antialiased font to draw mono/pixelized text.");
+        self().template draw_string<FONT, KERNING, ROTATION>(x, y, str, col, ALIGN_CENTER);
+    }
+
+    /**
+     * \brief Draw a centered NUL-terminated string. See draw_string_centered_mono(int32_t, int32_t,
+     * std::string_view, uint8_t).
+     * \param x Center/Starting X-coordinate in pixels.
+     * \param y Center/Starting Y-coordinate in pixels.
+     * \param str UTF-8 string. nullptr draws nothing.
+     * \param col Color palette index to use.
+     */
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+    constexpr void draw_string_centered_mono(int32_t x, int32_t y, const char *str, uint8_t col) {
+        self().template draw_string_centered_mono<FONT, KERNING, ROTATION>(x, y, hidden::cstr_view(str), col);
+    }
+
+    /**
+     * \brief Draw antialiased text at the specified coordinate. The template parameter selects which antialiased font
+     * to use. Only format_8bit targets are supported. Typical use:
+     *
+     * \code{.cpp}
+     * #include "some_font_aa.h"
+     * ...
+     *     image.draw_string_aa<constixel::some_font_aa>(0, 0, "MyText", constixel::color::WHITE);
+     * ...
+     * \endcode
+     *
+     * \tparam FONT The font struct name.
+     * \tparam KERNING Boolean, use kerning information if available. Default to false.
+     * \tparam ROTATION Rotation around the x/y coordinate. Can be text_rotation::DEGREE_0, text_rotation::DEGREE_90,
+     * text_rotation::DEGREE_180 or text_rotation::DEGREE_270
+     * \param x Starting X-coordinate in pixels.
+     * \param y Starting Y-coordinate in pixels.
+     * \param str UTF-8 string. Does not have to be NUL-terminated.
+     * \param col Color palette index to use.
+     * \param character_count How many utf32 characters in the string should be drawn.
+     * \param character_actual How many utf32 characters in the string were drawn.
+     * \return Returns the new caret X-coordinate position. Pass this value to the next draw_string call to get
+     * continious text.
+     */
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+    constexpr int32_t draw_string_aa(int32_t x, int32_t y, std::string_view str, uint8_t col,
+                                     size_t character_count = std::numeric_limits<size_t>::max(),
+                                     size_t *character_actual = nullptr) {
+        static_assert(FONT::mono == false, "Can't use a mono font to draw antialiased text.");
+        return self().template draw_string<FONT, KERNING, ROTATION>(x, y, str, col, ALIGN_LEFT, character_count,
+                                                                    character_actual);
+    }
+
+    /**
+     * \brief Draw a NUL-terminated string. See draw_string_aa(int32_t, int32_t, std::string_view, uint8_t, size_t,
+     * size_t *).
+     * \param x Starting X-coordinate in pixels.
+     * \param y Starting Y-coordinate in pixels.
+     * \param str UTF-8 string. nullptr draws nothing.
+     * \param col Color palette index to use.
+     * \param character_count How many utf32 characters in the string should be drawn.
+     * \param character_actual How many utf32 characters in the string were drawn.
+     * \return Returns the new caret position.
+     */
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+    constexpr int32_t draw_string_aa(int32_t x, int32_t y, const char *str, uint8_t col,
+                                     size_t character_count = std::numeric_limits<size_t>::max(),
+                                     size_t *character_actual = nullptr) {
+        if (str == nullptr) {
+            return 0;
+        }
+        return self().template draw_string_aa<FONT, KERNING, ROTATION>(x, y, std::string_view{str}, col,
+                                                                       character_count, character_actual);
+    }
+
+    /**
+     * \brief Draw antialiased text at the specified coordinate. The template parameter selects which antialiased font
+     * to use. Only format_8bit targets are supported. Typical use:
+     *
+     * \code{.cpp}
+     * #include "some_font_aa.h"
+     * ...
+     *     image.draw_string_aa<constixel::some_font_aa>({.x=0, .y=0, .str="MyText", .col=constixel::color::WHITE});
+     * ...
+     * \endcode
+     *
+     * \tparam FONT The font struct name.
+     * \tparam KERNING Boolean, use kerning information if available. Default to false.
+     * \tparam ROTATION Rotation around the x/y coordinate. Can be text_rotation::DEGREE_0, text_rotation::DEGREE_90,
+     * text_rotation::DEGREE_180 or text_rotation::DEGREE_270
+     * \param d \ref draw_string initializer struct.
+     * \param character_count How many utf32 characters in the string should be drawn.
+     * \param character_actual How many utf32 characters in the string were drawn.
+     * \return Returns the new caret X-coordinate position. Pass this value to the next draw_string call to get
+     * continious text.
+     */
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+    constexpr int32_t draw_string_aa(const struct draw_string &d,
+                                     size_t character_count = std::numeric_limits<size_t>::max(),
+                                     size_t *character_actual = nullptr) {
+        static_assert(FONT::mono == false, "Can't use a mono font to draw antialiased text.");
+        return self().template draw_string<FONT, KERNING, ROTATION>(d, character_count, character_actual);
+    }
+
+    /**
+     * \brief Draw antialiased text centered at the specified coordinate. The template parameter selects which
+     * antialiased font to use. Only format_8bit targets are supported. Typical use
+     *
+     * \tparam FONT The font struct name.
+     * \tparam KERNING Boolean, use kerning information if available. Default to false.
+     * \tparam ROTATION Rotation around the x/y coordinate. Can be text_rotation::DEGREE_0, text_rotation::DEGREE_90,
+     * text_rotation::DEGREE_180 or text_rotation::DEGREE_270
+     * \param x Center/Starting X-coordinate in pixels.
+     * \param y Center/Starting Y-coordinate in pixels.
+     * \param str UTF-8 string. Does not have to be NUL-terminated.
+     * \param col Color palette index to use.
+     */
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+    constexpr void draw_string_centered_aa(int32_t x, int32_t y, std::string_view str, uint8_t col) {
+        static_assert(FONT::mono == false, "Can't use a mono font to draw antialiased text.");
+        self().template draw_string<FONT, KERNING, ROTATION>(x, y, str, col, ALIGN_CENTER);
+    }
+
+    /**
+     * \brief Draw a centered NUL-terminated string. See draw_string_centered_aa(int32_t, int32_t,
+     * std::string_view, uint8_t).
+     * \param x Center/Starting X-coordinate in pixels.
+     * \param y Center/Starting Y-coordinate in pixels.
+     * \param str UTF-8 string. nullptr draws nothing.
+     * \param col Color palette index to use.
+     */
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+    constexpr void draw_string_centered_aa(int32_t x, int32_t y, const char *str, uint8_t col) {
+        self().template draw_string_centered_aa<FONT, KERNING, ROTATION>(x, y, hidden::cstr_view(str), col);
+    }
+
+    /**
+     * \brief Fill a rectangle with the specified color. Example:
+     *
+     * \code{.cpp}
+     * image.fill_rect({.x=0, .y=0, .w=320, .h=240, .col=constixel::color::WHITE});
+     * \endcode
+     *
+     * \param d \ref draw_rect initializer struct
+     */
+    constexpr void fill_rect(const struct draw_rect &d) {
+        self().fill_rect(d.x, d.y, d.w, d.h, d.col);
+    }
+
+    /**
+     * \brief Draw a stroked rectangle with the specified color and stroke width. Example:
+     *
+     * \code{.cpp}
+     * image.stroke_rect({.x=0, .y=0, .w=320, .h=240, .col=constixel::color::WHITE, .sw=2});
+     * \endcode
+     *
+     * \param d \ref draw_rect initializer struct
+     */
+    constexpr void stroke_rect(const struct draw_rect &d) {
+        self().stroke_rect(d.x, d.y, d.w, d.h, d.col, d.sw);
+    }
+
+    /**
+     * \brief Fill a circle with the specified radius and color. Example:
+     *
+     * \code{.cpp}
+     * image.fill_circle({.cx=64, .cy=64, .r=32, .col=constixel::color::WHITE});
+     * \endcode
+     *
+     * \param d \ref draw_circle initializer struct
+     */
+    constexpr void fill_circle(const struct draw_circle &d) {
+        self().fill_circle(d.cx, d.cy, d.r, d.col);
+    }
+
+    /**
+     * \brief Stroke a circle with the specified radius and color. Example:
+     *
+     * \code{.cpp}
+     * image.stroke_circle({.cx=64, .cy=64, .r=32, .col=constixel::color::WHITE, .sw=2});
+     * \endcode
+     *
+     * \param d \ref draw_circle initializer struct
+     */
+    constexpr void stroke_circle(const struct draw_circle &d) {
+        self().stroke_circle(d.cx, d.cy, d.r, d.col, d.sw);
+    }
+
+    /**
+     * \brief Stroke a circle using antialiasing with the specified radius and color. Only format_8bit targets are
+     * supported. Example:
+     *
+     * \code{.cpp}
+     * image.stroke_circle_aa({.cx=64, .cy=64, .r=32, .col=constixel::color::WHITE, .sw=2});
+     * \endcode
+     *
+     * \param d \ref draw_circle initializer struct
+     */
+    constexpr void stroke_circle_aa(const struct draw_circle &d) {
+        self().stroke_circle_aa(d.cx, d.cy, d.r, d.col, d.sw);
+    }
+
+    /**
+     * \brief Fill a circle using antialiasing with the specified radius and color. Only format_8bit targets are
+     * supported. Example:
+     *
+     * \code{.cpp}
+     * image.fill_circle_aa({.cx=64, .cy=64, .r=32, .col=constixel::color::WHITE});
+     * \endcode
+     *
+     * \param d \ref draw_circle initializer struct
+     */
+    constexpr void fill_circle_aa(const struct draw_circle &d) {
+        self().fill_circle_aa(d.cx, d.cy, d.r, d.col);
+    }
+
+    /**
+     * \brief Stroke a rounded rectangle with the specified color. Example:
+     *
+     * \code{.cpp}
+     * image.stroke_round_rect({.x=0, .y=0, .w=200, .h=100, .r=15, .col=constixel::color::WHITE, .sw=8});
+     * \endcode
+     *
+     * \param d \ref draw_round_rect initializer struct
+     */
+    constexpr void stroke_round_rect(const struct draw_round_rect &d) {
+        self().stroke_round_rect(d.x, d.y, d.w, d.h, d.r, d.col, d.sw);
+    }
+
+    /**
+     * \brief Fill a rounded rectangle with the specified color. Example:
+     *
+     * \code{.cpp}
+     * image.fill_round_rect({.x=0, .y=0, .w=200, .h=100, .r=15, .col=constixel::color::WHITE});
+     * \endcode
+     *
+     * \param d \ref draw_round_rect initializer struct
+     */
+    constexpr void fill_round_rect(const struct draw_round_rect &d) {
+        self().fill_round_rect(d.x, d.y, d.w, d.h, d.r, d.col);
+    }
+
+    /**
+     * \brief Fill a rounded rectangle using antialiasing with the specified color. Only format_8bit targets are
+     * supported.
+     *
+     * \code{.cpp}
+     * image.fill_round_rect_aa({.x=0, .y=0, .w=200, .h=100, .r=15, .col=constixel::color::WHITE, .sw=8});
+     * \endcode
+     *
+     * \param d \ref draw_round_rect initializer struct
+     */
+    constexpr void fill_round_rect_aa(const struct draw_round_rect &d) {
+        self().fill_round_rect_aa(d.x, d.y, d.w, d.h, d.r, d.col);
+    }
+
+    /**
+     * \brief Stroke a rounded rectangle using antialiasing with the specified color. Example:
+     *
+     * \code{.cpp}
+     * image.stroke_round_rect_aa({.x=0, .y=0, .w=200, .h=100, .r=15, .col=constixel::color::WHITE, .sw=8});
+     * \endcode
+     *
+     * \param d \ref draw_round_rect initializer struct
+     */
+    constexpr void stroke_round_rect_aa(const struct draw_round_rect &d) {
+        self().stroke_round_rect_aa(d.x, d.y, d.w, d.h, d.r, d.col, d.sw);
+    }
+
+    /**
+     * @brief Fluent shape API methods for method chaining
+     * These provide a more expressive way to create shapes compared to struct-based calls.
+     *
+     * Example usage:
+     * \code{.cpp}
+     * image.rect(10, 10, 50, 30).fill(constixel::color::RED).stroke(constixel::color::BLACK, 2);
+     * image.circle(100, 100, 20).fill(constixel::color::BLUE);
+     * image.line(0, 0, 100, 100).stroke(constixel::color::WHITE, 3);
+     * \endcode
+     */
+
+    /**
+     * \brief Create a rectangle shape for fluent method chaining.
+     * \param x Starting X-coordinate in pixels.
+     * \param y Starting Y-coordinate in pixels.
+     * \param w Width of the rectangle in pixels.
+     * \param h Height of the rectangle in pixels.
+     * \return A rect shape object that supports .fill() and .stroke() methods.
+     */
+    constexpr auto rect(int32_t x, int32_t y, int32_t w, int32_t h) {
+        return shapes::rect<PF>(self().view(), x, y, w, h);
+    }
+
+    /**
+     * \brief Create a circle shape for fluent method chaining.
+     * \param cx Center X-coordinate in pixels.
+     * \param cy Center Y-coordinate in pixels.
+     * \param r Radius of the circle in pixels.
+     * \return A circle shape object that supports .fill() and .stroke() methods.
+     */
+    constexpr auto circle(int32_t cx, int32_t cy, int32_t r) {
+        return shapes::circle<PF>(self().view(), cx, cy, r);
+    }
+
+    /**
+     * \brief Create an antialiased circle shape for fluent method chaining.
+     * Only format_8bit targets are supported.
+     * \param cx Center X-coordinate in pixels.
+     * \param cy Center Y-coordinate in pixels.
+     * \param r Radius of the circle in pixels.
+     * \return A circle_aa shape object that supports .fill() and .stroke() methods.
+     */
+    constexpr auto circle_aa(int32_t cx, int32_t cy, int32_t r) {
+        return shapes::circle_aa<PF>(self().view(), cx, cy, r);
+    }
+
+    /**
+     * \brief Create a rounded rectangle shape for fluent method chaining.
+     * \param x Starting X-coordinate in pixels.
+     * \param y Starting Y-coordinate in pixels.
+     * \param w Width of the rectangle in pixels.
+     * \param h Height of the rectangle in pixels.
+     * \param radius Radius of the rounded corners in pixels.
+     * \return A round_rect shape object that supports .fill() and .stroke() methods.
+     */
+    constexpr auto round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius) {
+        return shapes::round_rect<PF>(self().view(), x, y, w, h, radius);
+    }
+
+    /**
+     * \brief Create an antialiased rounded rectangle shape for fluent method chaining.
+     * Only format_8bit targets are supported.
+     * \param x Starting X-coordinate in pixels.
+     * \param y Starting Y-coordinate in pixels.
+     * \param w Width of the rectangle in pixels.
+     * \param h Height of the rectangle in pixels.
+     * \param radius Radius of the rounded corners in pixels.
+     * \return A round_rect_aa shape object that supports .fill() and .stroke() methods.
+     */
+    constexpr auto round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius) {
+        return shapes::round_rect_aa<PF>(self().view(), x, y, w, h, radius);
+    }
+
+    /**
+     * \brief Create a line shape for fluent method chaining.
+     * \param x0 Starting X-coordinate in pixels.
+     * \param y0 Starting Y-coordinate in pixels.
+     * \param x1 Ending X-coordinate in pixels.
+     * \param y1 Ending Y-coordinate in pixels.
+     * \return A line shape object that supports .stroke() method.
+     */
+    constexpr auto line(int32_t x0, int32_t y0, int32_t x1, int32_t y1) {
+        return shapes::line<PF>(self().view(), x0, y0, x1, y1);
+    }
+
+    /**
+     * \brief Create an antialiased line shape for fluent method chaining.
+     * Only format_8bit targets are supported.
+     * \param x0 Starting X-coordinate in pixels.
+     * \param y0 Starting Y-coordinate in pixels.
+     * \param x1 Ending X-coordinate in pixels.
+     * \param y1 Ending Y-coordinate in pixels.
+     * \return A line_aa shape object that supports .stroke() method.
+     */
+    constexpr auto line_aa(int32_t x0, int32_t y0, int32_t x1, int32_t y1) {
+        return shapes::line_aa<PF>(self().view(), x0, y0, x1, y1);
+    }
+
+    /**
+     * \brief Create a point shape for fluent method chaining.
+     * \param x X-coordinate in pixels.
+     * \param y Y-coordinate in pixels.
+     * \return A point shape object that supports .plot() method.
+     */
+    constexpr auto point(int32_t x, int32_t y) {
+        return shapes::point<PF>(self().view(), x, y);
+    }
+
+    /**
+     * \brief Create a text shape for fluent monospace string drawing with method chaining.
+     * \tparam FONT The font type to use for rendering.
+     * \tparam KERNING Enable kerning if true (default: false).
+     * \tparam ROTATION Text rotation (default: DEGREE_0).
+     * \param x Starting X-coordinate in pixels.
+     * \param y Starting Y-coordinate in pixels.
+     * \param str The string to draw. Does not have to be NUL-terminated; it has to outlive the shape.
+     * \return A text_mono shape object that supports .color() and .draw() methods.
+     *
+     * Example usage:
+     * \code
+     * img.text_mono<constixel::ibmplexmono_regular_12_mono>(10, 20, "Hello").color(constixel::color::WHITE);
+     * \endcode
+     */
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+    constexpr auto text_mono(int32_t x, int32_t y, std::string_view str) {
+        return shapes::text_mono<FONT, PF, KERNING, ROTATION>(self().view(), x, y, str);
+    }
+
+    /**
+     * \brief Create a text shape from a NUL-terminated string. See text_mono(int32_t, int32_t, std::string_view).
+     * \param x Starting X-coordinate in pixels.
+     * \param y Starting Y-coordinate in pixels.
+     * \param str The string to draw. nullptr draws nothing.
+     * \return A text_mono shape object.
+     */
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+    constexpr auto text_mono(int32_t x, int32_t y, const char *str) {
+        return self().template text_mono<FONT, KERNING, ROTATION>(x, y, hidden::cstr_view(str));
+    }
+
+    /**
+     * \brief Create a text shape for fluent antialiased string drawing with method chaining.
+     * Only format_8bit targets are supported.
+     * \tparam FONT The font type to use for rendering.
+     * \tparam KERNING Enable kerning if true (default: false).
+     * \tparam ROTATION Text rotation (default: DEGREE_0).
+     * \param x Starting X-coordinate in pixels.
+     * \param y Starting Y-coordinate in pixels.
+     * \param str The string to draw. Does not have to be NUL-terminated; it has to outlive the shape.
+     * \return A text_aa shape object that supports .color() and .draw() methods.
+     *
+     * Example usage:
+     * \code
+     * img.text_aa<constixel::ibmplexmono_regular_12_aa>(10, 20, "Hello").color(constixel::color::WHITE);
+     * \endcode
+     */
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+    constexpr auto text_aa(int32_t x, int32_t y, std::string_view str) {
+        return shapes::text_aa<FONT, PF, KERNING, ROTATION>(self().view(), x, y, str);
+    }
+
+    /**
+     * \brief Create a text shape from a NUL-terminated string. See text_aa(int32_t, int32_t, std::string_view).
+     * \param x Starting X-coordinate in pixels.
+     * \param y Starting Y-coordinate in pixels.
+     * \param str The string to draw. nullptr draws nothing.
+     * \return A text_aa shape object.
+     */
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+    constexpr auto text_aa(int32_t x, int32_t y, const char *str) {
+        return self().template text_aa<FONT, KERNING, ROTATION>(x, y, hidden::cstr_view(str));
+    }
+
+    /**
+     * \brief Create a text shape for fluent centered monospace string drawing with method chaining.
+     * \tparam FONT The font type to use for rendering.
+     * \tparam KERNING Enable kerning if true (default: false).
+     * \tparam ROTATION Text rotation (default: DEGREE_0).
+     * \param x Center X-coordinate in pixels.
+     * \param y Center Y-coordinate in pixels.
+     * \param str The string to draw. Does not have to be NUL-terminated; it has to outlive the shape.
+     * \return A text_centered_mono shape object that supports .color() method.
+     *
+     * Example usage:
+     * \code
+     * img.text_centered_mono<constixel::ibmplexmono_regular_12_mono>(100, 50,
+     * "Centered").color(constixel::color::WHITE);
+     * \endcode
+     */
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+    constexpr auto text_centered_mono(int32_t x, int32_t y, std::string_view str) {
+        return shapes::text_centered_mono<FONT, PF, KERNING, ROTATION>(self().view(), x, y, str);
+    }
+
+    /**
+     * \brief Create a text shape from a NUL-terminated string. See text_centered_mono(int32_t, int32_t,
+     * std::string_view).
+     * \param x Starting X-coordinate in pixels.
+     * \param y Starting Y-coordinate in pixels.
+     * \param str The string to draw. nullptr draws nothing.
+     * \return A text_centered_mono shape object.
+     */
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+    constexpr auto text_centered_mono(int32_t x, int32_t y, const char *str) {
+        return self().template text_centered_mono<FONT, KERNING, ROTATION>(x, y, hidden::cstr_view(str));
+    }
+
+    /**
+     * \brief Create a text shape for fluent centered antialiased string drawing with method chaining.
+     * Only format_8bit targets are supported.
+     * \tparam FONT The font type to use for rendering.
+     * \tparam KERNING Enable kerning if true (default: false).
+     * \tparam ROTATION Text rotation (default: DEGREE_0).
+     * \param x Center X-coordinate in pixels.
+     * \param y Center Y-coordinate in pixels.
+     * \param str The string to draw. Does not have to be NUL-terminated; it has to outlive the shape.
+     * \return A text_centered_aa shape object that supports .color() method.
+     *
+     * Example usage:
+     * \code
+     * img.text_centered_aa<constixel::ibmplexmono_regular_12_aa>(100, 50, "Centered").color(constixel::color::WHITE);
+     * \endcode
+     */
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+    constexpr auto text_centered_aa(int32_t x, int32_t y, std::string_view str) {
+        return shapes::text_centered_aa<FONT, PF, KERNING, ROTATION>(self().view(), x, y, str);
+    }
+
+    /**
+     * \brief Create a text shape from a NUL-terminated string. See text_centered_aa(int32_t, int32_t,
+     * std::string_view).
+     * \param x Starting X-coordinate in pixels.
+     * \param y Starting Y-coordinate in pixels.
+     * \param str The string to draw. nullptr draws nothing.
+     * \return A text_centered_aa shape object.
+     */
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+    constexpr auto text_centered_aa(int32_t x, int32_t y, const char *str) {
+        return self().template text_centered_aa<FONT, KERNING, ROTATION>(x, y, hidden::cstr_view(str));
+    }
+
+ private:
+    [[nodiscard]] constexpr D &self() {
+        return static_cast<D &>(*this);
+    }
+};
+/**
  * @class surface
  * @brief Non-owning drawing surface: all drawing, text and output code of constixel works on this view of a pixel
  * buffer. image and dynamic_image forward to it; it can also wrap an external frame buffer, including one with
@@ -3401,16 +4120,20 @@ using const_surface = basic_surface<PF, const uint8_t>;
  * @tparam PF Pixel class of the format, see basic_surface.
  */
 template <typename PF>
-class surface : public basic_surface<PF, uint8_t> {
+class surface : public basic_surface<PF, uint8_t>, public surface_extras<surface<PF>, PF> {
     using basic_surface<PF, uint8_t>::pix;
-
 #if defined(__x86_64__) || defined(_M_X64) || defined(__aarch64__)
     static constexpr int32_t min_coord = -int32_t{1 << 28};
+
     static constexpr int32_t max_coord = +int32_t{1 << 28};
+
     using calc_square_type = int64_t;
 #else   // #if defined(__x6_64__) || defined(_M_X64) || defined(__aarch64__)
+
     static constexpr int32_t min_coord = -int32_t{1 << 13} + int32_t{1};
+
     static constexpr int32_t max_coord = +int32_t{1 << 13} - int32_t{1};
+
     using calc_square_type = int32_t;
 #endif  // #if defined(__x86_64__) || defined(_M_X64) || defined(__aarch64__)
 
@@ -3418,6 +4141,21 @@ class surface : public basic_surface<PF, uint8_t> {
     using basic_surface<PF, uint8_t>::basic_surface;
 
     surface() = delete;
+
+    // the overloads of surface_extras, next to the ones declared here
+    using extras = surface_extras<surface<PF>, PF>;
+    using extras::plot, extras::draw_line, extras::draw_line_aa, extras::fill_rect, extras::stroke_rect;
+    using extras::fill_circle, extras::stroke_circle, extras::stroke_circle_aa, extras::fill_circle_aa;
+    using extras::stroke_round_rect, extras::fill_round_rect, extras::fill_round_rect_aa;
+    using extras::stroke_round_rect_aa, extras::string_width, extras::draw_string;
+
+    /**
+     * \brief This surface. image and dynamic_image have the same function.
+     * \return A copy of this view.
+     */
+    [[nodiscard]] constexpr surface view() const {
+        return *this;
+    }
 
     /**
      * \brief Plot a single pixel at the specified coordinates using the supplied color.
@@ -3427,15 +4165,6 @@ class surface : public basic_surface<PF, uint8_t> {
      */
     constexpr void plot(int32_t x, int32_t y, uint8_t col) {
         plot_clipped(pix, x, y, col);
-    }
-
-    /**
-     * \brief Plot a single pixel at the specified coordinates using the supplied color.
-     *
-     * \param p \ref plot initializer struct
-     */
-    constexpr void plot(const struct plot &p) {
-        plot(p.x, p.y, p.col);
     }
 
     /**
@@ -3550,19 +4279,6 @@ class surface : public basic_surface<PF, uint8_t> {
             }
         };
         line_thick.template operator()<calc_square_type>();
-    }
-
-    /**
-     * \brief Draw a line with the specified color and thickness. Example:
-     *
-     * \code{.cpp}
-     * image.draw_line({.x0=0, .y0=0, .x1=200, .y1=100, .col=color::WHITE, .sw=2});
-     * \endcode
-     *
-     * \param d \ref draw_line initializer struct
-     */
-    constexpr void draw_line(const struct draw_line &d) {
-        draw_line(d.x0, d.y0, d.x1, d.y1, d.col, static_cast<int32_t>(d.sw));
     }
 
     /**
@@ -3742,20 +4458,6 @@ class surface : public basic_surface<PF, uint8_t> {
     }
 
     /**
-     * \brief Draw a 1-pixel wide antialiased line with the specified color. Only format_8bit targets are supported.
-     * Example:
-     *
-     * \code{.cpp}
-     * image.draw_line_aa({.x0=0, .y0=0, .x1=200, .y1=100, .col=color::WHITE, .sw=2.5f});
-     * \endcode
-     *
-     * \param d \ref draw_line initializer struct
-     */
-    constexpr void draw_line_aa(const struct draw_line &d) {
-        draw_line_aa(d.x0, d.y0, d.x1, d.y1, d.col, d.sw);
-    }
-
-    /**
      * \brief Return the width of a string using the specified font in the template parameter. Typical use:
      *
      * \code{.cpp}
@@ -3800,20 +4502,6 @@ class surface : public basic_surface<PF, uint8_t> {
             *character_actual = count;
         }
         return x;
-    }
-
-    /**
-     * \brief Return the width of a NUL-terminated string. See string_width(std::string_view, size_t, size_t *).
-     * \param str UTF-8 string.
-     * \param character_count How many utf32 characters in the string should be measured.
-     * \param character_actual How many utf32 characters in the string were measured.
-     * \return Width of the string in pixels.
-     */
-    template <typename FONT, bool KERNING = false>
-    [[nodiscard]] constexpr int32_t string_width(const char *str,
-                                                 size_t character_count = std::numeric_limits<size_t>::max(),
-                                                 size_t *character_actual = nullptr) {
-        return string_width<FONT, KERNING>(std::string_view{str}, character_count, character_actual);
     }
 
     /**
@@ -3863,281 +4551,6 @@ class surface : public basic_surface<PF, uint8_t> {
     }
 
     /**
-     * \brief Draw a NUL-terminated string. See draw_string(int32_t, int32_t, std::string_view, uint8_t, text_align,
-     * size_t, size_t *).
-     * \param x X-coordinate in pixels.
-     * \param y Y-coordinate in pixels.
-     * \param str UTF-8 string. nullptr draws nothing.
-     * \param col Color palette index to use.
-     * \param align Placement relative to x/y.
-     * \param character_count How many utf32 characters in the string should be drawn.
-     * \param character_actual How many utf32 characters in the string were drawn.
-     * \return Returns the new caret position.
-     */
-    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr int32_t draw_string(int32_t x, int32_t y, const char *str, uint8_t col, text_align align = ALIGN_LEFT,
-                                  size_t character_count = std::numeric_limits<size_t>::max(),
-                                  size_t *character_actual = nullptr) {
-        if (str == nullptr) {
-            return 0;
-        }
-        return draw_string<FONT, KERNING, ROTATION>(x, y, std::string_view{str}, col, align, character_count,
-                                                    character_actual);
-    }
-
-    /**
-     * \brief Draw text at the specified coordinate. Example:
-     *
-     * \code{.cpp}
-     * image.draw_string<constixel::some_font_mono>({.x=191, .y=0, .str="MyText", .col=1, .align=ALIGN_RIGHT});
-     * \endcode
-     *
-     * \tparam FONT The font struct name.
-     * \tparam KERNING Boolean, use kerning information if available. Default to false.
-     * \tparam ROTATION Rotation around the x/y coordinate.
-     * \param d \ref draw_string initializer struct
-     * \param character_count How many utf32 characters in the string should be drawn.
-     * \param character_actual How many utf32 characters in the string were drawn.
-     * \return Returns the new caret position.
-     */
-    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr int32_t draw_string(const struct draw_string &d,
-                                  size_t character_count = std::numeric_limits<size_t>::max(),
-                                  size_t *character_actual = nullptr) {
-        return draw_string<FONT, KERNING, ROTATION>(d.x, d.y, d.str, d.col, d.align, character_count,
-                                                    character_actual);
-    }
-
-    /**
-     * \brief Draw text at the specified coordinate. The template parameter selects which mono font to use. Only
-     * format_8bit targets are supported.
-
-     * \code{.cpp}
-     * #include "some_font_mono.h"
-     * ...
-     *     image.draw_string_mono<constixel::some_font_mono>(0, 0, "MyText", constixel::color::WHITE);
-     * ...
-     * \endcode
-     *
-     * \tparam FONT The font struct name.
-     * \tparam KERNING Boolean, use kerning information if available. Default to false.
-     * \tparam ROTATION Rotation around the x/y coordinate. Defaults to text_rotation::DEGREE_0. Can be
-     * text_rotation::DEGREE_0, text_rotation::DEGREE_90, text_rotation::DEGREE_180 or text_rotation::DEGREE_270
-     * \param x Starting X-coordinate in pixels.
-     * \param y Starting Y-coordinate in pixels.
-     * \param str UTF-8 string. Does not have to be NUL-terminated.
-     * \param col Color palette index to use.
-     * \param character_count How many utf32 characters in the string should be drawn.
-     * \param character_actual How many utf32 characters in the string were drawn.
-     * \return Returns the new caret X-coordinate position. Pass this value to the next draw_string call to get
-     * continious text.
-     */
-    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr int32_t draw_string_mono(int32_t x, int32_t y, std::string_view str, uint8_t col,
-                                       size_t character_count = std::numeric_limits<size_t>::max(),
-                                       size_t *character_actual = nullptr) {
-        static_assert(FONT::mono == true, "Can't use an antialiased font to draw mono/pixelized text.");
-        return draw_text<FONT, KERNING, ROTATION>(x, y, str, col, character_count, character_actual);
-    }
-
-    /**
-     * \brief Draw a NUL-terminated string. See draw_string_mono(int32_t, int32_t, std::string_view, uint8_t, size_t,
-     * size_t *).
-     * \param x Starting X-coordinate in pixels.
-     * \param y Starting Y-coordinate in pixels.
-     * \param str UTF-8 string. nullptr draws nothing.
-     * \param col Color palette index to use.
-     * \param character_count How many utf32 characters in the string should be drawn.
-     * \param character_actual How many utf32 characters in the string were drawn.
-     * \return Returns the new caret position.
-     */
-    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr int32_t draw_string_mono(int32_t x, int32_t y, const char *str, uint8_t col,
-                                       size_t character_count = std::numeric_limits<size_t>::max(),
-                                       size_t *character_actual = nullptr) {
-        if (str == nullptr) {
-            return 0;
-        }
-        return draw_string_mono<FONT, KERNING, ROTATION>(x, y, std::string_view{str}, col, character_count,
-                                                         character_actual);
-    }
-
-    /**
-     * \brief Draw text at the specified coordinate. The template parameter selects which mono font to use. Only
-     * format_8bit targets are supported.
-
-     * \code{.cpp}
-     * #include "some_font_mono.h"
-     * ...
-     *     image.draw_string_mono<constixel::some_font_mono>({.x=0, .y=0, .str="MyText", .col=constixel::color::WHITE});
-     * ...
-     * \endcode
-     *
-     * \tparam FONT The font struct name.
-     * \tparam KERNING Boolean, use kerning information if available. Default to false.
-     * \tparam ROTATION Rotation around the x/y coordinate. Defaults to text_rotation::DEGREE_0. Can be
-     * text_rotation::DEGREE_0, text_rotation::DEGREE_90, text_rotation::DEGREE_180 or text_rotation::DEGREE_270
-     * \param d \ref draw_string initializer struct.
-     * \param character_count How many utf32 characters in the string should be drawn.
-     * \param character_actual How many utf32 characters in the string were drawn.
-     * \return Returns the new caret X-coordinate position. Pass this value to the next draw_string call to get
-     * continious text.
-     */
-    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr int32_t draw_string_mono(const struct draw_string &d,
-                                       size_t character_count = std::numeric_limits<size_t>::max(),
-                                       size_t *character_actual = nullptr) {
-        static_assert(FONT::mono == true, "Can't use an antialiased font to draw mono/pixelized text.");
-        return draw_string<FONT, KERNING, ROTATION>(d, character_count, character_actual);
-    }
-
-    /**
-     * \brief Draw text centered at the specified coordinate. The template parameter selects which mono font to use.
-     * Only format_8bit targets are supported.
-     * \tparam FONT The font struct name.
-     * \tparam KERNING Boolean, use kerning information if available. Default to false.
-     * \tparam ROTATION Rotation around the x/y coordinate. Can be text_rotation::DEGREE_0, text_rotation::DEGREE_90,
-     * text_rotation::DEGREE_180 or text_rotation::DEGREE_270
-     * \param x Center/Starting X-coordinate in pixels.
-     * \param y Center/Starting Y-coordinate in pixels.
-     * \param str UTF-8 string. Does not have to be NUL-terminated.
-     * \param col Color palette index to use.
-     */
-    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr void draw_string_centered_mono(int32_t x, int32_t y, std::string_view str, uint8_t col) {
-        static_assert(FONT::mono == true, "Can't use an antialiased font to draw mono/pixelized text.");
-        draw_string<FONT, KERNING, ROTATION>(x, y, str, col, ALIGN_CENTER);
-    }
-
-    /**
-     * \brief Draw a centered NUL-terminated string. See draw_string_centered_mono(int32_t, int32_t,
-     * std::string_view, uint8_t).
-     * \param x Center/Starting X-coordinate in pixels.
-     * \param y Center/Starting Y-coordinate in pixels.
-     * \param str UTF-8 string. nullptr draws nothing.
-     * \param col Color palette index to use.
-     */
-    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr void draw_string_centered_mono(int32_t x, int32_t y, const char *str, uint8_t col) {
-        draw_string_centered_mono<FONT, KERNING, ROTATION>(x, y, hidden::cstr_view(str), col);
-    }
-
-    /**
-     * \brief Draw antialiased text at the specified coordinate. The template parameter selects which antialiased font
-     * to use. Only format_8bit targets are supported. Typical use:
-     *
-     * \code{.cpp}
-     * #include "some_font_aa.h"
-     * ...
-     *     image.draw_string_aa<constixel::some_font_aa>(0, 0, "MyText", constixel::color::WHITE);
-     * ...
-     * \endcode
-     *
-     * \tparam FONT The font struct name.
-     * \tparam KERNING Boolean, use kerning information if available. Default to false.
-     * \tparam ROTATION Rotation around the x/y coordinate. Can be text_rotation::DEGREE_0, text_rotation::DEGREE_90,
-     * text_rotation::DEGREE_180 or text_rotation::DEGREE_270
-     * \param x Starting X-coordinate in pixels.
-     * \param y Starting Y-coordinate in pixels.
-     * \param str UTF-8 string. Does not have to be NUL-terminated.
-     * \param col Color palette index to use.
-     * \param character_count How many utf32 characters in the string should be drawn.
-     * \param character_actual How many utf32 characters in the string were drawn.
-     * \return Returns the new caret X-coordinate position. Pass this value to the next draw_string call to get
-     * continious text.
-     */
-    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr int32_t draw_string_aa(int32_t x, int32_t y, std::string_view str, uint8_t col,
-                                     size_t character_count = std::numeric_limits<size_t>::max(),
-                                     size_t *character_actual = nullptr) {
-        static_assert(FONT::mono == false, "Can't use a mono font to draw antialiased text.");
-        return draw_text<FONT, KERNING, ROTATION>(x, y, str, col, character_count, character_actual);
-    }
-
-    /**
-     * \brief Draw a NUL-terminated string. See draw_string_aa(int32_t, int32_t, std::string_view, uint8_t, size_t,
-     * size_t *).
-     * \param x Starting X-coordinate in pixels.
-     * \param y Starting Y-coordinate in pixels.
-     * \param str UTF-8 string. nullptr draws nothing.
-     * \param col Color palette index to use.
-     * \param character_count How many utf32 characters in the string should be drawn.
-     * \param character_actual How many utf32 characters in the string were drawn.
-     * \return Returns the new caret position.
-     */
-    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr int32_t draw_string_aa(int32_t x, int32_t y, const char *str, uint8_t col,
-                                       size_t character_count = std::numeric_limits<size_t>::max(),
-                                     size_t *character_actual = nullptr) {
-        if (str == nullptr) {
-            return 0;
-        }
-        return draw_string_aa<FONT, KERNING, ROTATION>(x, y, std::string_view{str}, col, character_count,
-                                                         character_actual);
-    }
-
-    /**
-     * \brief Draw antialiased text at the specified coordinate. The template parameter selects which antialiased font
-     * to use. Only format_8bit targets are supported. Typical use:
-     *
-     * \code{.cpp}
-     * #include "some_font_aa.h"
-     * ...
-     *     image.draw_string_aa<constixel::some_font_aa>({.x=0, .y=0, .str="MyText", .col=constixel::color::WHITE});
-     * ...
-     * \endcode
-     *
-     * \tparam FONT The font struct name.
-     * \tparam KERNING Boolean, use kerning information if available. Default to false.
-     * \tparam ROTATION Rotation around the x/y coordinate. Can be text_rotation::DEGREE_0, text_rotation::DEGREE_90,
-     * text_rotation::DEGREE_180 or text_rotation::DEGREE_270
-     * \param d \ref draw_string initializer struct.
-     * \param character_count How many utf32 characters in the string should be drawn.
-     * \param character_actual How many utf32 characters in the string were drawn.
-     * \return Returns the new caret X-coordinate position. Pass this value to the next draw_string call to get
-     * continious text.
-     */
-    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr int32_t draw_string_aa(const struct draw_string &d,
-                                     size_t character_count = std::numeric_limits<size_t>::max(),
-                                     size_t *character_actual = nullptr) {
-        static_assert(FONT::mono == false, "Can't use a mono font to draw antialiased text.");
-        return draw_string<FONT, KERNING, ROTATION>(d, character_count, character_actual);
-    }
-
-    /**
-     * \brief Draw antialiased text centered at the specified coordinate. The template parameter selects which
-     * antialiased font to use. Only format_8bit targets are supported. Typical use
-     *
-     * \tparam FONT The font struct name.
-     * \tparam KERNING Boolean, use kerning information if available. Default to false.
-     * \tparam ROTATION Rotation around the x/y coordinate. Can be text_rotation::DEGREE_0, text_rotation::DEGREE_90,
-     * text_rotation::DEGREE_180 or text_rotation::DEGREE_270
-     * \param x Center/Starting X-coordinate in pixels.
-     * \param y Center/Starting Y-coordinate in pixels.
-     * \param str UTF-8 string. Does not have to be NUL-terminated.
-     * \param col Color palette index to use.
-     */
-    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr void draw_string_centered_aa(int32_t x, int32_t y, std::string_view str, uint8_t col) {
-        static_assert(FONT::mono == false, "Can't use a mono font to draw antialiased text.");
-        draw_string<FONT, KERNING, ROTATION>(x, y, str, col, ALIGN_CENTER);
-    }
-
-    /**
-     * \brief Draw a centered NUL-terminated string. See draw_string_centered_aa(int32_t, int32_t,
-     * std::string_view, uint8_t).
-     * \param x Center/Starting X-coordinate in pixels.
-     * \param y Center/Starting Y-coordinate in pixels.
-     * \param str UTF-8 string. nullptr draws nothing.
-     * \param col Color palette index to use.
-     */
-    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr void draw_string_centered_aa(int32_t x, int32_t y, const char *str, uint8_t col) {
-        draw_string_centered_aa<FONT, KERNING, ROTATION>(x, y, hidden::cstr_view(str), col);
-    }
-
-    /**
      * \brief Fill a rectangle with the specified color. Example:
      *
      * \code{.cpp}
@@ -4172,19 +4585,6 @@ class surface : public basic_surface<PF, uint8_t> {
         for (; y < h; y++) {
             extent(dst, x, w, y, col);
         }
-    }
-
-    /**
-     * \brief Fill a rectangle with the specified color. Example:
-     *
-     * \code{.cpp}
-     * image.fill_rect({.x=0, .y=0, .w=320, .h=240, .col=constixel::color::WHITE});
-     * \endcode
-     *
-     * \param d \ref draw_rect initializer struct
-     */
-    constexpr void fill_rect(const struct draw_rect &d) {
-        fill_rect(d.x, d.y, d.w, d.h, d.col);
     }
 
     /**
@@ -4240,19 +4640,6 @@ class surface : public basic_surface<PF, uint8_t> {
     }
 
     /**
-     * \brief Draw a stroked rectangle with the specified color and stroke width. Example:
-     *
-     * \code{.cpp}
-     * image.stroke_rect({.x=0, .y=0, .w=320, .h=240, .col=constixel::color::WHITE, .sw=2});
-     * \endcode
-     *
-     * \param d \ref draw_rect initializer struct
-     */
-    constexpr void stroke_rect(const struct draw_rect &d) {
-        stroke_rect(d.x, d.y, d.w, d.h, d.col, d.sw);
-    }
-
-    /**
      * \brief Fill a circle with the specified radius and color. Example:
      *
      * \code{.cpp}
@@ -4277,19 +4664,6 @@ class surface : public basic_surface<PF, uint8_t> {
     }
 
     /**
-     * \brief Fill a circle with the specified radius and color. Example:
-     *
-     * \code{.cpp}
-     * image.fill_circle({.cx=64, .cy=64, .r=32, .col=constixel::color::WHITE});
-     * \endcode
-     *
-     * \param d \ref draw_circle initializer struct
-     */
-    constexpr void fill_circle(const struct draw_circle &d) {
-        fill_circle(d.cx, d.cy, d.r, d.col);
-    }
-
-    /**
      * \brief Stroke a circle with the specified radius and color. Example:
      *
      * \code{.cpp}
@@ -4304,19 +4678,6 @@ class surface : public basic_surface<PF, uint8_t> {
      */
     constexpr void stroke_circle(int32_t cx, int32_t cy, int32_t radius, uint8_t col, int32_t stroke_width = 1) {
         stroke_circle_impl<false>(cx, cy, radius, col, stroke_width);
-    }
-
-    /**
-     * \brief Stroke a circle with the specified radius and color. Example:
-     *
-     * \code{.cpp}
-     * image.stroke_circle({.cx=64, .cy=64, .r=32, .col=constixel::color::WHITE, .sw=2});
-     * \endcode
-     *
-     * \param d \ref draw_circle initializer struct
-     */
-    constexpr void stroke_circle(const struct draw_circle &d) {
-        stroke_circle(d.cx, d.cy, d.r, d.col, d.sw);
     }
 
     /**
@@ -4338,20 +4699,6 @@ class surface : public basic_surface<PF, uint8_t> {
     }
 
     /**
-     * \brief Stroke a circle using antialiasing with the specified radius and color. Only format_8bit targets are
-     * supported. Example:
-     *
-     * \code{.cpp}
-     * image.stroke_circle_aa({.cx=64, .cy=64, .r=32, .col=constixel::color::WHITE, .sw=2});
-     * \endcode
-     *
-     * \param d \ref draw_circle initializer struct
-     */
-    constexpr void stroke_circle_aa(const struct draw_circle &d) {
-        stroke_circle_aa(d.cx, d.cy, d.r, d.col, d.sw);
-    }
-
-    /**
      * \brief Fill a circle using antialiasing with the specified radius and color. Only format_8bit targets are
      * supported. Example:
      *
@@ -4370,20 +4717,6 @@ class surface : public basic_surface<PF, uint8_t> {
         }
         radius = abs(radius);
         circle_int<true, false>(cx, cy, radius, 0, 0, col, 0);
-    }
-
-    /**
-     * \brief Fill a circle using antialiasing with the specified radius and color. Only format_8bit targets are
-     * supported. Example:
-     *
-     * \code{.cpp}
-     * image.fill_circle_aa({.cx=64, .cy=64, .r=32, .col=constixel::color::WHITE});
-     * \endcode
-     *
-     * \param d \ref draw_circle initializer struct
-     */
-    constexpr void fill_circle_aa(const struct draw_circle &d) {
-        fill_circle_aa(d.cx, d.cy, d.r, d.col);
     }
 
     /**
@@ -4436,19 +4769,6 @@ class surface : public basic_surface<PF, uint8_t> {
     }
 
     /**
-     * \brief Stroke a rounded rectangle with the specified color. Example:
-     *
-     * \code{.cpp}
-     * image.stroke_round_rect({.x=0, .y=0, .w=200, .h=100, .r=15, .col=constixel::color::WHITE, .sw=8});
-     * \endcode
-     *
-     * \param d \ref draw_round_rect initializer struct
-     */
-    constexpr void stroke_round_rect(const struct draw_round_rect &d) {
-        stroke_round_rect(d.x, d.y, d.w, d.h, d.r, d.col, d.sw);
-    }
-
-    /**
      * \brief Fill a rounded rectangle with the specified color. Example:
      *
      * \code{.cpp}
@@ -4464,19 +4784,6 @@ class surface : public basic_surface<PF, uint8_t> {
      */
     constexpr void fill_round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col) {
         fill_round_rect_impl<false>(x, y, w, h, radius, col);
-    }
-
-    /**
-     * \brief Fill a rounded rectangle with the specified color. Example:
-     *
-     * \code{.cpp}
-     * image.fill_round_rect({.x=0, .y=0, .w=200, .h=100, .r=15, .col=constixel::color::WHITE});
-     * \endcode
-     *
-     * \param d \ref draw_round_rect initializer struct
-     */
-    constexpr void fill_round_rect(const struct draw_round_rect &d) {
-        fill_round_rect(d.x, d.y, d.w, d.h, d.r, d.col);
     }
 
     /**
@@ -4496,20 +4803,6 @@ class surface : public basic_surface<PF, uint8_t> {
      */
     constexpr void fill_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col) {
         fill_round_rect_impl<true>(x, y, w, h, radius, col);
-    }
-
-    /**
-     * \brief Fill a rounded rectangle using antialiasing with the specified color. Only format_8bit targets are
-     * supported.
-     *
-     * \code{.cpp}
-     * image.fill_round_rect_aa({.x=0, .y=0, .w=200, .h=100, .r=15, .col=constixel::color::WHITE, .sw=8});
-     * \endcode
-     *
-     * \param d \ref draw_round_rect initializer struct
-     */
-    constexpr void fill_round_rect_aa(const struct draw_round_rect &d) {
-        fill_round_rect_aa(d.x, d.y, d.w, d.h, d.r, d.col);
     }
 
     /**
@@ -4571,19 +4864,6 @@ class surface : public basic_surface<PF, uint8_t> {
     constexpr void stroke_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col,
                                         int32_t stroke_width = 1) {
         stroke_round_rect_impl<true>(x, y, w, h, radius, col, stroke_width);
-    }
-
-    /**
-     * \brief Stroke a rounded rectangle using antialiasing with the specified color. Example:
-     *
-     * \code{.cpp}
-     * image.stroke_round_rect_aa({.x=0, .y=0, .w=200, .h=100, .r=15, .col=constixel::color::WHITE, .sw=8});
-     * \endcode
-     *
-     * \param d \ref draw_round_rect initializer struct
-     */
-    constexpr void stroke_round_rect_aa(const struct draw_round_rect &d) {
-        stroke_round_rect_aa(d.x, d.y, d.w, d.h, d.r, d.col, d.sw);
     }
 
     /**
@@ -4784,248 +5064,6 @@ class surface : public basic_surface<PF, uint8_t> {
         blitrect &= {.x = 0, .y = 0, .w = static_cast<int32_t>(pix.width), .h = static_cast<int32_t>(pix.height)};
         blitrect &= {.x = dstrect.x, .y = dstrect.y, .w = iw, .h = ih};
         PF::blit_RGBA_diffused_linear(pix, blitrect, ptr, stride);
-    }
-
-    /**
-     * @brief Fluent shape API methods for method chaining
-     * These provide a more expressive way to create shapes compared to struct-based calls.
-     *
-     * Example usage:
-     * \code{.cpp}
-     * image.rect(10, 10, 50, 30).fill(constixel::color::RED).stroke(constixel::color::BLACK, 2);
-     * image.circle(100, 100, 20).fill(constixel::color::BLUE);
-     * image.line(0, 0, 100, 100).stroke(constixel::color::WHITE, 3);
-     * \endcode
-     */
-
-    /**
-     * \brief Create a rectangle shape for fluent method chaining.
-     * \param x Starting X-coordinate in pixels.
-     * \param y Starting Y-coordinate in pixels.
-     * \param w Width of the rectangle in pixels.
-     * \param h Height of the rectangle in pixels.
-     * \return A rect shape object that supports .fill() and .stroke() methods.
-     */
-    constexpr auto rect(int32_t x, int32_t y, int32_t w, int32_t h) {
-        return shapes::rect<PF>(*this, x, y, w, h);
-    }
-
-    /**
-     * \brief Create a circle shape for fluent method chaining.
-     * \param cx Center X-coordinate in pixels.
-     * \param cy Center Y-coordinate in pixels.
-     * \param r Radius of the circle in pixels.
-     * \return A circle shape object that supports .fill() and .stroke() methods.
-     */
-    constexpr auto circle(int32_t cx, int32_t cy, int32_t r) {
-        return shapes::circle<PF>(*this, cx, cy, r);
-    }
-
-    /**
-     * \brief Create an antialiased circle shape for fluent method chaining.
-     * Only format_8bit targets are supported.
-     * \param cx Center X-coordinate in pixels.
-     * \param cy Center Y-coordinate in pixels.
-     * \param r Radius of the circle in pixels.
-     * \return A circle_aa shape object that supports .fill() and .stroke() methods.
-     */
-    constexpr auto circle_aa(int32_t cx, int32_t cy, int32_t r) {
-        return shapes::circle_aa<PF>(*this, cx, cy, r);
-    }
-
-    /**
-     * \brief Create a rounded rectangle shape for fluent method chaining.
-     * \param x Starting X-coordinate in pixels.
-     * \param y Starting Y-coordinate in pixels.
-     * \param w Width of the rectangle in pixels.
-     * \param h Height of the rectangle in pixels.
-     * \param radius Radius of the rounded corners in pixels.
-     * \return A round_rect shape object that supports .fill() and .stroke() methods.
-     */
-    constexpr auto round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius) {
-        return shapes::round_rect<PF>(*this, x, y, w, h, radius);
-    }
-
-    /**
-     * \brief Create an antialiased rounded rectangle shape for fluent method chaining.
-     * Only format_8bit targets are supported.
-     * \param x Starting X-coordinate in pixels.
-     * \param y Starting Y-coordinate in pixels.
-     * \param w Width of the rectangle in pixels.
-     * \param h Height of the rectangle in pixels.
-     * \param radius Radius of the rounded corners in pixels.
-     * \return A round_rect_aa shape object that supports .fill() and .stroke() methods.
-     */
-    constexpr auto round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius) {
-        return shapes::round_rect_aa<PF>(*this, x, y, w, h, radius);
-    }
-
-    /**
-     * \brief Create a line shape for fluent method chaining.
-     * \param x0 Starting X-coordinate in pixels.
-     * \param y0 Starting Y-coordinate in pixels.
-     * \param x1 Ending X-coordinate in pixels.
-     * \param y1 Ending Y-coordinate in pixels.
-     * \return A line shape object that supports .stroke() method.
-     */
-    constexpr auto line(int32_t x0, int32_t y0, int32_t x1, int32_t y1) {
-        return shapes::line<PF>(*this, x0, y0, x1, y1);
-    }
-
-    /**
-     * \brief Create an antialiased line shape for fluent method chaining.
-     * Only format_8bit targets are supported.
-     * \param x0 Starting X-coordinate in pixels.
-     * \param y0 Starting Y-coordinate in pixels.
-     * \param x1 Ending X-coordinate in pixels.
-     * \param y1 Ending Y-coordinate in pixels.
-     * \return A line_aa shape object that supports .stroke() method.
-     */
-    constexpr auto line_aa(int32_t x0, int32_t y0, int32_t x1, int32_t y1) {
-        return shapes::line_aa<PF>(*this, x0, y0, x1, y1);
-    }
-
-    /**
-     * \brief Create a point shape for fluent method chaining.
-     * \param x X-coordinate in pixels.
-     * \param y Y-coordinate in pixels.
-     * \return A point shape object that supports .plot() method.
-     */
-    constexpr auto point(int32_t x, int32_t y) {
-        return shapes::point<PF>(*this, x, y);
-    }
-
-    /**
-     * \brief Create a text shape for fluent monospace string drawing with method chaining.
-     * \tparam FONT The font type to use for rendering.
-     * \tparam KERNING Enable kerning if true (default: false).
-     * \tparam ROTATION Text rotation (default: DEGREE_0).
-     * \param x Starting X-coordinate in pixels.
-     * \param y Starting Y-coordinate in pixels.
-     * \param str The string to draw. Does not have to be NUL-terminated; it has to outlive the shape.
-     * \return A text_mono shape object that supports .color() and .draw() methods.
-     *
-     * Example usage:
-     * \code
-     * img.text_mono<constixel::ibmplexmono_regular_12_mono>(10, 20, "Hello").color(constixel::color::WHITE);
-     * \endcode
-     */
-    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr auto text_mono(int32_t x, int32_t y, std::string_view str) {
-        return shapes::text_mono<FONT, PF, KERNING, ROTATION>(*this, x, y, str);
-    }
-
-    /**
-     * \brief Create a text shape from a NUL-terminated string. See text_mono(int32_t, int32_t, std::string_view).
-     * \param x Starting X-coordinate in pixels.
-     * \param y Starting Y-coordinate in pixels.
-     * \param str The string to draw. nullptr draws nothing.
-     * \return A text_mono shape object.
-     */
-    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr auto text_mono(int32_t x, int32_t y, const char *str) {
-        return text_mono<FONT, KERNING, ROTATION>(x, y, hidden::cstr_view(str));
-    }
-
-    /**
-     * \brief Create a text shape for fluent antialiased string drawing with method chaining.
-     * Only format_8bit targets are supported.
-     * \tparam FONT The font type to use for rendering.
-     * \tparam KERNING Enable kerning if true (default: false).
-     * \tparam ROTATION Text rotation (default: DEGREE_0).
-     * \param x Starting X-coordinate in pixels.
-     * \param y Starting Y-coordinate in pixels.
-     * \param str The string to draw. Does not have to be NUL-terminated; it has to outlive the shape.
-     * \return A text_aa shape object that supports .color() and .draw() methods.
-     *
-     * Example usage:
-     * \code
-     * img.text_aa<constixel::ibmplexmono_regular_12_aa>(10, 20, "Hello").color(constixel::color::WHITE);
-     * \endcode
-     */
-    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr auto text_aa(int32_t x, int32_t y, std::string_view str) {
-        return shapes::text_aa<FONT, PF, KERNING, ROTATION>(*this, x, y, str);
-    }
-
-    /**
-     * \brief Create a text shape from a NUL-terminated string. See text_aa(int32_t, int32_t, std::string_view).
-     * \param x Starting X-coordinate in pixels.
-     * \param y Starting Y-coordinate in pixels.
-     * \param str The string to draw. nullptr draws nothing.
-     * \return A text_aa shape object.
-     */
-    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr auto text_aa(int32_t x, int32_t y, const char *str) {
-        return text_aa<FONT, KERNING, ROTATION>(x, y, hidden::cstr_view(str));
-    }
-
-    /**
-     * \brief Create a text shape for fluent centered monospace string drawing with method chaining.
-     * \tparam FONT The font type to use for rendering.
-     * \tparam KERNING Enable kerning if true (default: false).
-     * \tparam ROTATION Text rotation (default: DEGREE_0).
-     * \param x Center X-coordinate in pixels.
-     * \param y Center Y-coordinate in pixels.
-     * \param str The string to draw. Does not have to be NUL-terminated; it has to outlive the shape.
-     * \return A text_centered_mono shape object that supports .color() method.
-     *
-     * Example usage:
-     * \code
-     * img.text_centered_mono<constixel::ibmplexmono_regular_12_mono>(100, 50,
-     * "Centered").color(constixel::color::WHITE);
-     * \endcode
-     */
-    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr auto text_centered_mono(int32_t x, int32_t y, std::string_view str) {
-        return shapes::text_centered_mono<FONT, PF, KERNING, ROTATION>(*this, x, y, str);
-    }
-
-    /**
-     * \brief Create a text shape from a NUL-terminated string. See text_centered_mono(int32_t, int32_t,
-     * std::string_view).
-     * \param x Starting X-coordinate in pixels.
-     * \param y Starting Y-coordinate in pixels.
-     * \param str The string to draw. nullptr draws nothing.
-     * \return A text_centered_mono shape object.
-     */
-    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr auto text_centered_mono(int32_t x, int32_t y, const char *str) {
-        return text_centered_mono<FONT, KERNING, ROTATION>(x, y, hidden::cstr_view(str));
-    }
-
-    /**
-     * \brief Create a text shape for fluent centered antialiased string drawing with method chaining.
-     * Only format_8bit targets are supported.
-     * \tparam FONT The font type to use for rendering.
-     * \tparam KERNING Enable kerning if true (default: false).
-     * \tparam ROTATION Text rotation (default: DEGREE_0).
-     * \param x Center X-coordinate in pixels.
-     * \param y Center Y-coordinate in pixels.
-     * \param str The string to draw. Does not have to be NUL-terminated; it has to outlive the shape.
-     * \return A text_centered_aa shape object that supports .color() method.
-     *
-     * Example usage:
-     * \code
-     * img.text_centered_aa<constixel::ibmplexmono_regular_12_aa>(100, 50, "Centered").color(constixel::color::WHITE);
-     * \endcode
-     */
-    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr auto text_centered_aa(int32_t x, int32_t y, std::string_view str) {
-        return shapes::text_centered_aa<FONT, PF, KERNING, ROTATION>(*this, x, y, str);
-    }
-
-    /**
-     * \brief Create a text shape from a NUL-terminated string. See text_centered_aa(int32_t, int32_t,
-     * std::string_view).
-     * \param x Starting X-coordinate in pixels.
-     * \param y Starting Y-coordinate in pixels.
-     * \param str The string to draw. nullptr draws nothing.
-     * \return A text_centered_aa shape object.
-     */
-    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr auto text_centered_aa(int32_t x, int32_t y, const char *str) {
-        return text_centered_aa<FONT, KERNING, ROTATION>(x, y, hidden::cstr_view(str));
     }
 
  private:
@@ -5714,7 +5752,6 @@ class surface : public basic_surface<PF, uint8_t> {
         }
     }
 
-
     /**
      * @private
      */
@@ -5741,16 +5778,18 @@ class surface : public basic_surface<PF, uint8_t> {
  * @tparam PF Pixel class of the format, see basic_surface.
  */
 template <typename D, typename PF>
-class surface_api {
+class surface_api : public surface_extras<D, PF> {
  public:
+    using extras = surface_extras<D, PF>;
+    using extras::plot, extras::draw_line, extras::draw_line_aa, extras::fill_rect, extras::stroke_rect;
+    using extras::fill_circle, extras::stroke_circle, extras::stroke_circle_aa, extras::fill_circle_aa;
+    using extras::stroke_round_rect, extras::fill_round_rect, extras::fill_round_rect_aa;
+    using extras::stroke_round_rect_aa, extras::string_width, extras::draw_string;
+
+
     /// @copydoc surface::plot(int32_t,int32_t,uint8_t)
     constexpr void plot(int32_t x, int32_t y, uint8_t col) {
         derived().view().plot(x, y, col);
-    }
-
-    /// @copydoc surface::plot(const struct plot &)
-    constexpr void plot(const struct plot &p) {
-        derived().view().plot(p);
     }
 
     /// @copydoc surface::draw_line(int32_t,int32_t,int32_t,int32_t,uint8_t,int32_t)
@@ -5758,28 +5797,10 @@ class surface_api {
         derived().view().draw_line(x0, y0, x1, y1, col, stroke_width);
     }
 
-    /// @copydoc surface::draw_line(const struct draw_line &)
-    constexpr void draw_line(const struct draw_line &d) {
-        derived().view().draw_line(d);
-    }
-
     /// @copydoc surface::draw_line_aa(int32_t,int32_t,int32_t,int32_t,uint8_t,float)
     constexpr void draw_line_aa(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col,
                                 float stroke_width = 1.0f) {
         derived().view().draw_line_aa(x0, y0, x1, y1, col, stroke_width);
-    }
-
-    /// @copydoc surface::draw_line_aa(const struct draw_line &)
-    constexpr void draw_line_aa(const struct draw_line &d) {
-        derived().view().draw_line_aa(d);
-    }
-
-    /// @copydoc surface::string_width(const char *,size_t,size_t *)
-    template <typename FONT, bool KERNING = false>
-    [[nodiscard]] constexpr int32_t string_width(const char *str,
-                                                 size_t character_count = std::numeric_limits<size_t>::max(),
-                                                 size_t *character_actual = nullptr) {
-        return derived().view().template string_width<FONT, KERNING>(str, character_count, character_actual);
     }
 
     /// @copydoc surface::string_width(std::string_view,size_t,size_t *)
@@ -5800,108 +5821,9 @@ class surface_api {
                                                                               character_actual);
     }
 
-    /// @copydoc surface::draw_string(int32_t,int32_t,const char *,uint8_t,text_align,size_t,size_t *)
-    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr int32_t draw_string(int32_t x, int32_t y, const char *str, uint8_t col, text_align align = ALIGN_LEFT,
-                                  size_t character_count = std::numeric_limits<size_t>::max(),
-                                  size_t *character_actual = nullptr) {
-        return derived().view().template draw_string<FONT, KERNING, ROTATION>(x, y, str, col, align, character_count,
-                                                                              character_actual);
-    }
-
-    /// @copydoc surface::draw_string(const struct draw_string &,size_t,size_t *)
-    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr int32_t draw_string(const struct draw_string &d,
-                                  size_t character_count = std::numeric_limits<size_t>::max(),
-                                  size_t *character_actual = nullptr) {
-        return derived().view().template draw_string<FONT, KERNING, ROTATION>(d, character_count, character_actual);
-    }
-
-    /// @copydoc surface::draw_string_mono(int32_t,int32_t,const char *,uint8_t,size_t,size_t *)
-    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr int32_t draw_string_mono(int32_t x, int32_t y, const char *str, uint8_t col,
-                                       size_t character_count = std::numeric_limits<size_t>::max(),
-                                       size_t *character_actual = nullptr) {
-        return derived().view().template draw_string_mono<FONT, KERNING, ROTATION>(x, y, str, col, character_count,
-                                                                                   character_actual);
-    }
-
-    /// @copydoc surface::draw_string_mono(int32_t,int32_t,std::string_view,uint8_t,size_t,size_t *)
-    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr int32_t draw_string_mono(int32_t x, int32_t y, std::string_view str, uint8_t col,
-                                       size_t character_count = std::numeric_limits<size_t>::max(),
-                                       size_t *character_actual = nullptr) {
-        return derived().view().template draw_string_mono<FONT, KERNING, ROTATION>(x, y, str, col, character_count,
-                                                                                   character_actual);
-    }
-
-    /// @copydoc surface::draw_string_mono(const struct draw_string &,size_t,size_t *)
-    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr int32_t draw_string_mono(const struct draw_string &d,
-                                       size_t character_count = std::numeric_limits<size_t>::max(),
-                                       size_t *character_actual = nullptr) {
-        return derived().view().template draw_string_mono<FONT, KERNING, ROTATION>(d, character_count,
-                                                                                   character_actual);
-    }
-
-    /// @copydoc surface::draw_string_centered_mono(int32_t,int32_t,const char *,uint8_t)
-    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr void draw_string_centered_mono(int32_t x, int32_t y, const char *str, uint8_t col) {
-        derived().view().template draw_string_centered_mono<FONT, KERNING, ROTATION>(x, y, str, col);
-    }
-
-    /// @copydoc surface::draw_string_centered_mono(int32_t,int32_t,std::string_view,uint8_t)
-    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr void draw_string_centered_mono(int32_t x, int32_t y, std::string_view str, uint8_t col) {
-        derived().view().template draw_string_centered_mono<FONT, KERNING, ROTATION>(x, y, str, col);
-    }
-
-    /// @copydoc surface::draw_string_aa(int32_t,int32_t,const char *,uint8_t,size_t,size_t *)
-    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr int32_t draw_string_aa(int32_t x, int32_t y, const char *str, uint8_t col,
-                                     size_t character_count = std::numeric_limits<size_t>::max(),
-                                     size_t *character_actual = nullptr) {
-        return derived().view().template draw_string_aa<FONT, KERNING, ROTATION>(x, y, str, col, character_count,
-                                                                                 character_actual);
-    }
-
-    /// @copydoc surface::draw_string_aa(int32_t,int32_t,std::string_view,uint8_t,size_t,size_t *)
-    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr int32_t draw_string_aa(int32_t x, int32_t y, std::string_view str, uint8_t col,
-                                     size_t character_count = std::numeric_limits<size_t>::max(),
-                                     size_t *character_actual = nullptr) {
-        return derived().view().template draw_string_aa<FONT, KERNING, ROTATION>(x, y, str, col, character_count,
-                                                                                 character_actual);
-    }
-
-    /// @copydoc surface::draw_string_aa(const struct draw_string &,size_t,size_t *)
-    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr int32_t draw_string_aa(const struct draw_string &d,
-                                     size_t character_count = std::numeric_limits<size_t>::max(),
-                                     size_t *character_actual = nullptr) {
-        return derived().view().template draw_string_aa<FONT, KERNING, ROTATION>(d, character_count, character_actual);
-    }
-
-    /// @copydoc surface::draw_string_centered_aa(int32_t,int32_t,const char *,uint8_t)
-    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr void draw_string_centered_aa(int32_t x, int32_t y, const char *str, uint8_t col) {
-        derived().view().template draw_string_centered_aa<FONT, KERNING, ROTATION>(x, y, str, col);
-    }
-
-    /// @copydoc surface::draw_string_centered_aa(int32_t,int32_t,std::string_view,uint8_t)
-    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr void draw_string_centered_aa(int32_t x, int32_t y, std::string_view str, uint8_t col) {
-        derived().view().template draw_string_centered_aa<FONT, KERNING, ROTATION>(x, y, str, col);
-    }
-
     /// @copydoc surface::fill_rect(int32_t,int32_t,int32_t,int32_t,uint8_t)
     constexpr void fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col) {
         derived().view().fill_rect(x, y, w, h, col);
-    }
-
-    /// @copydoc surface::fill_rect(const struct draw_rect &)
-    constexpr void fill_rect(const struct draw_rect &d) {
-        derived().view().fill_rect(d);
     }
 
     /// @copydoc surface::fill_rect(int32_t,int32_t,int32_t,int32_t,const shader_func &)
@@ -5917,19 +5839,9 @@ class surface_api {
         derived().view().stroke_rect(x, y, w, h, col, stroke_width);
     }
 
-    /// @copydoc surface::stroke_rect(const struct draw_rect &)
-    constexpr void stroke_rect(const struct draw_rect &d) {
-        derived().view().stroke_rect(d);
-    }
-
     /// @copydoc surface::fill_circle(int32_t,int32_t,int32_t,uint8_t)
     constexpr void fill_circle(int32_t cx, int32_t cy, int32_t radius, uint8_t col) {
         derived().view().fill_circle(cx, cy, radius, col);
-    }
-
-    /// @copydoc surface::fill_circle(const struct draw_circle &)
-    constexpr void fill_circle(const struct draw_circle &d) {
-        derived().view().fill_circle(d);
     }
 
     /// @copydoc surface::stroke_circle(int32_t,int32_t,int32_t,uint8_t,int32_t)
@@ -5937,29 +5849,14 @@ class surface_api {
         derived().view().stroke_circle(cx, cy, radius, col, stroke_width);
     }
 
-    /// @copydoc surface::stroke_circle(const struct draw_circle &)
-    constexpr void stroke_circle(const struct draw_circle &d) {
-        derived().view().stroke_circle(d);
-    }
-
     /// @copydoc surface::stroke_circle_aa(int32_t,int32_t,int32_t,uint8_t,int32_t)
     constexpr void stroke_circle_aa(int32_t cx, int32_t cy, int32_t radius, uint8_t col, int32_t stroke_width = 1) {
         derived().view().stroke_circle_aa(cx, cy, radius, col, stroke_width);
     }
 
-    /// @copydoc surface::stroke_circle_aa(const struct draw_circle &)
-    constexpr void stroke_circle_aa(const struct draw_circle &d) {
-        derived().view().stroke_circle_aa(d);
-    }
-
     /// @copydoc surface::fill_circle_aa(int32_t,int32_t,int32_t,uint8_t)
     constexpr void fill_circle_aa(int32_t cx, int32_t cy, int32_t radius, uint8_t col) {
         derived().view().fill_circle_aa(cx, cy, radius, col);
-    }
-
-    /// @copydoc surface::fill_circle_aa(const struct draw_circle &)
-    constexpr void fill_circle_aa(const struct draw_circle &d) {
-        derived().view().fill_circle_aa(d);
     }
 
     /// @copydoc surface::fill_circle_aa(int32_t,int32_t,int32_t,const shader_func &)
@@ -5976,29 +5873,14 @@ class surface_api {
         derived().view().stroke_round_rect(x, y, w, h, radius, col, stroke_width);
     }
 
-    /// @copydoc surface::stroke_round_rect(const struct draw_round_rect &)
-    constexpr void stroke_round_rect(const struct draw_round_rect &d) {
-        derived().view().stroke_round_rect(d);
-    }
-
     /// @copydoc surface::fill_round_rect(int32_t,int32_t,int32_t,int32_t,int32_t,uint8_t)
     constexpr void fill_round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col) {
         derived().view().fill_round_rect(x, y, w, h, radius, col);
     }
 
-    /// @copydoc surface::fill_round_rect(const struct draw_round_rect &)
-    constexpr void fill_round_rect(const struct draw_round_rect &d) {
-        derived().view().fill_round_rect(d);
-    }
-
     /// @copydoc surface::fill_round_rect_aa(int32_t,int32_t,int32_t,int32_t,int32_t,uint8_t)
     constexpr void fill_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col) {
         derived().view().fill_round_rect_aa(x, y, w, h, radius, col);
-    }
-
-    /// @copydoc surface::fill_round_rect_aa(const struct draw_round_rect &)
-    constexpr void fill_round_rect_aa(const struct draw_round_rect &d) {
-        derived().view().fill_round_rect_aa(d);
     }
 
     /// @copydoc surface::fill_round_rect_aa(int32_t,int32_t,int32_t,int32_t,int32_t,const shader_func &)
@@ -6014,11 +5896,6 @@ class surface_api {
     constexpr void stroke_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col,
                                         int32_t stroke_width = 1) {
         derived().view().stroke_round_rect_aa(x, y, w, h, radius, col, stroke_width);
-    }
-
-    /// @copydoc surface::stroke_round_rect_aa(const struct draw_round_rect &)
-    constexpr void stroke_round_rect_aa(const struct draw_round_rect &d) {
-        derived().view().stroke_round_rect_aa(d);
     }
 
     /// @copydoc surface::flip_h()
@@ -6072,94 +5949,6 @@ class surface_api {
         derived().view().blit_RGBA_diffused_linear(dstrect, ptr, iw, ih, stride);
     }
 
-    /// @copydoc surface::rect(int32_t,int32_t,int32_t,int32_t)
-    constexpr auto rect(int32_t x, int32_t y, int32_t w, int32_t h) {
-        return derived().view().rect(x, y, w, h);
-    }
-
-    /// @copydoc surface::circle(int32_t,int32_t,int32_t)
-    constexpr auto circle(int32_t cx, int32_t cy, int32_t r) {
-        return derived().view().circle(cx, cy, r);
-    }
-
-    /// @copydoc surface::circle_aa(int32_t,int32_t,int32_t)
-    constexpr auto circle_aa(int32_t cx, int32_t cy, int32_t r) {
-        return derived().view().circle_aa(cx, cy, r);
-    }
-
-    /// @copydoc surface::round_rect(int32_t,int32_t,int32_t,int32_t,int32_t)
-    constexpr auto round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius) {
-        return derived().view().round_rect(x, y, w, h, radius);
-    }
-
-    /// @copydoc surface::round_rect_aa(int32_t,int32_t,int32_t,int32_t,int32_t)
-    constexpr auto round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius) {
-        return derived().view().round_rect_aa(x, y, w, h, radius);
-    }
-
-    /// @copydoc surface::line(int32_t,int32_t,int32_t,int32_t)
-    constexpr auto line(int32_t x0, int32_t y0, int32_t x1, int32_t y1) {
-        return derived().view().line(x0, y0, x1, y1);
-    }
-
-    /// @copydoc surface::line_aa(int32_t,int32_t,int32_t,int32_t)
-    constexpr auto line_aa(int32_t x0, int32_t y0, int32_t x1, int32_t y1) {
-        return derived().view().line_aa(x0, y0, x1, y1);
-    }
-
-    /// @copydoc surface::point(int32_t,int32_t)
-    constexpr auto point(int32_t x, int32_t y) {
-        return derived().view().point(x, y);
-    }
-
-    /// @copydoc surface::text_mono(int32_t,int32_t,const char *)
-    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr auto text_mono(int32_t x, int32_t y, const char *str) {
-        return derived().view().template text_mono<FONT, KERNING, ROTATION>(x, y, str);
-    }
-
-    /// @copydoc surface::text_mono(int32_t,int32_t,std::string_view)
-    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr auto text_mono(int32_t x, int32_t y, std::string_view str) {
-        return derived().view().template text_mono<FONT, KERNING, ROTATION>(x, y, str);
-    }
-
-    /// @copydoc surface::text_aa(int32_t,int32_t,const char *)
-    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr auto text_aa(int32_t x, int32_t y, const char *str) {
-        return derived().view().template text_aa<FONT, KERNING, ROTATION>(x, y, str);
-    }
-
-    /// @copydoc surface::text_aa(int32_t,int32_t,std::string_view)
-    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr auto text_aa(int32_t x, int32_t y, std::string_view str) {
-        return derived().view().template text_aa<FONT, KERNING, ROTATION>(x, y, str);
-    }
-
-    /// @copydoc surface::text_centered_mono(int32_t,int32_t,const char *)
-    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr auto text_centered_mono(int32_t x, int32_t y, const char *str) {
-        return derived().view().template text_centered_mono<FONT, KERNING, ROTATION>(x, y, str);
-    }
-
-    /// @copydoc surface::text_centered_mono(int32_t,int32_t,std::string_view)
-    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr auto text_centered_mono(int32_t x, int32_t y, std::string_view str) {
-        return derived().view().template text_centered_mono<FONT, KERNING, ROTATION>(x, y, str);
-    }
-
-    /// @copydoc surface::text_centered_aa(int32_t,int32_t,const char *)
-    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr auto text_centered_aa(int32_t x, int32_t y, const char *str) {
-        return derived().view().template text_centered_aa<FONT, KERNING, ROTATION>(x, y, str);
-    }
-
-    /// @copydoc surface::text_centered_aa(int32_t,int32_t,std::string_view)
-    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr auto text_centered_aa(int32_t x, int32_t y, std::string_view str) {
-        return derived().view().template text_centered_aa<FONT, KERNING, ROTATION>(x, y, str);
-    }
-
     /// @copydoc basic_surface::get_nearest_color(uint8_t,uint8_t,uint8_t)
     [[nodiscard]] constexpr uint8_t get_nearest_color(uint8_t r, uint8_t g, uint8_t b) const {
         return derived().view().get_nearest_color(r, g, b);
@@ -6189,7 +5978,6 @@ class surface_api {
             derived().view().template sixel<S>(std::forward<F>(char_out), rect);
         }
     }
-
 #ifdef CONSTIXEL_ENABLE_COUT
     /// @copydoc basic_surface::sixel_to_cout()
     template <size_t S = 1>
@@ -6226,6 +6014,7 @@ class surface_api {
         derived().view().png_to_kitty();
     }
 #endif  // #ifdef CONSTIXEL_ENABLE_COUT
+
     /// @copydoc basic_surface::convert(F &&)
     template <device_format dst_format, typename F>
     constexpr void convert(F &&uint8_out) const {
@@ -6264,9 +6053,11 @@ class surface_api {
     }
 
  private:
+
     [[nodiscard]] constexpr D &derived() {
         return static_cast<D &>(*this);
     }
+
     [[nodiscard]] constexpr const D &derived() const {
         return static_cast<const D &>(*this);
     }
