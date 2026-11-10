@@ -33,6 +33,7 @@ SOFTWARE.
 #include <cstring>
 #include <limits>
 #include <span>
+#include <string_view>
 #include <type_traits>
 #include <utility>
 #include <vector>
@@ -3219,6 +3220,15 @@ struct draw_string {
 template <typename PF>
 class surface;
 
+/// @cond DOXYGEN_EXCLUDE
+namespace hidden {
+// View of a NUL-terminated string, empty for nullptr.
+[[nodiscard]] constexpr std::string_view cstr_view(const char *str) {
+    return str != nullptr ? std::string_view{str} : std::string_view{};
+}
+}  // namespace hidden
+/// @endcond
+
 /**
  * @brief Fluent shape API classes for method chaining
  */
@@ -3598,7 +3608,7 @@ template <typename FONT, typename PF, bool KERNING = false, text_rotation ROTATI
 class text_mono {
     surface<PF> img;
     int32_t x, y;
-    const char *str;
+    std::string_view str;
 
  public:
     /**
@@ -3608,7 +3618,7 @@ class text_mono {
      * @param y_ Y coordinate of text position
      * @param str_ Text string to draw
      */
-    constexpr text_mono(const surface<PF> &image, int32_t x_, int32_t y_, const char *str_)
+    constexpr text_mono(const surface<PF> &image, int32_t x_, int32_t y_, std::string_view str_)
         : img(image), x(x_), y(y_), str(str_) {
     }
 
@@ -3645,7 +3655,7 @@ template <typename FONT, typename PF, bool KERNING = false, text_rotation ROTATI
 class text_aa {
     surface<PF> img;
     int32_t x, y;
-    const char *str;
+    std::string_view str;
 
  public:
     /**
@@ -3655,7 +3665,7 @@ class text_aa {
      * @param y_ Y coordinate of text position
      * @param str_ Text string to draw
      */
-    constexpr text_aa(const surface<PF> &image, int32_t x_, int32_t y_, const char *str_)
+    constexpr text_aa(const surface<PF> &image, int32_t x_, int32_t y_, std::string_view str_)
         : img(image), x(x_), y(y_), str(str_) {
     }
 
@@ -3691,7 +3701,7 @@ template <typename FONT, typename PF, bool KERNING = false, text_rotation ROTATI
 class text_centered_mono {
     surface<PF> img;
     int32_t x, y;
-    const char *str;
+    std::string_view str;
 
  public:
     /**
@@ -3701,7 +3711,7 @@ class text_centered_mono {
      * @param y_ Y coordinate of center position
      * @param str_ Text string to draw
      */
-    constexpr text_centered_mono(const surface<PF> &image, int32_t x_, int32_t y_, const char *str_)
+    constexpr text_centered_mono(const surface<PF> &image, int32_t x_, int32_t y_, std::string_view str_)
         : img(image), x(x_), y(y_), str(str_) {
     }
 
@@ -3725,7 +3735,7 @@ template <typename FONT, typename PF, bool KERNING = false, text_rotation ROTATI
 class text_centered_aa {
     surface<PF> img;
     int32_t x, y;
-    const char *str;
+    std::string_view str;
 
  public:
     /**
@@ -3735,7 +3745,7 @@ class text_centered_aa {
      * @param y_ Y coordinate of center position
      * @param str_ Text string to draw
      */
-    constexpr text_centered_aa(const surface<PF> &image, int32_t x_, int32_t y_, const char *str_)
+    constexpr text_centered_aa(const surface<PF> &image, int32_t x_, int32_t y_, std::string_view str_)
         : img(image), x(x_), y(y_), str(str_) {
     }
 
@@ -4588,6 +4598,43 @@ class surface : public basic_surface<PF, uint8_t> {
      *
      * \tparam FONT The font struct name.
      * \tparam KERNING Boolean, use kerning information if available.
+     * \param str UTF-8 string. Does not have to be NUL-terminated.
+     * \param character_count How many utf32 characters in the string should be measured.
+     * \param character_actual How many utf32 characters in the string were measured.
+     * \return Width of the string in pixels.
+     */
+    template <typename FONT, bool KERNING = false>
+    [[nodiscard]] constexpr int32_t string_width(std::string_view str,
+                                                 size_t character_count = std::numeric_limits<size_t>::max(),
+                                                 size_t *character_actual = nullptr) {
+        const char *ptr = str.data();
+        const char *end = ptr + str.size();
+        int32_t x = 0;
+        size_t count = 0;
+        while (ptr != end && count++ < character_count) {
+            uint32_t utf32 = 0;
+            ptr = next_utf32(ptr, end, &utf32);
+            size_t index = 0;
+            if (lookup_glyph<FONT>(utf32, &index)) {
+                const char_info<typename FONT::char_info_type> &ch_info = FONT::char_table.at(index);
+                if (ptr == end) {
+                    x += static_cast<int32_t>(ch_info.width);
+                } else {
+                    x += static_cast<int32_t>(ch_info.xadvance);
+                    if constexpr (KERNING) {
+                        x += get_kerning<FONT>(utf32, ptr, end);
+                    }
+                }
+            }
+        }
+        if (character_actual) {
+            *character_actual = count;
+        }
+        return x;
+    }
+
+    /**
+     * \brief Return the width of a NUL-terminated string. See string_width(std::string_view, size_t, size_t *).
      * \param str UTF-8 string.
      * \param character_count How many utf32 characters in the string should be measured.
      * \param character_actual How many utf32 characters in the string were measured.
@@ -4597,28 +4644,7 @@ class surface : public basic_surface<PF, uint8_t> {
     [[nodiscard]] constexpr int32_t string_width(const char *str,
                                                  size_t character_count = std::numeric_limits<size_t>::max(),
                                                  size_t *character_actual = nullptr) {
-        int32_t x = 0;
-        size_t count = 0;
-        while (*str != 0 && count++ < character_count) {
-            uint32_t utf32 = 0;
-            str = get_next_utf32(str, &utf32);
-            size_t index = 0;
-            if (lookup_glyph<FONT>(utf32, &index)) {
-                const char_info<typename FONT::char_info_type> &ch_info = FONT::char_table.at(index);
-                if (*str == 0) {
-                    x += static_cast<int32_t>(ch_info.width);
-                } else {
-                    x += static_cast<int32_t>(ch_info.xadvance);
-                    if constexpr (KERNING) {
-                        x += get_kerning<FONT>(utf32, str);
-                    }
-                }
-            }
-        }
-        if (character_actual) {
-            *character_actual = count;
-        }
-        return x;
+        return string_width<FONT, KERNING>(std::string_view{str}, character_count, character_actual);
     }
 
     /**
@@ -4638,7 +4664,7 @@ class surface : public basic_surface<PF, uint8_t> {
      * text_rotation::DEGREE_0, text_rotation::DEGREE_90, text_rotation::DEGREE_180 or text_rotation::DEGREE_270
      * \param x Starting X-coordinate in pixels.
      * \param y Starting Y-coordinate in pixels.
-     * \param str UTF-8 string.
+     * \param str UTF-8 string. Does not have to be NUL-terminated.
      * \param col Color palette index to use.
      * \param character_count How many utf32 characters in the string should be drawn.
      * \param character_actual How many utf32 characters in the string were drawn.
@@ -4646,7 +4672,7 @@ class surface : public basic_surface<PF, uint8_t> {
      * continious text.
      */
     template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr int32_t draw_string_mono(int32_t x, int32_t y, const char *str, uint8_t col,
+    constexpr int32_t draw_string_mono(int32_t x, int32_t y, std::string_view str, uint8_t col,
                                        size_t character_count = std::numeric_limits<size_t>::max(),
                                        size_t *character_actual = nullptr) {
         static_assert(FONT::mono == true, "Can't use an antialiased font to draw mono/pixelized text.");
@@ -4654,13 +4680,12 @@ class surface : public basic_surface<PF, uint8_t> {
         if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
             return 0;
         }
-        if (str == nullptr) {
-            return 0;
-        }
+        const char *ptr = str.data();
+        const char *end = ptr + str.size();
         size_t count = 0;
-        while (*str != 0 && count++ < character_count) {
+        while (ptr != end && count++ < character_count) {
             uint32_t utf32 = 0;
-            str = get_next_utf32(str, &utf32);
+            ptr = next_utf32(ptr, end, &utf32);
             size_t index = 0;
             if (lookup_glyph<FONT>(utf32, &index)) {
                 const char_info<typename FONT::char_info_type> &ch_info = FONT::char_table.at(index);
@@ -4668,22 +4693,22 @@ class surface : public basic_surface<PF, uint8_t> {
                 if constexpr (ROTATION == DEGREE_0) {
                     x += static_cast<int32_t>(ch_info.xadvance);
                     if constexpr (KERNING) {
-                        x += get_kerning<FONT>(utf32, str);
+                        x += get_kerning<FONT>(utf32, ptr, end);
                     }
                 } else if constexpr (ROTATION == DEGREE_90) {
                     y += static_cast<int32_t>(ch_info.xadvance);
                     if constexpr (KERNING) {
-                        y += get_kerning<FONT>(utf32, str);
+                        y += get_kerning<FONT>(utf32, ptr, end);
                     }
                 } else if constexpr (ROTATION == DEGREE_180) {
                     x -= static_cast<int32_t>(ch_info.xadvance);
                     if constexpr (KERNING) {
-                        x -= get_kerning<FONT>(utf32, str);
+                        x -= get_kerning<FONT>(utf32, ptr, end);
                     }
                 } else if constexpr (ROTATION == DEGREE_270) {
                     y -= static_cast<int32_t>(ch_info.xadvance);
                     if constexpr (KERNING) {
-                        y -= get_kerning<FONT>(utf32, str);
+                        y -= get_kerning<FONT>(utf32, ptr, end);
                     }
                 }
             }
@@ -4696,6 +4721,28 @@ class surface : public basic_surface<PF, uint8_t> {
         } else {
             return x;
         }
+    }
+
+    /**
+     * \brief Draw a NUL-terminated string. See draw_string_mono(int32_t, int32_t, std::string_view, uint8_t, size_t,
+     * size_t *).
+     * \param x Starting X-coordinate in pixels.
+     * \param y Starting Y-coordinate in pixels.
+     * \param str UTF-8 string. nullptr draws nothing.
+     * \param col Color palette index to use.
+     * \param character_count How many utf32 characters in the string should be drawn.
+     * \param character_actual How many utf32 characters in the string were drawn.
+     * \return Returns the new caret position.
+     */
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+    constexpr int32_t draw_string_mono(int32_t x, int32_t y, const char *str, uint8_t col,
+                                       size_t character_count = std::numeric_limits<size_t>::max(),
+                                       size_t *character_actual = nullptr) {
+        if (str == nullptr) {
+            return 0;
+        }
+        return draw_string_mono<FONT, KERNING, ROTATION>(x, y, std::string_view{str}, col, character_count,
+                                                         character_actual);
     }
 
     /**
@@ -4735,11 +4782,11 @@ class surface : public basic_surface<PF, uint8_t> {
      * text_rotation::DEGREE_180 or text_rotation::DEGREE_270
      * \param x Center/Starting X-coordinate in pixels.
      * \param y Center/Starting Y-coordinate in pixels.
-     * \param str UTF-8 string.
+     * \param str UTF-8 string. Does not have to be NUL-terminated.
      * \param col Color palette index to use.
      */
     template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr void draw_string_centered_mono(int32_t x, int32_t y, const char *str, uint8_t col) {
+    constexpr void draw_string_centered_mono(int32_t x, int32_t y, std::string_view str, uint8_t col) {
         if constexpr (ROTATION == DEGREE_0) {
             draw_string_mono<FONT, KERNING, ROTATION>(x - string_width<FONT, KERNING>(str) / 2, y, str, col);
         } else if constexpr (ROTATION == DEGREE_180) {
@@ -4749,6 +4796,19 @@ class surface : public basic_surface<PF, uint8_t> {
         } else if constexpr (ROTATION == DEGREE_270) {
             draw_string_mono<FONT, KERNING, ROTATION>(x, y - string_width<FONT, KERNING>(str) / 2, str, col);
         }
+    }
+
+    /**
+     * \brief Draw a centered NUL-terminated string. See draw_string_centered_mono(int32_t, int32_t,
+     * std::string_view, uint8_t).
+     * \param x Center/Starting X-coordinate in pixels.
+     * \param y Center/Starting Y-coordinate in pixels.
+     * \param str UTF-8 string. nullptr draws nothing.
+     * \param col Color palette index to use.
+     */
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+    constexpr void draw_string_centered_mono(int32_t x, int32_t y, const char *str, uint8_t col) {
+        draw_string_centered_mono<FONT, KERNING, ROTATION>(x, y, hidden::cstr_view(str), col);
     }
 
     /**
@@ -4768,7 +4828,7 @@ class surface : public basic_surface<PF, uint8_t> {
      * text_rotation::DEGREE_180 or text_rotation::DEGREE_270
      * \param x Starting X-coordinate in pixels.
      * \param y Starting Y-coordinate in pixels.
-     * \param str UTF-8 string.
+     * \param str UTF-8 string. Does not have to be NUL-terminated.
      * \param col Color palette index to use.
      * \param character_count How many utf32 characters in the string should be drawn.
      * \param character_actual How many utf32 characters in the string were drawn.
@@ -4776,7 +4836,7 @@ class surface : public basic_surface<PF, uint8_t> {
      * continious text.
      */
     template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr int32_t draw_string_aa(int32_t x, int32_t y, const char *str, uint8_t col,
+    constexpr int32_t draw_string_aa(int32_t x, int32_t y, std::string_view str, uint8_t col,
                                      size_t character_count = std::numeric_limits<size_t>::max(),
                                      size_t *character_actual = nullptr) {
         static_assert(FONT::mono == false, "Can't use a mono font to draw antialiased text.");
@@ -4784,13 +4844,12 @@ class surface : public basic_surface<PF, uint8_t> {
         if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
             return 0;
         }
-        if (str == nullptr) {
-            return 0;
-        }
+        const char *ptr = str.data();
+        const char *end = ptr + str.size();
         size_t count = 0;
-        while (*str != 0 && count++ < character_count) {
+        while (ptr != end && count++ < character_count) {
             uint32_t utf32 = 0;
-            str = get_next_utf32(str, &utf32);
+            ptr = next_utf32(ptr, end, &utf32);
             size_t index = 0;
             if (lookup_glyph<FONT>(utf32, &index)) {
                 const char_info<typename FONT::char_info_type> &ch_info = FONT::char_table.at(index);
@@ -4798,22 +4857,22 @@ class surface : public basic_surface<PF, uint8_t> {
                 if constexpr (ROTATION == DEGREE_0) {
                     x += static_cast<int32_t>(ch_info.xadvance);
                     if constexpr (KERNING) {
-                        x += get_kerning<FONT>(utf32, str);
+                        x += get_kerning<FONT>(utf32, ptr, end);
                     }
                 } else if constexpr (ROTATION == DEGREE_90) {
                     y += static_cast<int32_t>(ch_info.xadvance);
                     if constexpr (KERNING) {
-                        y += get_kerning<FONT>(utf32, str);
+                        y += get_kerning<FONT>(utf32, ptr, end);
                     }
                 } else if constexpr (ROTATION == DEGREE_180) {
                     x -= static_cast<int32_t>(ch_info.xadvance);
                     if constexpr (KERNING) {
-                        x -= get_kerning<FONT>(utf32, str);
+                        x -= get_kerning<FONT>(utf32, ptr, end);
                     }
                 } else if constexpr (ROTATION == DEGREE_270) {
                     y -= static_cast<int32_t>(ch_info.xadvance);
                     if constexpr (KERNING) {
-                        y -= get_kerning<FONT>(utf32, str);
+                        y -= get_kerning<FONT>(utf32, ptr, end);
                     }
                 }
             }
@@ -4826,6 +4885,28 @@ class surface : public basic_surface<PF, uint8_t> {
         } else {
             return x;
         }
+    }
+
+    /**
+     * \brief Draw a NUL-terminated string. See draw_string_aa(int32_t, int32_t, std::string_view, uint8_t, size_t,
+     * size_t *).
+     * \param x Starting X-coordinate in pixels.
+     * \param y Starting Y-coordinate in pixels.
+     * \param str UTF-8 string. nullptr draws nothing.
+     * \param col Color palette index to use.
+     * \param character_count How many utf32 characters in the string should be drawn.
+     * \param character_actual How many utf32 characters in the string were drawn.
+     * \return Returns the new caret position.
+     */
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+    constexpr int32_t draw_string_aa(int32_t x, int32_t y, const char *str, uint8_t col,
+                                       size_t character_count = std::numeric_limits<size_t>::max(),
+                                     size_t *character_actual = nullptr) {
+        if (str == nullptr) {
+            return 0;
+        }
+        return draw_string_aa<FONT, KERNING, ROTATION>(x, y, std::string_view{str}, col, character_count,
+                                                         character_actual);
     }
 
     /**
@@ -4866,11 +4947,11 @@ class surface : public basic_surface<PF, uint8_t> {
      * text_rotation::DEGREE_180 or text_rotation::DEGREE_270
      * \param x Center/Starting X-coordinate in pixels.
      * \param y Center/Starting Y-coordinate in pixels.
-     * \param str UTF-8 string.
+     * \param str UTF-8 string. Does not have to be NUL-terminated.
      * \param col Color palette index to use.
      */
     template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr void draw_string_centered_aa(int32_t x, int32_t y, const char *str, uint8_t col) {
+    constexpr void draw_string_centered_aa(int32_t x, int32_t y, std::string_view str, uint8_t col) {
         if constexpr (ROTATION == DEGREE_0) {
             draw_string_aa<FONT, KERNING, ROTATION>(x - string_width<FONT, KERNING>(str) / 2, y, str, col);
         } else if constexpr (ROTATION == DEGREE_180) {
@@ -4880,6 +4961,19 @@ class surface : public basic_surface<PF, uint8_t> {
         } else if constexpr (ROTATION == DEGREE_270) {
             draw_string_aa<FONT, KERNING, ROTATION>(x, y - string_width<FONT, KERNING>(str) / 2, str, col);
         }
+    }
+
+    /**
+     * \brief Draw a centered NUL-terminated string. See draw_string_centered_aa(int32_t, int32_t,
+     * std::string_view, uint8_t).
+     * \param x Center/Starting X-coordinate in pixels.
+     * \param y Center/Starting Y-coordinate in pixels.
+     * \param str UTF-8 string. nullptr draws nothing.
+     * \param col Color palette index to use.
+     */
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+    constexpr void draw_string_centered_aa(int32_t x, int32_t y, const char *str, uint8_t col) {
+        draw_string_centered_aa<FONT, KERNING, ROTATION>(x, y, hidden::cstr_view(str), col);
     }
 
     /**
@@ -5756,7 +5850,7 @@ class surface : public basic_surface<PF, uint8_t> {
      * \tparam ROTATION Text rotation (default: DEGREE_0).
      * \param x Starting X-coordinate in pixels.
      * \param y Starting Y-coordinate in pixels.
-     * \param str The string to draw.
+     * \param str The string to draw. Does not have to be NUL-terminated; it has to outlive the shape.
      * \return A text_mono shape object that supports .color() and .draw() methods.
      *
      * Example usage:
@@ -5765,8 +5859,20 @@ class surface : public basic_surface<PF, uint8_t> {
      * \endcode
      */
     template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr auto text_mono(int32_t x, int32_t y, const char *str) {
+    constexpr auto text_mono(int32_t x, int32_t y, std::string_view str) {
         return shapes::text_mono<FONT, PF, KERNING, ROTATION>(*this, x, y, str);
+    }
+
+    /**
+     * \brief Create a text shape from a NUL-terminated string. See text_mono(int32_t, int32_t, std::string_view).
+     * \param x Starting X-coordinate in pixels.
+     * \param y Starting Y-coordinate in pixels.
+     * \param str The string to draw. nullptr draws nothing.
+     * \return A text_mono shape object.
+     */
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+    constexpr auto text_mono(int32_t x, int32_t y, const char *str) {
+        return text_mono<FONT, KERNING, ROTATION>(x, y, hidden::cstr_view(str));
     }
 
     /**
@@ -5777,7 +5883,7 @@ class surface : public basic_surface<PF, uint8_t> {
      * \tparam ROTATION Text rotation (default: DEGREE_0).
      * \param x Starting X-coordinate in pixels.
      * \param y Starting Y-coordinate in pixels.
-     * \param str The string to draw.
+     * \param str The string to draw. Does not have to be NUL-terminated; it has to outlive the shape.
      * \return A text_aa shape object that supports .color() and .draw() methods.
      *
      * Example usage:
@@ -5786,8 +5892,20 @@ class surface : public basic_surface<PF, uint8_t> {
      * \endcode
      */
     template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr auto text_aa(int32_t x, int32_t y, const char *str) {
+    constexpr auto text_aa(int32_t x, int32_t y, std::string_view str) {
         return shapes::text_aa<FONT, PF, KERNING, ROTATION>(*this, x, y, str);
+    }
+
+    /**
+     * \brief Create a text shape from a NUL-terminated string. See text_aa(int32_t, int32_t, std::string_view).
+     * \param x Starting X-coordinate in pixels.
+     * \param y Starting Y-coordinate in pixels.
+     * \param str The string to draw. nullptr draws nothing.
+     * \return A text_aa shape object.
+     */
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+    constexpr auto text_aa(int32_t x, int32_t y, const char *str) {
+        return text_aa<FONT, KERNING, ROTATION>(x, y, hidden::cstr_view(str));
     }
 
     /**
@@ -5797,7 +5915,7 @@ class surface : public basic_surface<PF, uint8_t> {
      * \tparam ROTATION Text rotation (default: DEGREE_0).
      * \param x Center X-coordinate in pixels.
      * \param y Center Y-coordinate in pixels.
-     * \param str The string to draw.
+     * \param str The string to draw. Does not have to be NUL-terminated; it has to outlive the shape.
      * \return A text_centered_mono shape object that supports .color() method.
      *
      * Example usage:
@@ -5807,8 +5925,21 @@ class surface : public basic_surface<PF, uint8_t> {
      * \endcode
      */
     template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr auto text_centered_mono(int32_t x, int32_t y, const char *str) {
+    constexpr auto text_centered_mono(int32_t x, int32_t y, std::string_view str) {
         return shapes::text_centered_mono<FONT, PF, KERNING, ROTATION>(*this, x, y, str);
+    }
+
+    /**
+     * \brief Create a text shape from a NUL-terminated string. See text_centered_mono(int32_t, int32_t,
+     * std::string_view).
+     * \param x Starting X-coordinate in pixels.
+     * \param y Starting Y-coordinate in pixels.
+     * \param str The string to draw. nullptr draws nothing.
+     * \return A text_centered_mono shape object.
+     */
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+    constexpr auto text_centered_mono(int32_t x, int32_t y, const char *str) {
+        return text_centered_mono<FONT, KERNING, ROTATION>(x, y, hidden::cstr_view(str));
     }
 
     /**
@@ -5819,7 +5950,7 @@ class surface : public basic_surface<PF, uint8_t> {
      * \tparam ROTATION Text rotation (default: DEGREE_0).
      * \param x Center X-coordinate in pixels.
      * \param y Center Y-coordinate in pixels.
-     * \param str The string to draw.
+     * \param str The string to draw. Does not have to be NUL-terminated; it has to outlive the shape.
      * \return A text_centered_aa shape object that supports .color() method.
      *
      * Example usage:
@@ -5828,8 +5959,21 @@ class surface : public basic_surface<PF, uint8_t> {
      * \endcode
      */
     template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-    constexpr auto text_centered_aa(int32_t x, int32_t y, const char *str) {
+    constexpr auto text_centered_aa(int32_t x, int32_t y, std::string_view str) {
         return shapes::text_centered_aa<FONT, PF, KERNING, ROTATION>(*this, x, y, str);
+    }
+
+    /**
+     * \brief Create a text shape from a NUL-terminated string. See text_centered_aa(int32_t, int32_t,
+     * std::string_view).
+     * \param x Starting X-coordinate in pixels.
+     * \param y Starting Y-coordinate in pixels.
+     * \param str The string to draw. nullptr draws nothing.
+     * \return A text_centered_aa shape object.
+     */
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+    constexpr auto text_centered_aa(int32_t x, int32_t y, const char *str) {
+        return text_centered_aa<FONT, KERNING, ROTATION>(x, y, hidden::cstr_view(str));
     }
 
  private:
@@ -5957,11 +6101,11 @@ class surface : public basic_surface<PF, uint8_t> {
      * @private
      */
     template <typename FONT>
-    constexpr int32_t get_kerning(uint32_t utf32, const char *str) const {
+    constexpr int32_t get_kerning(uint32_t utf32, const char *str, const char *end) const {
         if constexpr (FONT::kerning_tree.byte_size() > 0) {
             uint32_t utf_l = utf32;
             uint32_t utf_r = 0;
-            get_next_utf32(str, &utf_r);
+            static_cast<void>(next_utf32(str, end, &utf_r));
             auto amount = FONT::kerning_tree.lookup(
                 static_cast<FONT::kerning_lookup_type>(utf_l << FONT::kerning_code_shift | utf_r));
             if (amount != FONT::kerning_tree.invalid) {
@@ -5975,22 +6119,29 @@ class surface : public basic_surface<PF, uint8_t> {
     /**
      * @private
      */
-    constexpr const char *get_next_utf32(const char *str, uint32_t *utf32) const {
+    // Decodes one code point of [str, end) and returns the position after it. Never reads at or past end: a
+    // sequence cut off by the end decodes as 0.
+    [[nodiscard]] static constexpr const char *next_utf32(const char *str, const char *end, uint32_t *utf32) {
+        if (str == end) {
+            *utf32 = 0;
+            return str;
+        }
         const uint32_t lead = static_cast<uint32_t>(str[0]) & 0xFF;
+        const auto left = static_cast<size_t>(end - str);
         if (lead < 0x80) {
             *utf32 = lead;
             return str + 1;
         }
-        if ((lead >> 5) == 0x06 && str[1] != char{0}) {
+        if ((lead >> 5) == 0x06 && left >= 2) {
             *utf32 = ((lead & 0x1F) << 6) | (static_cast<uint32_t>(str[1]) & 0x3F);
             return str + 2;
         }
-        if ((lead >> 4) == 0x0E && str[1] != char{0} && str[2] != char{0}) {
+        if ((lead >> 4) == 0x0E && left >= 3) {
             *utf32 = ((lead & 0x0F) << 12) | ((static_cast<uint32_t>(str[1]) & 0x3F) << 6) |
                      (static_cast<uint32_t>(str[2]) & 0x3F);
             return str + 3;
         }
-        if ((lead >> 3) == 0x1E && str[1] != char{0} && str[2] != char{0} && str[3] != char{0}) {
+        if ((lead >> 3) == 0x1E && left >= 4) {
             *utf32 = ((lead & 0x07) << 18) | ((static_cast<uint32_t>(str[1]) & 0x3F) << 12) |
                      ((static_cast<uint32_t>(str[2]) & 0x3F) << 6) | (static_cast<uint32_t>(str[3]) & 0x3F);
             return str + 4;
@@ -6670,9 +6821,26 @@ class surface_api {
         return derived().view().template string_width<FONT, KERNING>(str, character_count, character_actual);
     }
 
+    /// @copydoc surface::string_width(std::string_view,size_t,size_t *)
+    template <typename FONT, bool KERNING = false>
+    [[nodiscard]] constexpr int32_t string_width(std::string_view str,
+                                                 size_t character_count = std::numeric_limits<size_t>::max(),
+                                                 size_t *character_actual = nullptr) {
+        return derived().view().template string_width<FONT, KERNING>(str, character_count, character_actual);
+    }
+
     /// @copydoc surface::draw_string_mono(int32_t,int32_t,const char *,uint8_t,size_t,size_t *)
     template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
     constexpr int32_t draw_string_mono(int32_t x, int32_t y, const char *str, uint8_t col,
+                                       size_t character_count = std::numeric_limits<size_t>::max(),
+                                       size_t *character_actual = nullptr) {
+        return derived().view().template draw_string_mono<FONT, KERNING, ROTATION>(x, y, str, col, character_count,
+                                                                                   character_actual);
+    }
+
+    /// @copydoc surface::draw_string_mono(int32_t,int32_t,std::string_view,uint8_t,size_t,size_t *)
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+    constexpr int32_t draw_string_mono(int32_t x, int32_t y, std::string_view str, uint8_t col,
                                        size_t character_count = std::numeric_limits<size_t>::max(),
                                        size_t *character_actual = nullptr) {
         return derived().view().template draw_string_mono<FONT, KERNING, ROTATION>(x, y, str, col, character_count,
@@ -6694,9 +6862,24 @@ class surface_api {
         derived().view().template draw_string_centered_mono<FONT, KERNING, ROTATION>(x, y, str, col);
     }
 
+    /// @copydoc surface::draw_string_centered_mono(int32_t,int32_t,std::string_view,uint8_t)
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+    constexpr void draw_string_centered_mono(int32_t x, int32_t y, std::string_view str, uint8_t col) {
+        derived().view().template draw_string_centered_mono<FONT, KERNING, ROTATION>(x, y, str, col);
+    }
+
     /// @copydoc surface::draw_string_aa(int32_t,int32_t,const char *,uint8_t,size_t,size_t *)
     template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
     constexpr int32_t draw_string_aa(int32_t x, int32_t y, const char *str, uint8_t col,
+                                     size_t character_count = std::numeric_limits<size_t>::max(),
+                                     size_t *character_actual = nullptr) {
+        return derived().view().template draw_string_aa<FONT, KERNING, ROTATION>(x, y, str, col, character_count,
+                                                                                 character_actual);
+    }
+
+    /// @copydoc surface::draw_string_aa(int32_t,int32_t,std::string_view,uint8_t,size_t,size_t *)
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+    constexpr int32_t draw_string_aa(int32_t x, int32_t y, std::string_view str, uint8_t col,
                                      size_t character_count = std::numeric_limits<size_t>::max(),
                                      size_t *character_actual = nullptr) {
         return derived().view().template draw_string_aa<FONT, KERNING, ROTATION>(x, y, str, col, character_count,
@@ -6714,6 +6897,12 @@ class surface_api {
     /// @copydoc surface::draw_string_centered_aa(int32_t,int32_t,const char *,uint8_t)
     template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
     constexpr void draw_string_centered_aa(int32_t x, int32_t y, const char *str, uint8_t col) {
+        derived().view().template draw_string_centered_aa<FONT, KERNING, ROTATION>(x, y, str, col);
+    }
+
+    /// @copydoc surface::draw_string_centered_aa(int32_t,int32_t,std::string_view,uint8_t)
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+    constexpr void draw_string_centered_aa(int32_t x, int32_t y, std::string_view str, uint8_t col) {
         derived().view().template draw_string_centered_aa<FONT, KERNING, ROTATION>(x, y, str, col);
     }
 
@@ -6941,9 +7130,21 @@ class surface_api {
         return derived().view().template text_mono<FONT, KERNING, ROTATION>(x, y, str);
     }
 
+    /// @copydoc surface::text_mono(int32_t,int32_t,std::string_view)
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+    constexpr auto text_mono(int32_t x, int32_t y, std::string_view str) {
+        return derived().view().template text_mono<FONT, KERNING, ROTATION>(x, y, str);
+    }
+
     /// @copydoc surface::text_aa(int32_t,int32_t,const char *)
     template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
     constexpr auto text_aa(int32_t x, int32_t y, const char *str) {
+        return derived().view().template text_aa<FONT, KERNING, ROTATION>(x, y, str);
+    }
+
+    /// @copydoc surface::text_aa(int32_t,int32_t,std::string_view)
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+    constexpr auto text_aa(int32_t x, int32_t y, std::string_view str) {
         return derived().view().template text_aa<FONT, KERNING, ROTATION>(x, y, str);
     }
 
@@ -6953,9 +7154,21 @@ class surface_api {
         return derived().view().template text_centered_mono<FONT, KERNING, ROTATION>(x, y, str);
     }
 
+    /// @copydoc surface::text_centered_mono(int32_t,int32_t,std::string_view)
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+    constexpr auto text_centered_mono(int32_t x, int32_t y, std::string_view str) {
+        return derived().view().template text_centered_mono<FONT, KERNING, ROTATION>(x, y, str);
+    }
+
     /// @copydoc surface::text_centered_aa(int32_t,int32_t,const char *)
     template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
     constexpr auto text_centered_aa(int32_t x, int32_t y, const char *str) {
+        return derived().view().template text_centered_aa<FONT, KERNING, ROTATION>(x, y, str);
+    }
+
+    /// @copydoc surface::text_centered_aa(int32_t,int32_t,std::string_view)
+    template <typename FONT, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+    constexpr auto text_centered_aa(int32_t x, int32_t y, std::string_view str) {
         return derived().view().template text_centered_aa<FONT, KERNING, ROTATION>(x, y, str);
     }
 
