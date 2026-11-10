@@ -1,5 +1,5 @@
 var classconstixel_1_1shapes_1_1point =
 [
-    [ "point", "classconstixel_1_1shapes_1_1point.html#a9dc7ab2a7d077758ae55a4a531d322a2", null ],
-    [ "plot", "classconstixel_1_1shapes_1_1point.html#ab7111ee7f1cedb7fe7429834d58c0bcd", null ]
+    [ "point", "classconstixel_1_1shapes_1_1point.html#a20b4c451acbe0e1944ddc7882bbdb801", null ],
+    [ "plot", "classconstixel_1_1shapes_1_1point.html#a262b09ef20a0459f79b339d2f2675bcc", null ]
 ];

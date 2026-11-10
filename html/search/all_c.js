@@ -1,10 +1,11 @@
 var searchData=
 [
-  ['plot_0',['plot',['../structconstixel_1_1plot.html',1,'constixel::plot'],['../classconstixel_1_1shapes_1_1point.html#ab7111ee7f1cedb7fe7429834d58c0bcd',1,'constixel::shapes::point::plot()'],['../classconstixel_1_1image.html#ac471aaf3c7fdb56059b20a58c5d6f596',1,'constixel::image::plot(int32_t x, int32_t y, uint8_t col)'],['../classconstixel_1_1image.html#a704e5b47bb1d888a675027dc28575474',1,'constixel::image::plot(const struct plot &amp;p)']]],
-  ['png_1',['png',['../classconstixel_1_1image.html#a76a5c4af0baf26d096b2f056249fa327',1,'constixel::image']]],
-  ['png_20to_20a_20file_20example_2',['Saving a PNG to a file example',['../md__r_e_a_d_m_e.html#autotoc_md10',1,'']]],
-  ['png_5fto_5fiterm_3',['png_to_iterm',['../classconstixel_1_1image.html#a797f9b4c797bb28fd0b74d5e728b7c5a',1,'constixel::image']]],
-  ['png_5fto_5fkitty_4',['png_to_kitty',['../classconstixel_1_1image.html#ab41974f6652f2f27aaafb99ec114db86',1,'constixel::image']]],
-  ['point_5',['point',['../classconstixel_1_1shapes_1_1point.html',1,'constixel::shapes::point&lt; T, W, H, GRAYSCALE, USE_SPAN &gt;'],['../classconstixel_1_1shapes_1_1point.html#a9dc7ab2a7d077758ae55a4a531d322a2',1,'constixel::shapes::point::point()'],['../classconstixel_1_1image.html#ace9a4bc386268bfda228712d06974858',1,'constixel::image::point()']]],
-  ['primary_20features_20and_20goals_6',['Primary features and goals',['../md__r_e_a_d_m_e.html#autotoc_md2',1,'']]]
+  ['palette_0',['palette',['../classconstixel_1_1basic__surface.html#a1934917a7219c66a8365b368cbe7d928',1,'constixel::basic_surface']]],
+  ['pixel_5ftype_1',['pixel_type',['../classconstixel_1_1basic__surface.html#a670d8f0d0bc0bb7fbbe485ab9373a2dc',1,'constixel::basic_surface::pixel_type'],['../classconstixel_1_1image.html#ab26c841f3e5005c0bd1d5bb98ef6fed2',1,'constixel::image::pixel_type'],['../classconstixel_1_1dynamic__image.html#a780687ea4fb2753b053f46e4d06305eb',1,'constixel::dynamic_image::pixel_type']]],
+  ['pixels_20to_20a_20display_2',['Sending pixels to a display',['../md__r_e_a_d_m_e.html#autotoc_md13',1,'']]],
+  ['plot_3',['plot',['../structconstixel_1_1plot.html',1,'constixel::plot'],['../classconstixel_1_1shapes_1_1point.html#a262b09ef20a0459f79b339d2f2675bcc',1,'constixel::shapes::point::plot()'],['../classconstixel_1_1surface__extras.html#accdd9b695090195fb29dcbec7fa01dd4',1,'constixel::surface_extras::plot()'],['../classconstixel_1_1surface.html#aa5397fc0ae5402ea749301fb2c337153',1,'constixel::surface::plot()'],['../classconstixel_1_1surface__api.html#a78e033169f5a336d46d9f5e5e112eeaa',1,'constixel::surface_api::plot()'],['../classconstixel_1_1surface.html#a14151c36db5685108d5a1af0c407b570',1,'constixel::surface::plot()'],['../classconstixel_1_1surface__api.html#accdd9b695090195fb29dcbec7fa01dd4',1,'constixel::surface_api::plot()']]],
+  ['png_4',['png',['../classconstixel_1_1basic__surface.html#a5a5afa163b0ba8bd47042a927be85b13',1,'constixel::basic_surface::png()'],['../classconstixel_1_1surface__api.html#a7e85a4ee22e0bc6c16ffa45c01a183e0',1,'constixel::surface_api::png()']]],
+  ['png_20to_20a_20file_20example_5',['Saving a PNG to a file example',['../md__r_e_a_d_m_e.html#autotoc_md11',1,'']]],
+  ['point_6',['point',['../classconstixel_1_1shapes_1_1point.html',1,'constixel::shapes::point&lt; PF &gt;'],['../classconstixel_1_1shapes_1_1point.html#a20b4c451acbe0e1944ddc7882bbdb801',1,'constixel::shapes::point::point()'],['../classconstixel_1_1surface__extras.html#ace2ee5e697683cc2183f628644da41cf',1,'constixel::surface_extras::point()']]],
+  ['primary_20features_20and_20goals_7',['Primary features and goals',['../md__r_e_a_d_m_e.html#autotoc_md2',1,'']]]
 ];

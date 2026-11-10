@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['str_0',['str',['../structconstixel_1_1draw__string.html#ac0bd4995a574a65ed9dac9fab2a4626b',1,'constixel::draw_string']]],
-  ['sw_1',['sw',['../structconstixel_1_1draw__line.html#a7e639c9f548dfef1478d287d508439d6',1,'constixel::draw_line::sw'],['../structconstixel_1_1draw__rect.html#a2006db9b59630d3b0529517ecc83795e',1,'constixel::draw_rect::sw'],['../structconstixel_1_1draw__circle.html#aaa519ec6d8e40cb6ce209784ce6df327',1,'constixel::draw_circle::sw'],['../structconstixel_1_1draw__round__rect.html#ac10440d41216bbdd1ff78287354983eb',1,'constixel::draw_round_rect::sw']]]
+  ['line_0',['line',['../structconstixel_1_1convert__cursor.html#a948926bf1afd642efc825c915f8e5104',1,'constixel::convert_cursor']]]
 ];

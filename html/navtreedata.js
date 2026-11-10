@@ -30,24 +30,32 @@ var NAVTREE =
       [ "Applications", "md__r_e_a_d_m_e.html#autotoc_md3", null ],
       [ "Requirements", "md__r_e_a_d_m_e.html#autotoc_md4", null ],
       [ "Usage", "md__r_e_a_d_m_e.html#autotoc_md5", null ],
-      [ "Minimal example", "md__r_e_a_d_m_e.html#autotoc_md6", null ],
-      [ "Text drawing example", "md__r_e_a_d_m_e.html#autotoc_md7", null ],
-      [ "Consteval sixel example", "md__r_e_a_d_m_e.html#autotoc_md8", null ],
-      [ "Consteval embedded image data example", "md__r_e_a_d_m_e.html#autotoc_md9", null ],
-      [ "Saving a PNG to a file example", "md__r_e_a_d_m_e.html#autotoc_md10", null ],
-      [ "API", "md__r_e_a_d_m_e.html#autotoc_md11", null ]
+      [ "Example gallery", "md__r_e_a_d_m_e.html#autotoc_md6", null ],
+      [ "Minimal example", "md__r_e_a_d_m_e.html#autotoc_md7", null ],
+      [ "Text drawing example", "md__r_e_a_d_m_e.html#autotoc_md8", null ],
+      [ "Consteval sixel example", "md__r_e_a_d_m_e.html#autotoc_md9", null ],
+      [ "Consteval embedded image data example", "md__r_e_a_d_m_e.html#autotoc_md10", null ],
+      [ "Saving a PNG to a file example", "md__r_e_a_d_m_e.html#autotoc_md11", null ],
+      [ "Surfaces, external buffers and runtime sizes", "md__r_e_a_d_m_e.html#autotoc_md12", null ],
+      [ "Sending pixels to a display", "md__r_e_a_d_m_e.html#autotoc_md13", null ],
+      [ "API", "md__r_e_a_d_m_e.html#autotoc_md14", null ]
     ] ],
     [ "Namespaces", "namespaces.html", [
-      [ "Namespace List", "namespaces.html", "namespaces_dup" ]
+      [ "Namespace List", "namespaces.html", "namespaces_dup" ],
+      [ "Namespace Members", "namespacemembers.html", [
+        [ "All", "namespacemembers.html", null ],
+        [ "Typedefs", "namespacemembers_type.html", null ]
+      ] ]
     ] ],
     [ "Classes", "annotated.html", [
       [ "Class List", "annotated.html", "annotated_dup" ],
       [ "Class Index", "classes.html", null ],
       [ "Class Hierarchy", "hierarchy.html", "hierarchy" ],
       [ "Class Members", "functions.html", [
-        [ "All", "functions.html", null ],
-        [ "Functions", "functions_func.html", null ],
-        [ "Variables", "functions_vars.html", null ]
+        [ "All", "functions.html", "functions_dup" ],
+        [ "Functions", "functions_func.html", "functions_func" ],
+        [ "Variables", "functions_vars.html", null ],
+        [ "Typedefs", "functions_type.html", null ]
       ] ]
     ] ],
     [ "Files", "files.html", [
@@ -59,8 +67,10 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "annotated.html",
-"classconstixel_1_1shapes_1_1text__centered__aa.html#a9cd8ce11ab0b5912a524b5b0ca192e13"
+"classconstixel_1_1surface.html#a91f42169950644e0b9fae31e86c5f268",
+"functions_func_v.html"
 ];
 
-var SYNCONMSG = 'click to disable panel synchronization';
-var SYNCOFFMSG = 'click to enable panel synchronization';
+const SYNCONMSG = 'click to disable panel synchronization';
+const SYNCOFFMSG = 'click to enable panel synchronization';
+const LISTOFALLMEMBERS = 'List of all members';
