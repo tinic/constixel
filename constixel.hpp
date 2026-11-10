@@ -3155,9 +3155,23 @@ enum device_format {
     RGB666_8BIT_SERIAL_1,  //!< RGB565 pixel data is stored from left to right, each three bytes containing 1 pixel
                            //!< values in the x direction.
                            //   Byte encoding: 0x00RRRRRR 0x00GGGGGG 0x00BBBBBB
-    RGB666_8BIT_SERIAL_2   //!< RGB565 pixel data is stored from left to right, each three bytes containing 1 pixel
+    RGB666_8BIT_SERIAL_2,  //!< RGB565 pixel data is stored from left to right, each three bytes containing 1 pixel
                            //!< values in the x direction.
                            //   Byte encoding: 0xRRRRRR00 0xGGGGGG00 0xBBBBBB00
+    MONO_1BIT_VERTICAL_PAGES,  //!< 1-bit formats only. Pages of 8 rows from top to bottom, one byte per column from
+                               //!< left to right, the least significant bit is the top row of the page. The page
+                               //!< order of SSD1306 and SH1106 displays.
+    MONO_1BIT_HORIZONTAL_LSB   //!< 1-bit formats only. Rows from top to bottom, 8 pixels per byte from left to
+                               //!< right, the least significant bit is the leftmost pixel.
+};
+
+/**
+ * @brief Position in the byte stream of convert_chunk(). Start with a default-constructed cursor and pass the same
+ * one to every call for a frame or rectangle.
+ */
+struct convert_cursor {
+    size_t line = 0;   /**< Output line (row, or page for MONO_1BIT_VERTICAL_PAGES) of the next byte. */
+    size_t offset = 0; /**< Byte offset of the next byte in that line. */
 };
 
 /**
@@ -4129,48 +4143,92 @@ class basic_surface : private hidden::palette_slot<PF> {
      */
     template <device_format dst_format, typename F>
     constexpr void convert(F &&uint8_out) const {
-        if constexpr (dst_format == STRAIGHT_THROUGH) {
-            const size_t line_bytes = PF::bytes_per_line(pix.width);
-            for (size_t y = 0; y < pix.height; y++) {
-                for (size_t x = 0; x < line_bytes; x++) {
-                    std::forward<F>(uint8_out)(pix.data[y * pix.stride + x]);
-                }
-            }
-        } else if constexpr (dst_format == RGB565_8BIT_SERIAL) {
-            const uint8_t *ptr = pix.data;
-            for (size_t y = 0; y < pix.height; y++) {
-                for (size_t x = 0; x < pix.width; x++) {
-                    const uint32_t col = PF::get_col(ptr, x);
-                    const uint32_t a = ((((col >> 0) & 0xff) >> 3) << 3) | ((((col >> 8) & 0xff) >> 2) >> 3);
-                    const uint32_t b = (((((col >> 8) & 0xff) >> 2) & 0x7) << 5) | (((col >> 16) & 0xff) >> 3);
-                    std::forward<F>(uint8_out)(static_cast<uint8_t>(a));
-                    std::forward<F>(uint8_out)(static_cast<uint8_t>(b));
-                }
-                ptr += pix.stride;
-            }
-        } else if constexpr (dst_format == RGB666_8BIT_SERIAL_1) {
-            const uint8_t *ptr = pix.data;
-            for (size_t y = 0; y < pix.height; y++) {
-                for (size_t x = 0; x < pix.width; x++) {
-                    const uint32_t col = PF::get_col(ptr, x);
-                    std::forward<F>(uint8_out)(static_cast<uint8_t>(((col >> 0) & 0xff) >> 2));
-                    std::forward<F>(uint8_out)(static_cast<uint8_t>(((col >> 8) & 0xff) >> 2));
-                    std::forward<F>(uint8_out)(static_cast<uint8_t>(((col >> 16) & 0xff) >> 2));
-                }
-                ptr += pix.stride;
-            }
-        } else if constexpr (dst_format == RGB666_8BIT_SERIAL_2) {
-            const uint8_t *ptr = pix.data;
-            for (size_t y = 0; y < pix.height; y++) {
-                for (size_t x = 0; x < pix.width; x++) {
-                    const uint32_t col = PF::get_col(ptr, x);
-                    std::forward<F>(uint8_out)(static_cast<uint8_t>(((col >> 0) & 0xff) >> 2) << 2);
-                    std::forward<F>(uint8_out)(static_cast<uint8_t>(((col >> 8) & 0xff) >> 2) << 2);
-                    std::forward<F>(uint8_out)(static_cast<uint8_t>(((col >> 16) & 0xff) >> 2) << 2);
-                }
-                ptr += pix.stride;
+        convert<dst_format>(std::forward<F>(uint8_out), {0, 0, width(), height()});
+    }
+
+    /**
+     * \brief Convert a rectangle of the current instance into a byte stream formatted for embedded displays, for
+     * partial display updates. The stream holds the lines of the rectangle only.
+     * \tparam dst_format The desired data format.
+     * \param uint8_out A lambda function which consumes the data stream one byte at a time.
+     * \param rect Rectangle to convert. It is clipped to the surface.
+     */
+    template <device_format dst_format, typename F>
+    constexpr void convert(F &&uint8_out, const constixel::rect<int32_t> &rect) const {
+        const convert_area area = convert_layout<dst_format>(rect);
+        for (size_t line = 0; line < area.lines; line++) {
+            for (size_t offset = 0; offset < area.line_bytes; offset++) {
+                std::forward<F>(uint8_out)(convert_byte<dst_format>(area, line, offset));
             }
         }
+    }
+
+    /**
+     * \brief Size of the byte stream convert() and convert_chunk() produce for a rectangle.
+     * \tparam dst_format The desired data format.
+     * \param rect Rectangle to convert. It is clipped to the surface.
+     * \return Size in bytes.
+     */
+    template <device_format dst_format>
+    [[nodiscard]] constexpr size_t convert_size(const constixel::rect<int32_t> &rect) const {
+        const convert_area area = convert_layout<dst_format>(rect);
+        return area.lines * area.line_bytes;
+    }
+
+    /**
+     * \brief Size of the byte stream convert() and convert_chunk() produce for the whole surface.
+     * \tparam dst_format The desired data format.
+     * \return Size in bytes.
+     */
+    template <device_format dst_format>
+    [[nodiscard]] constexpr size_t convert_size() const {
+        return convert_size<dst_format>({0, 0, width(), height()});
+    }
+
+    /**
+     * \brief Convert a rectangle of the current instance in chunks, the same byte stream as convert(). Call it
+     * with the same cursor and rectangle until it returns 0. Example, a partial update over SPI:
+     *
+     * \code{.cpp}
+     * std::array<uint8_t, 64> chunk;
+     * constixel::convert_cursor cursor;
+     * while (size_t n = image.convert_chunk<constixel::RGB565_8BIT_SERIAL>(chunk, cursor, {0, 0, 32, 16})) {
+     *     spi_write(chunk.data(), n);
+     * }
+     * \endcode
+     *
+     * \tparam dst_format The desired data format.
+     * \param dst Buffer to fill.
+     * \param cursor Position in the stream. Start with convert_cursor{}; it is advanced by the bytes written.
+     * \param rect Rectangle to convert. It is clipped to the surface.
+     * \return Bytes written to dst. Less than dst.size() at the end of the stream, 0 when it is finished.
+     */
+    template <device_format dst_format>
+    [[nodiscard]] constexpr size_t convert_chunk(std::span<uint8_t> dst, convert_cursor &cursor,
+                                                 const constixel::rect<int32_t> &rect) const {
+        const convert_area area = convert_layout<dst_format>(rect);
+        size_t count = 0;
+        while (count < dst.size() && cursor.line < area.lines && cursor.offset < area.line_bytes) {
+            dst[count++] = convert_byte<dst_format>(area, cursor.line, cursor.offset);
+            if (++cursor.offset >= area.line_bytes) {
+                cursor.offset = 0;
+                cursor.line++;
+            }
+        }
+        return count;
+    }
+
+    /**
+     * \brief Convert the current instance in chunks. See convert_chunk(std::span<uint8_t>, convert_cursor &, const
+     * constixel::rect<int32_t> &).
+     * \tparam dst_format The desired data format.
+     * \param dst Buffer to fill.
+     * \param cursor Position in the stream. Start with convert_cursor{}; it is advanced by the bytes written.
+     * \return Bytes written to dst. Less than dst.size() at the end of the stream, 0 when it is finished.
+     */
+    template <device_format dst_format>
+    [[nodiscard]] constexpr size_t convert_chunk(std::span<uint8_t> dst, convert_cursor &cursor) const {
+        return convert_chunk<dst_format>(dst, cursor, {0, 0, width(), height()});
     }
 
  protected:
@@ -4179,6 +4237,99 @@ class basic_surface : private hidden::palette_slot<PF> {
     /// @endcond
 
  private:
+    /// @cond DOXYGEN_EXCLUDE
+    // Clipped source rectangle of a conversion and the shape of its byte stream.
+    struct convert_area {
+        size_t x = 0;
+        size_t y = 0;
+        size_t w = 0;
+        size_t h = 0;
+        size_t lines = 0;
+        size_t line_bytes = 0;
+    };
+
+    template <device_format dst_format>
+    [[nodiscard]] constexpr convert_area convert_layout(const constixel::rect<int32_t> &rect) const {
+        const auto clipped = rect & constixel::rect<int32_t>{0, 0, width(), height()};
+        convert_area area{static_cast<size_t>(clipped.x), static_cast<size_t>(clipped.y),
+                          static_cast<size_t>(clipped.w), static_cast<size_t>(clipped.h)};
+        area.lines = area.h;
+        if constexpr (dst_format == STRAIGHT_THROUGH) {
+            // the bytes which hold the pixels x .. x + w - 1
+            area.line_bytes = area.w == 0 ? 0 : PF::bytes_per_line(area.x + area.w) - convert_first_byte(area.x);
+        } else if constexpr (dst_format == RGB565_8BIT_SERIAL) {
+            area.line_bytes = area.w * 2;
+        } else if constexpr (dst_format == RGB666_8BIT_SERIAL_1 || dst_format == RGB666_8BIT_SERIAL_2) {
+            area.line_bytes = area.w * 3;
+        } else if constexpr (dst_format == MONO_1BIT_VERTICAL_PAGES) {
+            area.lines = (area.h + 7) / 8;
+            area.line_bytes = area.w;
+        } else if constexpr (dst_format == MONO_1BIT_HORIZONTAL_LSB) {
+            area.line_bytes = (area.w + 7) / 8;
+        }
+        return area;
+    }
+
+    [[nodiscard]] static constexpr size_t convert_first_byte(size_t x) {
+        return (x * PF::bits_per_pixel) / 8;
+    }
+
+    // One byte of the stream. convert() and convert_chunk() both read the stream through this.
+    template <device_format dst_format>
+    [[nodiscard]] constexpr uint8_t convert_byte(const convert_area &area, size_t line, size_t offset) const {
+        if constexpr (dst_format == STRAIGHT_THROUGH) {
+            return pix.data[(area.y + line) * pix.stride + convert_first_byte(area.x) + offset];
+        } else if constexpr (dst_format == RGB565_8BIT_SERIAL) {
+            const uint32_t col = pixel_rgb(area.x + offset / 2, area.y + line);
+            if ((offset & 1) == 0) {
+                return static_cast<uint8_t>(((((col >> 0) & 0xff) >> 3) << 3) | ((((col >> 8) & 0xff) >> 2) >> 3));
+            }
+            return static_cast<uint8_t>((((((col >> 8) & 0xff) >> 2) & 0x7) << 5) | (((col >> 16) & 0xff) >> 3));
+        } else if constexpr (dst_format == RGB666_8BIT_SERIAL_1) {
+            const uint32_t col = pixel_rgb(area.x + offset / 3, area.y + line);
+            return static_cast<uint8_t>(((col >> (8 * (offset % 3))) & 0xff) >> 2);
+        } else if constexpr (dst_format == RGB666_8BIT_SERIAL_2) {
+            const uint32_t col = pixel_rgb(area.x + offset / 3, area.y + line);
+            return static_cast<uint8_t>((((col >> (8 * (offset % 3))) & 0xff) >> 2) << 2);
+        } else if constexpr (dst_format == MONO_1BIT_VERTICAL_PAGES) {
+            static_assert(PF::bits_per_pixel == 1, "MONO_1BIT_VERTICAL_PAGES needs a 1-bit format.");
+            uint8_t out = 0;
+            for (size_t bit = 0; bit < 8 && line * 8 + bit < area.h; bit++) {
+                const uint8_t *row = pix.data + (area.y + line * 8 + bit) * pix.stride;
+                out |= static_cast<uint8_t>((PF::get_col(row, area.x + offset) & 1) << bit);
+            }
+            return out;
+        } else if constexpr (dst_format == MONO_1BIT_HORIZONTAL_LSB) {
+            static_assert(PF::bits_per_pixel == 1, "MONO_1BIT_HORIZONTAL_LSB needs a 1-bit format.");
+            const uint8_t *row = pix.data + (area.y + line) * pix.stride;
+            uint8_t out = 0;
+            for (size_t bit = 0; bit < 8 && offset * 8 + bit < area.w; bit++) {
+                out |= static_cast<uint8_t>((PF::get_col(row, area.x + offset * 8 + bit) & 1) << bit);
+            }
+            return out;
+        } else {
+            return 0;
+        }
+    }
+
+    // Color of a pixel as 0x00BBGGRR.
+    [[nodiscard]] constexpr uint32_t pixel_rgb(size_t x, size_t y) const {
+        const uint8_t *row = pix.data + y * pix.stride;
+        if constexpr (PF::bits_per_pixel >= 24) {
+            const uint8_t *ptr = row + x * (PF::bits_per_pixel / 8);
+            return static_cast<uint32_t>(ptr[0]) | (static_cast<uint32_t>(ptr[1]) << 8) |
+                   (static_cast<uint32_t>(ptr[2]) << 16);
+        } else if constexpr (PF::bits_per_pixel == 8) {
+            if (palette() != nullptr) {
+                return palette()->at(row[x]);
+            }
+            return PF::quant.palette()[row[x]];
+        } else {
+            return PF::quant.palette()[PF::get_col(row, x)];
+        }
+    }
+    /// @endcond
+
 #ifdef CONSTIXEL_ENABLE_COUT
     /**
      * @private
@@ -7333,6 +7484,37 @@ class surface_api {
     template <device_format dst_format, typename F>
     constexpr void convert(F &&uint8_out) const {
         derived().view().template convert<dst_format>(std::forward<F>(uint8_out));
+    }
+
+    /// @copydoc basic_surface::convert(F &&,const constixel::rect<int32_t> &)
+    template <device_format dst_format, typename F>
+    constexpr void convert(F &&uint8_out, const constixel::rect<int32_t> &rect) const {
+        derived().view().template convert<dst_format>(std::forward<F>(uint8_out), rect);
+    }
+
+    /// @copydoc basic_surface::convert_size(const constixel::rect<int32_t> &)
+    template <device_format dst_format>
+    [[nodiscard]] constexpr size_t convert_size(const constixel::rect<int32_t> &rect) const {
+        return derived().view().template convert_size<dst_format>(rect);
+    }
+
+    /// @copydoc basic_surface::convert_size()
+    template <device_format dst_format>
+    [[nodiscard]] constexpr size_t convert_size() const {
+        return derived().view().template convert_size<dst_format>();
+    }
+
+    /// @copydoc basic_surface::convert_chunk(std::span<uint8_t>,convert_cursor &,const constixel::rect<int32_t> &)
+    template <device_format dst_format>
+    [[nodiscard]] constexpr size_t convert_chunk(std::span<uint8_t> dst, convert_cursor &cursor,
+                                                 const constixel::rect<int32_t> &rect) const {
+        return derived().view().template convert_chunk<dst_format>(dst, cursor, rect);
+    }
+
+    /// @copydoc basic_surface::convert_chunk(std::span<uint8_t>,convert_cursor &)
+    template <device_format dst_format>
+    [[nodiscard]] constexpr size_t convert_chunk(std::span<uint8_t> dst, convert_cursor &cursor) const {
+        return derived().view().template convert_chunk<dst_format>(dst, cursor);
     }
 
  private:
