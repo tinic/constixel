@@ -4033,7 +4033,7 @@ class surface : public basic_surface<PF, uint8_t>, public surface_extras<surface
 
     surface() = delete;
 
-    // the overloads of surface_extras, next to the ones declared here
+    /// @private The overloads of surface_extras, next to the ones declared here
     using extras = surface_extras<surface<PF>, PF>;
     using extras::plot, extras::draw_line, extras::draw_line_aa, extras::fill_rect, extras::stroke_rect;
     using extras::fill_circle, extras::stroke_circle, extras::stroke_circle_aa, extras::fill_circle_aa;
@@ -5616,6 +5616,7 @@ class surface : public basic_surface<PF, uint8_t>, public surface_extras<surface
 template <typename D, typename PF>
 class surface_api : public surface_extras<D, PF> {
  public:
+    /// @private
     using extras = surface_extras<D, PF>;
     using extras::plot, extras::draw_line, extras::draw_line_aa, extras::fill_rect, extras::stroke_rect;
     using extras::fill_circle, extras::stroke_circle, extras::stroke_circle_aa, extras::fill_circle_aa;
@@ -5726,22 +5727,22 @@ class surface_api : public surface_extras<D, PF> {
         derived().view().stroke_round_rect_aa(x, y, w, h, radius, col, stroke_width);
     }
 
-    /// @copydoc surface::flip_h()
+    /// @copydoc constixel::surface::flip_h()
     constexpr void flip_h() {
         derived().view().flip_h();
     }
 
-    /// @copydoc surface::flip_v()
+    /// @copydoc constixel::surface::flip_v()
     constexpr void flip_v() {
         derived().view().flip_v();
     }
 
-    /// @copydoc surface::flip_hv()
+    /// @copydoc constixel::surface::flip_hv()
     constexpr void flip_hv() {
         derived().view().flip_hv();
     }
 
-    /// @copydoc surface::blit_RGBA(int32_t,int32_t,int32_t,int32_t,const uint8_t *,int32_t,int32_t,int32_t)
+    /// @copydoc constixel::surface::blit_RGBA(int32_t,int32_t,int32_t,int32_t,const uint8_t *,int32_t,int32_t,int32_t)
     constexpr void blit_RGBA(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *ptr, int32_t iw, int32_t ih,
                              int32_t stride) {
         derived().view().blit_RGBA(x, y, w, h, ptr, iw, ih, stride);
@@ -5765,25 +5766,25 @@ class surface_api : public surface_extras<D, PF> {
         derived().view().blit_RGBA_diffused_linear(x, y, w, h, ptr, iw, ih, stride);
     }
 
-    /// @copydoc basic_surface::get_nearest_color(uint8_t,uint8_t,uint8_t)
+    /// @copydoc constixel::basic_surface::get_nearest_color(uint8_t,uint8_t,uint8_t) const
     [[nodiscard]] constexpr uint8_t get_nearest_color(uint8_t r, uint8_t g, uint8_t b) const {
         return derived().view().get_nearest_color(r, g, b);
     }
 
-    /// @copydoc basic_surface::png(F &&)
+    /// @copydoc constixel::basic_surface::png(F &&) const
     template <typename F>
     constexpr void png(F &&char_out) const {
         derived().view().png(std::forward<F>(char_out));
     }
 
-    /// @copydoc basic_surface::sixel(F &&)
+    /// @copydoc constixel::basic_surface::sixel(F &&) const
     template <size_t S = 1, typename F>
     constexpr void sixel(F &&char_out) const {
         const auto surface = derived().view();
         sixel<S>(std::forward<F>(char_out), {0, 0, surface.width(), surface.height()});
     }
 
-    /// @copydoc basic_surface::sixel(F &&,const constixel::rect<int32_t> &)
+    /// @copydoc constixel::basic_surface::sixel(F &&,const constixel::rect<int32_t> &) const
     template <size_t S = 1, typename F>
     constexpr void sixel(F &&char_out, const constixel::rect<int32_t> &rect) const {
         if constexpr (hidden::has_sixel_cache<PF>) {
@@ -5831,38 +5832,38 @@ class surface_api : public surface_extras<D, PF> {
     }
 #endif  // #ifdef CONSTIXEL_ENABLE_COUT
 
-    /// @copydoc basic_surface::convert(F &&)
+    /// @copydoc constixel::basic_surface::convert(F &&) const
     template <device_format dst_format, typename F>
     constexpr void convert(F &&uint8_out) const {
         derived().view().template convert<dst_format>(std::forward<F>(uint8_out));
     }
 
-    /// @copydoc basic_surface::convert(F &&,const constixel::rect<int32_t> &)
+    /// @copydoc constixel::basic_surface::convert(F &&,const constixel::rect<int32_t> &) const
     template <device_format dst_format, typename F>
     constexpr void convert(F &&uint8_out, const constixel::rect<int32_t> &rect) const {
         derived().view().template convert<dst_format>(std::forward<F>(uint8_out), rect);
     }
 
-    /// @copydoc basic_surface::convert_size(const constixel::rect<int32_t> &)
+    /// @copydoc constixel::basic_surface::convert_size(const constixel::rect<int32_t> &) const
     template <device_format dst_format>
     [[nodiscard]] constexpr size_t convert_size(const constixel::rect<int32_t> &rect) const {
         return derived().view().template convert_size<dst_format>(rect);
     }
 
-    /// @copydoc basic_surface::convert_size()
+    /// @copydoc constixel::basic_surface::convert_size() const
     template <device_format dst_format>
     [[nodiscard]] constexpr size_t convert_size() const {
         return derived().view().template convert_size<dst_format>();
     }
 
-    /// @copydoc basic_surface::convert_chunk(std::span<uint8_t>,convert_cursor &,const constixel::rect<int32_t> &)
+    /// @copydoc constixel::basic_surface::convert_chunk
     template <device_format dst_format>
     [[nodiscard]] constexpr size_t convert_chunk(std::span<uint8_t> dst, convert_cursor &cursor,
                                                  const constixel::rect<int32_t> &rect) const {
         return derived().view().template convert_chunk<dst_format>(dst, cursor, rect);
     }
 
-    /// @copydoc basic_surface::convert_chunk(std::span<uint8_t>,convert_cursor &)
+    /// @copydoc constixel::basic_surface::convert_chunk(std::span<uint8_t>,convert_cursor &) const
     template <device_format dst_format>
     [[nodiscard]] constexpr size_t convert_chunk(std::span<uint8_t> dst, convert_cursor &cursor) const {
         return derived().view().template convert_chunk<dst_format>(dst, cursor);

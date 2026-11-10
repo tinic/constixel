@@ -1,4 +1,6 @@
 var searchData=
 [
-  ['h_0',['h',['../structconstixel_1_1rect.html#a29cbd851b77f1651a9ffe762d6bf183a',1,'constixel::rect::h'],['../structconstixel_1_1draw__rect.html#a7156418f3424049e90891c81032f91b0',1,'constixel::draw_rect::h'],['../structconstixel_1_1draw__round__rect.html#a71d7326628499482a358c68f2e6f68d5',1,'constixel::draw_round_rect::h']]]
+  ['col_0',['col',['../structconstixel_1_1plot.html#a45c1fef78b868a05932661d183d2d599',1,'constixel::plot::col'],['../structconstixel_1_1draw__line.html#a4c88a47b5340678c83e69d7407ce560a',1,'constixel::draw_line::col'],['../structconstixel_1_1draw__rect.html#a9e659c6727af3f70d0e87d7376419372',1,'constixel::draw_rect::col'],['../structconstixel_1_1draw__circle.html#a791a0735868a9a694de875aacfa9645a',1,'constixel::draw_circle::col'],['../structconstixel_1_1draw__round__rect.html#a55006a156d2db8dceee658581299d5b4',1,'constixel::draw_round_rect::col'],['../structconstixel_1_1draw__string.html#a1ff5c8136a0d920df0dc74a783932fe5',1,'constixel::draw_string::col']]],
+  ['cx_1',['cx',['../structconstixel_1_1draw__circle.html#a6d44030a945dadb53b1df38166cc513a',1,'constixel::draw_circle']]],
+  ['cy_2',['cy',['../structconstixel_1_1draw__circle.html#a6e80d9f53cfa5bb333a3c6ce1dc27f73',1,'constixel::draw_circle']]]
 ];

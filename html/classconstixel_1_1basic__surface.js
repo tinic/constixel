@@ -1,0 +1,27 @@
+var classconstixel_1_1basic__surface =
+[
+    [ "pixel_type", "classconstixel_1_1basic__surface.html#a670d8f0d0bc0bb7fbbe485ab9373a2dc", null ],
+    [ "basic_surface", "classconstixel_1_1basic__surface.html#aefef53a6c967e488d5900fdfaf31bda1", null ],
+    [ "basic_surface", "classconstixel_1_1basic__surface.html#af55a542cbf9964f18a420b6d61d21935", null ],
+    [ "convert", "classconstixel_1_1basic__surface.html#a73944439d2b5efa24edfee8785579719", null ],
+    [ "convert", "classconstixel_1_1basic__surface.html#a120552b2f097c65991ead4e57877f608", null ],
+    [ "convert_chunk", "classconstixel_1_1basic__surface.html#aee5dcba4146f3f25acd5609adeb195a6", null ],
+    [ "convert_chunk", "classconstixel_1_1basic__surface.html#a4fe3df94e2d21d2d9f0c355867b18a41", null ],
+    [ "convert_size", "classconstixel_1_1basic__surface.html#a5bb88b14a7e052b2f3a7414b9d43fe10", null ],
+    [ "convert_size", "classconstixel_1_1basic__surface.html#a1fe6cfc3ed8cd89c902c8c96c0e38f22", null ],
+    [ "data", "classconstixel_1_1basic__surface.html#a61b39ade98e3f8c89f31764c9c057b59", null ],
+    [ "get_nearest_color", "classconstixel_1_1basic__surface.html#acb4244fe07caf193740af0558f7a21d6", null ],
+    [ "height", "classconstixel_1_1basic__surface.html#ac85de0b7713670c09d35418362acd299", null ],
+    [ "palette", "classconstixel_1_1basic__surface.html#a1934917a7219c66a8365b368cbe7d928", null ],
+    [ "png", "classconstixel_1_1basic__surface.html#a5a5afa163b0ba8bd47042a927be85b13", null ],
+    [ "RGBA_uint32", "classconstixel_1_1basic__surface.html#a5bdf09dae96a5e182e4cec37e3da6881", null ],
+    [ "RGBA_uint32", "classconstixel_1_1basic__surface.html#a124757a402cf2b0f3bf3edf180218082", null ],
+    [ "RGBA_uint8", "classconstixel_1_1basic__surface.html#a67b8a294309c27881e9430be9a8e304d", null ],
+    [ "RGBA_uint8", "classconstixel_1_1basic__surface.html#a574f7b993170101584f2f9f19695d085", null ],
+    [ "sixel", "classconstixel_1_1basic__surface.html#a513c7424f6e38bb843fbbe065201c297", null ],
+    [ "sixel", "classconstixel_1_1basic__surface.html#ac39ceaa16eb9f339d3883f0940d41214", null ],
+    [ "sixel", "classconstixel_1_1basic__surface.html#ac105033753a6a2ccb1cf08426b0921be", null ],
+    [ "stride", "classconstixel_1_1basic__surface.html#af47d92f9d9fa824a919ad992f4b067f8", null ],
+    [ "transpose", "classconstixel_1_1basic__surface.html#adcaca09aab6912dc3dca5fedab0e81f5", null ],
+    [ "width", "classconstixel_1_1basic__surface.html#ac283b671708ec2870aa3f34abc56490a", null ]
+];
