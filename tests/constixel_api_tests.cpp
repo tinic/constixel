@@ -190,10 +190,96 @@ void test_string_view() {
     check(blank(a), __LINE__);
 }
 
+// ----- draw_string: one entry point with alignment --------------------------------------
+
+consteval bool consteval_draw_string() {
+    image1 a;
+    image1 b;
+    // a mono font on a 1-bit image, right aligned
+    const int32_t end_a = a.draw_string_mono<mono, true>(60 - a.string_width<mono, true>("AV"), 1, "AV", 1);
+    const int32_t end_b = b.draw_string<mono, true>(60, 1, "AV", 1, constixel::ALIGN_RIGHT);
+    return end_a == end_b && same_pixels(a, b) && !blank(a);
+}
+static_assert(consteval_draw_string());
+
+void test_draw_string() {
+    static constexpr char text[] = "Hello W\xC3\xB6rld";
+    image8 a;
+    image8 b;
+
+    // dispatch on the kind of font
+    check(a.draw_string_mono<mono, true>(2, 4, text, 1) == b.draw_string<mono, true>(2, 4, text, 1), __LINE__);
+    check(same_pixels(a, b) && !blank(a), __LINE__);
+    a.clear();
+    b.clear();
+    check(a.draw_string_aa<aa, true>(2, 4, text, 3) == b.draw_string<aa, true>(2, 4, std::string_view{text}, 3),
+          __LINE__);
+    check(same_pixels(a, b) && !blank(a), __LINE__);
+
+    // right and center are the manual string_width arithmetic
+    a.clear();
+    b.clear();
+    const int32_t width = a.string_width<mono, true>(text);
+    a.draw_string_mono<mono, true>(150 - width, 4, text, 1);
+    b.draw_string<mono, true>(150, 4, text, 1, constixel::ALIGN_RIGHT);
+    check(same_pixels(a, b) && !blank(a), __LINE__);
+    a.clear();
+    b.clear();
+    a.draw_string_mono<mono, true>(80 - width / 2, 4, text, 1);
+    b.draw_string<mono, true>(80, 4, text, 1, constixel::ALIGN_CENTER);
+    check(same_pixels(a, b) && !blank(a), __LINE__);
+    a.clear();
+    a.draw_string_centered_mono<mono, true>(80, 4, text, 1);
+    check(same_pixels(a, b), __LINE__);
+
+    // antialiased, right aligned, with a character limit
+    a.clear();
+    b.clear();
+    const int32_t width5 = a.string_width<aa>(text, 5);
+    a.draw_string_aa<aa>(150 - width5, 4, text, 2, 5);
+    b.draw_string<aa>(150, 4, text, 2, constixel::ALIGN_RIGHT, 5);
+    check(same_pixels(a, b) && !blank(a), __LINE__);
+
+    // rotated: the offset follows the direction of the text
+    a.clear();
+    b.clear();
+    a.draw_string_mono<mono, false, constixel::DEGREE_180>(10 + a.string_width<mono>("Hi"), 40, "Hi", 1);
+    b.draw_string<mono, false, constixel::DEGREE_180>(10, 40, "Hi", 1, constixel::ALIGN_RIGHT);
+    check(same_pixels(a, b) && !blank(a), __LINE__);
+
+    // the param struct carries the alignment, also through the _mono and _aa names
+    a.clear();
+    b.clear();
+    a.draw_string<mono, true>(150, 4, text, 1, constixel::ALIGN_RIGHT);
+    b.draw_string<mono, true>({.x = 150, .y = 4, .str = text, .col = 1, .align = constixel::ALIGN_RIGHT});
+    check(same_pixels(a, b) && !blank(a), __LINE__);
+    b.clear();
+    b.draw_string_mono<mono, true>({.x = 150, .y = 4, .str = text, .col = 1, .align = constixel::ALIGN_RIGHT});
+    check(same_pixels(a, b), __LINE__);
+    a.clear();
+    b.clear();
+    a.draw_string_aa<aa>(2, 4, text, 1);
+    b.draw_string_aa<aa>({.x = 2, .y = 4, .str = text, .col = 1});
+    check(same_pixels(a, b) && !blank(a), __LINE__);
+
+    // dynamic_image and a bare surface have the same entry point
+    constixel::dynamic_image<constixel::pixel_8bit<false>> d(160, 48);
+    a.clear();
+    a.draw_string<aa, true>(80, 4, text, 1, constixel::ALIGN_CENTER);
+    d.draw_string<aa, true>(80, 4, text, 1, constixel::ALIGN_CENTER);
+    b.clear();
+    b.copy<160 * 48>(d.data_ref().data());
+    check(same_pixels(a, b) && !blank(a), __LINE__);
+    b.clear();
+    b.view().draw_string<aa, true>(80, 4, text, 1, constixel::ALIGN_CENTER);
+    check(same_pixels(a, b), __LINE__);
+}
+
 }  // namespace
 
 int main() {
     test_image_basics();
     test_string_view();
+    test_draw_string();
     return failures == 0 ? 0 : 1;
 }
