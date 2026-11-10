@@ -3593,9 +3593,7 @@ class surface : public basic_surface<PF, uint8_t> {
             return;
         }
 
-        const float Rl = PF::quant.linear_palette().at((col & PF::color_mask) * 3 + 0);
-        const float Gl = PF::quant.linear_palette().at((col & PF::color_mask) * 3 + 1);
-        const float Bl = PF::quant.linear_palette().at((col & PF::color_mask) * 3 + 2);
+        const auto [Rl, Gl, Bl] = linear_color(col);
 
         if (stroke_width <= 0.0f) {
             return;
@@ -5242,6 +5240,16 @@ class surface : public basic_surface<PF, uint8_t> {
 
     /**
      * @private
+     * Linear RGB of a palette color.
+     */
+    [[nodiscard]] static constexpr std::array<float, 3> linear_color(uint8_t col) {
+        const size_t index = (col & PF::color_mask) * 3;
+        const auto &linear = PF::quant.linear_palette();
+        return {linear.at(index + 0), linear.at(index + 1), linear.at(index + 2)};
+    }
+
+    /**
+     * @private
      */
     template <typename abs_T>
     [[nodiscard]] static constexpr abs_T abs(abs_T v) {
@@ -5494,9 +5502,7 @@ class surface : public basic_surface<PF, uint8_t> {
             }
         } else {
             const auto rF = static_cast<float>(r);
-            const float Rl = PF::quant.linear_palette().at((col & PF::color_mask) * 3 + 0);
-            const float Gl = PF::quant.linear_palette().at((col & PF::color_mask) * 3 + 1);
-            const float Bl = PF::quant.linear_palette().at((col & PF::color_mask) * 3 + 2);
+            const auto [Rl, Gl, Bl] = linear_color(col);
             if constexpr (!STROKE) {
                 auto plot_arc = [&, this]<typename I>(int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
                                                       int32_t y_off) {
@@ -5692,11 +5698,7 @@ class surface : public basic_surface<PF, uint8_t> {
             size_t index = 0;
             if (lookup_glyph<FONT>(utf32, &index)) {
                 const char_info<typename FONT::char_info_type> &ch_info = FONT::char_table.at(index);
-                if constexpr (FONT::mono) {
-                    draw_char_mono<FONT, ROTATION>(x, y, ch_info, col);
-                } else {
-                    draw_char_aa<FONT, ROTATION>(x, y, ch_info, col);
-                }
+                draw_char<FONT, ROTATION>(x, y, ch_info, col);
                 if constexpr (ROTATION == DEGREE_0) {
                     x += static_cast<int32_t>(ch_info.xadvance);
                     if constexpr (KERNING) {
@@ -5732,20 +5734,41 @@ class surface : public basic_surface<PF, uint8_t> {
 
     /**
      * @private
+     * Draws one glyph of a mono (1 bit per pixel) or an antialiased (4 bits per pixel) font.
      */
     template <typename FONT, text_rotation ROTATION>
-    constexpr void draw_char_mono(int32_t x, int32_t y, const char_info<typename FONT::char_info_type> &ch,
-                                  uint8_t col) {
+    constexpr void draw_char(int32_t x, int32_t y, const char_info<typename FONT::char_info_type> &ch, uint8_t col) {
         const auto dst = pix;
-        static_assert(FONT::mono == true, "Can't use an antialiased font to draw mono/pixelized text.");
+        constexpr int32_t ppb = FONT::mono ? 8 : 2;  // glyph pixels per byte
         int32_t ch_data_off = static_cast<int32_t>(ch.y) * static_cast<int32_t>(FONT::glyph_bitmap_stride) +
-                              static_cast<int32_t>(ch.x) / 8;
+                              static_cast<int32_t>(ch.x) / ppb;
+        std::array<float, 3> lin{};
+        if constexpr (!FONT::mono) {
+            lin = linear_color(col);
+        }
 
         auto limit_box = [&](int32_t &xmin, int32_t &ymin, int32_t &xmax, int32_t &ymax) {
             ymin = std::max(ymin, int32_t{0});
             ymax = std::min(ymax, static_cast<int32_t>(pix.height) - int32_t{1});
             xmin = std::max(xmin, int32_t{0});
             xmax = std::min(xmax, static_cast<int32_t>(pix.width) - int32_t{1});
+        };
+
+        // Draws pixel x_off of the current glyph line at xx/yy.
+        auto put = [&](int32_t xx, int32_t yy, int32_t x_off) {
+            const int32_t bit_index = (ppb - 1 - (x_off % ppb)) * (8 / ppb);
+            const auto byte_index = static_cast<size_t>(ch_data_off + x_off / ppb);
+            if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
+                constexpr uint8_t full = FONT::mono ? 1 : 0xF;
+                const auto a = static_cast<uint8_t>((FONT::glyph_bitmap[byte_index] >> bit_index) & full);
+                if (a == full) {
+                    plot_unsafe(dst, xx, yy, col);
+                } else if constexpr (!FONT::mono) {
+                    if (a != 0) {
+                        compose_unsafe(dst, xx, yy, hidden::a2al_4bit[a], lin[0], lin[1], lin[2]);
+                    }
+                }
+            }
         };
 
         if constexpr (ROTATION == DEGREE_0) {
@@ -5760,15 +5783,7 @@ class surface : public basic_surface<PF, uint8_t> {
             limit_box(x, y, x2, y2);
             for (int32_t yy = y; yy < y2; yy++) {
                 for (int32_t xx = x; xx < x2; xx++) {
-                    const int32_t x_off = (xx - x) + ch.x % 8;
-                    const int32_t bit_index = 7 - (x_off % 8);
-                    const auto byte_index = static_cast<size_t>(ch_data_off + x_off / 8);
-                    if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
-                        const auto a = static_cast<uint8_t>((FONT::glyph_bitmap[byte_index] >> bit_index) & 1);
-                        if (a) {
-                            plot_unsafe(dst, xx, yy, col);
-                        }
-                    }
+                    put(xx, yy, (xx - x) + ch.x % ppb);
                 }
                 ch_data_off += FONT::glyph_bitmap_stride;
             }
@@ -5784,15 +5799,7 @@ class surface : public basic_surface<PF, uint8_t> {
             limit_box(x2, y, x, y2);
             for (int32_t yy = y2 - 1; yy >= y; yy--) {
                 for (int32_t xx = x2; xx < x; xx++) {
-                    const int32_t x_off = (ch.width - (xx - x2) - 1) + ch.x % 8;
-                    const int32_t bit_index = 7 - (x_off % 8);
-                    const auto byte_index = static_cast<size_t>(ch_data_off + x_off / 8);
-                    if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
-                        const auto a = static_cast<uint8_t>((FONT::glyph_bitmap[byte_index] >> bit_index) & 1);
-                        if (a) {
-                            plot_unsafe(dst, xx, yy, col);
-                        }
-                    }
+                    put(xx, yy, (ch.width - (xx - x2) - 1) + ch.x % ppb);
                 }
                 ch_data_off += FONT::glyph_bitmap_stride;
             }
@@ -5808,15 +5815,7 @@ class surface : public basic_surface<PF, uint8_t> {
             limit_box(x, y, x2, y2);
             for (int32_t xx = x2 - 1; xx >= x; xx--) {
                 for (int32_t yy = y; yy < y2; yy++) {
-                    const int32_t x_off = (yy - y) + ch.x % 8;
-                    const int32_t bit_index = 7 - (x_off % 8);
-                    const auto byte_index = static_cast<size_t>(ch_data_off + x_off / 8);
-                    if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
-                        const auto a = static_cast<uint8_t>((FONT::glyph_bitmap[byte_index] >> bit_index) & 1);
-                        if (a) {
-                            plot_unsafe(dst, xx, yy, col);
-                        }
-                    }
+                    put(xx, yy, (yy - y) + ch.x % ppb);
                 }
                 ch_data_off += FONT::glyph_bitmap_stride;
             }
@@ -5832,160 +5831,13 @@ class surface : public basic_surface<PF, uint8_t> {
             limit_box(x, y2, x2, y);
             for (int32_t xx = x; xx < x2; xx++) {
                 for (int32_t yy = y2; yy < y; yy++) {
-                    const int32_t x_off = (ch.width - (yy - y2) - 1) + ch.x % 8;
-                    const int32_t bit_index = 7 - (x_off % 8);
-                    const auto byte_index = static_cast<size_t>(ch_data_off + x_off / 8);
-                    if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
-                        const auto a = static_cast<uint8_t>((FONT::glyph_bitmap[byte_index] >> bit_index) & 1);
-                        if (a) {
-                            plot_unsafe(dst, xx, yy, col);
-                        }
-                    }
+                    put(xx, yy, (ch.width - (yy - y2) - 1) + ch.x % ppb);
                 }
                 ch_data_off += FONT::glyph_bitmap_stride;
             }
         }
     }
 
-    /**
-     * @private
-     */
-    template <typename FONT, text_rotation ROTATION>
-    constexpr void draw_char_aa(int32_t x, int32_t y, const char_info<typename FONT::char_info_type> &ch, uint8_t col) {
-        const auto dst = pix;
-        static_assert(FONT::mono == false, "Can't use a mono font to draw antialiased text.");
-
-        int32_t ch_data_off = static_cast<int32_t>(ch.y) * static_cast<int32_t>(FONT::glyph_bitmap_stride) +
-                              static_cast<int32_t>(ch.x) / 2;
-        const float Rl = PF::quant.linear_palette().at((col & PF::color_mask) * 3 + 0);
-        const float Gl = PF::quant.linear_palette().at((col & PF::color_mask) * 3 + 1);
-        const float Bl = PF::quant.linear_palette().at((col & PF::color_mask) * 3 + 2);
-
-        auto limit_box = [&](int32_t &xmin, int32_t &ymin, int32_t &xmax, int32_t &ymax) {
-            ymin = std::max(ymin, int32_t{0});
-            ymax = std::min(ymax, static_cast<int32_t>(pix.height) - int32_t{1});
-            xmin = std::max(xmin, int32_t{0});
-            xmax = std::min(xmax, static_cast<int32_t>(pix.width) - int32_t{1});
-        };
-
-        if constexpr (ROTATION == DEGREE_0) {
-            if (check_not_in_bounds(x + ch.xoffset, y + ch.yoffset, ch.width + 1, ch.height + 1)) {
-                return;
-            }
-
-            x += ch.xoffset;
-            y += ch.yoffset;
-            int32_t x2 = x + static_cast<int32_t>(ch.width);
-            int32_t y2 = y + static_cast<int32_t>(ch.height);
-            limit_box(x, y, x2, y2);
-            for (int32_t yy = y; yy < y2; yy++) {
-                for (int32_t xx = x; xx < x2; xx++) {
-                    const int32_t x_off = (xx - x) + ch.x % 2;
-                    const int32_t bit_index = (1 - (x_off % 2)) * 4;
-                    const auto byte_index = static_cast<size_t>(ch_data_off + x_off / 2);
-                    if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
-                        const auto a = static_cast<uint8_t>((FONT::glyph_bitmap[byte_index] >> bit_index) & 0xF);
-                        if (a != 0) {
-                            if (a == 0xF) {
-                                plot_unsafe(dst, xx, yy, col);
-                            } else {
-                                float Al = hidden::a2al_4bit[a];
-                                compose_unsafe(dst, xx, yy, Al, Rl, Gl, Bl);
-                            }
-                        }
-                    }
-                }
-                ch_data_off += FONT::glyph_bitmap_stride;
-            }
-        } else if constexpr (ROTATION == DEGREE_180) {
-            if (check_not_in_bounds(x - ch.xoffset - ch.width, y - FONT::ascent, ch.width + 1, ch.height + 1)) {
-                return;
-            }
-
-            x -= ch.xoffset;
-            y -= FONT::ascent;
-            int32_t x2 = x - static_cast<int32_t>(ch.width);
-            int32_t y2 = y + static_cast<int32_t>(ch.height);
-            limit_box(x2, y, x, y2);
-            for (int32_t yy = y2 - 1; yy >= y; yy--) {
-                for (int32_t xx = x2; xx < x; xx++) {
-                    const int32_t x_off = (ch.width - (xx - x2) - 1) + ch.x % 2;
-                    const int32_t bit_index = (1 - (x_off % 2)) * 4;
-                    const auto byte_index = static_cast<size_t>(ch_data_off + x_off / 2);
-                    if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
-                        const auto a = static_cast<uint8_t>((FONT::glyph_bitmap[byte_index] >> bit_index) & 0xF);
-                        if (a != 0) {
-                            if (a == 0xF) {
-                                plot_unsafe(dst, xx, yy, col);
-                            } else {
-                                float Al = hidden::a2al_4bit[a];
-                                compose_unsafe(dst, xx, yy, Al, Rl, Gl, Bl);
-                            }
-                        }
-                    }
-                }
-                ch_data_off += FONT::glyph_bitmap_stride;
-            }
-        } else if constexpr (ROTATION == DEGREE_90) {
-            if (check_not_in_bounds(x - FONT::ascent, y, ch.height + 1, ch.width + 1)) {
-                return;
-            }
-
-            x -= FONT::ascent;
-            y += ch.xoffset;
-            int32_t x2 = x + static_cast<int32_t>(ch.height);
-            int32_t y2 = y + static_cast<int32_t>(ch.width);
-            limit_box(x, y, x2, y2);
-            for (int32_t xx = x2 - 1; xx >= x; xx--) {
-                for (int32_t yy = y; yy < y2; yy++) {
-                    const int32_t x_off = (yy - y) + ch.x % 2;
-                    const int32_t bit_index = (1 - (x_off % 2)) * 4;
-                    const auto byte_index = static_cast<size_t>(ch_data_off + x_off / 2);
-                    if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
-                        const auto a = static_cast<uint8_t>((FONT::glyph_bitmap[byte_index] >> bit_index) & 0xF);
-                        if (a != 0) {
-                            if (a == 0xF) {
-                                plot_unsafe(dst, xx, yy, col);
-                            } else {
-                                float Al = hidden::a2al_4bit[a];
-                                compose_unsafe(dst, xx, yy, Al, Rl, Gl, Bl);
-                            }
-                        }
-                    }
-                }
-                ch_data_off += FONT::glyph_bitmap_stride;
-            }
-        } else if constexpr (ROTATION == DEGREE_270) {
-            if (check_not_in_bounds(x + ch.yoffset, y - ch.xoffset - ch.width, ch.height + 1, ch.width + 1)) {
-                return;
-            }
-
-            x += ch.yoffset;
-            y -= ch.xoffset;
-            int32_t x2 = x + static_cast<int32_t>(ch.height);
-            int32_t y2 = y - static_cast<int32_t>(ch.width);
-            limit_box(x, y2, x2, y);
-            for (int32_t xx = x; xx < x2; xx++) {
-                for (int32_t yy = y2; yy < y; yy++) {
-                    const int32_t x_off = (ch.width - (yy - y2) - 1) + ch.x % 2;
-                    const int32_t bit_index = (1 - (x_off % 2)) * 4;
-                    const auto byte_index = static_cast<size_t>(ch_data_off + x_off / 2);
-                    if (byte_index < (FONT::glyph_bitmap_stride * FONT::glyph_bitmap_height)) {
-                        const auto a = static_cast<uint8_t>((FONT::glyph_bitmap[byte_index] >> bit_index) & 0xF);
-                        if (a != 0) {
-                            if (a == 0xF) {
-                                plot_unsafe(dst, xx, yy, col);
-                            } else {
-                                float Al = hidden::a2al_4bit[a];
-                                compose_unsafe(dst, xx, yy, Al, Rl, Gl, Bl);
-                            }
-                        }
-                    }
-                }
-                ch_data_off += FONT::glyph_bitmap_stride;
-            }
-        }
-    }
 
     /**
      * @private
