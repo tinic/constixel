@@ -4226,6 +4226,8 @@ class surface : public basic_surface<PF, uint8_t> {
  public:
     using basic_surface<PF, uint8_t>::basic_surface;
 
+    surface() = delete;
+
     /**
      * \brief Plot a single pixel at the specified coordinates using the supplied color.
      * \param x X-coordinate in pixels.
