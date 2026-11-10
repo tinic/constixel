@@ -47,6 +47,16 @@ foreach(TEST IN LISTS TESTS)
     target_include_directories(constixel_${TEST} PRIVATE ${PROJECT_SOURCE_DIR}/.. ${PROJECT_SOURCE_DIR}/../genfonts/)
 endforeach()
 
+# ----- API TESTS (ctest) ------------------------------------------------------------------
+
+# Silent on success, non-zero exit on failure. The two binaries above print images and are not registered.
+enable_testing()
+get_source_file_property(API_TEST_FLAGS constixel_tests.cpp COMPILE_FLAGS)
+set_source_files_properties(constixel_api_tests.cpp PROPERTIES COMPILE_FLAGS "${API_TEST_FLAGS}")
+add_executable(constixel_api_tests constixel_api_tests.cpp)
+target_include_directories(constixel_api_tests PRIVATE ${PROJECT_SOURCE_DIR}/..)
+add_test(NAME constixel_api_tests COMMAND constixel_api_tests)
+
 # ----- FONTS -------------------------------------------------------------------------
 
 set(HEADER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../fonts")   # adjust as needed
