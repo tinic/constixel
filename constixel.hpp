@@ -964,13 +964,19 @@ class format {
         std::forward<F>(char_out)('\\');
     }
 
-    // 24/32-bit sixel output caches palette indices for this many columns on the stack. Images up to this width
-    // quantize every pixel once, wider ones once per color of a band.
+    // 24/32-bit sixel output caches the palette indices of the six lines of a band, column by column. A cache of
+    // the image width quantizes every pixel once. A smaller one is a window which follows the column that is read
+    // and quantizes once per color of a band.
+    [[nodiscard]] static constexpr size_t sixel_cache_size(size_t columns) {
+        return columns * 6;
+    }
+
+    // Columns of the cache a surface uses when its owner supplies none.
     static constexpr size_t sixel_cache_columns = 1024;
 
-    // First cached column for a window which has to hold column x.
-    [[nodiscard]] static constexpr size_t sixel_cache_start(size_t x, size_t width) {
-        return std::min(x, width > sixel_cache_columns ? width - sixel_cache_columns : size_t{0});
+    // First cached column for a window of the given size which has to hold column x.
+    [[nodiscard]] static constexpr size_t sixel_cache_start(size_t x, size_t width, size_t columns) {
+        return std::min(x, width > columns ? width - columns : size_t{0});
     }
 
     template <typename PBT, size_t PBS>
@@ -2428,26 +2434,29 @@ class pixel_24bit : public format {
         png_image<bits_per_pixel>(pix, bytes_per_line(pix.width), quant.palette(), std::forward<F>(char_out));
     }
 
+    // Marks the formats whose sixel output takes a line cache of sixel_cache_size(columns) bytes.
+    static constexpr bool sixel_line_cache = true;
+
     template <size_t S, typename F>
-    static constexpr void sixel(const const_raster &pix, F &&char_out, const rect<int32_t> &r) {
-        // Palette indices of the six lines of a band, for a window of columns.
-        std::array<uint8_t, sixel_cache_columns * 6> line_cache{};
+    static constexpr void sixel(const const_raster &pix, F &&char_out, const rect<int32_t> &r,
+                                std::span<uint8_t> line_cache) {
+        const size_t cache_columns = line_cache.size() / sixel_cache_size(1);
         auto line_cache_line = std::numeric_limits<size_t>::max();
         size_t line_cache_x = 0;
         sixel_image<uint8_t, sixel_bitset_size>(
             pix.data, quant.palette(), std::forward<F>(char_out), r, pix.width, pix.height, S,
-            [&pix, &line_cache, &line_cache_line, &line_cache_x](const uint8_t *data_raw, size_t x, size_t col,
-                                                                  size_t y) {
+            [&pix, line_cache, cache_columns, &line_cache_line, &line_cache_x](const uint8_t *data_raw, size_t x,
+                                                                               size_t col, size_t y) {
                 const size_t xs = x / S;
-                if (line_cache_line != (y / S) || xs < line_cache_x || xs >= line_cache_x + sixel_cache_columns) {
+                if (line_cache_line != (y / S) || (xs - line_cache_x) >= cache_columns) {
                     line_cache_line = (y / S);
-                    line_cache_x = sixel_cache_start(xs, pix.width);
-                    const size_t columns = std::min(sixel_cache_columns, pix.width - line_cache_x);
+                    line_cache_x = sixel_cache_start(xs, pix.width, cache_columns);
+                    const size_t columns = std::min(cache_columns, pix.width - line_cache_x);
                     const uint8_t *ptr = &data_raw[(y / S) * pix.stride + line_cache_x * 3];
                     for (size_t y6 = 0; y6 < 6; y6++) {
                         if (((y / S) + y6) < pix.height) {
                             for (size_t xx = 0; xx < columns; xx++) {
-                                line_cache[y6 * sixel_cache_columns + xx] =
+                                line_cache[xx * 6 + y6] =
                                     quant.nearest(ptr[xx * 3 + 0], ptr[xx * 3 + 1], ptr[xx * 3 + 2]);
                             }
                             if (((y / S) + y6) != (pix.height - 1)) {
@@ -2456,12 +2465,13 @@ class pixel_24bit : public format {
                         }
                     }
                 }
+                const uint8_t *column = &line_cache[(xs - line_cache_x) * 6];
                 uint8_t out = 0;
                 for (size_t y6 = 0; y6 < 6; y6++) {
                     out >>= 1;
                     if ((y + y6) < (pix.height * S)) {
                         size_t y6_l = (((y + y6) % 6) / S);
-                        const uint8_t *ptr = &line_cache[y6_l * sixel_cache_columns + xs - line_cache_x];
+                        const uint8_t *ptr = &column[y6_l];
                         out |= static_cast<uint8_t>((*ptr == col) ? (1UL << 5) : 0);
                     }
                 }
@@ -2712,26 +2722,29 @@ class pixel_32bit : public format {
         png_image<bits_per_pixel>(pix, bytes_per_line(pix.width), quant.palette(), std::forward<F>(char_out));
     }
 
+    // Marks the formats whose sixel output takes a line cache of sixel_cache_size(columns) bytes.
+    static constexpr bool sixel_line_cache = true;
+
     template <size_t S, typename F>
-    static constexpr void sixel(const const_raster &pix, F &&char_out, const rect<int32_t> &r) {
-        // Palette indices of the six lines of a band, for a window of columns.
-        std::array<uint8_t, sixel_cache_columns * 6> line_cache{};
+    static constexpr void sixel(const const_raster &pix, F &&char_out, const rect<int32_t> &r,
+                                std::span<uint8_t> line_cache) {
+        const size_t cache_columns = line_cache.size() / sixel_cache_size(1);
         auto line_cache_line = std::numeric_limits<size_t>::max();
         size_t line_cache_x = 0;
         sixel_image<uint8_t, sixel_bitset_size>(
             pix.data, quant.palette(), std::forward<F>(char_out), r, pix.width, pix.height, S,
-            [&pix, &line_cache, &line_cache_line, &line_cache_x](const uint8_t *data_raw, size_t x, size_t col,
-                                                                  size_t y) {
+            [&pix, line_cache, cache_columns, &line_cache_line, &line_cache_x](const uint8_t *data_raw, size_t x,
+                                                                               size_t col, size_t y) {
                 const size_t xs = x / S;
-                if (line_cache_line != (y / S) || xs < line_cache_x || xs >= line_cache_x + sixel_cache_columns) {
+                if (line_cache_line != (y / S) || (xs - line_cache_x) >= cache_columns) {
                     line_cache_line = (y / S);
-                    line_cache_x = sixel_cache_start(xs, pix.width);
-                    const size_t columns = std::min(sixel_cache_columns, pix.width - line_cache_x);
+                    line_cache_x = sixel_cache_start(xs, pix.width, cache_columns);
+                    const size_t columns = std::min(cache_columns, pix.width - line_cache_x);
                     const uint8_t *ptr = &data_raw[(y / S) * pix.stride + line_cache_x * 4];
                     for (size_t y6 = 0; y6 < 6; y6++) {
                         if (((y / S) + y6) < pix.height) {
                             for (size_t xx = 0; xx < columns; xx++) {
-                                line_cache[y6 * sixel_cache_columns + xx] =
+                                line_cache[xx * 6 + y6] =
                                     quant.nearest(ptr[xx * 4 + 0], ptr[xx * 4 + 1], ptr[xx * 4 + 2]);
                             }
                             if (((y / S) + y6) != (pix.height - 1)) {
@@ -2740,12 +2753,13 @@ class pixel_32bit : public format {
                         }
                     }
                 }
+                const uint8_t *column = &line_cache[(xs - line_cache_x) * 6];
                 uint8_t out = 0;
                 for (size_t y6 = 0; y6 < 6; y6++) {
                     out >>= 1;
                     if ((y + y6) < (pix.height * S)) {
                         size_t y6_l = (((y + y6) % 6) / S);
-                        const uint8_t *ptr = &line_cache[y6_l * sixel_cache_columns + xs - line_cache_x];
+                        const uint8_t *ptr = &column[y6_l];
                         out |= static_cast<uint8_t>((*ptr == col) ? (1UL << 5) : 0);
                     }
                 }
@@ -2908,6 +2922,8 @@ using format_8bit_dyn = pixel_8bit<false>;
 namespace hidden {
 template <typename PF>
 concept has_runtime_palette = requires { typename PF::runtime_palette; };
+template <typename PF>
+concept has_sixel_cache = requires { PF::sixel_line_cache; };
 }  // namespace hidden
 /// @endcond
 
@@ -3983,9 +3999,34 @@ class basic_surface : private hidden::palette_slot<PF> {
     constexpr void sixel(F &&char_out, const constixel::rect<int32_t> &rect) const {
         if constexpr (hidden::has_runtime_palette<PF>) {
             PF::template sixel<S>(pix, std::forward<F>(char_out), rect, palette());
+        } else if constexpr (hidden::has_sixel_cache<PF>) {
+            std::array<uint8_t, PF::sixel_cache_size(PF::sixel_cache_columns)> line_cache{};
+            PF::template sixel<S>(pix, std::forward<F>(char_out), rect, std::span<uint8_t>{line_cache});
         } else {
             PF::template sixel<S>(pix, std::forward<F>(char_out), rect);
         }
+    }
+
+    /**
+     * \brief Convert the current instance into a sixel stream, with a caller-supplied line cache. Only for the 24
+     * and 32-bit formats. sixel() without a cache uses a window of 1024 columns on the stack, which is slow for
+     * wider surfaces; a cache of the full width is not.
+     *
+     * \tparam S scale of sixel output.
+     * \param char_out A lambda function which consumes the sixel stream data one byte at a time
+     * \param rect Clipping rectangle; to only show a portion of the image.
+     * \param line_cache Scratch memory, PF::sixel_cache_size(width()) bytes for full speed. It is overwritten.
+     */
+    template <size_t S = 1, typename F>
+    constexpr void sixel(F &&char_out, const constixel::rect<int32_t> &rect, std::span<uint8_t> line_cache) const
+        requires hidden::has_sixel_cache<PF>
+    {
+        if (line_cache.size() < PF::sixel_cache_size(1)) {
+            sixel<S>(std::forward<F>(char_out), rect);
+            return;
+        }
+        std::fill(line_cache.begin(), line_cache.end(), uint8_t{0});
+        PF::template sixel<S>(pix, std::forward<F>(char_out), rect, line_cache);
     }
 
 #ifdef CONSTIXEL_ENABLE_COUT
@@ -6930,20 +6971,31 @@ class surface_api {
     /// @copydoc basic_surface::sixel(F &&)
     template <size_t S = 1, typename F>
     constexpr void sixel(F &&char_out) const {
-        derived().view().template sixel<S>(std::forward<F>(char_out));
+        const auto surface = derived().view();
+        sixel<S>(std::forward<F>(char_out), {0, 0, surface.width(), surface.height()});
     }
 
     /// @copydoc basic_surface::sixel(F &&,const constixel::rect<int32_t> &)
     template <size_t S = 1, typename F>
     constexpr void sixel(F &&char_out, const constixel::rect<int32_t> &rect) const {
-        derived().view().template sixel<S>(std::forward<F>(char_out), rect);
+        if constexpr (hidden::has_sixel_cache<PF>) {
+            // D::sixel_cache() returns the storage for a line cache of the full width.
+            auto line_cache = derived().sixel_cache();
+            derived().view().template sixel<S>(std::forward<F>(char_out), rect, std::span<uint8_t>{line_cache});
+        } else {
+            derived().view().template sixel<S>(std::forward<F>(char_out), rect);
+        }
     }
 
 #ifdef CONSTIXEL_ENABLE_COUT
     /// @copydoc basic_surface::sixel_to_cout()
     template <size_t S = 1>
     void sixel_to_cout() const {
-        derived().view().template sixel_to_cout<S>();
+        std::string out;
+        sixel<S>([&out](char ch) mutable {
+            out.push_back(ch);
+        });
+        std::cout << out << '\n';
     }
 
     /// @copydoc basic_surface::vt100_clear()
@@ -7204,6 +7256,16 @@ class image
     using dataType = std::conditional_t<USE_SPAN, std::span<uint8_t, T<W, H, GRAYSCALE, USE_SPAN>::image_size>,
                                         std::array<uint8_t, T<W, H, GRAYSCALE, USE_SPAN>::image_size>>;
 
+    friend surface_api<image<T, W, H, GRAYSCALE, USE_SPAN>, pixel_type>;
+
+    /**
+     * @private
+     * Line cache for 24/32-bit sixel output, on the stack of the caller.
+     */
+    [[nodiscard]] static constexpr std::array<uint8_t, pixel_type::sixel_cache_size(W)> sixel_cache() {
+        return {};
+    }
+
     dataType data{};
 
     /**
@@ -7394,6 +7456,13 @@ class dynamic_image : public surface_api<dynamic_image<PF>, PF> {
 
  private:
     /// @cond DOXYGEN_EXCLUDE
+    friend surface_api<dynamic_image<PF>, PF>;
+
+    // Line cache for 24/32-bit sixel output.
+    [[nodiscard]] constexpr std::vector<uint8_t> sixel_cache() const {
+        return std::vector<uint8_t>(PF::sixel_cache_size(w_));
+    }
+
     std::vector<uint8_t> data_;
     size_t w_;
     size_t h_;
