@@ -13,6 +13,8 @@ target_include_directories(constixel INTERFACE
     $<INSTALL_INTERFACE:include>
 )
 
+target_compile_features(constixel INTERFACE cxx_std_20)
+
 install(TARGETS constixel
         EXPORT ConstixelConfig)
 
@@ -26,6 +28,7 @@ install(EXPORT ConstixelConfig
 add_library(constixel::constixel ALIAS constixel)
 
 if (PROJECT_IS_TOP_LEVEL)
+    enable_testing()
     add_subdirectory(tests)
     add_subdirectory(examples)
 endif()

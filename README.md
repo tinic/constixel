@@ -15,6 +15,8 @@ constixel is a single header minimalistic constexpr C++20 palette based 2D graph
 [Consteval sixel example](#consteval-sixel-example)  
 [Consteval image example](#consteval-embedded-image-data-example)  
 [Saving a PNG to a file example](#saving-a-png-to-a-file-example)  
+[Surfaces, external buffers and runtime sizes](#surfaces-external-buffers-and-runtime-sizes)  
+[Sending pixels to a display](#sending-pixels-to-a-display)  
 [API](#api)  
 
 ## Primary features and goals
@@ -62,8 +64,7 @@ Option 1: Simply copy the header file to your project and include it. Optionally
 
 Option 2: If you prefer you can add this git repo as a cmake library:
 
-```find_package(constixel REQUIRED)
-...
+```
 add_subdirectory(constixel)
 ...
 target_link_libraries([your target name] PRIVATE constixel::constixel)
@@ -77,11 +78,7 @@ After that you can simply do this:
 #include "constixel/fonts/[whatever font you want].hpp"
 ```
 
-Don't forget to enable C++20/23:
-
-```
-set(CMAKE_CXX_STANDARD 20)
-```
+The cmake target requires C++20 on its own, no need to set CMAKE_CXX_STANDARD.
 
 ## Example gallery
 
@@ -255,6 +252,58 @@ int main() {
 
 ```
 
+## Surfaces, external buffers and runtime sizes
+
+All drawing code lives in constixel::surface, a non-owning view of a pixel buffer (data pointer, width, height and stride). A function which takes a surface is compiled once per format and draws into any image of that format, whatever its size or storage:
+
+```c++
+#include "constixel.hpp"
+#include "fonts/ibmplexsans_bold_18_mono.hpp"
+using font = constixel::ibmplexsans_bold_18_mono;
+using namespace constixel;
+
+void draw_status(surface<pixel_1bit> s, std::string_view psi) {
+    s.fill_rect({.x = 0, .y = 0, .w = s.width(), .h = 2, .col = 1});
+    s.draw_string<font, true>(0, 2, "Air:", 1);
+    s.draw_string<font, true>(s.width() - 1, 2, psi, 1, ALIGN_RIGHT);
+}
+
+int main() {
+    // Static storage. image has the complete drawing API itself, view() returns its surface.
+    static image<format_1bit, 192, 64> screen;
+    draw_status(screen.view(), "95psi");
+
+    // An existing framebuffer: data, width, height, bytes per line.
+    static uint8_t fb[32 * 20];
+    draw_status(surface<pixel_1bit>{fb, 128, 32, 20}, "75psi");
+
+    // Size only known at run time, storage on the heap.
+    dynamic_image<pixel_1bit> dyn(160, 48);
+    draw_status(dyn.view(), "12psi");
+}
+```
+
+The pixel classes are pixel_1bit, pixel_2bit<Grayscale>, pixel_4bit<Grayscale>, pixel_8bit<Grayscale>, pixel_24bit<> and pixel_32bit<>. An image of a 1, 2, 4, 24 or 32-bit format occupies exactly its pixel data in memory.
+
+> [!NOTE]
+> Sixel output of 24 and 32-bit data through a bare surface wider than 1024 pixels is slow unless a line cache of 6 * width bytes is passed to sixel(). image and dynamic_image supply it themselves.
+
+## Sending pixels to a display
+
+convert() streams the pixels in the byte order of a display controller. convert_chunk() fills a caller buffer instead and is called until it returns 0, which fits SPI transfers with DMA. Both accept a rectangle for partial updates.
+
+```c++
+static constixel::image<constixel::format_1bit, 128, 64> screen;
+
+void flush() {
+    std::array<uint8_t, 64> chunk;
+    constixel::convert_cursor cursor;
+    while (size_t n = screen.convert_chunk<constixel::MONO_1BIT_VERTICAL_PAGES>(chunk, cursor)) {
+        spi_write(chunk.data(), n);
+    }
+}
+```
+
 ## API
 
 Full doxygen generated API docs are at [constixel.dev](https://constixel.dev)
@@ -328,6 +377,12 @@ class image {
     // NOTE: This only works with constixel::format_8bit/constixel::format_32bit images
     template <typename FONT, bool KERNING = false, ROTATION = DEGREE_0>
     constexpr int32_t draw_string_aa(int32_t x, int32_t y, const char *str, uint8_t col);
+
+    // Draw utf8 text with a monochrome or an antialiased font, the font decides. Text can be a const char * or a
+    // std::string_view. Alignment is ALIGN_LEFT, ALIGN_CENTER or ALIGN_RIGHT relative to x.
+    // Returns the current x caret position in pixels.
+    template <typename FONT, bool KERNING = false, ROTATION = DEGREE_0>
+    constexpr int32_t draw_string(int32_t x, int32_t y, std::string_view str, uint8_t col, text_align align = ALIGN_LEFT);
 
     // Get the width of a utf8 string in pixels. #include a monochrome or antialiased font and specify the included struct as the template parameter
     template <typename FONT, bool KERNING = false>
@@ -444,20 +499,31 @@ class image {
     // Send a escape command to std::cout to home the cursor of a vt100 compatible terminal.
     void vt100_home();
 
+    // Return the drawing surface of this image
+    surface<pixel_type> view();
+
     /*! Data formats for the convert functions */
     enum device_format {
-        STRAIGHT_THROUGH,     /*!< Just copy the data as is. */
-        RGB565_8BIT_SERIAL,   /*!< RGB565 pixel data is stored from left to right, each two bytes containing 1 pixel value in the x direction.
-                                   Byte encoding: 0xRRRRRGGG 0xGGGBBBBB */
-        RGB666_8BIT_SERIAL_1, /*!< RGB565 pixel data is stored from left to right, each three bytes containing 1 pixel values in the x direction.
-                                   Byte encoding: 0x00RRRRRR 0x00GGGGGG 0x00BBBBBB */
-        RGB666_8BIT_SERIAL_2  /*!< RGB565 pixel data is stored from left to right, each three bytes containing 1 pixel values in the x direction.
-                                   Byte encoding: 0xRRRRRR00 0xGGGGGG00 0xBBBBBB00 */
+        STRAIGHT_THROUGH,         /*!< Just copy the data as is. */
+        RGB565_8BIT_SERIAL,       /*!< Two bytes per pixel: 0xRRRRRGGG 0xGGGBBBBB */
+        RGB666_8BIT_SERIAL_1,     /*!< Three bytes per pixel: 0x00RRRRRR 0x00GGGGGG 0x00BBBBBB */
+        RGB666_8BIT_SERIAL_2,     /*!< Three bytes per pixel: 0xRRRRRR00 0xGGGGGG00 0xBBBBBB00 */
+        MONO_1BIT_VERTICAL_PAGES, /*!< 1-bit only. Pages of 8 rows, one byte per column, LSB is the top row (SSD1306, SH1106). */
+        MONO_1BIT_HORIZONTAL_LSB  /*!< 1-bit only. 8 pixels per byte, LSB is the leftmost pixel. */
     };
 
-    // Convert the current instance into a byte stream formatted for embedded displays.
-    void convert<device_format>(F &&char_out);
-    bool convert_chunk<device_format>(char *dst, size_t chunk_size, size_t &chunk_actual, size_t &chunk_index);
+    // Convert the current instance, or a rectangle of it, into a byte stream formatted for embedded displays.
+    void convert<device_format>(F &&uint8_out);
+    void convert<device_format>(F &&uint8_out, const rect<int32_t> &r);
+
+    // Number of bytes convert will produce.
+    size_t convert_size<device_format>();
+    size_t convert_size<device_format>(const rect<int32_t> &r);
+
+    // Same as convert, but fills dst and returns the number of bytes written, 0 when done.
+    // Start with a default constructed cursor and pass the same one to every call.
+    size_t convert_chunk<device_format>(std::span<uint8_t> dst, convert_cursor &cursor);
+    size_t convert_chunk<device_format>(std::span<uint8_t> dst, convert_cursor &cursor, const rect<int32_t> &r);
 
 }
 ```

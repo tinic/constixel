@@ -42,6 +42,16 @@ Files appear in `build/examples/previews/` (with a multi-configuration generator
 | ![Monochrome weather display](weather/example_weather.png) | ![Server health dashboard](server_status/example_server_status.png) |
 | [Source](weather/example_weather.cpp) · An 800 x 480, 1-bit display with procedural weather icons, stippled rain bars, and a five-day forecast. The pixel buffer occupies 48,000 bytes. | [Source](server_status/example_server_status.cpp) · A dark monitoring screen with latency buckets, resource use, and service health. Request totals, error rate, and the p95 upper bound come from the sample data. |
 
+| One interface, three displays | Pixel formats compared |
+| --- | --- |
+| ![One interface on three displays](displays/example_displays.png) | ![A ray traced scene in six pixel formats](dither/example_dither.png) |
+| [Source](displays/example_displays.cpp) · One `draw_ui(surface<PF>)` function draws a 1-bit OLED, a 16 color TFT and a grayscale e-paper screen. The picture is rendered from the converted display data: SSD1306 pages from `convert_chunk`, an RGB565 frame from `convert`. | [Source](dither/example_dither.cpp) · A small ray tracer renders a scene which is blitted into 8, 4, 2 and 1-bit images, with the size of each pixel buffer. |
+
+| Synthwave |
+| --- |
+| ![Synthwave sunset](synthwave/example_synthwave.png) |
+| [Source](synthwave/example_synthwave.cpp) · A retro sunset from shader fills with alpha, antialiased lines of varying width and layered text. |
+
 | Process dashboard | Music player |
 | --- | --- |
 | ![Process dashboard](industrial/example_industrial.png) | ![Music player](watchui/example_watchui.png) |

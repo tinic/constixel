@@ -19,7 +19,7 @@ struct Point2 {
     int x, y;
 };
 
-float surface(float x, float z) {
+float height_at(float x, float z) {
     const float radius = std::sqrt(x * x + z * z);
     return 0.6f * std::sin(radius * 2) * std::exp(-0.3f * radius) + 0.3f * std::sin(x * 3) * std::cos(z * 2);
 }
@@ -58,7 +58,7 @@ int main(int argc, char** argv) {
     float min_height = 1, max_height = -1;
     for (int i = 0; i <= resolution; ++i) {
         for (int j = 0; j <= resolution; ++j) {
-            const float y = surface(-3 + i * step, -3 + j * step);
+            const float y = height_at(-3 + i * step, -3 + j * step);
             min_height = std::min(min_height, y);
             max_height = std::max(max_height, y);
         }
@@ -73,13 +73,13 @@ int main(int argc, char** argv) {
     for (int i = 0; i <= resolution; ++i) {
         for (int j = 0; j <= resolution; ++j) {
             const float x = -3 + i * step, z = -3 + j * step;
-            const Point3 a{x, surface(x, z), z};
+            const Point3 a{x, height_at(x, z), z};
             if (i < resolution) {
-                const Point3 b{x + step, surface(x + step, z), z};
+                const Point3 b{x + step, height_at(x + step, z), z};
                 segment(img, a, b, height_color((a.y + b.y) / 2));
             }
             if (j < resolution) {
-                const Point3 b{x, surface(x, z + step), z + step};
+                const Point3 b{x, height_at(x, z + step), z + step};
                 segment(img, a, b, height_color((a.y + b.y) / 2));
             }
         }

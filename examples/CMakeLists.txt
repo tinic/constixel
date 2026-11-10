@@ -6,6 +6,7 @@ set(EXAMPLES
     "text" "graph" "embedded" "specimen" "minimal" "drawingapi" "industrial"
     "watchui" "mandelbrot" "visualization3d" "shader_fill"
     "energy" "thermostat" "weather" "server_status"
+    "displays" "dither" "synthwave"
 )
 
 project(examples)
@@ -31,6 +32,7 @@ endforeach()
 set(PREVIEW_EXAMPLES
     "text" "graph" "drawingapi" "industrial" "watchui" "mandelbrot" "visualization3d" "shader_fill"
     "energy" "thermostat" "weather" "server_status"
+    "displays" "dither" "synthwave"
 )
 add_custom_target(example_previews
     COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/previews"
