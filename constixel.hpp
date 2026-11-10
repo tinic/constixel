@@ -4967,7 +4967,7 @@ class surface : public basic_surface<PF, uint8_t>, public surface_extras<surface
     [[nodiscard]] static constexpr std::array<float, 3> linear_color(uint8_t col) {
         const size_t index = (col & PF::color_mask) * 3;
         const auto &linear = PF::quant.linear_palette();
-        return {linear.at(index + 0), linear.at(index + 1), linear.at(index + 2)};
+        return {{linear.at(index + 0), linear.at(index + 1), linear.at(index + 2)}};
     }
 
     /**
