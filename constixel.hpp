@@ -3894,6 +3894,32 @@ class basic_surface : private hidden::palette_slot<PF> {
     }
 
     /**
+     * \brief Convert this surface to an RGBA8 buffer, size-checked.
+     * \param dst RGBA8 buffer of at least width() * height() entries.
+     * \return false if dst is too small. Nothing is written then.
+     */
+    [[nodiscard]] constexpr bool RGBA_uint32(std::span<uint32_t> dst) const {
+        if (dst.size() < pix.width * pix.height) {
+            return false;
+        }
+        PF::RGBA_uint32(dst.data(), pix);
+        return true;
+    }
+
+    /**
+     * \brief Convert this surface to an RGBA8 buffer, size-checked.
+     * \param dst RGBA8 buffer of at least width() * height() * 4 bytes.
+     * \return false if dst is too small. Nothing is written then.
+     */
+    [[nodiscard]] constexpr bool RGBA_uint8(std::span<uint8_t> dst) const {
+        if (dst.size() < pix.width * pix.height * 4) {
+            return false;
+        }
+        PF::RGBA_uint8(dst.data(), pix);
+        return true;
+    }
+
+    /**
      * \brief Write a transposed version of this surface. Data is copied.
      * \tparam FLIP_H Flip image horizontally.
      * \tparam FLIP_V Flip image vertically.
@@ -5369,6 +5395,35 @@ class surface : public basic_surface<PF, uint8_t> {
      */
     constexpr void stroke_round_rect_aa(const struct draw_round_rect &d) {
         stroke_round_rect_aa(d.x, d.y, d.w, d.h, d.r, d.col, d.sw);
+    }
+
+    /**
+     * \brief Copy the pixels of a surface of the same size. No compositing occurs, replaces current content.
+     * \param src Source surface.
+     * \return false if the sizes differ. Nothing is copied then.
+     */
+    [[nodiscard]] constexpr bool copy(const const_surface<PF> &src) {
+        if (src.width() != this->width() || src.height() != this->height()) {
+            return false;
+        }
+        const size_t line_bytes = PF::bytes_per_line(pix.width);
+        for (size_t y = 0; y < pix.height; y++) {
+            std::copy_n(src.data() + y * src.stride(), line_bytes, pix.data + y * pix.stride);
+        }
+        return true;
+    }
+
+    /**
+     * \brief Copy raw pixel data without line padding. No compositing occurs, replaces current content.
+     * \param src Source data, height() * PF::bytes_per_line(width()) bytes.
+     * \return false if the size of src differs. Nothing is copied then.
+     */
+    [[nodiscard]] constexpr bool copy(std::span<const uint8_t> src) {
+        const size_t line_bytes = PF::bytes_per_line(pix.width);
+        if (src.size() != line_bytes * pix.height) {
+            return false;
+        }
+        return copy(const_surface<PF>{src.data(), pix.width, pix.height, line_bytes});
     }
 
     /**
@@ -7072,7 +7127,7 @@ class image
      * \param src Source image.
      */
     constexpr void copy(const image<T, W, H, GRAYSCALE> &src) {
-        data = src.data;
+        static_cast<void>(view().copy(src.view()));
     }
 
     /**
@@ -7083,9 +7138,7 @@ class image
     template <size_t BYTE_SIZE>
     constexpr void copy(const uint8_t *src) {
         static_assert(size() == BYTE_SIZE, "Copied length much match the image size");
-        for (size_t c = 0; c < BYTE_SIZE; c++) {
-            data.data()[c] = src[c];
-        }
+        static_cast<void>(view().copy(std::span<const uint8_t>{src, BYTE_SIZE}));
     }
 
     /**
@@ -7224,16 +7277,16 @@ class dynamic_image : public surface_api<dynamic_image<PF>, PF> {
      * \brief Width in pixels of the image.
      * \return Width in pixels of the image.
      */
-    [[nodiscard]] constexpr size_t width() const noexcept {
-        return w_;
+    [[nodiscard]] constexpr int32_t width() const noexcept {
+        return static_cast<int32_t>(w_);
     }
 
     /**
      * \brief Height in pixels of the image.
      * \return Height in pixels of the image.
      */
-    [[nodiscard]] constexpr size_t height() const noexcept {
-        return h_;
+    [[nodiscard]] constexpr int32_t height() const noexcept {
+        return static_cast<int32_t>(h_);
     }
 
     /**
@@ -7249,6 +7302,78 @@ class dynamic_image : public surface_api<dynamic_image<PF>, PF> {
      */
     [[nodiscard]] constexpr std::vector<uint8_t> &data_ref() {
         return data_;
+    }
+
+    /**
+     * \brief Returns a clone of this image. Data is copied.
+     * \return Cloned image instance.
+     */
+    [[nodiscard]] constexpr dynamic_image clone() const {
+        return *this;
+    }
+
+    /**
+     * \brief Copy source image into this instance. No compositing occurs, replaces current content.
+     * \param src Source image of the same size.
+     * \return false if the sizes differ. Nothing is copied then.
+     */
+    [[nodiscard]] constexpr bool copy(const dynamic_image &src) {
+        return view().copy(src.view());
+    }
+
+    /**
+     * \brief Copy raw source data into this instance. No compositing occurs.
+     * \param src Source data. The size must match dynamic_image::size()
+     * \return false if the size of src differs. Nothing is copied then.
+     */
+    [[nodiscard]] constexpr bool copy(std::span<const uint8_t> src) {
+        return view().copy(src);
+    }
+
+    /**
+     * \brief Convert this instance to equivalent RGBA8 data.
+     * \param dst RGBA8 buffer of at least width() * height() uint32_t values.
+     * \return false if dst is too small. Nothing is written then.
+     */
+    [[nodiscard]] constexpr bool RGBA_uint32(std::span<uint32_t> dst) const {
+        return view().RGBA_uint32(dst);
+    }
+
+    /**
+     * \brief Convert this instance to equivalent RGBA8 data.
+     * \param dst RGBA8 buffer of at least width() * height() * 4 uint8_t values.
+     * \return false if dst is too small. Nothing is written then.
+     */
+    [[nodiscard]] constexpr bool RGBA_uint8(std::span<uint8_t> dst) const {
+        return view().RGBA_uint8(dst);
+    }
+
+    /**
+     * \brief Return a transposed version of this image, width and height swapped.
+     * \tparam FLIP_H Flip image horizontally
+     * \tparam FLIP_V Flip image vertically
+     */
+    template <bool FLIP_H = false, bool FLIP_V = false>
+    [[nodiscard]] constexpr dynamic_image transpose() const {
+        dynamic_image transposed(h_, w_);
+        view().template transpose<FLIP_H, FLIP_V>(transposed.data_.data());
+        return transposed;
+    }
+
+    /**
+     * \brief Transpose this image into another.
+     * \tparam FLIP_H Flip image horizontally
+     * \tparam FLIP_V Flip image vertically
+     * \param dst Image of height() x width() pixels.
+     * \return false if the size of dst does not match. Nothing is written then.
+     */
+    template <bool FLIP_H = false, bool FLIP_V = false>
+    [[nodiscard]] constexpr bool transpose(dynamic_image &dst) const {
+        if (dst.w_ != h_ || dst.h_ != w_) {
+            return false;
+        }
+        view().template transpose<FLIP_H, FLIP_V>(dst.data_.data());
+        return true;
     }
 
     /**
