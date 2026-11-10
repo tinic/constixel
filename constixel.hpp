@@ -2454,6 +2454,11 @@ namespace hidden {
  */
 namespace shapes {
 
+/// @cond DOXYGEN_EXCLUDE
+template <typename shader_func>
+concept shader_function = std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, int32_t, int32_t>;
+/// @endcond
+
 /**
  * @brief Fluent API for drawing rectangles
  *
@@ -2492,10 +2497,7 @@ class rect {
      * @param shader Function that returns RGBA values based on normalized coordinates
      * @return Reference to this rectangle for chaining
      */
-    template <typename shader_func>
-    constexpr auto fill_shader(const shader_func &shader) -> rect &
-        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, int32_t, int32_t>
-    {
+    constexpr rect &fill_shader(const shader_function auto &shader) {
         img.fill_rect(x, y, w, h, shader);
         return *this;
     }
@@ -2513,12 +2515,13 @@ class rect {
 };
 
 /**
- * @brief Fluent API for drawing circles
+ * @brief Fluent API for drawing circles, plain (circle) or antialiased (circle_aa)
  *
  * Provides a chainable interface for drawing filled and stroked circles.
+ * @tparam AA Draw with antialiasing.
  */
-template <typename PF>
-class circle {
+template <typename PF, bool AA>
+class basic_circle {
     surface<PF> img;
     int32_t cx, cy, r;
 
@@ -2530,7 +2533,7 @@ class circle {
      * @param cy_ Y coordinate of center
      * @param r_ Radius of circle
      */
-    constexpr circle(const surface<PF> &image, int32_t cx_, int32_t cy_, int32_t r_)
+    constexpr basic_circle(const surface<PF> &image, int32_t cx_, int32_t cy_, int32_t r_)
         : img(image), cx(cx_), cy(cy_), r(r_) {
     }
 
@@ -2539,63 +2542,22 @@ class circle {
      * @param col Color value
      * @return Reference to this circle for chaining
      */
-    constexpr circle &fill(uint8_t col) {
-        img.fill_circle(cx, cy, r, col);
+    constexpr basic_circle &fill(uint8_t col) {
+        if constexpr (AA) {
+            img.fill_circle_aa(cx, cy, r, col);
+        } else {
+            img.fill_circle(cx, cy, r, col);
+        }
         return *this;
     }
 
     /**
-     * @brief Draw the circle outline
-     * @param col Color value
-     * @param stroke_width Width of the stroke (default: 1)
-     * @return Reference to this circle for chaining
-     */
-    constexpr circle &stroke(uint8_t col, int32_t stroke_width = 1) {
-        img.stroke_circle(cx, cy, r, col, stroke_width);
-        return *this;
-    }
-};
-
-/**
- * @brief Fluent API for drawing anti-aliased circles
- *
- * Provides a chainable interface for drawing filled and stroked circles with anti-aliasing.
- */
-template <typename PF>
-class circle_aa {
-    surface<PF> img;
-    int32_t cx, cy, r;
-
- public:
-    /**
-     * @brief Construct an anti-aliased circle shape
-     * @param image Target surface to draw on
-     * @param cx_ X coordinate of center
-     * @param cy_ Y coordinate of center
-     * @param r_ Radius of circle
-     */
-    constexpr circle_aa(const surface<PF> &image, int32_t cx_, int32_t cy_, int32_t r_)
-        : img(image), cx(cx_), cy(cy_), r(r_) {
-    }
-
-    /**
-     * @brief Fill the circle with a solid color
-     * @param col Color value
-     * @return Reference to this circle for chaining
-     */
-    constexpr circle_aa &fill(uint8_t col) {
-        img.fill_circle_aa(cx, cy, r, col);
-        return *this;
-    }
-
-    /**
-     * @brief Fill the circle using a shader function
+     * @brief Fill the circle using a shader function. Antialiased circles only.
      * @param shader Function that returns RGBA values based on normalized coordinates
      * @return Reference to this circle for chaining
      */
-    template <typename shader_func>
-    constexpr auto fill_shader(const shader_func &shader) -> circle_aa &
-        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, int32_t, int32_t>
+    constexpr basic_circle &fill_shader(const shader_function auto &shader)
+        requires AA
     {
         img.fill_circle_aa(cx, cy, r, shader);
         return *this;
@@ -2607,19 +2569,31 @@ class circle_aa {
      * @param stroke_width Width of the stroke (default: 1)
      * @return Reference to this circle for chaining
      */
-    constexpr circle_aa &stroke(uint8_t col, int32_t stroke_width = 1) {
-        img.stroke_circle_aa(cx, cy, r, col, stroke_width);
+    constexpr basic_circle &stroke(uint8_t col, int32_t stroke_width = 1) {
+        if constexpr (AA) {
+            img.stroke_circle_aa(cx, cy, r, col, stroke_width);
+        } else {
+            img.stroke_circle(cx, cy, r, col, stroke_width);
+        }
         return *this;
     }
 };
 
+/// @brief Fluent API for drawing circles
+template <typename PF>
+using circle = basic_circle<PF, false>;
+/// @brief Fluent API for drawing anti-aliased circles
+template <typename PF>
+using circle_aa = basic_circle<PF, true>;
+
 /**
- * @brief Fluent API for drawing rounded rectangles
+ * @brief Fluent API for drawing rounded rectangles, plain (round_rect) or antialiased (round_rect_aa)
  *
  * Provides a chainable interface for drawing filled and stroked rounded rectangles.
+ * @tparam AA Draw with antialiasing.
  */
-template <typename PF>
-class round_rect {
+template <typename PF, bool AA>
+class basic_round_rect {
     surface<PF> img;
     int32_t x, y, w, h, radius;
 
@@ -2633,7 +2607,8 @@ class round_rect {
      * @param h_ Height of rectangle
      * @param radius_ Corner radius
      */
-    constexpr round_rect(const surface<PF> &image, int32_t x_, int32_t y_, int32_t w_, int32_t h_, int32_t radius_)
+    constexpr basic_round_rect(const surface<PF> &image, int32_t x_, int32_t y_, int32_t w_, int32_t h_,
+                               int32_t radius_)
         : img(image), x(x_), y(y_), w(w_), h(h_), radius(radius_) {
     }
 
@@ -2642,65 +2617,22 @@ class round_rect {
      * @param col Color value
      * @return Reference to this rounded rectangle for chaining
      */
-    constexpr round_rect &fill(uint8_t col) {
-        img.fill_round_rect(x, y, w, h, radius, col);
+    constexpr basic_round_rect &fill(uint8_t col) {
+        if constexpr (AA) {
+            img.fill_round_rect_aa(x, y, w, h, radius, col);
+        } else {
+            img.fill_round_rect(x, y, w, h, radius, col);
+        }
         return *this;
     }
 
     /**
-     * @brief Draw the rounded rectangle outline
-     * @param col Color value
-     * @param stroke_width Width of the stroke (default: 1)
-     * @return Reference to this rounded rectangle for chaining
-     */
-    constexpr round_rect &stroke(uint8_t col, int32_t stroke_width = 1) {
-        img.stroke_round_rect(x, y, w, h, radius, col, stroke_width);
-        return *this;
-    }
-};
-
-/**
- * @brief Fluent API for drawing anti-aliased rounded rectangles
- *
- * Provides a chainable interface for drawing filled and stroked rounded rectangles with anti-aliasing.
- */
-template <typename PF>
-class round_rect_aa {
-    surface<PF> img;
-    int32_t x, y, w, h, radius;
-
- public:
-    /**
-     * @brief Construct an anti-aliased rounded rectangle shape
-     * @param image Target surface to draw on
-     * @param x_ X coordinate of top-left corner
-     * @param y_ Y coordinate of top-left corner
-     * @param w_ Width of rectangle
-     * @param h_ Height of rectangle
-     * @param radius_ Corner radius
-     */
-    constexpr round_rect_aa(const surface<PF> &image, int32_t x_, int32_t y_, int32_t w_, int32_t h_, int32_t radius_)
-        : img(image), x(x_), y(y_), w(w_), h(h_), radius(radius_) {
-    }
-
-    /**
-     * @brief Fill the rounded rectangle with a solid color
-     * @param col Color value
-     * @return Reference to this rounded rectangle for chaining
-     */
-    constexpr round_rect_aa &fill(uint8_t col) {
-        img.fill_round_rect_aa(x, y, w, h, radius, col);
-        return *this;
-    }
-
-    /**
-     * @brief Fill the rounded rectangle using a shader function
+     * @brief Fill the rounded rectangle using a shader function. Antialiased rounded rectangles only.
      * @param shader Function that returns RGBA values based on normalized coordinates
      * @return Reference to this rounded rectangle for chaining
      */
-    template <typename shader_func>
-    constexpr auto fill_shader(const shader_func &shader) -> round_rect_aa &
-        requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, int32_t, int32_t>
+    constexpr basic_round_rect &fill_shader(const shader_function auto &shader)
+        requires AA
     {
         img.fill_round_rect_aa(x, y, w, h, radius, shader);
         return *this;
@@ -2712,19 +2644,31 @@ class round_rect_aa {
      * @param stroke_width Width of the stroke (default: 1)
      * @return Reference to this rounded rectangle for chaining
      */
-    constexpr round_rect_aa &stroke(uint8_t col, int32_t stroke_width = 1) {
-        img.stroke_round_rect_aa(x, y, w, h, radius, col, stroke_width);
+    constexpr basic_round_rect &stroke(uint8_t col, int32_t stroke_width = 1) {
+        if constexpr (AA) {
+            img.stroke_round_rect_aa(x, y, w, h, radius, col, stroke_width);
+        } else {
+            img.stroke_round_rect(x, y, w, h, radius, col, stroke_width);
+        }
         return *this;
     }
 };
 
+/// @brief Fluent API for drawing rounded rectangles
+template <typename PF>
+using round_rect = basic_round_rect<PF, false>;
+/// @brief Fluent API for drawing anti-aliased rounded rectangles
+template <typename PF>
+using round_rect_aa = basic_round_rect<PF, true>;
+
 /**
- * @brief Fluent API for drawing lines
+ * @brief Fluent API for drawing lines, plain (line) or antialiased (line_aa)
  *
  * Provides a chainable interface for drawing stroked lines.
+ * @tparam AA Draw with antialiasing. The stroke width is a float then.
  */
-template <typename PF>
-class line {
+template <typename PF, bool AA>
+class basic_line {
     surface<PF> img;
     int32_t x0, y0, x1, y1;
 
@@ -2737,56 +2681,32 @@ class line {
      * @param x1_ X coordinate of end point
      * @param y1_ Y coordinate of end point
      */
-    constexpr line(const surface<PF> &image, int32_t x0_, int32_t y0_, int32_t x1_, int32_t y1_)
+    constexpr basic_line(const surface<PF> &image, int32_t x0_, int32_t y0_, int32_t x1_, int32_t y1_)
         : img(image), x0(x0_), y0(y0_), x1(x1_), y1(y1_) {
     }
 
     /**
-     * @brief Draw the line
+     * @brief Draw the line with the specified color and width
      * @param col Color value
-     * @param stroke_width Width of the stroke (default: 1)
+     * @param stroke_width Width of the line (default: 1)
      * @return Reference to this line for chaining
      */
-    constexpr line &stroke(uint8_t col, int32_t stroke_width = 1) {
-        img.draw_line(x0, y0, x1, y1, col, stroke_width);
+    constexpr basic_line &stroke(uint8_t col, std::conditional_t<AA, float, int32_t> stroke_width = 1) {
+        if constexpr (AA) {
+            img.draw_line_aa(x0, y0, x1, y1, col, stroke_width);
+        } else {
+            img.draw_line(x0, y0, x1, y1, col, stroke_width);
+        }
         return *this;
     }
 };
 
-/**
- * @brief Fluent API for drawing anti-aliased lines
- *
- * Provides a chainable interface for drawing stroked lines with anti-aliasing.
- */
+/// @brief Fluent API for drawing lines
 template <typename PF>
-class line_aa {
-    surface<PF> img;
-    int32_t x0, y0, x1, y1;
-
- public:
-    /**
-     * @brief Construct an anti-aliased line shape
-     * @param image Target surface to draw on
-     * @param x0_ X coordinate of start point
-     * @param y0_ Y coordinate of start point
-     * @param x1_ X coordinate of end point
-     * @param y1_ Y coordinate of end point
-     */
-    constexpr line_aa(const surface<PF> &image, int32_t x0_, int32_t y0_, int32_t x1_, int32_t y1_)
-        : img(image), x0(x0_), y0(y0_), x1(x1_), y1(y1_) {
-    }
-
-    /**
-     * @brief Draw the anti-aliased line
-     * @param col Color value
-     * @param stroke_width Width of the stroke (default: 1.0f)
-     * @return Reference to this line for chaining
-     */
-    constexpr line_aa &stroke(uint8_t col, float stroke_width = 1.0f) {
-        img.draw_line_aa(x0, y0, x1, y1, col, stroke_width);
-        return *this;
-    }
-};
+using line = basic_line<PF, false>;
+/// @brief Fluent API for drawing anti-aliased lines
+template <typename PF>
+using line_aa = basic_line<PF, true>;
 
 /**
  * @brief Fluent API for drawing points
@@ -2820,39 +2740,44 @@ class point {
 };
 
 /**
- * @brief Fluent API for drawing monospace text
+ * @brief Fluent API for drawing text: text_mono, text_aa, text_centered_mono and text_centered_aa
  *
- * Provides a chainable interface for drawing text using monospace fonts.
+ * Provides a chainable interface for drawing text using monospace or anti-aliased fonts.
+ * @tparam AA The font is an anti-aliased font.
+ * @tparam CENTERED The text is centered at its position.
  */
-template <typename FONT, typename PF, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-class text_mono {
+template <typename FONT, typename PF, bool KERNING, text_rotation ROTATION, bool AA, bool CENTERED>
+class basic_text {
+    static_assert(FONT::mono != AA, "text_mono needs a mono font, text_aa an antialiased font.");
     surface<PF> img;
     int32_t x, y;
     std::string_view str;
 
  public:
     /**
-     * @brief Construct a monospace text shape
+     * @brief Construct a text shape
      * @param image Target surface to draw on
      * @param x_ X coordinate of text position
      * @param y_ Y coordinate of text position
      * @param str_ Text string to draw
      */
-    constexpr text_mono(const surface<PF> &image, int32_t x_, int32_t y_, std::string_view str_)
+    constexpr basic_text(const surface<PF> &image, int32_t x_, int32_t y_, std::string_view str_)
         : img(image), x(x_), y(y_), str(str_) {
     }
 
     /**
-     * @brief Draw the text and return the width
+     * @brief Draw the text and return the width. Not for centered text.
      * @param col Color value
      * @param character_count Maximum number of characters to draw
      * @param character_actual Pointer to store actual characters drawn
      * @return Width of the drawn text in pixels
      */
     constexpr int32_t draw(uint8_t col, size_t character_count = std::numeric_limits<size_t>::max(),
-                           size_t *character_actual = nullptr) {
-        return img.template draw_string_mono<FONT, KERNING, ROTATION>(x, y, str, col, character_count,
-                                                                      character_actual);
+                           size_t *character_actual = nullptr)
+        requires(!CENTERED)
+    {
+        return img.template draw_string<FONT, KERNING, ROTATION>(x, y, str, col, ALIGN_LEFT, character_count,
+                                                                 character_actual);
     }
 
     /**
@@ -2860,125 +2785,24 @@ class text_mono {
      * @param col Color value
      * @return Reference to this text for chaining
      */
-    constexpr text_mono &color(uint8_t col) {
-        img.template draw_string_mono<FONT, KERNING, ROTATION>(x, y, str, col);
+    constexpr basic_text &color(uint8_t col) {
+        img.template draw_string<FONT, KERNING, ROTATION>(x, y, str, col, CENTERED ? ALIGN_CENTER : ALIGN_LEFT);
         return *this;
     }
 };
 
-/**
- * @brief Fluent API for drawing anti-aliased text
- *
- * Provides a chainable interface for drawing text using anti-aliased fonts.
- */
+/// @brief Fluent API for drawing monospace text
 template <typename FONT, typename PF, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-class text_aa {
-    surface<PF> img;
-    int32_t x, y;
-    std::string_view str;
-
- public:
-    /**
-     * @brief Construct an anti-aliased text shape
-     * @param image Target surface to draw on
-     * @param x_ X coordinate of text position
-     * @param y_ Y coordinate of text position
-     * @param str_ Text string to draw
-     */
-    constexpr text_aa(const surface<PF> &image, int32_t x_, int32_t y_, std::string_view str_)
-        : img(image), x(x_), y(y_), str(str_) {
-    }
-
-    /**
-     * @brief Draw the text and return the width
-     * @param col Color value
-     * @param character_count Maximum number of characters to draw
-     * @param character_actual Pointer to store actual characters drawn
-     * @return Width of the drawn text in pixels
-     */
-    constexpr int32_t draw(uint8_t col, size_t character_count = std::numeric_limits<size_t>::max(),
-                           size_t *character_actual = nullptr) {
-        return img.template draw_string_aa<FONT, KERNING, ROTATION>(x, y, str, col, character_count, character_actual);
-    }
-
-    /**
-     * @brief Draw the text with the specified color
-     * @param col Color value
-     * @return Reference to this text for chaining
-     */
-    constexpr text_aa &color(uint8_t col) {
-        img.template draw_string_aa<FONT, KERNING, ROTATION>(x, y, str, col);
-        return *this;
-    }
-};
-
-/**
- * @brief Fluent API for drawing centered monospace text
- *
- * Provides a chainable interface for drawing centered text using monospace fonts.
- */
+using text_mono = basic_text<FONT, PF, KERNING, ROTATION, false, false>;
+/// @brief Fluent API for drawing anti-aliased text
 template <typename FONT, typename PF, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-class text_centered_mono {
-    surface<PF> img;
-    int32_t x, y;
-    std::string_view str;
-
- public:
-    /**
-     * @brief Construct a centered monospace text shape
-     * @param image Target surface to draw on
-     * @param x_ X coordinate of center position
-     * @param y_ Y coordinate of center position
-     * @param str_ Text string to draw
-     */
-    constexpr text_centered_mono(const surface<PF> &image, int32_t x_, int32_t y_, std::string_view str_)
-        : img(image), x(x_), y(y_), str(str_) {
-    }
-
-    /**
-     * @brief Draw the centered text with the specified color
-     * @param col Color value
-     * @return Reference to this text for chaining
-     */
-    constexpr text_centered_mono &color(uint8_t col) {
-        img.template draw_string_centered_mono<FONT, KERNING, ROTATION>(x, y, str, col);
-        return *this;
-    }
-};
-
-/**
- * @brief Fluent API for drawing centered anti-aliased text
- *
- * Provides a chainable interface for drawing centered text using anti-aliased fonts.
- */
+using text_aa = basic_text<FONT, PF, KERNING, ROTATION, true, false>;
+/// @brief Fluent API for drawing centered monospace text
 template <typename FONT, typename PF, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
-class text_centered_aa {
-    surface<PF> img;
-    int32_t x, y;
-    std::string_view str;
-
- public:
-    /**
-     * @brief Construct a centered anti-aliased text shape
-     * @param image Target surface to draw on
-     * @param x_ X coordinate of center position
-     * @param y_ Y coordinate of center position
-     * @param str_ Text string to draw
-     */
-    constexpr text_centered_aa(const surface<PF> &image, int32_t x_, int32_t y_, std::string_view str_)
-        : img(image), x(x_), y(y_), str(str_) {
-    }
-
-    /**
-     * @brief Draw the centered text with the specified color
-     * @param col Color value
-     * @return Reference to this text for chaining
-     */
-    constexpr text_centered_aa &color(uint8_t col) {
-        img.template draw_string_centered_aa<FONT, KERNING, ROTATION>(x, y, str, col);
-        return *this;
-    }
-};
+using text_centered_mono = basic_text<FONT, PF, KERNING, ROTATION, false, true>;
+/// @brief Fluent API for drawing centered anti-aliased text
+template <typename FONT, typename PF, bool KERNING = false, text_rotation ROTATION = DEGREE_0>
+using text_centered_aa = basic_text<FONT, PF, KERNING, ROTATION, true, true>;
 
 }  // namespace shapes
 
