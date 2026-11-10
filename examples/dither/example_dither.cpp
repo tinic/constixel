@@ -18,7 +18,7 @@ using namespace constixel;
 
 //
 // A small ray tracer renders a scene into a RGBA buffer. The buffer is then blitted into every palette format with
-// the blit_RGBA functions, which shows what the same picture costs and looks like at 1, 2, 4 and 8 bits per pixel.
+// blit_RGBA_diffused_linear(), which shows what the same picture costs and looks like at 1, 2, 4 and 8 bits per pixel.
 //
 
 static constexpr int32_t W = 320;
@@ -148,12 +148,9 @@ int main(int argc, char **argv) {
     };
 
     // Dither the scene into a palette image and show what the image holds.
-    enum mode { NEAREST, DIFFUSED, DIFFUSED_LINEAR };
-    auto dithered = [&](auto &img, const char *name, mode m = DIFFUSED_LINEAR) {
-        if (m == DIFFUSED_LINEAR) {
+    auto dithered = [&](auto &img, const char *name, bool diffuse = true) {
+        if (diffuse) {
             img.blit_RGBA_diffused_linear(0, 0, W, H, scene.data(), W, H, W * 4);
-        } else if (m == DIFFUSED) {
-            img.blit_RGBA_diffused(0, 0, W, H, scene.data(), W, H, W * 4);
         } else {
             img.blit_RGBA(0, 0, W, H, scene.data(), W, H, W * 4);
         }
@@ -173,9 +170,9 @@ int main(int argc, char **argv) {
     static image<format_2bit, W, H, true> img2;
     dithered(img2, "2 bit, 4 grays");
     static image<format_1bit, W, H> img1;
-    dithered(img1, "1 bit, error diffusion", DIFFUSED);
+    dithered(img1, "1 bit, error diffusion");
     static image<format_1bit, W, H> img1t;
-    dithered(img1t, "1 bit, threshold", NEAREST);
+    dithered(img1t, "1 bit, threshold", false);
 
     return example::output(*canvas, argc, argv);
 }

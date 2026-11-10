@@ -1305,7 +1305,7 @@ class pixel_1bit : public format {
                 Rl = Rl + err_r;
                 Gl = Gl + err_g;
                 Bl = Bl + err_b;
-                const uint8_t n = (Rl * 2 * +Gl * 3 + Bl * 1) > 3.0f ? 1 : 0;
+                const uint8_t n = (Rl * 2 + Gl * 3 + Bl * 1) > 3.0f ? 1 : 0;
                 plot(pix, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
                 const float c = 0.75;
                 err_r = std::clamp(Rl - ((n != uint8_t{0}) ? 1.0f : 0.0f), -c, c);

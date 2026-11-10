@@ -489,9 +489,24 @@ void test_convert() {
     }
 }
 
+// The 1-bit linear diffusion weighs red, green and blue as a sum: pure green and pure red reach white.
+void test_blit_diffused_linear_1bit() {
+    for (const size_t channel : {size_t{0}, size_t{1}}) {
+        std::array<uint8_t, 16 * 4> rgba{};
+        for (size_t i = 0; i < 16; i++) {
+            rgba[i * 4 + channel] = 0xFF;
+            rgba[i * 4 + 3] = 0xFF;
+        }
+        constixel::image<constixel::format_1bit, 16, 1> img;
+        img.blit_RGBA_diffused_linear(0, 0, 16, 1, rgba.data(), 16, 1, 16 * 4);
+        check(img.data_ref()[0] != 0 || img.data_ref()[1] != 0, __LINE__);
+    }
+}
+
 }  // namespace
 
 int main() {
+    test_blit_diffused_linear_1bit();
     test_image_basics();
     test_string_view();
     test_draw_string();
