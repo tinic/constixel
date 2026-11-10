@@ -1,4 +1,8 @@
+#define CONSTIXEL_ENABLE_COUT
+
 #include "constixel.hpp"
+
+#include "../example_output.hpp"
 
 #include "fonts/ibmplexsans_bold_24_mono.hpp"
 #include "fonts/ibmplexsans_bold_32_mono.hpp"
@@ -11,7 +15,6 @@
 
 #include <array>
 #include <cmath>
-#include <fstream>
 #include <memory>
 #include <span>
 #include <string_view>
@@ -99,7 +102,7 @@ static float pixel_mask(int32_t px, int32_t py, int32_t scale, float gap) {
     return (px % scale == scale - 1 || py % scale == scale - 1) ? gap : 1.0f;
 }
 
-int main() {
+int main(int argc, char **argv) {
     using canvas_type = image<format_32bit, 1020, 690>;
     static auto canvas = std::make_unique<canvas_type>();
 
@@ -207,8 +210,5 @@ int main() {
         canvas->draw_string<ibmplexsans_regular_14_aa, true>(x0 - 26, y0 + 200 * scale + 52,
                                                              "E-paper, 200x200, 2 bit gray, 10000 bytes", label_col);
     }
-    std::ofstream file("example_displays.png", std::ios::binary);
-    canvas->png([&](char ch) {
-        file.put(ch);
-    });
+    return example::output(*canvas, argc, argv);
 }

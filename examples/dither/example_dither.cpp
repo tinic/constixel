@@ -1,4 +1,8 @@
+#define CONSTIXEL_ENABLE_COUT
+
 #include "constixel.hpp"
+
+#include "../example_output.hpp"
 
 #include "fonts/ibmplexsans_regular_14_aa.hpp"
 #include "fonts/ibmplexsans_semibold_24_aa.hpp"
@@ -6,7 +10,6 @@
 #include <array>
 #include <cmath>
 #include <cstdio>
-#include <fstream>
 #include <memory>
 #include <string>
 #include <vector>
@@ -121,7 +124,7 @@ static std::vector<uint8_t> render() {
     return rgba;
 }
 
-int main() {
+int main(int argc, char **argv) {
     using canvas_type = image<format_32bit, 3 * W + 80, 2 * H + 150>;
     static auto canvas = std::make_unique<canvas_type>();
     canvas->fill_rect(0, 0, canvas->width(), canvas->height(), [](float, float v, int32_t, int32_t) {
@@ -174,8 +177,5 @@ int main() {
     static image<format_1bit, W, H> img1t;
     dithered(img1t, "1 bit, threshold", NEAREST);
 
-    std::ofstream file("example_dither.png", std::ios::binary);
-    canvas->png([&](char ch) {
-        file.put(ch);
-    });
+    return example::output(*canvas, argc, argv);
 }

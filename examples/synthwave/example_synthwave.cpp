@@ -1,11 +1,14 @@
+#define CONSTIXEL_ENABLE_COUT
+
 #include "constixel.hpp"
+
+#include "../example_output.hpp"
 
 #include "fonts/ibmplexsans_bolditalic_48_aa.hpp"
 #include "fonts/m42_mono.hpp"
 
 #include <array>
 #include <cmath>
-#include <fstream>
 #include <memory>
 
 using namespace constixel;
@@ -18,7 +21,7 @@ static constexpr int32_t W = 800;
 static constexpr int32_t H = 450;
 static constexpr int32_t HORIZON = 262;
 
-int main() {
+int main(int argc, char **argv) {
     static auto img = std::make_unique<image<format_32bit, W, H>>();
 
     // ─── sky ──────────────────────────────────────────────────────────────────
@@ -141,8 +144,5 @@ int main() {
         return std::array<float, 4>{0.0f, 0.0f, 0.0f, std::min(1.0f, d * 0.9f + ((py & 1) != 0 ? 0.16f : 0.0f))};
     });
 
-    std::ofstream file("example_synthwave.png", std::ios::binary);
-    img->png([&](char ch) {
-        file.put(ch);
-    });
+    return example::output(*img, argc, argv);
 }

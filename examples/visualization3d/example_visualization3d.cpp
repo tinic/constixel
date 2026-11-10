@@ -1,303 +1,107 @@
 #define CONSTIXEL_ENABLE_COUT
 
-#include "constixel.hpp"
-#include "fonts/ibmplexsans_bold_24_aa.hpp"
-#include "fonts/ibmplexsans_semibold_18_aa.hpp"
-#include "fonts/ibmplexsans_regular_12_aa.hpp"
+#include <algorithm>
+#include <array>
 #include <cmath>
-#include <vector>
-#include <string>
-#include <sstream>
-#include <iomanip>
+
+#include "../example_output.hpp"
+#include "../example_style.hpp"
 
 using namespace constixel;
-using UI = image<format_8bit, 1024, 768>;
-using title_font = constixel::ibmplexsans_bold_24_aa;
-using label_font = constixel::ibmplexsans_semibold_18_aa;
-using small_font = constixel::ibmplexsans_regular_12_aa;
+using namespace example;
+using Canvas = image<format_8bit, 1024, 768>;
 
-struct Point3D {
+namespace {
+struct Point3 {
     float x, y, z;
-    Point3D(float x = 0, float y = 0, float z = 0) : x(x), y(y), z(z) {}
 };
-
-struct Point2D {
+struct Point2 {
     int x, y;
-    Point2D(int x = 0, int y = 0) : x(x), y(y) {}
 };
 
-class Matrix3D {
-public:
-    float m[4][4];
-    
-    Matrix3D() {
-        identity();
+float height_at(float x, float z) {
+    const float radius = std::sqrt(x * x + z * z);
+    return 0.6f * std::sin(radius * 2) * std::exp(-0.3f * radius) + 0.3f * std::sin(x * 3) * std::cos(z * 2);
+}
+
+Point2 project(Point3 point) {
+    // A fixed orthographic camera keeps the entire [-3, 3] domain in view.
+    constexpr float yaw = 0.65f, tilt = 0.62f, scale = 88.0f;
+    const float x = point.x * std::cos(yaw) + point.z * std::sin(yaw);
+    const float z = -point.x * std::sin(yaw) + point.z * std::cos(yaw);
+    const float y = point.y * std::cos(tilt) - z * std::sin(tilt);
+    return {512 + static_cast<int>(x * scale), 386 - static_cast<int>(y * scale)};
+}
+
+void segment(Canvas& img, Point3 a, Point3 b, uint8_t color) {
+    const auto p = project(a), q = project(b);
+    img.draw_line_aa(p.x, p.y, q.x, q.y, color);
+}
+}  // namespace
+
+int main(int argc, char** argv) {
+    static Canvas img;
+    const Theme theme(img);
+    header(img, "Surface study", "Damped radial waves with a cross-wave perturbation", theme);
+    card(img, 32, 108, 960, 568, theme);
+    text<small>(img, 56, 140, "ORTHOGRAPHIC VIEW", theme.muted);
+    right_text<small>(img, 968, 140, "x, z in [-3, 3]", theme.muted);
+
+    // A subtle floor grid establishes orientation without competing with the mesh.
+    for (int i = -3; i <= 3; ++i) {
+        const float t = static_cast<float>(i);
+        segment(img, {-3, -0.8f, t}, {3, -0.8f, t}, theme.background);
+        segment(img, {t, -0.8f, -3}, {t, -0.8f, 3}, theme.background);
     }
-    
-    void identity() {
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                m[i][j] = (i == j) ? 1.0f : 0.0f;
+    constexpr int resolution = 36;
+    constexpr float step = 6.0f / resolution;
+    float min_height = 1, max_height = -1;
+    for (int i = 0; i <= resolution; ++i) {
+        for (int j = 0; j <= resolution; ++j) {
+            const float y = height_at(-3 + i * step, -3 + j * step);
+            min_height = std::min(min_height, y);
+            max_height = std::max(max_height, y);
+        }
+    }
+    const auto low = img.get_nearest_color(70, 110, 180);
+    const auto middle = theme.accent;
+    const auto high = theme.warm;
+    auto height_color = [&](float y) {
+        const float t = (y - min_height) / (max_height - min_height);
+        return t < 0.35f ? low : (t < 0.7f ? middle : high);
+    };
+    for (int i = 0; i <= resolution; ++i) {
+        for (int j = 0; j <= resolution; ++j) {
+            const float x = -3 + i * step, z = -3 + j * step;
+            const Point3 a{x, height_at(x, z), z};
+            if (i < resolution) {
+                const Point3 b{x + step, height_at(x + step, z), z};
+                segment(img, a, b, height_color((a.y + b.y) / 2));
+            }
+            if (j < resolution) {
+                const Point3 b{x, height_at(x, z + step), z + step};
+                segment(img, a, b, height_color((a.y + b.y) / 2));
             }
         }
     }
-    
-    static Matrix3D rotationY(float angle) {
-        Matrix3D mat;
-        float c = cos(angle);
-        float s = sin(angle);
-        mat.m[0][0] = c;  mat.m[0][2] = s;
-        mat.m[2][0] = -s; mat.m[2][2] = c;
-        return mat;
-    }
-    
-    static Matrix3D rotationX(float angle) {
-        Matrix3D mat;
-        float c = cos(angle);
-        float s = sin(angle);
-        mat.m[1][1] = c;  mat.m[1][2] = -s;
-        mat.m[2][1] = s;  mat.m[2][2] = c;
-        return mat;
-    }
-    
-    Point3D transform(const Point3D& p) const {
-        return Point3D(
-            m[0][0] * p.x + m[0][1] * p.y + m[0][2] * p.z,
-            m[1][0] * p.x + m[1][1] * p.y + m[1][2] * p.z,
-            m[2][0] * p.x + m[2][1] * p.y + m[2][2] * p.z
-        );
-    }
-    
-    Matrix3D operator*(const Matrix3D& other) const {
-        Matrix3D result;
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                result.m[i][j] = 0;
-                for (int k = 0; k < 4; k++) {
-                    result.m[i][j] += m[i][k] * other.m[k][j];
-                }
-            }
-        }
-        return result;
-    }
-};
 
-class Renderer3D {
-private:
-    UI& img;
-    int centerX, centerY;
-    float scale;
-    float viewDistance;
-    
-public:
-    Renderer3D(UI& image) : img(image) {
-        centerX = img.width() / 2;
-        centerY = img.height() / 2 - 50; // Offset up for labels
-        scale = 180.0f;
-        viewDistance = 8.0f;
+    // Keep the orientation key separate from the surface and its title.
+    img.draw_line_aa(76, 625, 111, 641, theme.muted, 2);
+    img.draw_line_aa(76, 625, 102, 607, theme.muted, 2);
+    img.draw_line_aa(76, 625, 76, 589, theme.muted, 2);
+    text<caption>(img, 117, 647, "z", theme.muted);
+    text<caption>(img, 109, 608, "x", theme.muted);
+    centered_text<caption>(img, 76, 582, "y", theme.muted);
+    text<small>(img, 652, 643, "Height", theme.muted);
+    const std::array<const char*, 3> labels = {"Low", "Mid", "High"};
+    const std::array<uint8_t, 3> colors = {low, middle, high};
+    for (int i = 0; i < 3; ++i) {
+        img.fill_circle_aa(728 + i * 84, 638, 5, colors[i]);
+        text<small>(img, 740 + i * 84, 643, labels[i], theme.ink);
     }
-    
-    Point2D project(const Point3D& p3d) const {
-        // Simple perspective projection
-        float perspective = viewDistance / (viewDistance + p3d.z);
-        return Point2D(
-            centerX + (int)(p3d.x * scale * perspective),
-            centerY - (int)(p3d.y * scale * perspective)
-        );
-    }
-    
-    bool isVisible(const Point3D& p) const {
-        Point2D p2d = project(p);
-        return p2d.x >= 0 && p2d.x < img.width() && 
-               p2d.y >= 0 && p2d.y < img.height();
-    }
-};
-
-struct Colors {
-    static uint8_t background;
-    static uint8_t grid_light;
-    static uint8_t grid_dark;
-    static uint8_t surface_high;
-    static uint8_t surface_mid;
-    static uint8_t surface_low;
-    static uint8_t text_primary;
-    static uint8_t text_secondary;
-    static uint8_t axes;
-    
-    static void init(const UI& img) {
-        background = img.get_nearest_color(8, 12, 20);        // Dark blue-black
-        grid_light = img.get_nearest_color(40, 50, 70);       // Light grid
-        grid_dark = img.get_nearest_color(25, 30, 45);        // Dark grid
-        surface_high = img.get_nearest_color(255, 100, 100);  // Red peaks
-        surface_mid = img.get_nearest_color(100, 200, 255);   // Blue mid
-        surface_low = img.get_nearest_color(50, 255, 150);    // Green valleys
-        text_primary = img.get_nearest_color(255, 255, 255);  // White
-        text_secondary = img.get_nearest_color(180, 190, 200); // Light gray
-        axes = img.get_nearest_color(200, 200, 100);          // Yellow axes
-    }
-};
-
-uint8_t Colors::background;
-uint8_t Colors::grid_light;
-uint8_t Colors::grid_dark;
-uint8_t Colors::surface_high;
-uint8_t Colors::surface_mid;
-uint8_t Colors::surface_low;
-uint8_t Colors::text_primary;
-uint8_t Colors::text_secondary;
-uint8_t Colors::axes;
-
-float mathFunction(float x, float z) {
-    // Impressive mathematical surface: combination of sine waves
-    return 0.6f * sin(sqrt(x*x + z*z) * 2.0f) * exp(-0.3f * sqrt(x*x + z*z)) + 
-           0.3f * sin(x * 3.0f) * cos(z * 2.0f);
-}
-
-uint8_t getHeightColor(float height, float minH, float maxH) {
-    float normalized = (height - minH) / (maxH - minH);
-    if (normalized < 0.33f) return Colors::surface_low;
-    else if (normalized < 0.66f) return Colors::surface_mid;
-    else return Colors::surface_high;
-}
-
-void drawSurface(UI& img, Renderer3D& renderer, const Matrix3D& transform) {
-    const int resolution = 40;
-    const float range = 3.0f;
-    const float step = (2.0f * range) / resolution;
-    
-    float minHeight = 1000.0f, maxHeight = -1000.0f;
-    
-    // First pass: find height range
-    for (int i = 0; i < resolution; i++) {
-        for (int j = 0; j < resolution; j++) {
-            float x = -range + i * step;
-            float z = -range + j * step;
-            float y = mathFunction(x, z);
-            minHeight = std::min(minHeight, y);
-            maxHeight = std::max(maxHeight, y);
-        }
-    }
-    
-    // Draw wireframe surface
-    for (int i = 0; i < resolution - 1; i++) {
-        for (int j = 0; j < resolution - 1; j++) {
-            float x1 = -range + i * step;
-            float z1 = -range + j * step;
-            float x2 = -range + (i + 1) * step;
-            float z2 = -range + (j + 1) * step;
-            
-            float y1 = mathFunction(x1, z1);
-            float y2 = mathFunction(x2, z1);
-            float y3 = mathFunction(x1, z2);
-            
-            Point3D p1 = transform.transform(Point3D(x1, y1, z1));
-            Point3D p2 = transform.transform(Point3D(x2, y2, z1));
-            Point3D p3 = transform.transform(Point3D(x1, y3, z2));
-            
-            if (renderer.isVisible(p1) || renderer.isVisible(p2)) {
-                Point2D proj1 = renderer.project(p1);
-                Point2D proj2 = renderer.project(p2);
-                uint8_t color = getHeightColor((y1 + y2) / 2.0f, minHeight, maxHeight);
-                img.draw_line_aa(proj1.x, proj1.y, proj2.x, proj2.y, color, 1);
-            }
-            
-            if (renderer.isVisible(p1) || renderer.isVisible(p3)) {
-                Point2D proj1 = renderer.project(p1);
-                Point2D proj3 = renderer.project(p3);
-                uint8_t color = getHeightColor((y1 + y3) / 2.0f, minHeight, maxHeight);
-                img.draw_line_aa(proj1.x, proj1.y, proj3.x, proj3.y, color, 1);
-            }
-        }
-    }
-}
-
-void drawAxes(UI& img, Renderer3D& renderer, const Matrix3D& transform) {
-    // Draw 3D coordinate axes
-    Point3D origin = transform.transform(Point3D(0, 0, 0));
-    Point3D xAxis = transform.transform(Point3D(2.5f, 0, 0));
-    Point3D yAxis = transform.transform(Point3D(0, 2.5f, 0));
-    Point3D zAxis = transform.transform(Point3D(0, 0, 2.5f));
-    
-    Point2D oProj = renderer.project(origin);
-    Point2D xProj = renderer.project(xAxis);
-    Point2D yProj = renderer.project(yAxis);
-    Point2D zProj = renderer.project(zAxis);
-    
-    // X axis (red)
-    uint8_t xColor = img.get_nearest_color(255, 100, 100);
-    img.draw_line_aa(oProj.x, oProj.y, xProj.x, xProj.y, xColor, 2);
-    img.draw_string_aa<small_font>(xProj.x + 5, xProj.y - small_font::ascent, "X", Colors::text_secondary);
-    
-    // Y axis (green)
-    uint8_t yColor = img.get_nearest_color(100, 255, 100);
-    img.draw_line_aa(oProj.x, oProj.y, yProj.x, yProj.y, yColor, 2);
-    img.draw_string_aa<small_font>(yProj.x + 5, yProj.y - small_font::ascent, "Y", Colors::text_secondary);
-    
-    // Z axis (blue)
-    uint8_t zColor = img.get_nearest_color(100, 100, 255);
-    img.draw_line_aa(oProj.x, oProj.y, zProj.x, zProj.y, zColor, 2);
-    img.draw_string_aa<small_font>(zProj.x + 5, zProj.y - small_font::ascent, "Z", Colors::text_secondary);
-}
-
-void drawLabels(UI& img) {
-    // Title
-    const char* title = "3D Mathematical Surface Visualization";
-    int titleWidth = img.string_width<title_font>(title);
-    img.draw_string_aa<title_font>((img.width() - titleWidth) / 2, 40 - title_font::ascent, title, Colors::text_primary);
-    
-    // Function equation
-    const char* equation = "f(x,z) = 0.6×sin(√(x²+z²)×2)×e^(-0.3√(x²+z²)) + 0.3×sin(3x)×cos(2z)";
-    int eqWidth = img.string_width<small_font>(equation);
-    img.draw_string_aa<small_font>((img.width() - eqWidth) / 2, 70 - small_font::ascent, equation, Colors::text_secondary);
-    
-    // Legend
-    int legendY = img.height() - 120;
-    img.draw_string_aa<label_font>(50, legendY - label_font::ascent, "Height Legend:", Colors::text_primary);
-    
-    // Color legend boxes
-    img.fill_rect(50, legendY + 10, 20, 15, Colors::surface_high);
-    img.draw_string_aa<small_font>(80, legendY + 15 - small_font::ascent / 2, "High", Colors::text_secondary);
-    
-    img.fill_rect(50, legendY + 35, 20, 15, Colors::surface_mid);
-    img.draw_string_aa<small_font>(80, legendY + 40 - small_font::ascent / 2, "Medium", Colors::text_secondary);
-    
-    img.fill_rect(50, legendY + 60, 20, 15, Colors::surface_low);
-    img.draw_string_aa<small_font>(80, legendY + 65 - small_font::ascent / 2, "Low", Colors::text_secondary);
-    
-    // Rotation info
-    const char* rotInfo = "Rotation: Y-axis animation with X-tilt";
-    img.draw_string_aa<small_font>(img.width() - img.string_width<small_font>(rotInfo) - 50, 
-                                   img.height() - 30 - small_font::ascent, rotInfo, Colors::text_secondary);
-}
-
-int main() {
-    static UI img;
-    img.clear();
-    
-    Colors::init(img);
-    
-    // Clear background
-    img.fill_rect(0, 0, img.width(), img.height(), Colors::background);
-    
-    // Create animated rotation (simulating frame from animation)
-    float rotationY = 0.8f; // Approximately 45 degrees
-    float rotationX = -0.3f; // Slight downward tilt
-    
-    Matrix3D transform = Matrix3D::rotationY(rotationY) * Matrix3D::rotationX(rotationX);
-    
-    Renderer3D renderer(img);
-    
-    // Draw the surface
-    drawSurface(img, renderer, transform);
-    
-    // Draw coordinate axes
-    drawAxes(img, renderer, transform);
-    
-    // Add labels and title
-    drawLabels(img);
-    
-    // Output
-    img.sixel_to_cout<1>();
-    
-    return 0;
+    text<small>(img, 32, 711, "f(x,z) = 0.6 sin(2r) exp(-0.3r) + 0.3 sin(3x) cos(2z)", theme.ink);
+    text<caption>(img, 32, 739, "r = sqrt(x*x + z*z)", theme.muted);
+    right_text<small>(img, 992, 711, "36 x 36 cells", theme.muted);
+    right_text<caption>(img, 992, 739, "2D lines / 3D projection", theme.muted);
+    return output(img, argc, argv);
 }
