@@ -50,6 +50,13 @@ SOFTWARE.
 #include <immintrin.h>
 #endif  // #if defined(__AVX2__)
 
+// An empty member takes no storage. MSVC ignores the standard spelling.
+#if defined(_MSC_VER) && !defined(__clang__)
+#define CONSTIXEL_NO_UNIQUE_ADDRESS [[msvc::no_unique_address]]
+#else  // #if defined(_MSC_VER) && !defined(__clang__)
+#define CONSTIXEL_NO_UNIQUE_ADDRESS [[no_unique_address]]
+#endif  // #if defined(_MSC_VER) && !defined(__clang__)
+
 namespace constixel {
 
 /// @cond DOXYGEN_EXCLUDE
@@ -3741,7 +3748,7 @@ struct palette_slot<PF> {
     const runtime_palette *slot;
 };
 
-// Runtime palette storage of dynamic_image, same condition.
+// Runtime palette storage of image and dynamic_image, same condition. Empty for the other formats.
 template <typename PF>
 struct palette_store {
     [[nodiscard]] static constexpr const runtime_palette *get() {
@@ -6969,7 +6976,7 @@ class image
      */
     explicit image(std::span<const std::array<uint8_t, 3>> palette)
         requires(!USE_SPAN && requires { typename T<W, H, GRAYSCALE, USE_SPAN>::runtime_palette; })
-        : palette_(palette), has_custom_palette_(true) {
+        : palette_{runtime_palette(palette), true} {
     }
 
     /**
@@ -6978,7 +6985,7 @@ class image
     image(const std::span<uint8_t, T<W, H, GRAYSCALE, USE_SPAN>::image_size> &other,
           std::span<const std::array<uint8_t, 3>> palette)
         requires(USE_SPAN && requires { typename T<W, H, GRAYSCALE, USE_SPAN>::runtime_palette; })
-        : data(other), palette_(palette), has_custom_palette_(true) {
+        : data(other), palette_{runtime_palette(palette), true} {
     }
 
     /**
@@ -7078,8 +7085,7 @@ class image
      * \return surface of this image.
      */
     [[nodiscard]] constexpr surface<pixel_type> view() {
-        return {data.data(), W, H, T<W, H, GRAYSCALE, USE_SPAN>::bytes_per_line,
-                has_custom_palette_ ? &palette_ : nullptr};
+        return {data.data(), W, H, T<W, H, GRAYSCALE, USE_SPAN>::bytes_per_line, palette_.get()};
     }
 
     /**
@@ -7087,8 +7093,7 @@ class image
      * \return const_surface of this image.
      */
     [[nodiscard]] constexpr const_surface<pixel_type> view() const {
-        return {data.data(), W, H, T<W, H, GRAYSCALE, USE_SPAN>::bytes_per_line,
-                has_custom_palette_ ? &palette_ : nullptr};
+        return {data.data(), W, H, T<W, H, GRAYSCALE, USE_SPAN>::bytes_per_line, palette_.get()};
     }
 
     /**
@@ -7143,12 +7148,7 @@ class image
     /**
      * @private
      */
-    runtime_palette palette_{};
-
-    /**
-     * @private
-     */
-    bool has_custom_palette_{false};
+    CONSTIXEL_NO_UNIQUE_ADDRESS hidden::palette_store<pixel_type> palette_{};
     /// @endcond  // DOXYGEN_EXCLUDE
 #endif  // #ifndef __INTELLISENSE__
 };
@@ -7269,5 +7269,7 @@ class dynamic_image : public surface_api<dynamic_image<PF>, PF> {
 };
 
 }  // namespace constixel
+
+#undef CONSTIXEL_NO_UNIQUE_ADDRESS
 
 #endif  // CONSTIXEL_HPP_
