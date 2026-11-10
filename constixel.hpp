@@ -633,19 +633,9 @@ struct rect {
     /// @brief intersects one rect with another
     /// @param other the other rectangle
     constexpr rect operator&(const rect &other) const {
-        T x1 = std::max(x, other.x);
-        T y1 = std::max(y, other.y);
-        T x2 = std::min(x + w, other.x + other.w);
-        T y2 = std::min(y + h, other.y + other.h);
-
-        T nw = x2 - x1;
-        T nh = y2 - y1;
-
-        if (nw <= 0 || nh <= 0) {
-            return {T{0}, T{0}, T{0}, T{0}};
-        }
-
-        return {x1, y1, nw, nh};
+        rect result = *this;
+        result &= other;
+        return result;
     }
 
     /// @brief intersects one rect with another
@@ -1421,74 +1411,52 @@ class pixel_packed : public format {
         }
     }
 
-    // The 1-bit format picks black or white by luminance, the others the nearest palette color.
+    // The 1-bit format picks black or white by luminance, the others the nearest palette color. Also when it
+    // diffuses the error.
     static constexpr void blit_RGBA(const raster &pix, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
-        if constexpr (BITS == 1) {
-            const auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
-            const auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
-            for (size_t y = 0; y < r_h; y++) {
-                for (size_t x = 0; x < r_w; x++) {
-                    const uint32_t R = ptr[y * static_cast<size_t>(stride) + x * 4 + 0];
-                    const uint32_t G = ptr[y * static_cast<size_t>(stride) + x * 4 + 1];
-                    const uint32_t B = ptr[y * static_cast<size_t>(stride) + x * 4 + 2];
-                    plot(pix, x + static_cast<size_t>(r.x), y + static_cast<size_t>(r.y),
-                         (R * 2 + G * 3 + B * 1) > 768 ? 1 : 0);
+        const auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
+        const auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
+        for (size_t y = 0; y < r_h; y++) {
+            for (size_t x = 0; x < r_w; x++) {
+                const uint8_t *src = &ptr[y * static_cast<size_t>(stride) + x * 4];
+                uint8_t n = 0;
+                if constexpr (BITS == 1) {
+                    n = (src[0] * 2 + src[1] * 3 + src[2] * 1) > 768 ? 1 : 0;
+                } else {
+                    n = quant.nearest(src[0], src[1], src[2]);
                 }
-            }
-        } else {
-            const auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
-            const auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
-            for (size_t y = 0; y < r_h; y++) {
-                for (size_t x = 0; x < r_w; x++) {
-                    plot(pix, (x + static_cast<uint32_t>(r.x)), (y + static_cast<uint32_t>(r.y)),
-                         quant.nearest(ptr[y * static_cast<size_t>(stride) + x * 4 + 0],
-                                       ptr[y * static_cast<size_t>(stride) + x * 4 + 1],
-                                       ptr[y * static_cast<size_t>(stride) + x * 4 + 2]));
-                }
+                plot(pix, x + static_cast<size_t>(r.x), y + static_cast<size_t>(r.y), n);
             }
         }
     }
 
     static constexpr void blit_RGBA_diffused(const raster &pix, const rect<int32_t> &r, const uint8_t *ptr,
                                              int32_t stride) {
-        if constexpr (BITS == 1) {
-            const auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
-            const auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
-            for (size_t y = 0; y < r_h; y++) {
-                int32_t err = 0;
-                for (size_t x = 0; x < r_w; x++) {
-                    const int32_t R = ptr[y * static_cast<size_t>(stride) + x * 4 + 0];
-                    const int32_t G = ptr[y * static_cast<size_t>(stride) + x * 4 + 1];
-                    const int32_t B = ptr[y * static_cast<size_t>(stride) + x * 4 + 2];
-                    const int32_t V = (R * 2 + G * 3 + B * 1) + err;
+        const auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
+        const auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
+        for (size_t y = 0; y < r_h; y++) {
+            int32_t err_r = 0;
+            int32_t err_g = 0;
+            int32_t err_b = 0;
+            for (size_t x = 0; x < r_w; x++) {
+                const uint8_t *src = &ptr[y * static_cast<size_t>(stride) + x * 4];
+                if constexpr (BITS == 1) {
+                    // one error value, of the luminance
+                    const int32_t V = (src[0] * 2 + src[1] * 3 + src[2] * 1) + err_r;
                     const uint8_t n = V > 768 ? 1 : 0;
-                    plot(pix, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
-                    err = std::clamp(V - ((n != 0) ? int32_t{0xFF * 6} : int32_t{0x00}), int32_t{-0xFF * 6},
-                                     int32_t{0xFF * 6});
-                }
-            }
-        } else {
-            const auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
-            const auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
-            for (size_t y = 0; y < r_h; y++) {
-                int32_t err_r = 0;
-                int32_t err_g = 0;
-                int32_t err_b = 0;
-                for (size_t x = 0; x < r_w; x++) {
-                    int32_t R = ptr[y * static_cast<size_t>(stride) + x * 4 + 0];
-                    int32_t G = ptr[y * static_cast<size_t>(stride) + x * 4 + 1];
-                    int32_t B = ptr[y * static_cast<size_t>(stride) + x * 4 + 2];
-                    R = R + err_r;
-                    G = G + err_g;
-                    B = B + err_b;
+                    plot(pix, x + static_cast<size_t>(r.x), y + static_cast<size_t>(r.y), n);
+                    err_r = std::clamp(V - ((n != 0) ? int32_t{0xFF * 6} : int32_t{0x00}), int32_t{-0xFF * 6},
+                                       int32_t{0xFF * 6});
+                } else {
+                    const int32_t R = src[0] + err_r;
+                    const int32_t G = src[1] + err_g;
+                    const int32_t B = src[2] + err_b;
                     const uint8_t n = quant.nearest(R, G, B);
-                    plot(pix, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
-                    err_r = std::clamp(R - static_cast<int32_t>((quant.palette().at(n) >> 0) & 0xFF), int32_t{-255},
-                                       int32_t{255});
-                    err_g = std::clamp(G - static_cast<int32_t>((quant.palette().at(n) >> 8) & 0xFF), int32_t{-255},
-                                       int32_t{255});
-                    err_b = std::clamp(B - static_cast<int32_t>((quant.palette().at(n) >> 16) & 0xFF), int32_t{-255},
-                                       int32_t{255});
+                    plot(pix, x + static_cast<size_t>(r.x), y + static_cast<size_t>(r.y), n);
+                    const uint32_t rgb = quant.palette().at(n);
+                    err_r = std::clamp(R - static_cast<int32_t>((rgb >> 0) & 0xFF), int32_t{-255}, int32_t{255});
+                    err_g = std::clamp(G - static_cast<int32_t>((rgb >> 8) & 0xFF), int32_t{-255}, int32_t{255});
+                    err_b = std::clamp(B - static_cast<int32_t>((rgb >> 16) & 0xFF), int32_t{-255}, int32_t{255});
                 }
             }
         }
@@ -1496,56 +1464,27 @@ class pixel_packed : public format {
 
     static constexpr void blit_RGBA_diffused_linear(const raster &pix, const rect<int32_t> &r, const uint8_t *ptr,
                                                     int32_t stride) {
-        if constexpr (BITS == 1) {
-            const auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
-            const auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
-            for (size_t y = 0; y < r_h; y++) {
-                float err_r = 0;
-                float err_g = 0;
-                float err_b = 0;
-                for (size_t x = 0; x < r_w; x++) {
-                    const auto R =
-                        static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 0]) * (1.0f / 255.0f);
-                    const auto G =
-                        static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 1]) * (1.0f / 255.0f);
-                    const auto B =
-                        static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 2]) * (1.0f / 255.0f);
-                    float Rl = hidden::srgb_to_linear(R);
-                    float Gl = hidden::srgb_to_linear(G);
-                    float Bl = hidden::srgb_to_linear(B);
-                    Rl = Rl + err_r;
-                    Gl = Gl + err_g;
-                    Bl = Bl + err_b;
+        const auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
+        const auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
+        for (size_t y = 0; y < r_h; y++) {
+            float err_r = 0;
+            float err_g = 0;
+            float err_b = 0;
+            for (size_t x = 0; x < r_w; x++) {
+                const uint8_t *src = &ptr[y * static_cast<size_t>(stride) + x * 4];
+                const float Rl = hidden::srgb_to_linear(static_cast<float>(src[0]) * (1.0f / 255.0f)) + err_r;
+                const float Gl = hidden::srgb_to_linear(static_cast<float>(src[1]) * (1.0f / 255.0f)) + err_g;
+                const float Bl = hidden::srgb_to_linear(static_cast<float>(src[2]) * (1.0f / 255.0f)) + err_b;
+                if constexpr (BITS == 1) {
                     const uint8_t n = (Rl * 2 + Gl * 3 + Bl * 1) > 3.0f ? 1 : 0;
-                    plot(pix, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
+                    plot(pix, x + static_cast<size_t>(r.x), y + static_cast<size_t>(r.y), n);
                     const float c = 0.75;
                     err_r = std::clamp(Rl - ((n != uint8_t{0}) ? 1.0f : 0.0f), -c, c);
                     err_g = std::clamp(Gl - ((n != uint8_t{0}) ? 1.0f : 0.0f), -c, c);
                     err_b = std::clamp(Bl - ((n != uint8_t{0}) ? 1.0f : 0.0f), -c, c);
-                }
-            }
-        } else {
-            const auto r_w = static_cast<size_t>(r.w < 0 ? 0 : r.w);
-            const auto r_h = static_cast<size_t>(r.h < 0 ? 0 : r.h);
-            for (size_t y = 0; y < r_h; y++) {
-                float err_r = 0;
-                float err_g = 0;
-                float err_b = 0;
-                for (size_t x = 0; x < r_w; x++) {
-                    const auto R =
-                        static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 0]) * (1.0f / 255.0f);
-                    const auto G =
-                        static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 1]) * (1.0f / 255.0f);
-                    const auto B =
-                        static_cast<float>(ptr[y * static_cast<size_t>(stride) + x * 4 + 2]) * (1.0f / 255.0f);
-                    float Rl = hidden::srgb_to_linear(R);
-                    float Gl = hidden::srgb_to_linear(G);
-                    float Bl = hidden::srgb_to_linear(B);
-                    Rl = Rl + err_r;
-                    Gl = Gl + err_g;
-                    Bl = Bl + err_b;
+                } else {
                     const uint8_t n = quant.nearest_linear(Rl, Gl, Bl);
-                    plot(pix, (x + static_cast<size_t>(r.x)), (y + static_cast<size_t>(r.y)), n);
+                    plot(pix, x + static_cast<size_t>(r.x), y + static_cast<size_t>(r.y), n);
                     err_r = std::clamp(Rl - quant.linear_palette().at(n * size_t{3} + size_t{0}), -1.0f, 1.0f);
                     err_g = std::clamp(Gl - quant.linear_palette().at(n * size_t{3} + size_t{1}), -1.0f, 1.0f);
                     err_b = std::clamp(Bl - quant.linear_palette().at(n * size_t{3} + size_t{2}), -1.0f, 1.0f);
@@ -1702,7 +1641,7 @@ class pixel_rgb : public format {
 
     static constexpr void compose(const raster &pix, size_t x, size_t y, float cola, float colr, float colg,
                                   float colb) {
-        if constexpr (BYTES == 4) {
+        if constexpr (BYTES == 4) {  // SIMD at run time; constant evaluation takes the scalar code below
 #if defined(__ARM_NEON)
             if (!std::is_constant_evaluated()) {
                 const size_t off = y * pix.stride + x * 4;
@@ -1754,36 +1693,17 @@ class pixel_rgb : public format {
                 return;
             }
 #endif  // #if defined(__AVX2__)
-            const size_t off = y * pix.stride + x * 4;
-
-            const float lr = hidden::a2al_8bit[pix.data[off + 0]];
-            const float lg = hidden::a2al_8bit[pix.data[off + 1]];
-            const float lb = hidden::a2al_8bit[pix.data[off + 2]];
-            const float la = pix.data[off + 3] * (1.0f / 255.0f);
-
-            const float as = cola + la * (1.0f - cola);
-            const float rs = hidden::linear_to_srgb(colr * cola + lr * (1.0f - cola));
-            const float gs = hidden::linear_to_srgb(colg * cola + lg * (1.0f - cola));
-            const float bs = hidden::linear_to_srgb(colb * cola + lb * (1.0f - cola));
-
-            pix.data[off + 0] = static_cast<uint8_t>(rs * 255.0f);
-            pix.data[off + 1] = static_cast<uint8_t>(gs * 255.0f);
-            pix.data[off + 2] = static_cast<uint8_t>(bs * 255.0f);
-            pix.data[off + 3] = static_cast<uint8_t>(as * 255.0f);
-        } else {
-            const size_t off = y * pix.stride + x * 3;
-
-            const float lr = hidden::a2al_8bit[pix.data[off + 0]];
-            const float lg = hidden::a2al_8bit[pix.data[off + 1]];
-            const float lb = hidden::a2al_8bit[pix.data[off + 2]];
-
-            const float rs = hidden::linear_to_srgb(colr * cola + lr * (1.0f - cola));
-            const float gs = hidden::linear_to_srgb(colg * cola + lg * (1.0f - cola));
-            const float bs = hidden::linear_to_srgb(colb * cola + lb * (1.0f - cola));
-
-            pix.data[off + 0] = static_cast<uint8_t>(rs * 255.0f);
-            pix.data[off + 1] = static_cast<uint8_t>(gs * 255.0f);
-            pix.data[off + 2] = static_cast<uint8_t>(bs * 255.0f);
+        }
+        uint8_t *ptr = &pix.data[y * pix.stride + x * BYTES];
+        const float rs = hidden::linear_to_srgb(colr * cola + hidden::a2al_8bit[ptr[0]] * (1.0f - cola));
+        const float gs = hidden::linear_to_srgb(colg * cola + hidden::a2al_8bit[ptr[1]] * (1.0f - cola));
+        const float bs = hidden::linear_to_srgb(colb * cola + hidden::a2al_8bit[ptr[2]] * (1.0f - cola));
+        ptr[0] = static_cast<uint8_t>(rs * 255.0f);
+        ptr[1] = static_cast<uint8_t>(gs * 255.0f);
+        ptr[2] = static_cast<uint8_t>(bs * 255.0f);
+        if constexpr (BYTES == 4) {
+            const float la = ptr[3] * (1.0f / 255.0f);
+            ptr[3] = static_cast<uint8_t>((cola + la * (1.0f - cola)) * 255.0f);
         }
     }
 
@@ -1845,40 +1765,27 @@ class pixel_rgb : public format {
     }
 
     static constexpr void blit_RGBA(const raster &pix, const rect<int32_t> &r, const uint8_t *ptr, int32_t stride) {
-        if constexpr (BYTES == 4) {
-            rect<int32_t> intersect_rect{
-                .x = 0, .y = 0, .w = static_cast<int32_t>(pix.width), .h = static_cast<int32_t>(pix.height)};
-            intersect_rect &= rect<int32_t>{.x = r.x, .y = r.y, .w = r.w, .h = r.h};
-            auto const r_x = static_cast<size_t>(intersect_rect.x);
-            auto const r_y = static_cast<size_t>(intersect_rect.y);
-            auto const r_w = static_cast<size_t>(intersect_rect.w);
-            auto const r_h = static_cast<size_t>(intersect_rect.h);
-            const uint8_t *src = ptr;
-            uint8_t *dst = pix.data + r_y * pix.stride + r_x * 4;
-            for (size_t y = 0; y < r_h; y++) {
+        rect<int32_t> intersect_rect{
+            .x = 0, .y = 0, .w = static_cast<int32_t>(pix.width), .h = static_cast<int32_t>(pix.height)};
+        intersect_rect &= rect<int32_t>{.x = r.x, .y = r.y, .w = r.w, .h = r.h};
+        auto const r_x = static_cast<size_t>(intersect_rect.x);
+        auto const r_y = static_cast<size_t>(intersect_rect.y);
+        auto const r_w = static_cast<size_t>(intersect_rect.w);
+        auto const r_h = static_cast<size_t>(intersect_rect.h);
+        const uint8_t *src = ptr;
+        uint8_t *dst = pix.data + r_y * pix.stride + r_x * BYTES;
+        for (size_t y = 0; y < r_h; y++) {
+            if constexpr (BYTES == 4) {
                 std::memcpy(dst, src, r_w * 4);
-                dst += pix.stride;
-                src += stride;
-            }
-        } else {
-            rect<int32_t> intersect_rect{
-                .x = 0, .y = 0, .w = static_cast<int32_t>(pix.width), .h = static_cast<int32_t>(pix.height)};
-            intersect_rect &= rect<int32_t>{.x = r.x, .y = r.y, .w = r.w, .h = r.h};
-            auto const r_x = static_cast<size_t>(intersect_rect.x);
-            auto const r_y = static_cast<size_t>(intersect_rect.y);
-            auto const r_w = static_cast<size_t>(intersect_rect.w);
-            auto const r_h = static_cast<size_t>(intersect_rect.h);
-            const uint8_t *src = ptr;
-            uint8_t *dst = pix.data + r_y * pix.stride + r_x * 3;
-            for (size_t y = 0; y < r_h; y++) {
+            } else {
                 for (size_t x = 0; x < r_w; x++) {
                     dst[x * 3 + 0] = src[x * 4 + 0];
                     dst[x * 3 + 1] = src[x * 4 + 1];
                     dst[x * 3 + 2] = src[x * 4 + 2];
                 }
-                dst += pix.stride;
-                src += stride;
             }
+            dst += pix.stride;
+            src += stride;
         }
     }
 
@@ -4182,15 +4089,7 @@ class surface : public basic_surface<PF, uint8_t>, public surface_extras<surface
         }
 
         if (stroke_width == 1) {
-            bool steep = abs(y1 - y0) > abs(x1 - x0);
-            if (steep) {
-                std::swap(x0, y0);
-                std::swap(x1, y1);
-            }
-            if (x0 > x1) {
-                std::swap(x0, x1);
-                std::swap(y0, y1);
-            }
+            const bool steep = order_line(x0, y0, x1, y1);
 
             const int32_t dx = x1 - x0;
             const int32_t dy = abs(y1 - y0);
@@ -4303,15 +4202,7 @@ class surface : public basic_surface<PF, uint8_t>, public surface_extras<surface
                 return;
             }
 
-            bool steep = abs(y1 - y0) > abs(x1 - x0);
-            if (steep) {
-                std::swap(x0, y0);
-                std::swap(x1, y1);
-            }
-            if (x0 > x1) {
-                std::swap(x0, x1);
-                std::swap(y0, y1);
-            }
+            const bool steep = order_line(x0, y0, x1, y1);
 
             const auto dx = static_cast<float>(x1 - x0);
             const auto dy = static_cast<float>(y1 - y0);
@@ -4550,13 +4441,7 @@ class surface : public basic_surface<PF, uint8_t>, public surface_extras<surface
      */
     constexpr void fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col) {
         const auto dst = pix;
-        if (!in_range({x, y, w, h})) {
-            return;
-        }
-        if (w <= 0 || h <= 0) {
-            return;
-        }
-        if (check_not_in_bounds(x, y, w, h)) {
+        if (!rect_visible(x, y, w, h)) {
             return;
         }
         if (y < 0) {
@@ -4892,36 +4777,14 @@ class surface : public basic_surface<PF, uint8_t>, public surface_extras<surface
      * \brief Flip the contents of this image vertically.
      */
     constexpr void flip_v() {
-        const size_t line_bytes = PF::bytes_per_line(pix.width);
-        uint8_t *ptr = pix.data;
-        for (size_t x = 0; x < line_bytes; x++) {
-            for (size_t y = 0; y < pix.height / 2; y++) {
-                uint8_t *ptr_a = ptr + y * pix.stride;
-                uint8_t *ptr_b = ptr + (pix.height - y - 1) * pix.stride;
-                const uint8_t a = ptr_a[x];
-                const uint8_t b = ptr_b[x];
-                ptr_a[x] = b;
-                ptr_b[x] = a;
-            }
-        }
+        flip_rows<false>();
     }
 
     /**
      * \brief Flip the contents of this image horizontally & vertically.
      */
     constexpr void flip_hv() {
-        const size_t line_bytes = PF::bytes_per_line(pix.width);
-        uint8_t *ptr = pix.data;
-        for (size_t x = 0; x < line_bytes; x++) {
-            for (size_t y = 0; y < pix.height / 2; y++) {
-                uint8_t *ptr_a = ptr + y * pix.stride;
-                uint8_t *ptr_b = ptr + (pix.height - y - 1) * pix.stride;
-                uint8_t a = PF::reverse(ptr_a[x]);
-                uint8_t b = PF::reverse(ptr_b[line_bytes - x - 1]);
-                ptr_a[x] = b;
-                ptr_b[line_bytes - x - 1] = a;
-            }
-        }
+        flip_rows<true>();
     }
 
     /**
@@ -5109,6 +4972,56 @@ class surface : public basic_surface<PF, uint8_t>, public surface_extras<surface
 
     /**
      * @private
+     * Swaps the upper and the lower rows. MIRROR also reverses the pixels of every row.
+     */
+    template <bool MIRROR>
+    constexpr void flip_rows() {
+        const size_t line_bytes = PF::bytes_per_line(pix.width);
+        for (size_t x = 0; x < line_bytes; x++) {
+            const size_t xb = MIRROR ? (line_bytes - x - 1) : x;
+            for (size_t y = 0; y < pix.height / 2; y++) {
+                uint8_t *ptr_a = pix.data + y * pix.stride;
+                uint8_t *ptr_b = pix.data + (pix.height - y - 1) * pix.stride;
+                uint8_t a = ptr_a[x];
+                uint8_t b = ptr_b[xb];
+                if constexpr (MIRROR) {
+                    a = PF::reverse(a);
+                    b = PF::reverse(b);
+                }
+                ptr_a[x] = b;
+                ptr_b[xb] = a;
+            }
+        }
+    }
+
+    /**
+     * @private
+     * true if a rectangle has coordinates in range, a size, and a part inside of the surface.
+     */
+    [[nodiscard]] constexpr bool rect_visible(int32_t x, int32_t y, int32_t w, int32_t h) {
+        return in_range({x, y, w, h}) && w > 0 && h > 0 && !check_not_in_bounds(x, y, w, h);
+    }
+
+    /**
+     * @private
+     * Makes a line run in +x with a slope of at most 1, by swapping its axes and its ends.
+     * @return true if the axes were swapped.
+     */
+    static constexpr bool order_line(int32_t &x0, int32_t &y0, int32_t &x1, int32_t &y1) {
+        const bool steep = abs(y1 - y0) > abs(x1 - x0);
+        if (steep) {
+            std::swap(x0, y0);
+            std::swap(x1, y1);
+        }
+        if (x0 > x1) {
+            std::swap(x0, x1);
+            std::swap(y0, y1);
+        }
+        return steep;
+    }
+
+    /**
+     * @private
      */
     template <typename abs_T>
     [[nodiscard]] static constexpr abs_T abs(abs_T v) {
@@ -5255,13 +5168,7 @@ class surface : public basic_surface<PF, uint8_t>, public surface_extras<surface
     constexpr void fill_rect_int(int32_t x, int32_t y, int32_t w, int32_t h, const hidden::shader_function auto &shader,
                                  int32_t parent_x, int32_t parent_y, int32_t parent_w, int32_t parent_h) {
         const auto dst = pix;
-        if (!in_range({x, y, w, h})) {
-            return;
-        }
-        if (w <= 0 || h <= 0) {
-            return;
-        }
-        if (check_not_in_bounds(x, y, w, h)) {
+        if (!rect_visible(x, y, w, h)) {
             return;
         }
 
