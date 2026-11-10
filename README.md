@@ -9,6 +9,7 @@ constixel is a single header minimalistic constexpr C++20 palette based 2D graph
 [Primary features and goals](#primary-features-and-goals)  
 [Applications](#applications)  
 [Requirements](#requirements)  
+[Example gallery](#example-gallery)\
 [Minimal example](#minimal-example)  
 [Text drawing example](#text-drawing-example)  
 [Consteval sixel example](#consteval-sixel-example)  
@@ -81,6 +82,21 @@ Don't forget to enable C++20/23:
 ```
 set(CMAKE_CXX_STANDARD 20)
 ```
+
+## Example gallery
+
+The [examples](./examples/README.md) include home energy and server monitors, a compact thermostat, a monochrome e-paper weather display, a process dashboard, a music player, signal plots, procedural artwork, and an illustrated drawing API. Each preview is rendered directly by its C++ example using the bundled fonts and drawing primitives.
+
+![Process dashboard rendered with constixel](./examples/industrial/example_industrial.png)
+
+Build the examples and generate their PNG previews without a graphics terminal:
+
+```sh
+cmake -S examples -B build/examples -DCMAKE_BUILD_TYPE=Release
+cmake --build build/examples --target example_previews --parallel
+```
+
+The images are written to `build/examples/previews/`. See the [gallery and run instructions](./examples/README.md) for individual examples.
 
 ## Minimal example
 

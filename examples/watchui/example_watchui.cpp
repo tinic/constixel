@@ -1,140 +1,71 @@
 #define CONSTIXEL_ENABLE_COUT
 
-#include "constixel.hpp"
-#include "fonts/ibmplexsans_regular_18_aa.hpp"
-#include "fonts/notosanssymbols2_regular_aa.hpp"
-#include <fstream>
+#include <array>
+#include <cmath>
+
+#include "../example_output.hpp"
+#include "../example_style.hpp"
 
 using namespace constixel;
+using namespace example;
 using UI = image<format_32bit, 396, 484>;
 
-int main() {
+int main(int argc, char** argv) {
     static UI img;
-    img.clear();
+    const auto background = img.get_nearest_color(17, 17, 17);
+    const auto surface = img.get_nearest_color(34, 34, 34);
+    const auto muted = img.get_nearest_color(170, 170, 170);
+    const auto accent = img.get_nearest_color(130, 220, 190);
+    img.fill_rect(0, 0, 396, 484, background);
 
-    // ─── pick a soft, modern palette via nearest RGB ───────────────────────────
-    uint8_t col_text       = img.get_nearest_color(236, 240, 241); // off-white
-    uint8_t col_button_fg  = col_text;                             // white
+    // A compact player with generous touch targets and a clear title hierarchy.
+    img.draw_line_aa(31, 32, 25, 38, muted, 2);
+    img.draw_line_aa(25, 38, 31, 44, muted, 2);
+    centered_text<small>(img, 198, 43, "ON REPEAT", muted);
+    text<small>(img, 330, 43, "09:41", muted);
 
-    // ─── full‐screen background with dark gradient ────────────────────────────
-    img.fill_rect(0, 0, 396, 484, [&](float /*u*/, float v, float /*au*/, float /*av*/) {
-        return std::array<float, 4>{
-            (8 + v * 35) / 255.0f,     // very dark to dark blue
-            (8 + v * 35) / 255.0f,     // very dark to dark
-            (15 + v * 50) / 255.0f,    // very dark to darker blue
-            1.0f
-        };
-    });
-
-    // ─── top header bar with dark gradient ────────────────────────────────────
-    img.fill_round_rect_aa(0, 0, 396, 60, 0, [&](float /*u*/, float v, float /*au*/, float /*av*/) {
-        return std::array<float, 4>{
-            (5 + v * 40) / 255.0f,     // very dark to dark
-            (5 + v * 40) / 255.0f,     // very dark to dark
-            (12 + v * 55) / 255.0f,    // very dark to darker blue
-            1.0f
-        };
-    });
-    img.draw_string_aa<ibmplexsans_regular_18_aa,true>(20, 38, "Now Playing", col_text);
-
-    // ─── album art placeholder ────────────────────────────────────────────────
-    const int artSize = 220;
-    const int ax = (396 - artSize) / 2;
-    const int ay = 80;
-    // outer frame
-    img.fill_round_rect_aa(ax, ay, artSize, artSize, 20, [&](float u, float v, float /*au*/, float /*av*/) {
-        float radial = std::sqrt((u - 0.5f) * (u - 0.5f) + (v - 0.5f) * (v - 0.5f));
-        return std::array<float, 4>{
-            (15 + radial * 60) / 255.0f,   // dark charcoal gradient
-            (20 + radial * 70) / 255.0f,   // dark blue-gray
-            (30 + radial * 80) / 255.0f,   // darker blue
-            1.0f
-        };
-    });
-    img.stroke_round_rect_aa(ax, ay, artSize, artSize, 20, col_text, 3);
-    // inner “art”
-    img.fill_round_rect_aa(ax+10, ay+10, artSize-20, artSize-20, 12, [&](float u, float v, float /*au*/, float /*av*/) {
-        float center_dist = std::sqrt((u - 0.5f) * (u - 0.5f) + (v - 0.5f) * (v - 0.5f));
-        float gradient = 1.0f - center_dist * 1.5f;
-        return std::array<float, 4>{
-            std::min(1.0f, std::max(0.0f, (10 + gradient * 80) / 255.0f)),  // dark teal
-            std::min(1.0f, std::max(0.0f, (60 + gradient * 100) / 255.0f)), // darker teal
-            std::min(1.0f, std::max(0.0f, (50 + gradient * 90) / 255.0f)),  // dark blue-green
-            1.0f
-        };
-    });
-
-    // ─── track & artist text ─────────────────────────────────────────────────
-    img.draw_string_aa<ibmplexsans_regular_18_aa,true>(20, 320, "Artist Name", col_text);
-    img.draw_string_aa<ibmplexsans_regular_18_aa,true>(20, 348, "Track Title", col_text);
-
-    // ─── progress bar ─────────────────────────────────────────────────────────
-    {
-        const int pbX = 20, pbY = 380, pbW = 356, pbH = 8;
-        const float progress = 0.45f;  // 45%
-        // background track with subtle gradient
-        img.fill_round_rect_aa(pbX, pbY, pbW, pbH, pbH/2, [&](float /*u*/, float v, float /*au*/, float /*av*/) {
-            float highlight = (1.0f - v) * 0.7f;
-            return std::array<float, 4>{
-                (15 + highlight * 50) / 255.0f,   // dark gray gradient
-                (20 + highlight * 60) / 255.0f,   // dark blue-gray
-                (30 + highlight * 70) / 255.0f,   // darker blue
-                1.0f
-            };
-        });
-        // filled portion with warm gradient
-        img.fill_round_rect_aa(pbX, pbY, int(pbW * progress), pbH, pbH/2, [&](float u, float v, float /*au*/, float /*av*/) {
-            float glow = (1.0f - v) * 0.8f + u * 0.3f;
-            return std::array<float, 4>{
-                (60 + glow * 100) / 255.0f,    // dark orange
-                (30 + glow * 80) / 255.0f,     // dark amber  
-                (5 + glow * 25) / 255.0f,      // very dark
-                1.0f
-            };
-        });
-    }
-
-    // ─── playback controls ────────────────────────────────────────────────────
-    const int btnY    = 440;
-    const int btnSize = 60;
-    const int spacing = 90;
-    const int cx      = 396 / 2;
-
-    // helper to draw a circular button with gradient
-    auto drawBtn = [&](int x, const char* label, bool isAccent, uint8_t fg){
-        if (isAccent) {
-            img.fill_circle_aa(x, btnY, btnSize/2, [&](float u, float v, float /*au*/, float /*av*/) {
-                float center_dist = std::sqrt((u - 0.5f) * (u - 0.5f) + (v - 0.5f) * (v - 0.5f));
-                float glow = 1.0f - center_dist * 2.0f;
-                return std::array<float, 4>{
-                    std::min(1.0f, std::max(0.0f, (8 + glow * 70) / 255.0f)),   // dark teal center
-                    std::min(1.0f, std::max(0.0f, (40 + glow * 80) / 255.0f)),  // darker teal
-                    std::min(1.0f, std::max(0.0f, (30 + glow * 70) / 255.0f)),  // dark blue-green
-                    1.0f
-                };
-            });
-        } else {
-            img.fill_circle_aa(x, btnY, btnSize/2, [&](float /*u*/, float v, float /*au*/, float /*av*/) {
-                float highlight = (1.0f - v) * 0.8f;
-                return std::array<float, 4>{
-                    (20 + highlight * 60) / 255.0f,   // dark charcoal
-                    (25 + highlight * 70) / 255.0f,   // dark blue-gray
-                    (35 + highlight * 80) / 255.0f,   // darker blue
-                    1.0f
-                };
-            });
+    // Procedural cover art: a warm sun over layered, cool-toned hills.
+    // Shader channels are linear-light values, so low values keep the art rich.
+    img.fill_round_rect_aa(90, 68, 216, 216, 16, [](float u, float v, int32_t, int32_t) {
+        const float dx = u - 0.66f, dy = v - 0.30f;
+        if (dx * dx + dy * dy < 0.021f) {
+            return std::array<float, 4>{0.98f, 0.59f, 0.28f, 1.0f};
         }
-        img.stroke_circle_aa(x, btnY, btnSize/2, fg, 3);
-        img.draw_string_centered_aa<notosanssymbols2_regular_aa,true>(x, btnY - 24, label, fg);
-    };
+        if (v > 0.80f + 0.08f * std::sin(u * 6.0f + 2.0f)) {
+            return std::array<float, 4>{0.025f, 0.09f, 0.12f, 1.0f};
+        }
+        if (v > 0.65f + 0.10f * std::sin(u * 5.0f - 1.0f)) {
+            return std::array<float, 4>{0.04f, 0.22f, 0.25f, 1.0f};
+        }
+        if (v > 0.48f + 0.12f * std::sin(u * 5.0f + 1.0f)) {
+            return std::array<float, 4>{0.18f, 0.39f, 0.39f, 1.0f};
+        }
+        return std::array<float, 4>{0.64f - v * 0.12f, 0.76f - v * 0.10f, 0.73f - v * 0.08f, 1.0f};
+    });
+    centered_text<title>(img, 198, 318, "Distant shores", color::WHITE);
+    centered_text<small>(img, 198, 342, "Low Tide / Coastal Sessions", muted);
 
-    drawBtn(cx - spacing, "⏮", false, col_button_fg);
-    drawBtn(cx          , "⏯", true,  col_text);
-    drawBtn(cx + spacing, "⏭", false, col_button_fg);
+    constexpr int progress_x = 32, progress_y = 363, progress_width = 332;
+    constexpr int elapsed_seconds = 102, duration_seconds = 238;
+    const int filled = progress_width * elapsed_seconds / duration_seconds;
+    img.fill_round_rect_aa(progress_x, progress_y, progress_width, 4, 2, surface);
+    img.fill_round_rect_aa(progress_x, progress_y, filled, 4, 2, accent);
+    img.fill_circle_aa(progress_x + filled, progress_y + 2, 4, accent);
+    text<caption>(img, 32, 388, "1:42", muted);
+    right_text<caption>(img, 364, 388, "3:58", muted);
 
-    // ─── save out PNG ─────────────────────────────────────────────────────────
-    std::ofstream fout("example_watchui.png", std::ios::binary);
-    img.png([&](char c){ fout.put(c); });
-
-    return 0;
+    // Draw playback symbols with primitives, independent of Unicode coverage.
+    img.fill_circle_aa(198, 433, 29, accent);
+    img.fill_round_rect_aa(187, 422, 7, 22, 2, background);
+    img.fill_round_rect_aa(202, 422, 7, 22, 2, background);
+    for (int direction : {-1, 1}) {
+        const int cx = 198 + direction * 88;
+        img.fill_rect(cx + direction * 12 - 1, 423, 3, 20, color::WHITE);
+        for (int i = 0; i < 17; ++i) {
+            const int x = cx + direction * (i - 8);
+            const int half_height = (17 - i) * 10 / 17;
+            img.draw_line(x, 433 - half_height, x, 433 + half_height, color::WHITE);
+        }
+    }
+    return output(img, argc, argv, "example_watchui.png");
 }

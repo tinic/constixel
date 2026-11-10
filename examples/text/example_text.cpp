@@ -1,37 +1,36 @@
 #define CONSTIXEL_ENABLE_COUT
 
-#include "constixel.hpp"
+#include <array>
 
-#include "fonts/ibmplexsans_bold_48_aa.hpp"
-using myfont = constixel::ibmplexsans_bold_48_aa;
+#include "../example_output.hpp"
+#include "../example_style.hpp"
 
+using namespace constixel;
+using namespace example;
+
+// The finished panel, including antialiased type, is evaluated by the compiler.
 static consteval auto create_static_panel_image() {
-    using namespace constixel;
+    image<format_8bit, 440, 344> img;
+    const Theme theme(img);
+    img.fill_rect(0, 0, img.width(), img.height(), theme.background);
+    text<title>(img, 28, 49, "Session controls", theme.ink);
+    text<small>(img, 28, 76, "Ready when you are.", theme.muted);
 
-    image<format_8bit, 300, 256> image;
-
-    const int32_t buttonHeight = 75;
-    const int32_t textCenterY = ( buttonHeight + myfont::ascent) / 2 - myfont::line_height + 3;
-
-    int32_t buttonY = 0;
-    image.fill_round_rect_aa(0, buttonY, image.width(), 75, 20, image.get_nearest_color(0x2F,0x7F,0x2F));
-    image.stroke_round_rect_aa(0, buttonY, image.width(), 75, 20, color::WHITE, 2);
-    image.draw_string_centered_aa<myfont,true>(image.width()/2, buttonY + textCenterY, "Start", color::WHITE);
-
-    buttonY += 86;
-    image.fill_round_rect_aa(0, buttonY, image.width(), 75, 20, image.get_nearest_color(0x2F,0x2F,0x7F));
-    image.stroke_round_rect_aa(0, buttonY, image.width(), 75, 20, color::WHITE, 2);
-    image.draw_string_centered_aa<myfont,true>(image.width()/2, buttonY + textCenterY, "Pause", color::WHITE);
-
-    buttonY += 86;
-    image.fill_round_rect_aa(0, buttonY, image.width(), 75, 20, image.get_nearest_color(0x7F,0xF,0xF));
-    image.stroke_round_rect_aa(0, buttonY, image.width(), 75, 20, color::WHITE, 2);
-    image.draw_string_centered_aa<myfont,true>(image.width()/2, buttonY + textCenterY, "STOP", color::WHITE);
-
-    return image;
+    constexpr std::array<const char*, 3> labels = {"Start session", "Pause session", "Stop session"};
+    constexpr std::array<const char*, 3> shortcuts = {"01", "02", "03"};
+    for (int i = 0; i < 3; ++i) {
+        const int y = 100 + i * 68;
+        const auto background = i == 0 ? theme.accent : theme.surface;
+        const auto foreground = i == 0 ? theme.surface : (i == 2 ? theme.danger : theme.ink);
+        img.fill_round_rect_aa(28, y, 384, 56, 12, background);
+        text<heading>(img, 52, y + 35, labels[i], foreground);
+        right_text<small>(img, 388, y + 34, shortcuts[i], foreground);
+    }
+    text<caption>(img, 28, 324, "CONSTEXPR / TYPE + SHAPES", theme.muted);
+    return img;
 }
 
-int main() {
+int main(int argc, char** argv) {
     static constexpr auto panel_image = create_static_panel_image();
-    panel_image.sixel_to_cout();
+    return output(panel_image, argc, argv);
 }
