@@ -3454,8 +3454,7 @@ class surface : public basic_surface<PF, uint8_t> {
      */
     constexpr void draw_line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col, int32_t stroke_width = 1) {
         const auto dst = pix;
-        auto minmax_check = std::minmax({x0, y0, x1, y1, stroke_width});
-        if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
+        if (!in_range({x0, y0, x1, y1, stroke_width})) {
             return;
         }
 
@@ -3584,8 +3583,7 @@ class surface : public basic_surface<PF, uint8_t> {
     constexpr void draw_line_aa(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint8_t col,
                                 float stroke_width = 1.0f) {
         const auto dst = pix;
-        auto minmax_check = std::minmax({x0, y0, x1, y1});
-        if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
+        if (!in_range({x0, y0, x1, y1})) {
             return;
         }
         if (!std::isnormal(stroke_width) || stroke_width < static_cast<float>(min_coord) ||
@@ -3593,7 +3591,7 @@ class surface : public basic_surface<PF, uint8_t> {
             return;
         }
 
-        const auto [Rl, Gl, Bl] = linear_color(col);
+        const auto lin = linear_color(col);
 
         if (stroke_width <= 0.0f) {
             return;
@@ -3625,7 +3623,7 @@ class surface : public basic_surface<PF, uint8_t> {
                 if (a >= hidden::epsilon_high) {
                     plot_clipped(pix, x, y, col);
                 } else {
-                    compose(pix, x, y, a, Rl, Gl, Bl);
+                    compose(pix, x, y, a, lin[0], lin[1], lin[2]);
                 }
             };
 
@@ -3705,17 +3703,13 @@ class surface : public basic_surface<PF, uint8_t> {
                     if (px >= 0 && px < static_cast<int32_t>(pix.width) && py >= 0 &&
                         py < static_cast<int32_t>(pix.height)) {
                         auto dist = static_cast<float>((px - x0) * (px - x0) + (py - y0) * (py - y0));
-                        if (std::is_constant_evaluated()) {
-                            dist = hidden::fast_sqrtf(dist);
-                        } else {
-                            dist = std::sqrt(dist);
-                        }
+                        dist = root(dist);
                         const float coverage = std::max(0.0f, std::min(1.0f, radius + 0.5f - dist));
                         if (coverage > hidden::epsilon_low) {
                             if (coverage >= hidden::epsilon_high) {
                                 plot_clipped(dst, px, py, col);
                             } else {
-                                compose(dst, px, py, coverage, Rl, Gl, Bl);
+                                compose(dst, px, py, coverage, lin[0], lin[1], lin[2]);
                             }
                         }
                     }
@@ -3734,17 +3728,13 @@ class surface : public basic_surface<PF, uint8_t> {
                 const float dist_x = static_cast<float>(px) - closest_x;
                 const float dist_y = static_cast<float>(py) - closest_y;
                 float dist = dist_x * dist_x + dist_y * dist_y;
-                if (std::is_constant_evaluated()) {
-                    dist = hidden::fast_sqrtf(dist);
-                } else {
-                    dist = std::sqrt(dist);
-                }
+                dist = root(dist);
                 const float coverage = std::max(0.0f, std::min(1.0f, half_width + 0.5f - dist));
                 if (coverage > hidden::epsilon_low) {
                     if (coverage >= hidden::epsilon_high) {
                         plot_clipped(dst, px, py, col);
                     } else {
-                        compose(dst, px, py, coverage, Rl, Gl, Bl);
+                        compose(dst, px, py, coverage, lin[0], lin[1], lin[2]);
                     }
                 }
             }
@@ -4162,8 +4152,7 @@ class surface : public basic_surface<PF, uint8_t> {
      */
     constexpr void fill_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col) {
         const auto dst = pix;
-        auto minmax_check = std::minmax({x, y, w, h});
-        if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
+        if (!in_range({x, y, w, h})) {
             return;
         }
         if (w <= 0 || h <= 0) {
@@ -4237,8 +4226,7 @@ class surface : public basic_surface<PF, uint8_t> {
      * \param stroke_width Width of the stroke in pixels.
      */
     constexpr void stroke_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t col, int32_t stroke_width = 1) {
-        auto minmax_check = std::minmax({x, y, w, h, stroke_width});
-        if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
+        if (!in_range({x, y, w, h, stroke_width})) {
             return;
         }
         if (w <= 0 || h <= 0) {
@@ -4277,8 +4265,7 @@ class surface : public basic_surface<PF, uint8_t> {
      * \param col Color palette index to use.
      */
     constexpr void fill_circle(int32_t cx, int32_t cy, int32_t radius, uint8_t col) {
-        auto minmax_check = std::minmax({cx, cy, radius});
-        if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
+        if (!in_range({cx, cy, radius})) {
             return;
         }
         radius = abs(radius);
@@ -4316,21 +4303,7 @@ class surface : public basic_surface<PF, uint8_t> {
      * \param stroke_width Width of the stroke in pixels.
      */
     constexpr void stroke_circle(int32_t cx, int32_t cy, int32_t radius, uint8_t col, int32_t stroke_width = 1) {
-        auto minmax_check = std::minmax({cx, cy, radius, stroke_width});
-        if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
-            return;
-        }
-        radius = abs(radius);
-        stroke_width = abs(stroke_width);
-        if (radius == 1) {
-            fill_rect(cx - 1, cy - 1, 2, 2, col);
-            return;
-        }
-        if (stroke_width >= radius) {
-            circle_int<false, false>(cx, cy, radius, 0, 0, col, 0);
-            return;
-        }
-        circle_int<false, true>(cx, cy, radius, 0, 0, col, stroke_width);
+        stroke_circle_impl<false>(cx, cy, radius, col, stroke_width);
     }
 
     /**
@@ -4361,21 +4334,7 @@ class surface : public basic_surface<PF, uint8_t> {
      * \param stroke_width Width of the stroke in pixels.
      */
     constexpr void stroke_circle_aa(int32_t cx, int32_t cy, int32_t radius, uint8_t col, int32_t stroke_width = 1) {
-        auto minmax_check = std::minmax({cx, cy, radius, stroke_width});
-        if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
-            return;
-        }
-        radius = abs(radius);
-        stroke_width = abs(stroke_width);
-        if (radius == 1) {
-            fill_rect(cx - 1, cy - 1, 2, 2, col);
-            return;
-        }
-        if (stroke_width >= radius) {
-            circle_int<true, false>(cx, cy, radius, 0, 0, col, 0);
-            return;
-        }
-        circle_int<true, true>(cx, cy, radius, 0, 0, col, stroke_width);
+        stroke_circle_impl<true>(cx, cy, radius, col, stroke_width);
     }
 
     /**
@@ -4406,8 +4365,7 @@ class surface : public basic_surface<PF, uint8_t> {
      * \param col Color palette index to use.
      */
     constexpr void fill_circle_aa(int32_t cx, int32_t cy, int32_t radius, uint8_t col) {
-        auto minmax_check = std::minmax({cx, cy, radius});
-        if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
+        if (!in_range({cx, cy, radius})) {
             return;
         }
         radius = abs(radius);
@@ -4450,8 +4408,7 @@ class surface : public basic_surface<PF, uint8_t> {
     constexpr auto fill_circle_aa(int32_t cx, int32_t cy, int32_t radius, const shader_func &shader) -> void
         requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, int32_t, int32_t>
     {
-        auto minmax_check = std::minmax({cx, cy, radius});
-        if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
+        if (!in_range({cx, cy, radius})) {
             return;
         }
         radius = abs(radius);
@@ -4475,31 +4432,7 @@ class surface : public basic_surface<PF, uint8_t> {
      */
     constexpr void stroke_round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col,
                                      int32_t stroke_width = 1) {
-        auto minmax_check = std::minmax({x, y, w, h, radius, stroke_width});
-        if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
-            return;
-        }
-        if (w <= 0 || h <= 0) {
-            return;
-        }
-        radius = abs(radius);
-        stroke_width = abs(stroke_width);
-        const int32_t cr = std::min({w / 2, h / 2, radius});
-        const int32_t dx = w - cr * 2;
-        const int32_t dy = h - cr * 2;
-        if (radius == 0) {
-            stroke_rect(x, y, w, h, col, stroke_width);
-        } else {
-            if (radius > stroke_width) {
-                circle_int<false, true>(x + cr, y + cr, cr, dx, dy, col, stroke_width);
-            } else {
-                circle_int<false, false>(x + cr, y + cr, cr, dx, dy, col, 0);
-            }
-            fill_rect(x, y + cr, stroke_width, dy, col);
-            fill_rect(x + w - stroke_width, y + cr, stroke_width, dy, col);
-            fill_rect(x + cr, y, w - cr * 2, stroke_width, col);
-            fill_rect(x + cr, y + h - stroke_width, w - cr * 2, stroke_width, col);
-        }
+        stroke_round_rect_impl<false>(x, y, w, h, radius, col, stroke_width);
     }
 
     /**
@@ -4530,20 +4463,7 @@ class surface : public basic_surface<PF, uint8_t> {
      * \param col Color palette index to use.
      */
     constexpr void fill_round_rect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col) {
-        auto minmax_check = std::minmax({x, y, w, h, radius});
-        if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
-            return;
-        }
-        if (w <= 0 || h <= 0) {
-            return;
-        }
-        const int32_t cr = std::min({w / 2, h / 2, radius});
-        const int32_t dx = w - cr * 2;
-        const int32_t dy = h - cr * 2;
-        circle_int<false, false>(x + cr, y + cr, cr, dx, dy, col, 0);
-        fill_rect(x, y + cr, cr, dy, col);
-        fill_rect(x + w - cr, y + cr, cr, dy, col);
-        fill_rect(x + cr, y, dx, h, col);
+        fill_round_rect_impl<false>(x, y, w, h, radius, col);
     }
 
     /**
@@ -4575,21 +4495,7 @@ class surface : public basic_surface<PF, uint8_t> {
      * \param col Color palette index to use.
      */
     constexpr void fill_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col) {
-        auto minmax_check = std::minmax({x, y, w, h, radius});
-        if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
-            return;
-        }
-        if (w <= 0 || h <= 0) {
-            return;
-        }
-        radius = abs(radius);
-        int32_t cr = std::min({w / 2, h / 2, radius});
-        int32_t dx = w - cr * 2;
-        int32_t dy = h - cr * 2;
-        circle_int<true, false>(x + cr, y + cr, cr, dx, dy, col, 0);
-        fill_rect(x, y + cr, cr, dy, col);
-        fill_rect(x + w - cr, y + cr, cr, dy, col);
-        fill_rect(x + cr, y, dx, h, col);
+        fill_round_rect_impl<true>(x, y, w, h, radius, col);
     }
 
     /**
@@ -4629,8 +4535,7 @@ class surface : public basic_surface<PF, uint8_t> {
                                       const shader_func &shader) -> void
         requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, int32_t, int32_t>
     {
-        auto minmax_check = std::minmax({x, y, w, h, radius});
-        if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
+        if (!in_range({x, y, w, h, radius})) {
             return;
         }
         if (w <= 0 || h <= 0) {
@@ -4665,31 +4570,7 @@ class surface : public basic_surface<PF, uint8_t> {
      */
     constexpr void stroke_round_rect_aa(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col,
                                         int32_t stroke_width = 1) {
-        auto minmax_check = std::minmax({x, y, w, h, radius, stroke_width});
-        if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
-            return;
-        }
-        if (w <= 0 || h <= 0) {
-            return;
-        }
-        radius = abs(radius);
-        stroke_width = abs(stroke_width);
-        const int32_t cr = std::min({w / 2, h / 2, radius});
-        const int32_t dx = w - cr * 2;
-        const int32_t dy = h - cr * 2;
-        if (radius == 0) {
-            stroke_rect(x, y, w, h, col, stroke_width);
-        } else {
-            if (radius > stroke_width) {
-                circle_int<true, true>(x + cr, y + cr, cr, dx, dy, col, stroke_width);
-            } else {
-                circle_int<true, false>(x + cr, y + cr, cr, dx, dy, col, 0);
-            }
-            fill_rect(x, y + cr, stroke_width, dy, col);
-            fill_rect(x + w - stroke_width, y + cr, stroke_width, dy, col);
-            fill_rect(x + cr, y, w - cr * 2, stroke_width, col);
-            fill_rect(x + cr, y + h - stroke_width, w - cr * 2, stroke_width, col);
-        }
+        stroke_round_rect_impl<true>(x, y, w, h, radius, col, stroke_width);
     }
 
     /**
@@ -5399,8 +5280,7 @@ class surface : public basic_surface<PF, uint8_t> {
         requires std::is_invocable_r_v<std::array<float, 4>, shader_func, float, float, int32_t, int32_t>
     {
         const auto dst = pix;
-        auto minmax_check = std::minmax({x, y, w, h});
-        if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
+        if (!in_range({x, y, w, h})) {
             return;
         }
         if (w <= 0 || h <= 0) {
@@ -5423,10 +5303,7 @@ class surface : public basic_surface<PF, uint8_t> {
                 float u = (static_cast<float>(px) - static_cast<float>(parent_x)) / parent_wF;
                 float v = (static_cast<float>(py) - static_cast<float>(parent_y)) / parent_hF;
 
-                auto rgba = shader(u, v, px, py);
-                for (auto &p : rgba) {
-                    p = std::clamp(p, 0.0f, 1.0f);
-                }
+                const auto rgba = shade(shader, u, v, px, py);
                 compose(dst, px, py, rgba[3], rgba[0], rgba[1], rgba[2]);
             }
         }
@@ -5434,197 +5311,215 @@ class surface : public basic_surface<PF, uint8_t> {
 
     /**
      * @private
+     * true if all coordinates are in the range the rasterisers can calculate with.
      */
-    template <bool AA, bool STROKE>
-    constexpr void circle_int(int32_t cx, int32_t cy, int32_t r, int32_t ox, int32_t oy, uint8_t col, int32_t s) {
-        auto bounds = calculate_circle_bounds(cx, cy, r);
-
-        if (check_not_in_bounds(bounds.x0, bounds.y0, r * int32_t{2} + ox + int32_t{1},
-                                r * int32_t{2} + oy + int32_t{1})) {
-            return;
-        }
-
-        auto for_each_quadrant = [&]<typename I>(auto &&plot_arc) {
-            plot_arc.template operator()<I>(bounds.x0, bounds.y0, bounds.x0r, bounds.y0r, 0, 0);
-            plot_arc.template operator()<I>(bounds.x0r, bounds.y0, bounds.x0r2, bounds.y0r, ox, 0);
-            plot_arc.template operator()<I>(bounds.x0, bounds.y0r, bounds.x0r, bounds.y0r2, 0, oy);
-            plot_arc.template operator()<I>(bounds.x0r, bounds.y0r, bounds.x0r2, bounds.y0r2, ox, oy);
-        };
-
-        auto limit_box = [this](int32_t &xmin, int32_t &ymin, int32_t &xmax, int32_t &ymax, int32_t x_off,
-                                int32_t y_off) {
-            xmin = std::max(xmin + x_off, int32_t{0}) - x_off;
-            xmax = std::min(xmax + x_off, static_cast<int32_t>(pix.width) - int32_t{1}) - x_off;
-            ymin = std::max(ymin + y_off, int32_t{0}) - y_off;
-            ymax = std::min(ymax + y_off, static_cast<int32_t>(pix.height) - int32_t{1}) - y_off;
-        };
-
-        if constexpr (!AA) {
-            if constexpr (!STROKE) {
-                auto plot_arc = [&, this]<typename I>(int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
-                                                      int32_t y_off) {
-                    const auto dst = pix;
-                    limit_box(xx0, yy0, xx1, yy1, x_off, y_off);
-                    for (int32_t y = yy0; y <= yy1; y++) {
-                        for (int32_t x = xx0; x <= xx1; x++) {
-                            const I dx = (static_cast<I>(x) * I{2} + I{1}) - (static_cast<I>(cx) * I{2});
-                            const I dy = (static_cast<I>(y) * I{2} + I{1}) - (static_cast<I>(cy) * I{2});
-                            const I dist_sq = dx * dx + dy * dy;
-                            if (dist_sq > (static_cast<I>(r) * static_cast<I>(r) * I{4} - I{3})) {
-                                continue;
-                            }
-                            plot_unsafe(dst, x + x_off, y + y_off, col);
-                        }
-                    }
-                };
-                for_each_quadrant.template operator()<calc_square_type>(plot_arc);
-            } else {
-                auto plot_arc = [&, this]<typename I>(int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
-                                                      int32_t y_off) {
-                    const auto dst = pix;
-                    limit_box(xx0, yy0, xx1, yy1, x_off, y_off);
-                    for (int32_t y = yy0; y <= yy1; y++) {
-                        for (int32_t x = xx0; x <= xx1; x++) {
-                            const I dx = (static_cast<I>(x) * I{2} + I{1}) - (static_cast<I>(cx) * I{2});
-                            const I dy = (static_cast<I>(y) * I{2} + I{1}) - (static_cast<I>(cy) * I{2});
-                            const I dist_sq = dx * dx + dy * dy;
-                            if (dist_sq > (static_cast<I>(r) * static_cast<I>(r) * I{4} - I{3})) {
-                                continue;
-                            }
-                            if (dist_sq < (static_cast<I>(r - s) * static_cast<I>(r - s) * I{4} - I{3})) {
-                                continue;
-                            }
-                            plot_unsafe(dst, x + x_off, y + y_off, col);
-                        }
-                    }
-                };
-                for_each_quadrant.template operator()<calc_square_type>(plot_arc);
-            }
-        } else {
-            const auto rF = static_cast<float>(r);
-            const auto [Rl, Gl, Bl] = linear_color(col);
-            if constexpr (!STROKE) {
-                auto plot_arc = [&, this]<typename I>(int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
-                                                      int32_t y_off) {
-                    const auto dst = pix;
-                    limit_box(xx0, yy0, xx1, yy1, x_off, y_off);
-                    for (int32_t y = yy0; y <= yy1; y++) {
-                        for (int32_t x = xx0; x <= xx1; x++) {
-                            const float dx = (static_cast<float>(x) + 0.5f) - static_cast<float>(cx);
-                            const float dy = (static_cast<float>(y) + 0.5f) - static_cast<float>(cy);
-                            const float dist_sq = dx * dx + dy * dy;
-                            if (dist_sq > (rF + 0.5f) * (rF + 0.5f)) {
-                                continue;
-                            }
-                            if (dist_sq < (rF - 0.5f) * (rF - 0.5f)) {
-                                plot_unsafe(dst, x + x_off, y + y_off, col);
-                                continue;
-                            }
-                            float a = rF;
-                            if (std::is_constant_evaluated()) {
-                                a -= hidden::fast_sqrtf(dist_sq);
-                            } else {
-                                a -= std::sqrt(dist_sq);
-                            }
-                            a = std::clamp(a + 0.5f, 0.0f, 1.0f);
-                            if (a >= hidden::epsilon_low) {
-                                if (a >= hidden::epsilon_high) {
-                                    plot_unsafe(dst, x + x_off, y + y_off, col);
-                                } else {
-                                    compose_unsafe(dst, x + x_off, y + y_off, a, Rl, Gl, Bl);
-                                }
-                            }
-                        }
-                    }
-                };
-                for_each_quadrant.template operator()<float>(plot_arc);
-            } else {
-                const auto rsF = static_cast<float>(r - s);
-                auto plot_arc = [&, this]<typename I>(int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
-                                                      int32_t y_off) {
-                    const auto dst = pix;
-                    limit_box(xx0, yy0, xx1, yy1, x_off, y_off);
-                    for (int32_t y = yy0; y <= yy1; y++) {
-                        for (int32_t x = xx0; x <= xx1; x++) {
-                            const float dx = (static_cast<float>(x) + 0.5f) - static_cast<float>(cx);
-                            const float dy = (static_cast<float>(y) + 0.5f) - static_cast<float>(cy);
-                            const float dist_sq = dx * dx + dy * dy;
-                            if (dist_sq > ((rF + 0.5f) * (rF + 0.5f))) {
-                                continue;
-                            }
-                            if (dist_sq < ((rsF - 0.5f) * (rsF - 0.5f))) {
-                                continue;
-                            }
-                            if (dist_sq < ((rsF + 0.5f) * (rsF + 0.5f))) {
-                                float a = rsF;
-                                if (std::is_constant_evaluated()) {
-                                    a -= hidden::fast_sqrtf(dist_sq);
-                                } else {
-                                    a -= std::sqrt(dist_sq);
-                                }
-                                a = 1.0f - std::clamp(a + 0.5f, 0.0f, 1.0f);
-                                if (a >= hidden::epsilon_low) {
-                                    if (a >= hidden::epsilon_high) {
-                                        plot_unsafe(dst, x + x_off, y + y_off, col);
-                                    } else {
-                                        compose_unsafe(dst, x + x_off, y + y_off, a, Rl, Gl, Bl);
-                                    }
-                                } else {
-                                    plot_unsafe(dst, x + x_off, y + y_off, col);
-                                }
-                            } else {
-                                float a = rF;
-                                if (std::is_constant_evaluated()) {
-                                    a -= hidden::fast_sqrtf(dist_sq);
-                                } else {
-                                    a -= std::sqrt(dist_sq);
-                                }
-                                a = std::clamp(a + 0.5f, 0.0f, 1.0f);
-                                if (a >= hidden::epsilon_low) {
-                                    if (a >= hidden::epsilon_high) {
-                                        plot_unsafe(dst, x + x_off, y + y_off, col);
-                                    } else {
-                                        compose_unsafe(dst, x + x_off, y + y_off, a, Rl, Gl, Bl);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                };
-                for_each_quadrant.template operator()<float>(plot_arc);
-            }
-        }
+    [[nodiscard]] static constexpr bool in_range(std::initializer_list<int32_t> coords) {
+        const auto minmax_check = std::minmax(coords);
+        return minmax_check.first >= min_coord && minmax_check.second <= max_coord;
     }
 
     /**
      * @private
      */
-    template <typename shader_func>
-    constexpr void circle_int_shader(int32_t cx, int32_t cy, int32_t r, int32_t ox, int32_t oy,
-                                     const shader_func &shader, int32_t parent_x = -1, int32_t parent_y = -1,
-                                     int32_t parent_w = -1, int32_t parent_h = -1) {
-        auto bounds = calculate_circle_bounds(cx, cy, r);
+    [[nodiscard]] static constexpr float root(float v) {
+        return std::is_constant_evaluated() ? hidden::fast_sqrtf(v) : std::sqrt(v);
+    }
 
+    /**
+     * @private
+     * Calls a shader and clamps its RGBA result to 0..1.
+     */
+    [[nodiscard]] static constexpr std::array<float, 4> shade(const auto &shader, float u, float v, int32_t x,
+                                                              int32_t y) {
+        std::array<float, 4> rgba = shader(u, v, x, y);
+        for (auto &p : rgba) {
+            p = std::clamp(p, 0.0f, 1.0f);
+        }
+        return rgba;
+    }
+
+    /**
+     * @private
+     */
+    template <bool AA>
+    constexpr void stroke_circle_impl(int32_t cx, int32_t cy, int32_t radius, uint8_t col, int32_t stroke_width) {
+        if (!in_range({cx, cy, radius, stroke_width})) {
+            return;
+        }
+        radius = abs(radius);
+        stroke_width = abs(stroke_width);
+        if (radius == 1) {
+            fill_rect(cx - 1, cy - 1, 2, 2, col);
+            return;
+        }
+        if (stroke_width >= radius) {
+            circle_int<AA, false>(cx, cy, radius, 0, 0, col, 0);
+            return;
+        }
+        circle_int<AA, true>(cx, cy, radius, 0, 0, col, stroke_width);
+    }
+
+    /**
+     * @private
+     */
+    template <bool AA>
+    constexpr void stroke_round_rect_impl(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col,
+                                          int32_t stroke_width) {
+        if (!in_range({x, y, w, h, radius, stroke_width})) {
+            return;
+        }
+        if (w <= 0 || h <= 0) {
+            return;
+        }
+        radius = abs(radius);
+        stroke_width = abs(stroke_width);
+        const int32_t cr = std::min({w / 2, h / 2, radius});
+        const int32_t dx = w - cr * 2;
+        const int32_t dy = h - cr * 2;
+        if (radius == 0) {
+            stroke_rect(x, y, w, h, col, stroke_width);
+        } else {
+            if (radius > stroke_width) {
+                circle_int<AA, true>(x + cr, y + cr, cr, dx, dy, col, stroke_width);
+            } else {
+                circle_int<AA, false>(x + cr, y + cr, cr, dx, dy, col, 0);
+            }
+            fill_rect(x, y + cr, stroke_width, dy, col);
+            fill_rect(x + w - stroke_width, y + cr, stroke_width, dy, col);
+            fill_rect(x + cr, y, w - cr * 2, stroke_width, col);
+            fill_rect(x + cr, y + h - stroke_width, w - cr * 2, stroke_width, col);
+        }
+    }
+
+    /**
+     * @private
+     * The antialiased form takes the absolute value of the radius, the plain form does not.
+     */
+    template <bool AA>
+    constexpr void fill_round_rect_impl(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint8_t col) {
+        if (!in_range({x, y, w, h, radius})) {
+            return;
+        }
+        if (w <= 0 || h <= 0) {
+            return;
+        }
+        if constexpr (AA) {
+            radius = abs(radius);
+        }
+        const int32_t cr = std::min({w / 2, h / 2, radius});
+        const int32_t dx = w - cr * 2;
+        const int32_t dy = h - cr * 2;
+        circle_int<AA, false>(x + cr, y + cr, cr, dx, dy, col, 0);
+        fill_rect(x, y + cr, cr, dy, col);
+        fill_rect(x + w - cr, y + cr, cr, dy, col);
+        fill_rect(x + cr, y, dx, h, col);
+    }
+
+    /**
+     * @private
+     * Calls pixel(dst, x, y, px, py) for the pixels of the four quadrant boxes of a circle. x/y is the position
+     * relative to the circle, px/py the pixel: ox/oy move the right and the lower quadrants apart, which makes the
+     * corners of a rounded rectangle.
+     */
+    constexpr void circle_scan(int32_t cx, int32_t cy, int32_t r, int32_t ox, int32_t oy, const auto &pixel) {
+        const auto bounds = calculate_circle_bounds(cx, cy, r);
         if (check_not_in_bounds(bounds.x0, bounds.y0, r * int32_t{2} + ox + int32_t{1},
                                 r * int32_t{2} + oy + int32_t{1})) {
             return;
         }
-
-        auto for_each_quadrant = [&]<typename I>(auto &&plot_arc) {
-            plot_arc.template operator()<I>(bounds.x0, bounds.y0, bounds.x0r, bounds.y0r, 0, 0);
-            plot_arc.template operator()<I>(bounds.x0r, bounds.y0, bounds.x0r2, bounds.y0r, ox, 0);
-            plot_arc.template operator()<I>(bounds.x0, bounds.y0r, bounds.x0r, bounds.y0r2, 0, oy);
-            plot_arc.template operator()<I>(bounds.x0r, bounds.y0r, bounds.x0r2, bounds.y0r2, ox, oy);
-        };
-
-        auto limit_box = [this](int32_t &xmin, int32_t &ymin, int32_t &xmax, int32_t &ymax, int32_t x_off,
-                                int32_t y_off) {
+        const auto quadrant = [&, this](int32_t xmin, int32_t ymin, int32_t xmax, int32_t ymax, int32_t x_off,
+                                        int32_t y_off) {
+            const auto dst = pix;
             xmin = std::max(xmin + x_off, int32_t{0}) - x_off;
             xmax = std::min(xmax + x_off, static_cast<int32_t>(pix.width) - int32_t{1}) - x_off;
             ymin = std::max(ymin + y_off, int32_t{0}) - y_off;
             ymax = std::min(ymax + y_off, static_cast<int32_t>(pix.height) - int32_t{1}) - y_off;
+            for (int32_t y = ymin; y <= ymax; y++) {
+                for (int32_t x = xmin; x <= xmax; x++) {
+                    pixel(dst, x, y, x + x_off, y + y_off);
+                }
+            }
         };
+        quadrant(bounds.x0, bounds.y0, bounds.x0r, bounds.y0r, 0, 0);
+        quadrant(bounds.x0r, bounds.y0, bounds.x0r2, bounds.y0r, ox, 0);
+        quadrant(bounds.x0, bounds.y0r, bounds.x0r, bounds.y0r2, 0, oy);
+        quadrant(bounds.x0r, bounds.y0r, bounds.x0r2, bounds.y0r2, ox, oy);
+    }
 
+    /**
+     * @private
+     * Filled circle, or with STROKE a ring of width s, plain or antialiased.
+     */
+    template <bool AA, bool STROKE>
+    constexpr void circle_int(int32_t cx, int32_t cy, int32_t r, int32_t ox, int32_t oy, uint8_t col, int32_t s) {
+        using raster = hidden::raster<uint8_t>;
+        if constexpr (!AA) {
+            using I = calc_square_type;
+            circle_scan(cx, cy, r, ox, oy, [&](const raster &dst, int32_t x, int32_t y, int32_t px, int32_t py) {
+                const I dx = (static_cast<I>(x) * I{2} + I{1}) - (static_cast<I>(cx) * I{2});
+                const I dy = (static_cast<I>(y) * I{2} + I{1}) - (static_cast<I>(cy) * I{2});
+                const I dist_sq = dx * dx + dy * dy;
+                if (dist_sq > (static_cast<I>(r) * static_cast<I>(r) * I{4} - I{3})) {
+                    return;
+                }
+                if constexpr (STROKE) {
+                    if (dist_sq < (static_cast<I>(r - s) * static_cast<I>(r - s) * I{4} - I{3})) {
+                        return;
+                    }
+                }
+                plot_unsafe(dst, px, py, col);
+            });
+        } else {
+            const auto rF = static_cast<float>(r);
+            const auto rsF = static_cast<float>(r - s);
+            const auto lin = linear_color(col);
+            // a pixel with coverage a: nothing, blended or solid
+            const auto cover = [&](const raster &dst, int32_t px, int32_t py, float a) {
+                if (a >= hidden::epsilon_high) {
+                    plot_unsafe(dst, px, py, col);
+                } else if (a >= hidden::epsilon_low) {
+                    compose_unsafe(dst, px, py, a, lin[0], lin[1], lin[2]);
+                }
+            };
+            circle_scan(cx, cy, r, ox, oy, [&](const raster &dst, int32_t x, int32_t y, int32_t px, int32_t py) {
+                const float dx = (static_cast<float>(x) + 0.5f) - static_cast<float>(cx);
+                const float dy = (static_cast<float>(y) + 0.5f) - static_cast<float>(cy);
+                const float dist_sq = dx * dx + dy * dy;
+                if (dist_sq > (rF + 0.5f) * (rF + 0.5f)) {
+                    return;
+                }
+                if constexpr (STROKE) {
+                    if (dist_sq < ((rsF - 0.5f) * (rsF - 0.5f))) {
+                        return;
+                    }
+                    if (dist_sq < ((rsF + 0.5f) * (rsF + 0.5f))) {
+                        // inner edge. Coverage below the threshold is drawn solid, as it always was.
+                        const float a = 1.0f - std::clamp(rsF - root(dist_sq) + 0.5f, 0.0f, 1.0f);
+                        if (a >= hidden::epsilon_low) {
+                            cover(dst, px, py, a);
+                        } else {
+                            plot_unsafe(dst, px, py, col);
+                        }
+                        return;
+                    }
+                } else {
+                    if (dist_sq < (rF - 0.5f) * (rF - 0.5f)) {
+                        plot_unsafe(dst, px, py, col);
+                        return;
+                    }
+                }
+                cover(dst, px, py, std::clamp(rF - root(dist_sq) + 0.5f, 0.0f, 1.0f));
+            });
+        }
+    }
+
+    /**
+     * @private
+     * Filled antialiased circle, colored by a shader.
+     */
+    constexpr void circle_int_shader(int32_t cx, int32_t cy, int32_t r, int32_t ox, int32_t oy, const auto &shader,
+                                     int32_t parent_x = -1, int32_t parent_y = -1, int32_t parent_w = -1,
+                                     int32_t parent_h = -1) {
         const auto rF = static_cast<float>(r);
         const int32_t actual_parent_x = (parent_x == -1) ? cx - r : parent_x;
         const int32_t actual_parent_y = (parent_y == -1) ? cy - r : parent_y;
@@ -5634,46 +5529,28 @@ class surface : public basic_surface<PF, uint8_t> {
         const auto parent_wF = static_cast<float>(actual_parent_w);
         const auto parent_hF = static_cast<float>(actual_parent_h);
 
-        auto plot_arc = [&, this]<typename I>(int32_t xx0, int32_t yy0, int32_t xx1, int32_t yy1, int32_t x_off,
-                                              int32_t y_off) {
-            const auto dst = pix;
-            limit_box(xx0, yy0, xx1, yy1, x_off, y_off);
-            for (int32_t y = yy0; y <= yy1; y++) {
-                for (int32_t x = xx0; x <= xx1; x++) {
-                    const float dx = (static_cast<float>(x) + 0.5f) - static_cast<float>(cx);
-                    const float dy = (static_cast<float>(y) + 0.5f) - static_cast<float>(cy);
-                    const float dist_sq = dx * dx + dy * dy;
-                    if (dist_sq > (rF + 0.5f) * (rF + 0.5f)) {
-                        continue;
-                    }
+        circle_scan(cx, cy, r, ox, oy,
+                    [&](const hidden::raster<uint8_t> &dst, int32_t x, int32_t y, int32_t px, int32_t py) {
+                        const float dx = (static_cast<float>(x) + 0.5f) - static_cast<float>(cx);
+                        const float dy = (static_cast<float>(y) + 0.5f) - static_cast<float>(cy);
+                        const float dist_sq = dx * dx + dy * dy;
+                        if (dist_sq > (rF + 0.5f) * (rF + 0.5f)) {
+                            return;
+                        }
 
-                    float u = (static_cast<float>(x + x_off) - static_cast<float>(actual_parent_x)) / parent_wF;
-                    float v = (static_cast<float>(y + y_off) - static_cast<float>(actual_parent_y)) / parent_hF;
+                        const float u = (static_cast<float>(px) - static_cast<float>(actual_parent_x)) / parent_wF;
+                        const float v = (static_cast<float>(py) - static_cast<float>(actual_parent_y)) / parent_hF;
+                        const auto rgba = shade(shader, u, v, px, py);
 
-                    auto rgba = shader(u, v, x + x_off, y + y_off);
-                    for (auto &p : rgba) {
-                        p = std::clamp(p, 0.0f, 1.0f);
-                    }
-
-                    if (dist_sq < (rF - 0.5f) * (rF - 0.5f)) {
-                        compose_unsafe(dst, x + x_off, y + y_off, rgba[3], rgba[0], rgba[1], rgba[2]);
-                        continue;
-                    }
-
-                    float a = rF;
-                    if (std::is_constant_evaluated()) {
-                        a -= hidden::fast_sqrtf(dist_sq);
-                    } else {
-                        a -= std::sqrt(dist_sq);
-                    }
-                    a = std::clamp(a + 0.5f, 0.0f, 1.0f);
-                    if (a >= hidden::epsilon_low) {
-                        compose_unsafe(dst, x + x_off, y + y_off, a * rgba[3], rgba[0], rgba[1], rgba[2]);
-                    }
-                }
-            }
-        };
-        for_each_quadrant.template operator()<float>(plot_arc);
+                        if (dist_sq < (rF - 0.5f) * (rF - 0.5f)) {
+                            compose_unsafe(dst, px, py, rgba[3], rgba[0], rgba[1], rgba[2]);
+                            return;
+                        }
+                        const float a = std::clamp(rF - root(dist_sq) + 0.5f, 0.0f, 1.0f);
+                        if (a >= hidden::epsilon_low) {
+                            compose_unsafe(dst, px, py, a * rgba[3], rgba[0], rgba[1], rgba[2]);
+                        }
+                    });
     }
 
     /**
@@ -5685,8 +5562,7 @@ class surface : public basic_surface<PF, uint8_t> {
                                 size_t *character_actual) {
         static_assert(FONT::mono || PF::bits_per_pixel >= 4,
                       "An antialiased font needs a format which can blend, 4-bit or more. Use a mono font.");
-        auto minmax_check = std::minmax({x, y});
-        if (minmax_check.first < min_coord || minmax_check.second > max_coord) {
+        if (!in_range({x, y})) {
             return 0;
         }
         const char *ptr = str.data();
